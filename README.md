@@ -1,34 +1,23 @@
-# panoramic_optical_flow
+# File Structure
 
-
-## File Structure
+The project file structure are like following image:
 
 ```
 .
 ├── code
-│   └── python                        # the python used to load & visual & Evaluation
+|   ├── README.md
+│   └── python                         # the python used to load & visual & Evaluation
 │
 ├── data
+|   ├── README.md
+│   └── replica_360_hotel_0 
+|
 ├── doc
-│   └── optical_flow_ground_truth.md   # the 
+|   ├── README.md
+|   ├── image                            # the images used in the documents
+│   └── optical_flow_ground_truth.md   
+|
 └── README.md
 ```
 
-## File Format
-
-The optical flow store with `*.flo` format.
-
-
-# Dataset
-
-## Replica 360 
-
-Scene List:
-
-- hotel_0: [Download](https://drive.google.com/file/d/16KheF7FRAMM3yotJXeL9V2-a46yvUbxX/view)
-
-
-
-# Reference
-
-- ERP Projection Model: https://developers.google.com/vr/jump/rendering-ods-content.pdf
+Please read the README.md file in each folder to get more information.
