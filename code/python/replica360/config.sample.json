@@ -1,0 +1,34 @@
+{
+    "_comment": "the unit is meter",
+    "scene_name": "apartment_0",
+    "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
+    "render_type": "panorama",
+    "image": {
+        "width": 3840,
+        "height": 1920,
+        "fps": 50
+    },
+    "_comment": "config the pose-processing",
+    "post_proc":{
+        "convert_format_all": true,
+        "convert_format_center": true
+    },
+    "camera_traj": {
+        "_comment": "circle/grid",
+        "type": "circle",
+        "_comment": "when lock direction is false, the camera view dirction do not change",
+	    "lock_direction": false,
+        "step_number": 90,
+        "radius": 0.5,
+        "start_position": {
+            "x": 0.153774,
+            "y": -5.88666,
+            "z": -0.38 
+        },
+        "start_orientations": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    }
+}
