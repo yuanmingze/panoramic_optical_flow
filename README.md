@@ -21,3 +21,11 @@ The project file structure are like following image:
 ```
 
 Please read the README.md file in each folder to get more information.
+
+# TODO List
+
+- [ ] Optical Flow comparison;
+- [ ] use lzma to compress the optical flow (*.flo) and depth map (*.dpt);
+- [ ] Sun IJCV Matlab code;
+- [ ] Tangent Image projection code;
+- [ ] 

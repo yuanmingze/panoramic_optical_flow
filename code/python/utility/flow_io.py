@@ -2,34 +2,38 @@ import os
 import numpy as np
 from struct import pack, unpack
 
+"""
+ *.flo file read and wirte;
+"""
 
-def readFlowFile(fname):
+
+def readFlowFile(file_name):
     '''
     args
-        fname (str)
+        file_name (str)
     return
         flow (numpy array) numpy array of shape (height, width, 2)
     '''
 
     TAG_FLOAT = 202021.25  # check for this when READING the file
 
-    ext = os.path.splitext(fname)[1]
+    ext = os.path.splitext(file_name)[1]
 
-    assert len(ext) > 0, ('readFlowFile: extension required in fname %s' % fname)
-    assert ext == '.flo', exit('readFlowFile: fname %s should have extension ''.flo''' % fname)
+    assert len(ext) > 0, ('readFlowFile: extension required in file_name %s' % file_name)
+    assert ext == '.flo', exit('readFlowFile: file_name %s should have extension ''.flo''' % file_name)
 
     try:
-        fid = open(fname, 'rb')
+        fid = open(file_name, 'rb')
     except IOError:
-        print('readFlowFile: could not open %s', fname)
+        print('readFlowFile: could not open %s', file_name)
 
-    tag     = unpack('f', fid.read(4))[0]
-    width   = unpack('i', fid.read(4))[0]
-    height  = unpack('i', fid.read(4))[0]
+    tag = unpack('f', fid.read(4))[0]
+    width = unpack('i', fid.read(4))[0]
+    height = unpack('i', fid.read(4))[0]
 
-    assert tag == TAG_FLOAT, ('readFlowFile(%s): wrong tag (possibly due to big-endian machine?)' % fname)
-    assert 0 < width and width < 100000, ('readFlowFile(%s): illegal width %d' % (fname, width))
-    assert 0 < height and height < 100000, ('readFlowFile(%s): illegal height %d' % (fname, height))
+    assert tag == TAG_FLOAT, ('readFlowFile(%s): wrong tag (possibly due to big-endian machine?)' % file_name)
+    assert 0 < width and width < 100000, ('readFlowFile(%s): illegal width %d' % (file_name, width))
+    assert 0 < height and height < 100000, ('readFlowFile(%s): illegal height %d' % (file_name, height))
 
     nBands = 2
 
@@ -40,6 +44,47 @@ def readFlowFile(fname):
     fid.close()
 
     return flow
+
+
+def readFlowFloss(fname):
+    '''
+    args
+        fname (str)
+    return
+        flow (numpy array) numpy array of shape (height, width, 2)
+    '''
+
+    TAG_STRING = "SHRT"  # check for this when READING the file
+
+    ext = os.path.splitext(fname)[1]
+
+    assert len(ext) > 0, ('readFlowFile: extension required in fname %s' % fname)
+    assert ext == '.floss', exit('readFlowFile: fname %s should have extension ''.flo''' % fname)
+
+    try:
+        fid = open(fname, 'rb')
+    except IOError:
+        print('readFlowFile: could not open %s', fname)
+
+    tag = unpack('4s', fid.read(4))[0].decode()
+    width = unpack('i', fid.read(4))[0]
+    height = unpack('i', fid.read(4))[0]
+
+    assert tag == TAG_STRING, ('readFlowFile(%s): wrong tag (possibly due to big-endian machine?)' % fname)
+    assert 0 < width and width < 100000, ('readFlowFile(%s): illegal width %d' % (fname, width))
+    assert 0 < height and height < 100000, ('readFlowFile(%s): illegal height %d' % (fname, height))
+
+    nBands = 2
+
+    # arrange into matrix form
+    flow = np.fromfile(fid, np.int16)
+    flow = flow.reshape(height, width, nBands)
+    flow = flow / 8.0
+    
+    fid.close()
+
+    return flow
+
 
 def writeFlowFile(img, fname):
     TAG_STRING = 'PIEH'    # use this when WRITING the file
@@ -77,8 +122,39 @@ def writeFlowFile(img, fname):
     fid.close()
 
 
+def writeFlowFloss(filename,uv,v=None):
+    """ Write optical flow to file.
+    
+    If v is None, uv is assumed to contain both u and v channels,
+    stacked in depth.
+    Original code by Deqing Sun, adapted from Daniel Scharstein.
+    """
+    nBands = 2
 
-def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold = 0.5):
+    if v is None:
+        assert(uv.ndim == 3)
+        assert(uv.shape[2] == 2)
+        u = uv[:,:,0]
+        v = uv[:,:,1]
+    else:
+        u = uv
+
+    assert(u.shape == v.shape)
+    height,width = u.shape
+    f = open(filename,'wb')
+    # write the header
+    f.write("SHRT".encode())
+    np.array(width).astype(np.int32).tofile(f)
+    np.array(height).astype(np.int32).tofile(f)
+    # arrange into matrix form
+    tmp = np.zeros((height, width*nBands))
+    tmp[:,np.arange(width)*2] = u * 8.0
+    tmp[:,np.arange(width)*2 + 1] = v * 8.0
+    tmp.astype(np.int16).tofile(f)
+    f.close()
+
+
+def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
     """
     convert the pinhole optical flow to panoramic optical flow.
     
@@ -188,4 +264,36 @@ def load_of_bin(binary_file_path, height, width, visual_enable=True):
         fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
         plt.show()
 
-    return data[:, :, 0:2], data[:,:,2:4]
+    return data[:, :, 0:2], data[:, :, 2:4]
+
+
+def writeFlowFloss(filename, uv, v=None):
+    """ Write optical flow to file as format *.floss
+    
+    If v is None, uv is assumed to contain both u and v channels,
+    stacked in depth.
+    Original code by Deqing Sun, adapted from Daniel Scharstein.
+    """
+    nBands = 2
+
+    if v is None:
+        assert(uv.ndim == 3)
+        assert(uv.shape[2] == 2)
+        u = uv[:, :, 0]
+        v = uv[:, :, 1]
+    else:
+        u = uv
+
+    assert(u.shape == v.shape)
+    height, width = u.shape
+    f = open(filename, 'wb')
+    # write the header
+    f.write("SHRT".encode())
+    np.array(width).astype(np.int32).tofile(f)
+    np.array(height).astype(np.int32).tofile(f)
+    # arrange into matrix form
+    tmp = np.zeros((height, width*nBands))
+    tmp[:, np.arange(width)*2] = u * 8.0
+    tmp[:, np.arange(width)*2 + 1] = v * 8.0
+    tmp.astype(np.int16).tofile(f)
+    f.close()

@@ -3,14 +3,21 @@ import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 
-def image_diff(image_generated, image_gt, output_path = ""):
+
+def image_read(image_file_path):
+    """
+    :return: return the numpy array of image
+    """
+    return np.asarray(Image.open(image_file_path))
+
+def image_diff(image_generated, image_gt, output_path=""):
     """
     """
     # rgb to gray
     rgb_weights = [0.2989, 0.5870, 0.1140]
 
-    image_generated_gray = np.dot(image_generated[...,:3], rgb_weights)
-    image_gt_gray = np.dot(image_gt[...,:3], rgb_weights)
+    image_generated_gray = np.dot(image_generated[..., :3], rgb_weights)
+    image_gt_gray = np.dot(image_gt[..., :3], rgb_weights)
 
     # diff map to heatmap image
     diff = np.absolute(image_generated_gray - image_gt_gray)

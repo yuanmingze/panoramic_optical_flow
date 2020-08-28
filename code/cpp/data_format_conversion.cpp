@@ -818,7 +818,7 @@ int main(int argc, char **argv)
                 cv::Mat of_visual;
                 cv::Mat planes[2];
                 cv::split(of, planes);
-                drawOpticalFlow(planes[0], planes[1], of_visual);
+                drawOpticalFlow(planes[0], planes[1], of_visual);//, planes[0].rows * 0.2);
                 write_image_jpeg(of_visual_path.string(), of_visual);
             }
             else if (path.string().find("_depth") != std::string::npos && depth_convert_enable == "y")

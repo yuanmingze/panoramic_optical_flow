@@ -34,7 +34,7 @@ def create_camera_obj(center, camera_position_list, obj_file_path):
         obj_file.write(obj_str)
 
 
-def generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, \
+def generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, center_csv_file,\
                     center_point, lock_direction_enable=True):
     """
      the unit is Meter
@@ -80,6 +80,11 @@ def generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, \
     with open(path_csv_file,'w') as f:
         f.writelines(' '.join(str(j) for j in i) +'\n' for i in navigable_positions)
     print("output path file {}".format(path_csv_file))
+
+    # output the camera centre csv file
+    with open(center_csv_file,'w') as f:
+        f.writelines("0 {} {} {} {} {} {} \n".format(cx,cy, cz, 0.0, 0.0, 0.0))
+    print("output centre file {}".format(center_csv_file))
 
     # output camera position obj file
     path_obj_file = path_csv_file + ".obj"
@@ -212,12 +217,16 @@ def generate_path(root_dir, config):
 
     elif path_type == "grid":
         output_filename = "grid.csv"
-        grid_size = config["camera_traj"]["grid_size"] 
+        output_center_filename = "grid_center.csv"
+        
         path_csv_file = root_dir + "/" + output_filename
-        generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, \
+        center_csv_file = root_dir + "/" + output_center_filename
+
+        grid_size = config["camera_traj"]["grid_size"] 
+        generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, center_csv_file, \
                     center_point = center_point_position, lock_direction_enable= lock_direction_enable)
         
-        return path_csv_file, None
+        return path_csv_file, center_csv_file
 
     else:
         raise RuntimeError("Juse generate circle path")

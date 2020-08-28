@@ -7,7 +7,7 @@ from PIL import Image
 from utility import flow_vis
 from utility import flow_io
 from utility import flow_evaluate
-flow utility import image_io
+from utility import image_io
 
 
 def test_warp_image():

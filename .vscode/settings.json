@@ -1,0 +1,43 @@
+{
+    "python.pythonPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
+    "python.venvPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
+    "python.terminal.activateEnvironment": true,
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": ["--max-line-length=200"],
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": ["--list-msgs"],
+    "python.linting.pylintPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/pylint",
+    "python.linting.pylintCategorySeverity.convention": "Information",
+    "cmake.sourceDirectory": "${workspaceFolder}/code/cpp/replica360",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "charconv": "cpp"
+    },
+}
+
+// // windows env
+// {
+//     "python.pythonPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/python.exe",
+//     "python.venvPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/python.exe",
+//     "python.terminal.activateEnvironment": true,
+//     "python.formatting.provider": "autopep8",
+//     "python.formatting.autopep8Args": ["--max-line-length", "250", "--experimental"],
+//     "python.formatting.blackArgs": ["--line-length", "250"],
+//     "_comment":"",
+//     "python.linting.enabled": true,
+//     "python.linting.pylintEnabled": true,
+//     "python.linting.pylintArgs": ["--list-msgs"],
+//     "python.linting.pylintPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/pylint.exe",
+//     "python.linting.pylintCategorySeverity.convention": "Information",
+//     "cSpell.words": [
+//         "numpy",
+//         "openvslam",
+//         "traj"
+//     ],
+//     "files.associations": {
+//         "vector": "cpp",
+//         "alignedvector3": "cpp",
+//         "fft": "cpp"
+//     }
+// }

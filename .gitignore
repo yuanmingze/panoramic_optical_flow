@@ -1,10 +1,17 @@
 
+backup/
+
 ## Python 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+/code/cpp/build/
+/code/cpp/replica360/build/
+
+
+build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -48,3 +55,23 @@ venv.bak/
 *.exe
 *.out
 *.app
+
+
+
+## Core latex/pdflatex auxiliary files:
+/doc/draft/*.aux
+/doc/draft/*.pdf
+/doc/draft/*.lof
+/doc/draft/*.log
+/doc/draft/*.lot
+/doc/draft/*.fls
+/doc/draft/*.out
+/doc/draft/*.toc
+/doc/draft/*.fmt
+/doc/draft/*.fot
+/doc/draft/*.cb
+/doc/draft/*.cb2
+/doc/draft/.*.lb
+/doc/draft/*.bbl
+/doc/draft/*.blg
+/doc/draft/*.synctex.gz

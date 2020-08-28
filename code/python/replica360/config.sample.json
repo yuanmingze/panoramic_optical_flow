@@ -3,6 +3,12 @@
     "scene_name": "apartment_0",
     "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
     "render_type": "panorama",
+    "render_view":{
+        "_comment": "whether render data the camera at center of scene",
+        "center_view": true,
+        "_comment": "whether render data the camera at the trajectory",
+        "traj_view": true
+    },
     "image": {
         "width": 3840,
         "height": 1920,
@@ -10,8 +16,9 @@
     },
     "_comment": "config the pose-processing",
     "post_proc":{
-        "convert_format_all": true,
-        "convert_format_center": true
+        "convert_format_traj": true,
+        "convert_format_center": true,
+        "generate_msg_file": true
     },
     "camera_traj": {
         "_comment": "circle/grid",
