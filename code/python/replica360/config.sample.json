@@ -23,7 +23,7 @@
     "camera_traj": {
         "_comment": "circle/grid",
         "type": "circle",
-        "_comment": "when lock direction is false, the camera view dirction do not change",
+        "_comment": "when lock direction is false, the camera view direction do not change",
 	    "lock_direction": false,
         "step_number": 90,
         "radius": 0.5,

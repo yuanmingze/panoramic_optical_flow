@@ -85,8 +85,8 @@ def optical_flow_test(root_dir):
         base_name = os.path.splitext(os.path.basename(rgb_image_B_file_name))[0]
         rgb_image_A_B_file_name = warped_image_folder + base_name + "_A_B_fw.jpg"
         rgb_image_B_A_file_name = warped_image_folder + base_name + "_B_A_bw.jpg"
-        rgb_image_B_C_file_name = warped_image_folder + base_name + "_B_C_fw.jpg"
-        rgb_image_C_B_file_name = warped_image_folder + base_name + "_C_B_bw.jpg"
+        rgb_image_B_C_file_name = warped_image_folder + base_name + "_B_C_bw.jpg"
+        rgb_image_C_B_file_name = warped_image_folder + base_name + "_C_B_fw.jpg"
 
         # warp image to geerate 4 images, A --> B --> C
         # 1) A->B of + A + forward_warp

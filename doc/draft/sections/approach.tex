@@ -5,14 +5,55 @@
 \section{Panoramic Optical Flow}
 
 
-
 \section{Panoramic Optical Flow Synthetic Dataset}
+
+The real word photo image is hard to estimate accurate optical flow.
+So the synthetic method is commonly used to generate the ground truth RGB images sequence and optical flow.
 
 
 \subsection{Overview}
 
+The traditional OpenGL pipeline don't support the panoramic camera model and optical flow generation.
+For synthesising ground truth RGB images and optical flow, we implemented and hired an panoramic camera model.
+
+The camera model composes with 3 parts:
+\begin{itemize}
+	\item Equirectangular projection;
+	\item Warp Around Processing;
+	\item Optical flow estimation;
+\end{itemize}
+
+\subsection{Equirectangular Projection}
+
+The panoramic camera model render the 3D mesh to a panoramic image with the equirectangular projection.
+To achieve the projection, the geometry shader transform the 3D mesh from cartesian coordinate system to spherical coordinate system.
+The projection 
+
+Furthermore, we use Replica to demonstrate. 
+The Replica dataset coordinate system show as the Fig.~\ref{fig:approach:coord_hotel_00}.
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\linewidth]{images/synthetic_optical_flow/coord_hotel_00.png}
+	\caption{A boat.}
+	\label{fig:approach:coord_hotel_00}
+\end{figure}
+
+And the coordinate system used in geometry OpenGL shader shown as Fig.~\ref{fig:approach:geometry_cs}.
+The forward is $+z$, up is $+y$ and left is $+x$.
+Meanwhile, the $\theta$ and $$
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\linewidth]{images/synthetic_optical_flow/coord_hotel_00.png}
+	\caption{A boat.}
+	\label{fig:approach:geometry_cs}
+\end{figure}
+
 
 \subsection{Warp Around Processing}
+
+
 
 
 \subsubsection{Cross Image Boundary}
@@ -21,6 +62,10 @@
 \subsubsection{Poles}
 
 
-\subsection{Occlusion}
+\subsection{Optical Flow Synthesis}
+
+
+
+\subsubsection{Occlusion}
 
 
