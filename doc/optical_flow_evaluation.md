@@ -8,12 +8,49 @@ Optical Flow Methods list:
 - FlowNetx[];
 - Sun IJCV[];
 
-## Result
+## Host
 
-The 
-Others optical flow list:
-- DIS
+### DIS
 
+The OpenCV DIS flow method.
+The code at `code/python/utility/flow_estimate.py`
+
+### PWC-Net
+
+Code is [official released code](https://github.com/NVlabs/PWC-Net).
+Run time environment at: 
+- Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
+- PWC-Net code: `/mnt/sda1/workspace_linux/PWC-Net/PyTorch/script_pwc.py`
+- PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/PyTorch/`
+
+### FlowNet2
+
+Code is [flownet2-pytorch](https://github.com/NVIDIA/flownet2-pytorch)
+- Python virtual environment: `/mnt/sda1/workenv_linux/python_3_6_pytorch_0_4_1/`
+- FlowNet2 code: `/mnt/sda1/workspace_linux/flownet2/script_pwc.py`
+- FlowNet2 model" `/mnt/sda1/workspace_linux/flownet2/models/`
+
+### Sun IJCV
+
+Code is [IJCV](http://cs.brown.edu/~dqsun/code/ijcv_flow_code.zip)
+- Matlab code: `/mnt/sda1/workspace_windows/IJCV_2013_matlab_opticalflow/ijcv_flow_code`
+
+## Garlick
+
+## Evaluation Result
+
+The test ground truth data store in the folder:
+
+Test the optical flow methods on the fellowing datasets:
+- Replica_360:
+1. hotel_0: 
+2. apartment_0: 
+3. office_0:
+4. office_4:
+5. room_0: 
+6. room_1: 
+
+- 
 
 # Optical flow GT Generation
 
@@ -59,8 +96,6 @@ Folder structure:
 ```
 
 Compressed optical flow or depth map by LZMA algorithm [1][2] named with postfix *.xz'.
-
-
 
 
 # Reference

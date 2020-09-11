@@ -1,20 +1,96 @@
 \chapter{Experiments}
 
 
-\section{Quality Analysis}
+\section{Dataset}
 
+It's very hard to measure the real word optical flow information, especially the equirectangular image. 
+And currently do not have any public optical flow equirectangular image dataset.
+So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
+Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
 
 
 \subsection{Synthetic Dataset}
 
+The rasterization render method OpenGL used to synthesize the ground truth optical flow.
+The equirectangular optical flow generation algorithm introduction in Section. \ref{sec:app:panoof}.
+Few public indoor 3D datasets are hired to render the ground truth data.
 
-\subsubsection{Replica 360}
+Although, the 3D computer graphics software toolsets, e.g. Blender have functions to estimate the object motion information, e.g motion vector of Blender. 
+The rendered object motion used for motion blur e.t.c VFX is not accurate enough. 
+There are obviously artefacts at the boundary of moving objects, Figure. ~\ref{fig:exp:blendermv}. 
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\linewidth]{example-image-a}
+	\caption{Blender Motion Vector}
+	\label{fig:exp:blendermv}
+\end{figure}
+
+\textbf{Replica 360} ~\citet{replica19arxiv}
+
+
+\textbf{Matterport3D} ~\citet{Matterport3D}
+
+
+\subsection{Real World Dataset}
+
+We test our method on the real world dataset with warped image sequence.
+
+\section{Comparison}
+
+We compare our method with following state of the art methods, FlowNet2~\cite{ilg2017flownet}, Dense Inverse Search (DIS) optical flow~\cite{kroeger2016fast} and PWC-Net~\cite{sun2018pwc}. 
+The FlowNet2~\cite{ilg2017flownet} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
+The PWC-Net~\cite{sun2018pwc}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
+
+\subsection{Quantity Analysis}
+
+The metrics AAE, EPE and RMS is used for the quantity analysis.
+
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{ c | c | c | c | c | c | c }
+		\hline
+		     & \multicolumn{3}{c|}{FlowNet2} & \multicolumn{3}{c}{PWCNet} \\
+		\hline
+			 & AAE & EPE & RMS & AAE & EPE & RMS \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline\hline
+			& \multicolumn{3}{c|}{DIS} & \multicolumn{3}{c}{Ours} \\
+		\hline
+			& AAE & EPE & RMS & AAE & EPE & RMS \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline
+	\end{tabular}
+	\caption{Replica dataset}
+	\label{fig:exp:quality}
+\end{table}
+
+\subsection{Quality Analysis}
 
 
 
-
-
-
-\section{Quantity Analysis}
 
 

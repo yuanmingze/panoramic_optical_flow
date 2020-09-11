@@ -5,11 +5,27 @@
 \section{Panoramic Optical Flow}
 
 
-\section{Panoramic Optical Flow Synthetic Dataset}
+\textbf{Regular icosahedron}
+a convex polyhedron with 20 faces, 30 edges and 12 vertices. 
 
-The real word photo image is hard to estimate accurate optical flow.
-So the synthetic method is commonly used to generate the ground truth RGB images sequence and optical flow.
+Reference:
+\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
+\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
+\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
+\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
 
+\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
+\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}
+
+
+
+\section{Panoramic Optical Flow Synthetic Dataset}\ref{sec:app:panoof}
+
+The real word data rich and colourful, but it very hard to estimate or measure the accurate segmentation, motion flow, e.t.c form the read word scene.
+So the synthetic dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as ~\cite{habitat19iccv}.
+
+Meanwhile, the real word photo image is hard to estimate accurate optical flow.
+Although like KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{Butler:ECCV:2012} pinhole image opical flow, e.t.c currently don't have any public panoramic optical flow dataset is available.
 
 \subsection{Overview}
 
@@ -41,7 +57,7 @@ The Replica dataset coordinate system show as the Fig.~\ref{fig:approach:coord_h
 
 And the coordinate system used in geometry OpenGL shader shown as Fig.~\ref{fig:approach:geometry_cs}.
 The forward is $+z$, up is $+y$ and left is $+x$.
-Meanwhile, the $\theta$ and $$
+Meanwhile, the $\theta$ and 
 
 \begin{figure}[hbt!]
 	\centering
