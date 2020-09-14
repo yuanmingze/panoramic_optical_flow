@@ -15,7 +15,7 @@
 from math import pi
 import numpy as np
 
-class NFOV():
+class IcosahedronProject():
     def __init__(self, height=400, width=800):
         self.FOV = [0.45, 0.45]
         self.PI = pi
@@ -94,7 +94,7 @@ class NFOV():
         return nfov
 
 
-    def toNFOV(self, frame, center_point):
+    def toTangent(self, frame, center_point):
         """
         image point range is [0,1], the original is Top-Left.
 
@@ -115,11 +115,11 @@ class NFOV():
         return self._bilinear_interpolation(spericalCoord)
 
 
-# test the class
-if __name__ == '__main__':
-    import imageio as im
-    img = im.imread('images/360.jpg')
-    nfov = NFOV()
-    # the theta_1 and phi_0
-    center_point = np.array([0.5, 0.5])  # camera center point (valid range [0,1])
-    nfov.toNFOV(img, center_point)
+# # test the class
+# if __name__ == '__main__':
+#     import imageio as im
+#     img = im.imread('images/360.jpg')
+#     nfov = NFOV()
+#     # the theta_1 and phi_0
+#     center_point = np.array([0.5, 0.5])  # camera center point (valid range [0,1])
+#     nfov.toNFOV(img, center_point)
