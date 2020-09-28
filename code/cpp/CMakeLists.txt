@@ -13,7 +13,7 @@ project(pano_optical_flow)
 
 # find_package(dl REQUIRED)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED) #opencv 3
 find_package(Eigen3 REQUIRED) 
 find_package(OpenMP)
 if (OPENMP_FOUND)

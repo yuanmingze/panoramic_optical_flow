@@ -101,7 +101,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
 
     Args:
         flow_uv (np.ndarray): Flow UV image of shape [H,W,2]
-        clip_flow (float, optional): Clip maximum of flow values. Defaults to None.
+        clip_flow (float, optional): Clip maximum of flow values. Defaults to None e.g. [-100, 100]
         convert_to_bgr (bool, optional): Convert output image to BGR. Defaults to False.
 
     Returns:
@@ -110,7 +110,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
     assert flow_uv.ndim == 3, 'input flow must have three dimensions'
     assert flow_uv.shape[2] == 2, 'input flow must have shape [H,W,2]'
     if clip_flow is not None:
-        flow_uv = np.clip(flow_uv, 0, clip_flow)
+        flow_uv = np.clip(flow_uv, clip_flow[0], clip_flow[1])
     u = flow_uv[:,:,0]
     v = flow_uv[:,:,1]
     rad = np.sqrt(np.square(u) + np.square(v))

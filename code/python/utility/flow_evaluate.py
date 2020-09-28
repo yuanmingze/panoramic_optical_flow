@@ -1,8 +1,15 @@
 
 import math
+import os
+from struct import pack, unpack
+
 import numpy as np
 from scipy import ndimage
 
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
 
 """
 functions used to evaluate the quality of optical flow;
@@ -10,15 +17,30 @@ functions used to evaluate the quality of optical flow;
 
 UNKNOWN_FLOW_THRESH = 1e7
 SMALLFLOW = 0.0
-LARGEFLOW = 1e8
+# LARGEFLOW = 1e8
 
+def error_visual(error_data, max = None, min = None, verbose = False):
+    """
+    visualize the error data, and return colored error image.
+    """
+    if max is None:
+        max = np.max(error_data)
+    if min is None:
+        min = np.min(error_data)
+    if verbose:
+        print("error_visual(): max error {}, min error {}".format(max, min))
+    norm = mpl.colors.Normalize(vmin=min, vmax=max)
+    cmap = plt.get_cmap('jet')
+
+    m = cm.ScalarMappable(norm=norm, cmap=cmap)
+    return (m.to_rgba(error_data)[:,:,:3] * 255).astype(np.uint8)
 
 def EPE(of_ground_truth, of_evaluation):
     """
     endpoint error (EE)
     reference : https://github.com/prgumd/GapFlyt/blob/master/Code/flownet2-tf-umd/src/flowlib.py
 
-    return: average of EPE & average 
+    return: average of EPE
     """
     stu = of_ground_truth[:, :, 0]
     stv = of_ground_truth[:, :, 1]
@@ -33,14 +55,60 @@ def EPE(of_ground_truth, of_evaluation):
     sv[idxUnknow] = 0
 
     ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-    index_su = su[ind2]
-    index_sv = sv[ind2]
-    # an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
-    # un = index_su * an
-    # vn = index_sv * an
+    # index_su = su[ind2]
+    # index_sv = sv[ind2]
+    # # an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
+    # # un = index_su * an
+    # # vn = index_sv * an
 
-    index_stu = stu[ind2]
-    index_stv = stv[ind2]
+    # index_stu = stu[ind2]
+    # index_stv = stv[ind2]
+    # # tn = 1.0 / np.sqrt(index_stu ** 2 + index_stv ** 2 + 1)
+    # # tun = index_stu * tn
+    # # tvn = index_stv * tn
+
+    # # angle = un * tun + vn * tvn + (an * tn)
+    # # index = [angle == 1.0]
+    # # angle[index] = 0.999
+    # # ang = np.arccos(angle)
+    # # mang = np.mean(ang)
+    # # mang = mang * 180 / np.pi
+
+    epe = np.sqrt((stu - su) ** 2 + (stv - sv) ** 2)
+    epe = epe[ind2]
+    mepe = np.mean(epe)
+
+    return mepe
+
+
+def EPE_mat(of_ground_truth, of_evaluation):
+    """
+    endpoint error (EE)
+    reference : https://github.com/prgumd/GapFlyt/blob/master/Code/flownet2-tf-umd/src/flowlib.py
+
+    return: average of EPE data 
+    """
+    stu = of_ground_truth[:, :, 0]
+    stv = of_ground_truth[:, :, 1]
+    su = of_evaluation[:, :, 0]
+    sv = of_evaluation[:, :, 1]
+
+    # remove the invalid data
+    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
+    stu[idxUnknow] = 0
+    stv[idxUnknow] = 0
+    su[idxUnknow] = 0
+    sv[idxUnknow] = 0
+
+    # ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
+    # index_su = su[ind2]
+    # index_sv = sv[ind2]
+    # # an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
+    # # un = index_su * an
+    # # vn = index_sv * an
+
+    # index_stu = stu[ind2]
+    # index_stv = stv[ind2]
     # tn = 1.0 / np.sqrt(index_stu ** 2 + index_stv ** 2 + 1)
     # tun = index_stu * tn
     # tvn = index_stv * tn
@@ -53,10 +121,10 @@ def EPE(of_ground_truth, of_evaluation):
     # mang = mang * 180 / np.pi
 
     epe = np.sqrt((stu - su) ** 2 + (stv - sv) ** 2)
-    epe = epe[ind2]
-    mepe = np.mean(epe)
+    # epe[ind2] = 0
+    # mepe = np.mean(epe)
 
-    return mepe
+    return epe
 
 
 def RMSE(of_ground_truth, of_evaluation):
@@ -82,6 +150,33 @@ def RMSE(of_ground_truth, of_evaluation):
 
     rmse = np.sqrt(np.sum(diff_u ** 2 + diff_v ** 2) / np.shape(diff_u)[0])
     return rmse
+
+
+def RMSE_mat(of_ground_truth, of_evaluation):
+    """
+    compute the root mean square error(RMSE) of optical flow
+
+    retrun: rmse
+    """
+    stu = of_ground_truth[:, :, 0]
+    stv = of_ground_truth[:, :, 1]
+    su = of_evaluation[:, :, 0]
+    sv = of_evaluation[:, :, 1]
+
+    # ignore the invalid data
+    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
+    stu[idxUnknow] = 0
+    stv[idxUnknow] = 0
+
+    ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
+
+    diff_u = stu[ind2] - su[ind2]
+    diff_v = stv[ind2] - sv[ind2]
+
+    # rmse = np.sqrt(np.sum(diff_u ** 2 + diff_v ** 2) / np.shape(diff_u)[0])
+    rmse_mat = np.sqrt(diff_u ** 2 + diff_v ** 2)
+    rmse_mat = rmse_mat.reshape(np.shape(su))
+    return rmse_mat 
 
 
 def AAE(of_ground_truth, of_evaluation):
@@ -121,6 +216,49 @@ def AAE(of_ground_truth, of_evaluation):
             "The angle average of the inputs is undefined: %r" % angles)
 
     return math.fmod(math.atan2(y, x) + 2 * math.pi, 2 * math.pi) * 180 / np.pi
+
+
+def AAE_mat(of_ground_truth, of_evaluation):
+    """
+    Return the mat of the average angular error(AAE) 
+
+    The result is between 0 and 2 * PI.
+    """
+    stu = of_ground_truth[:, :, 0]
+    stv = of_ground_truth[:, :, 1]
+    su = of_evaluation[:, :, 0]
+    sv = of_evaluation[:, :, 1]
+
+    # remove the invalid data
+    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
+    stu[idxUnknow] = 0
+    stv[idxUnknow] = 0
+    su[idxUnknow] = 0
+    sv[idxUnknow] = 0
+
+    ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
+    index_su = su[ind2]
+    index_sv = sv[ind2]
+
+    index_stu = stu[ind2]
+    index_stv = stv[ind2]
+
+    # compute the average angle
+    uv_cross = index_su * index_stv - index_stu * index_sv
+    uv_dot = index_su * index_stu + index_stv * index_sv
+    angles = np.arctan2(uv_cross, uv_dot)
+    angles_mat  = angles.reshape(np.shape(su))
+
+    angles_mat = abs(angles_mat)
+
+    # import ipdb; ipdb.set_trace()
+    # x = sum(math.cos(a) for a in angles)
+    # y = sum(math.sin(a) for a in angles)
+    # if x == 0 and y == 0:
+    #     raise ValueError(
+    #         "The angle average of the inputs is undefined: %r" % angles)
+
+    return angles_mat
 
 
 def warp_backward(image_target, of_forward):

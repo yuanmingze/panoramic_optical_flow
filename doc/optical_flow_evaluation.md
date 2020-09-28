@@ -18,22 +18,57 @@ The code at `code/python/utility/flow_estimate.py`
 ### PWC-Net
 
 Code is [official released code](https://github.com/NVlabs/PWC-Net).
+
 Run time environment at: 
 - Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
-- PWC-Net code: `/mnt/sda1/workspace_linux/PWC-Net/PyTorch/script_pwc.py`
-- PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/PyTorch/`
+
+With the PWC-Net office Caffe Code. And use the python code `python/compare_pwc-net.py` to generate the `img1.txt`, `img2.txt` and `out.txt` for the `proc_images.py` file.
+- virtual env: `/mnt/sda1/workenv_linux/python_2_7_pwcnet/`
+- Run the script `source set-env.sh` than `proc_images.py` python script as `./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
+- PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/Caffe/`
 
 ### FlowNet2
 
-Code is [flownet2-pytorch](https://github.com/NVIDIA/flownet2-pytorch)
-- Python virtual environment: `/mnt/sda1/workenv_linux/python_3_6_pytorch_0_4_1/`
-- FlowNet2 code: `/mnt/sda1/workspace_linux/flownet2/script_pwc.py`
-- FlowNet2 model" `/mnt/sda1/workspace_linux/flownet2/models/`
+Code is [flownet2](https://github.com/lmb-freiburg/flownet2)
+- Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
+- FlowNet2 model" `/mnt/sda1/workspace_linux/flownet2-lmb_freiburg/models/`
+- FlowNet2 code: `/mnt/sda1/workspace_linux/flownet2-lmb_freiburg/`
+ 1. The code `code/python/compare_flownet2.py` generate the list file for `run-flownet-many.py`.
+ 1. `source set-env.sh`
+ 1. Estimate the optical flow files with 
+    `python ./scripts/run-flownet-many.py ./models/FlowNet2-CSS/FlowNet2-CSS_weights.caffemodel.h5 ./models/FlowNet2-CSS/FlowNet2-CSS_deploy.prototxt.template /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/flownet2/replica_listfile.txt`
+
+### RAFT (ECCV 2020)
+
+Get the code from [GitHub](https://github.com/princeton-vl/RAFT)
+
+Setup env:
+- Conda install in: `/home/mingze/anaconda3` run int Ubuntu 18.04.5
+ 1. `conda create -p /mnt/sda1/workenv_linux/conda_raft_py3.6 python=3.6`
+ 1. `conda install -c menpo opencv3`
+
+Inference:
+- Conda virtual environment: `/mnt/sda1/workenv_linux/conda_raft_py3.6/`
+ 1. `conda activate /mnt/sda1/workenv_linux/conda_raft_py3.6/`
+
+- Get the flo file with the RAFT code `/mnt/sda1/workspace_linux/RAFT/compare_raft.py`, which is symbol link of `code/python/compare_raft.py`.
+ 1. `python compare_raft.py --model=models/raft-things.pth --path=/mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/replica_seq_data/`
+
+- RAFT model: `/mnt/sda1/workspace_linux/RAFT`
 
 ### Sun IJCV
 
 Code is [IJCV](http://cs.brown.edu/~dqsun/code/ijcv_flow_code.zip)
 - Matlab code: `/mnt/sda1/workspace_windows/IJCV_2013_matlab_opticalflow/ijcv_flow_code`
+
+## Output data
+
+The output optical flow *.flo file, save to the original dataset folder.
+The input of the scripts is the folder of `replica_seq_data` of each dataset.
+And the output data folders are named with :
+1. raft:
+1. pwc_net:
+1. flownet2:
 
 ## Garlick
 

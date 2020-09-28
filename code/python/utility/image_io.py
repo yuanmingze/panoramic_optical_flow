@@ -41,6 +41,25 @@ def image_show(image):
     plt.show()
 
 
+def image_save_rgba(image, image_file_path):
+    """ 
+    save the numpy as image
+    """
+    img = Image.fromarray(image)
+    img = img.convert("RGBA")
+    datas = img.getdata()
+
+    newData = []
+    for item in datas:
+        if item[0] == 255 and item[1] == 255 and item[2] == 255:
+            newData.append((255, 255, 255, 0))
+        else:
+            newData.append(item)
+
+    img.putdata(newData)
+    img.save(image_file_path, "PNG")
+
+
 def image_save(image, image_file_path):
     """ 
     save the numpy as image
