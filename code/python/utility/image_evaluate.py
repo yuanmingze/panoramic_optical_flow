@@ -16,6 +16,7 @@ def calculate_psnr(img1, img2, max_value=255):
         return 100
     return 20 * np.log10(max_value / (np.sqrt(mse)))
 
+
 def mse(image_0, image_1):
     # the 'Mean Squared Error' between the two images is the
     # sum of the squared difference between the two images;

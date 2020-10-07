@@ -14,10 +14,34 @@ from utility import image_io
 from utility import flow_vis
 from utility import replica_util
 
-
 """
 evalute the estimated optical flow and output the error to csv file
 """
+
+
+def visual_of(root_dir, of_min=-300, of_max=300):
+    """
+    visual all flo files.
+    """
+    flow_file_str = r"[0-9]*_opticalflow_[a-zA-Z]*.flo"
+    flow_file_re = re.compile(flow_file_str)
+    of_list = []
+
+    # load all optical flow file
+    for item in pathlib.Path(root_dir).iterdir():
+        if not flow_file_re.match(item.name) is None:
+            of_list.append(item.name)
+
+    # visualization optical flow
+    for index in range(len(of_list)):
+        item = of_list[index]
+        of_data = flow_io.readFlowFile(root_dir + item)
+        of_data_vis = flow_vis.flow_to_color(of_data, [of_min, of_max])
+        of_vis_file_name = item.replace(".flo", ".jpg")
+        image_io.image_save(of_data_vis, root_dir + of_vis_file_name)
+
+        if index % 10 == 0:
+            print("processing {}: {} to {}".format(index, item, of_vis_file_name))
 
 
 def flow_evaluate_dataset(root_dir, flo_dir_list):
@@ -70,7 +94,7 @@ def flow_evaluate_frames(flow_gt_dir, flow_estimated_dir):
     _, _, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(flow_gt_dir)
 
     # estimate and output to csv file
-    output_csv_header = "# index, file_name, AAE, EPE, RME\n"
+    output_csv_header = "# index, file_name, AAE, EPE, RME, AAE_SC, EPE_SC, RME_SC\n"
     warped_csv_file_path = flow_estimated_dir + "result.csv"
     error_csv_file = open(warped_csv_file_path, 'w', newline='')
     error_csv = csv.writer(error_csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
@@ -99,35 +123,67 @@ def flow_evaluate_frames(flow_gt_dir, flow_estimated_dir):
             of_estimated = flow_io.readFlowFile(of_estimated_file_path)
 
             # 1) output the error to CSV file
+            # 1-0) comput the error in ERP image
             row = [index * 2 + forward_of, of_gt_file_path]
             row.append(flow_evaluate.AAE(of_gt, of_estimated))
             row.append(flow_evaluate.EPE(of_gt, of_estimated))
             row.append(flow_evaluate.RMSE(of_gt, of_estimated))
+            # 1-1) compute the error in spherical coordinates
+            # row.append(flow_evaluate.AAE(of_gt, of_estimated, spherical=True))
+            row.append(flow_evaluate.EPE(of_gt, of_estimated, spherical=True))
+            # row.append(flow_evaluate.RMSE(of_gt, of_estimated, spherical=True))
             error_csv.writerow(row)
 
-            aae_error_vis = True
-            epe_error_vis = True
-            rmse_error_vis = True
             # 2) output the error image to jpg files
-            if aae_error_vis == True:
+            # 2-1) comput the error in ERP image
+            epe_error_vis = True
+            aae_error_vis = False
+            rmse_error_vis = False
+            if epe_error_vis:
+                of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
+                error_image_path = of_estimated_error_file_name + "_epe.jpg"
+                epe_data = flow_evaluate.EPE_mat(of_gt, of_estimated)
+                epe_data_visual = flow_evaluate.error_visual(epe_data, 90)
+                image_io.image_save(epe_data_visual, error_image_path)
+
+            if aae_error_vis:
                 of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
                 error_image_path = of_estimated_error_file_name + "_aae.jpg"
                 aae_data = flow_evaluate.AAE_mat(of_gt, of_estimated)
                 aae_data_visual = flow_evaluate.error_visual(aae_data)
                 image_io.image_save(aae_data_visual, error_image_path)
 
-            if rmse_error_vis == True:
+            if rmse_error_vis:
                 of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
                 error_image_path = of_estimated_error_file_name + "_rmse.jpg"
                 rmse_data = flow_evaluate.RMSE_mat(of_gt, of_estimated)
                 rmse_data_visual = flow_evaluate.error_visual(rmse_data)
                 image_io.image_save(aae_data_visual, error_image_path)
 
-            if epe_error_vis == True:
+            # 2-2) compute the error in spherical coordinates
+            epe_error_cs_vis = False
+            aae_error_cs_vis = False
+            rmse_error_cs_vis = False
+            if aae_error_cs_vis:
                 of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
-                error_image_path = of_estimated_error_file_name + "_epe.jpg"
-                epe_data = flow_evaluate.EPE_mat(of_gt, of_estimated)
-                epe_data_visual = flow_evaluate.error_visual(epe_data, 90)
+                error_image_path = of_estimated_error_file_name + "_aae_spherical.jpg"
+                aae_data = flow_evaluate.AAE_mat(of_gt, of_estimated, spherical=True)
+                aae_data_visual = flow_evaluate.error_visual(aae_data)
+                image_io.image_save(aae_data_visual, error_image_path)
+
+            if rmse_error_cs_vis:
+                of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
+                error_image_path = of_estimated_error_file_name + "_rmse_spherical.jpg"
+                rmse_data = flow_evaluate.RMSE_mat(of_gt, of_estimated, spherical=True)
+                rmse_data_visual = flow_evaluate.error_visual(rmse_data)
+                image_io.image_save(rmse_data_visual, error_image_path)
+
+            if epe_error_cs_vis:
+                of_estimated_error_file_name = os.path.splitext(of_estimated_file_path)[0]
+                error_image_path = of_estimated_error_file_name + "_epe_spherical.jpg"
+                epe_data = flow_evaluate.EPE_mat(of_gt, of_estimated, spherical=True)
+                # epe_data = flow_evaluate.EPE_mat(of_gt, of_gt, spherical=True)
+                epe_data_visual = flow_evaluate.error_visual(epe_data, verbose=True)  # , max=0.5)
                 image_io.image_save(epe_data_visual, error_image_path)
 
     error_csv_file.close()
@@ -138,25 +194,31 @@ if __name__ == "__main__":
     root_dir = "/mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/"
     replica_gt_dir = root_dir + "replica_seq_data/"
     flo_dir_dis = root_dir + "dis/"
-    flo_dir_flownet2 = root_dir + "flownet2/"
-    flo_dir_pwcnet = root_dir + "pwcnet/"
-    flo_dir_raft = root_dir + "raft/"
+    # flo_dir_flownet2 = root_dir + "flownet2/"
+    # flo_dir_pwcnet = root_dir + "pwcnet/"
+    # flo_dir_raft = root_dir + "raft/"
 
-    # flow_evaluate_frames(replica_gt_dir, flo_dir_dis)
+    flo_dir_list = [flo_dir_dis]  # , flo_dir_flownet2, flo_dir_pwcnet, flo_dir_raft]
+    # 0) visual all output flo files
+    # print("--1) Visualization.")
+    # for dataset_dir in flo_dir_list:
+    #     print("Visualization {}".format(os.path.basename(os.path.dirname(dataset_dir))))
+    #     visual_of(dataset_dir)
 
-    # 0) get 
-    flo_dir_list = [flo_dir_dis, flo_dir_flownet2, flo_dir_pwcnet, flo_dir_raft]
-    thread_list = []
-    for dataset_name in flo_dir_list:
-        print("Evaluate {}".format(os.path.basename(os.path.dirname(dataset_name))))
-        # flow_evaluate_frames(replica_gt_dir, flo_dir_dis)
-        flo_thread = Thread(target = flow_evaluate_frames, args = (replica_gt_dir, dataset_name))
-        thread_list.append(flo_thread)
-        flo_thread.start()
+    flow_evaluate_frames(replica_gt_dir, flo_dir_dis)
+    # # 1) get the error csv file
+    # print("--2) Evaluate the optical flow error.")
+    # thread_list = []
+    # for dataset_dir in flo_dir_list:
+    #     print("Evaluate {}".format(os.path.basename(os.path.dirname(dataset_dir))))
+    #     # flow_evaluate_frames(replica_gt_dir, flo_dir_dis)
+    #     flo_thread = Thread(target=flow_evaluate_frames, args=(replica_gt_dir, dataset_dir))
+    #     thread_list.append(flo_thread)
+    #     flo_thread.start()
 
-    for of_thread in thread_list:
-        of_thread.join()
+    # for of_thread in thread_list:
+    #     of_thread.join()
 
-    # 1)  get the mean error for a dataset
-    print("summary the result:")
+    # 2)  get the mean error for a dataset
+    print("--3) Summary the result.")
     flow_evaluate_dataset(root_dir, flo_dir_list)

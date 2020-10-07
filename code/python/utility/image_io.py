@@ -1,4 +1,3 @@
-
 import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
@@ -9,6 +8,7 @@ def image_read(image_file_path):
     :return: return the numpy array of image
     """
     return np.asarray(Image.open(image_file_path))
+
 
 def image_diff(image_generated, image_gt, output_path=""):
     """

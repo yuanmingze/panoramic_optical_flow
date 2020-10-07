@@ -46,6 +46,45 @@ The PWC-Net~\cite{sun2018pwc}'s code is \href{https://github.com/NVlabs/PWC-Net}
 
 The metrics AAE, EPE and RMS is used for the quantity analysis.
 
+The average endpoint error (\textbf{EPE}):  ~\cite{??}
+EPE is the absolute error of all the pixels. 
+
+\begin{equation}\label{equ_exp_epe}
+E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
+\end{equation}
+
+The average angular error (\textbf{AAE}):~\cite{??}
+AAE is a metric to measure the deviation of angle:
+
+\begin{equation}\label{equ_exp_aae}
+	E_{AAE} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+\end{equation}
+
+The root mean square error (\textbf{RMSE}):~\cite{??}
+
+\begin{equation}\label{equ_exp_rmse}
+	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
+\end{equation}
+
+
+
+%\begin{tikzpicture}
+%	% Read the file
+%	% if needed, define column separators by pgfplotstableread[col sep=...]{}{}
+%	\pgfplotstableread{data.csv}{\Data}
+%	\begin{groupplot}[
+%			group style = {group size = 2 by 1},
+%			height = 10cm,
+%			width = 10cm,
+%			ymin = 500,
+%			xticklabels from table = {\Data}{Day}, xtick = {1,...,19},
+%			xticklabel style = {rotate = 90, xshift = -0.8ex, anchor = mid east}
+%		]
+%		\nextgroupplot[xmin = 1, xmax = 19, ymax = 900]
+%		\addplot[very thick] table [x = Number, y = Orders] {\Data};
+%	\end{groupplot}
+%\end{tikzpicture}
+
 
 \begin{table}[h!]
 	\centering

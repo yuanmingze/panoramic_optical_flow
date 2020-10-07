@@ -103,10 +103,10 @@ def writeFlowFile(img, fname):
 
     fid.close()
 
-
 def load_image_list(image_files):
     images = []
-    for imfile in sorted(image_files):
+    # for imfile in sorted(image_files):
+    for imfile in image_files:
         images.append(load_image(imfile))
 
     images = torch.stack(images, dim=0)
@@ -114,17 +114,6 @@ def load_image_list(image_files):
 
     padder = InputPadder(images.shape)
     return padder.pad(images)[0]
-
-
-# def viz(img, flo):
-
-#     # map flow to rgb image
-#     flo = flow_viz.flow_to_image(flo)
-#     img_flo = np.concatenate([img, flo], axis=0)
-#     return img_flo
-
-    # cv2.imshow('image', img_flo[:, :, [2,1,0]]/255.0)
-    # cv2.waitKey()
 
 
 def demo(args):
@@ -150,10 +139,6 @@ def demo(args):
     # 2) estimate optical flow
     with torch.no_grad():
         for index in range(min_index, max_index + 1):
-
-            if index % 1 == 0:
-                print("{}: {}".format(index, image_files[index]))
-
             index_next = index + 1
             if index_next > max_index:
                 index_next = min_index + max_index - index
@@ -162,32 +147,31 @@ def demo(args):
             if index_previous < min_index:
                 index_previous = max_index + min_index - index
 
-            # load image a image pair
-            # 2-0) inference optical flow forward
-            images = load_image_list([root_dir + image_files[index], root_dir + image_files[index_next]])
+            if index % 1 == 0:
+                print("Current {}: {}, Previous {}: {}, Next {}: {}".format(index, image_files[index], index_previous, image_files[index_previous], index_next, image_files[index_next]))
 
-            image1 = images[0, None]
-            image2 = images[1, None]
+            # load image a image pair and inference optical flow forward/backward
+            for forward_of in [True, False]:
+                if forward_of:
+                    index_0 = index
+                    index_1 = index_next
+                    output_flo_file_name = of_forward_list[index]
+                else:
+                    index_0 = index
+                    index_1 = index_previous
+                    output_flo_file_name = of_backward_list[index]
 
-            flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
-            flow_up = flow_up[0].permute(1, 2, 0).cpu().numpy()
-            writeFlowFile(flow_up, output_dir + of_forward_list[index])
-            flow_vis = flow_viz.flow_to_image(flow_up)
-            flow_vis = Image.fromarray(flow_vis)
-            flow_vis.save((output_dir + of_forward_list[index]).replace(".flo", ".jpg"))
+                images = load_image_list([root_dir + image_files[index_0], root_dir + image_files[index_1]])
 
-            # 2-1) inference optical flow backward
-            images = load_image_list([root_dir + image_files[index], root_dir + image_files[index_previous]])
+                image1 = images[0, None]
+                image2 = images[1, None]
 
-            image1 = images[0, None]
-            image2 = images[1, None]
-
-            flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
-            flow_up = flow_up[0].permute(1, 2, 0).cpu().numpy()
-            writeFlowFile(flow_up, output_dir + of_backward_list[index])
-            flow_vis = flow_viz.flow_to_image(flow_up)
-            flow_vis = Image.fromarray(flow_vis)
-            flow_vis.save((output_dir + of_backward_list[index]).replace(".flo", ".jpg"))
+                flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
+                flow_up = flow_up[0].permute(1, 2, 0).cpu().numpy()
+                writeFlowFile(flow_up, output_dir + output_flo_file_name)
+                flow_vis = flow_viz.flow_to_image(flow_up)
+                flow_vis = Image.fromarray(flow_vis)
+                flow_vis.save((output_dir + output_flo_file_name).replace(".flo", ".jpg"))
 
 
 if __name__ == '__main__':
@@ -195,7 +179,6 @@ if __name__ == '__main__':
     e.g.
     python compare_raft.py --model=models/raft-things.pth --path=/mnt/sda1/workdata/opticalflow_data/replica_360/${DATASET_NAME}/replica_seq_data/
     """
-
     dataset_list = ["apartment_0", "hotel_0", "office_0", "office_4", "room_0", "room_1"]
 
     for dataset_name in dataset_list:

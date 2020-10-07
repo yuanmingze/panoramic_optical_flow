@@ -289,6 +289,8 @@ def sphere2tangent(erp_image_path, output_folder):
 
     # ERP image size
     image_data = image_io.image_read(image_path)
+    if np.shape(image_data)[2] == 4:
+        image_data = image_data[:,:,0:3]
     image_height = np.shape(image_data)[0]
     image_width = np.shape(image_data)[1]
 
@@ -317,7 +319,6 @@ def sphere2tangent(erp_image_path, output_folder):
         triangle_point_01_lambda = -np.pi + triangle_index * phi_up_center_step 
         triangle_point_01 = gnomonic_projection(triangle_point_01_lambda, np.arctan(0.5), lambda_0, phi_1_up)
         triangle_points.append(np.array(triangle_point_01))
-
 
         triangle_point_02_lambda = -np.pi + (triangle_index + 1) * phi_up_center_step         
         triangle_point_02 = gnomonic_projection(triangle_point_02_lambda, np.arctan(0.5),lambda_0, phi_1_up)
