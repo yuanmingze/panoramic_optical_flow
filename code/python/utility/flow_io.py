@@ -14,6 +14,8 @@ def readFlowFile(file_name):
     return
         flow (numpy array) numpy array of shape (height, width, 2)
     '''
+    if not os.path.exists(file_name):
+        raise RuntimeError("{} do not exist!".format(file_name))
 
     TAG_FLOAT = 202021.25  # check for this when READING the file
 
@@ -53,6 +55,8 @@ def readFlowFloss(fname):
     return
         flow (numpy array) numpy array of shape (height, width, 2)
     '''
+    if not os.path.exists(fname):
+        raise RuntimeError("{} do not exist!".format(fname))
 
     TAG_STRING = "SHRT"  # check for this when READING the file
 
@@ -80,13 +84,16 @@ def readFlowFloss(fname):
     flow = np.fromfile(fid, np.int16)
     flow = flow.reshape(height, width, nBands)
     flow = flow / 8.0
-    
+
     fid.close()
 
     return flow
 
 
 def writeFlowFile(img, fname):
+    """
+    
+    """
     TAG_STRING = 'PIEH'    # use this when WRITING the file
 
     ext = os.path.splitext(fname)[1]
@@ -122,7 +129,7 @@ def writeFlowFile(img, fname):
     fid.close()
 
 
-def writeFlowFloss(filename,uv,v=None):
+def writeFlowFloss(filename, uv, v=None):
     """ Write optical flow to file.
     
     If v is None, uv is assumed to contain both u and v channels,
@@ -134,22 +141,22 @@ def writeFlowFloss(filename,uv,v=None):
     if v is None:
         assert(uv.ndim == 3)
         assert(uv.shape[2] == 2)
-        u = uv[:,:,0]
-        v = uv[:,:,1]
+        u = uv[:, :, 0]
+        v = uv[:, :, 1]
     else:
         u = uv
 
     assert(u.shape == v.shape)
-    height,width = u.shape
-    f = open(filename,'wb')
+    height, width = u.shape
+    f = open(filename, 'wb')
     # write the header
     f.write("SHRT".encode())
     np.array(width).astype(np.int32).tofile(f)
     np.array(height).astype(np.int32).tofile(f)
     # arrange into matrix form
     tmp = np.zeros((height, width*nBands))
-    tmp[:,np.arange(width)*2] = u * 8.0
-    tmp[:,np.arange(width)*2 + 1] = v * 8.0
+    tmp[:, np.arange(width)*2] = u * 8.0
+    tmp[:, np.arange(width)*2 + 1] = v * 8.0
     tmp.astype(np.int16).tofile(f)
     f.close()
 

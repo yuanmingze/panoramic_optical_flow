@@ -105,7 +105,6 @@ class NFOV():
         self.frame_width = frame.shape[1]
         self.frame_channel = frame.shape[2]
 
-        # import ipdb; ipdb.set_trace()
         # get the cental point's spherical coordinate location, image center theta, phi is (0,0)
         self.cp = self._get_coord_rad(center_point=center_point, isCenterPt=True)
         # get target image's spherical coordinate 

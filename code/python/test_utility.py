@@ -97,8 +97,6 @@ def depth_visual():
     data = image_io.image_read(depth_file_path)
     empty_idx = np.all(data == 22, axis=-1)
     print(empty_idx)
-    #import ipdb; ipdb.set_trace()
-
 
     image_io.image_show(data.astype('float'))
 

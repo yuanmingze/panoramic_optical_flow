@@ -94,14 +94,22 @@ def get_angle_uv(points_A_phi, points_A_theta,
 
     # # with the arccos
     # data = (np.cos(length_BC) - np.cos(length_AC) * np.cos(length_AB)) / (np.sin(length_AC) * np.sin(length_AB))
-    # angle_A = np.arccos(data)
+    # # remove the float error
+    # if (np.abs(data) > (1.0 + np.finfo(float).eps * 100)).any():
+    #     raise RuntimeError("the angle_A is not in range [-1,1]")
+    # else:
+    #     data[data > 1.0] = 1.0
+    #     data[data < -1.0] = -1.0
+    # angle_A = np.arccos(data) - np.pi
 
     # with tangent two avoid the error of Float
     s = 0.5 * (length_BC + length_AC + length_AB)
     numerator = np.sin(s-length_AC) * np.sin(s-length_AB)
     denominator = np.sin(s) * np.sin(s-length_BC)
     #denominator[denominator == 0] = pow(0.1, 10)
-    angle_A = 2 * np.arctan(np.sqrt(np.abs(numerator / denominator)))
+    temp_data = numerator / denominator
+    # angle_sign = np.sign(temp_data)
+    angle_A = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
 
     if np.isnan(angle_A).any():
         raise Exception("the angle_A contain NAN")
@@ -159,6 +167,17 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     end_points_v[end_points_v < 0] = end_points_v[end_points_v < 0] + height
 
     return np.stack((end_points_u, end_points_v))
+
+
+def car2sph(points_car, points_sph):
+    """
+    Transform the optical flow from cartesian to spherical coordinate.
+    The coordinate system:
+
+    :param points_car: the points array, first column is x, second is y, third is z
+    :param points_sph: the points array, theta, phi
+    """
+    pass
 
 
 if __name__ == "__main__":

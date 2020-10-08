@@ -1,7 +1,7 @@
-\chapter{Experiments}
+\chapter{Experiments}\label{sec:exp}
 
 
-\section{Dataset}
+\section{Dataset}\label{sec:exp:data}
 
 It's very hard to measure the real word optical flow information, especially the equirectangular image. 
 And currently do not have any public optical flow equirectangular image dataset.
@@ -9,7 +9,7 @@ So we evaluate our method estimated optical flow quantity in the synthetic equir
 Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
 
 
-\subsection{Synthetic Dataset}
+\subsection{Synthetic Dataset}\label{sec:exp:data:syn}
 
 The rasterization render method OpenGL used to synthesize the ground truth optical flow.
 The equirectangular optical flow generation algorithm introduction in Section. \ref{sec:app:panoof}.
@@ -27,6 +27,7 @@ There are obviously artefacts at the boundary of moving objects, Figure. ~\ref{f
 \end{figure}
 
 \textbf{Replica 360} ~\citet{replica19arxiv}
+
 
 
 \textbf{Matterport3D} ~\citet{Matterport3D}
@@ -66,6 +67,87 @@ The root mean square error (\textbf{RMSE}):~\cite{??}
 	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
 \end{equation}
 
+The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
+To evaluate the error with same metric on the whole images, we extend EPE, AAE adn RMS to the spherical coordinate. 
+Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
+The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
+
+The error in spherical coordinate shown as Tab. ~\ref{fig:exp:quality}.
+
+
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{ c | c | c | c | c | c | c }
+		\hline
+		& \multicolumn{6}{c}{DIS}  \\
+		\hline
+		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline\hline
+		& \multicolumn{6}{c}{Flownet2} \\
+		\hline
+		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline\hline
+		& \multicolumn{6}{c}{PWCNet} \\
+		\hline
+		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline\hline
+		& \multicolumn{6}{c}{RAFT} \\
+		\hline
+		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
+		\hline
+		apartment\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		hotel\_0 & - & - & -  & - & - & -  \\ 
+		\hline
+		office\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		office\_4 & - & - & -  & - & - & -  \\ 
+		\hline
+		room\_0 & - & - & - & - & - & -  \\ 
+		\hline
+		room\_1 & - & - & -  & - & - & -  \\ 
+		\hline
+	\end{tabular}
+	\caption{Error of Replica dataset}
+	\label{fig:exp:quality}
+\end{table}
 
 
 %\begin{tikzpicture}
@@ -86,46 +168,6 @@ The root mean square error (\textbf{RMSE}):~\cite{??}
 %\end{tikzpicture}
 
 
-\begin{table}[h!]
-	\centering
-	\begin{tabular}{ c | c | c | c | c | c | c }
-		\hline
-		     & \multicolumn{3}{c|}{FlowNet2} & \multicolumn{3}{c}{PWCNet} \\
-		\hline
-			 & AAE & EPE & RMS & AAE & EPE & RMS \\
-		\hline
-		apartment\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		hotel\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		office\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		office\_4 & - & - & -  & - & - & -  \\ 
-		\hline
-		room\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		room\_1 & - & - & -  & - & - & -  \\ 
-		\hline\hline
-			& \multicolumn{3}{c|}{DIS} & \multicolumn{3}{c}{Ours} \\
-		\hline
-			& AAE & EPE & RMS & AAE & EPE & RMS \\
-		\hline
-		apartment\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		hotel\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		office\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		office\_4 & - & - & -  & - & - & -  \\ 
-		\hline
-		room\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		room\_1 & - & - & -  & - & - & -  \\ 
-		\hline
-	\end{tabular}
-	\caption{Replica dataset}
-	\label{fig:exp:quality}
-\end{table}
 
 \subsection{Quality Analysis}
 
