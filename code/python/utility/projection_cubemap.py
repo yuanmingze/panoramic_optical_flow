@@ -7,8 +7,9 @@ from scipy import ndimage
 from . import image_io
 from . import flow_io
 from . import flow_vis
-
+from . import flow_warp
 from . import tangent_image
+
 
 """
 Convention of cubemap:
@@ -162,7 +163,7 @@ def erp2cubemap_flow(erp_flow_mat):
     :retrun: 6 images of each fact of cubemap projection
     """
     # get the cube map with inverse of gnomonic projection.
-    cubmap_tangent_images = []
+    cubmap_tangent_flows = []
     face_image_size = 500  # the size of each face
     erp_image_height = np.shape(erp_flow_mat)[0]
     erp_image_width = np.shape(erp_flow_mat)[1]
@@ -192,7 +193,7 @@ def erp2cubemap_flow(erp_flow_mat):
 
         # spherical coordinate to pixel location
         erp_pixel_x = ((lambda_ + np.pi) / (2 * np.pi)) * erp_image_width
-        erp_pixel_y = (- phi_ + np.pi / 2.0) / np.pi * erp_image_height
+        erp_pixel_y = (- phi_ + 0.5 * np.pi) / np.pi * erp_image_height
 
         # process warp around, make the range in [0, image_width), and [0, image_height)
         erp_pixel_x[erp_pixel_x < 0] = erp_pixel_x[erp_pixel_x < 0] + erp_image_width
@@ -201,15 +202,15 @@ def erp2cubemap_flow(erp_flow_mat):
         erp_pixel_y[erp_pixel_y >= erp_image_height] = erp_pixel_y[erp_pixel_y >= erp_image_height] - erp_image_height
 
         # interpollation
-        face_image = np.zeros((face_image_size, face_image_size, erp_image_channel), dtype=float)
+        erp_pixel_flow = np.zeros((face_image_size, face_image_size, erp_image_channel), dtype=float)
         for channel in range(0, erp_image_channel):
-            face_image[:, :, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel], [erp_pixel_y, erp_pixel_x], order=1, mode = 'wrap')
+            erp_pixel_flow[:, :, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel], [erp_pixel_y, erp_pixel_x], order=1, mode='wrap')
+            # erp_pixel_flow[:, :, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel].T, [erp_pixel_x, erp_pixel_y], order=1)
 
         # 1) comput the end point location in the tangent image
-
         # convert the ERP optical flow's UV to tangent image's UV
-        erp_pixel_x_target = erp_pixel_x + face_image[:,:,0]
-        erp_pixel_y_target = erp_pixel_y + face_image[:,:,1]
+        erp_pixel_x_target = erp_pixel_x + erp_pixel_flow[:, :, 0]
+        erp_pixel_y_target = erp_pixel_y + erp_pixel_flow[:, :, 1]
         # process warp around
         erp_pixel_x_target[erp_pixel_x_target < 0] = erp_pixel_x_target[erp_pixel_x_target < 0] + erp_image_width
         erp_pixel_x_target[erp_pixel_x_target >= erp_image_width] = erp_pixel_x_target[erp_pixel_x_target >= erp_image_width] - erp_image_width
@@ -217,23 +218,18 @@ def erp2cubemap_flow(erp_flow_mat):
         erp_pixel_y_target[erp_pixel_y_target >= erp_image_height] = erp_pixel_y_target[erp_pixel_y_target >= erp_image_height] - erp_image_height
         # convert the erp location to spherical coordinate location
         lambda_target = erp_pixel_x_target / erp_image_width * np.pi * 2 - np.pi
-        phi_target = -erp_pixel_y_target / erp_image_height * np.pi + np.pi / 2.0
+        phi_target = -erp_pixel_y_target / erp_image_height * np.pi + 0.5 * np.pi
         # spherical location to tangent location
         face_image_x_target, face_image_y_target = tangent_image.gnomonic_projection(lambda_target, phi_target, lambda_0, phi_1)
-        face_flow_u = (face_image_x_target - x) * face_image_size
-        face_flow_v = (face_image_y_target - y) * face_image_size
+        face_flow_u = (face_image_x_target - x) * face_image_size * 0.5
+        face_flow_v = (face_image_y_target - y) * face_image_size * 0.5
+        face_flow_v = -face_flow_v  # transform to image coordinate system (+y is to down)
 
         # 2) the optical flow of tangent image
-        face_image_flow = np.stack((face_flow_u, face_flow_v))
+        face_flow = np.stack((face_flow_u, face_flow_v), axis=2)
+        cubmap_tangent_flows.append(face_flow)
 
-        # image_io.image_show(face_image)
-        # image_io.image_show(phi_)
-        # image_io.image_show(lambda_)
-        # image_io.image_show(erp_pixel_x)
-        # image_io.image_show(erp_pixel_y)
-        cubmap_tangent_images.append(face_image)
-
-    return cubmap_tangent_images
+    return cubmap_tangent_flows
 
 
 def erp2cubemap_image(erp_image_mat):
@@ -273,7 +269,7 @@ def erp2cubemap_image(erp_image_mat):
 
         # spherical coordinate to pixel location
         erp_pixel_x = ((lambda_ + np.pi) / (2 * np.pi)) * erp_image_width
-        erp_pixel_y = (- phi_ + np.pi / 2.0) / np.pi * erp_image_height
+        erp_pixel_y = (-phi_ + np.pi / 2.0) / np.pi * erp_image_height
 
         # process warp around
         erp_pixel_x[erp_pixel_x < 0] = erp_pixel_x[erp_pixel_x < 0] + erp_image_width
@@ -283,13 +279,9 @@ def erp2cubemap_image(erp_image_mat):
         erp_pixel_y[erp_pixel_y >= erp_image_height] = erp_pixel_y[erp_pixel_y >= erp_image_height] - erp_image_height
 
         # interpollation
-        # from scipy.interpolate import griddata
-        # erp_grid_x, erp_grid_y = np.mgrid[0:1:(erp_image_width * 1j), 0:1:(erp_image_height * 1j)]
-
-        # grid_z0 = griddata(points, values, (erp_grid_x, erp_grid_y), method='linear')
         face_image = np.zeros((face_image_size, face_image_size, erp_image_channel), dtype=float)
         for channel in range(0, erp_image_channel):
-            face_image[:, :, channel] = ndimage.map_coordinates(erp_image_mat[:, :, channel], [erp_pixel_y, erp_pixel_x], order=1, mode = 'wrap')
+            face_image[:, :, channel] = ndimage.map_coordinates(erp_image_mat[:, :, channel], [erp_pixel_y, erp_pixel_x], order=1, mode='wrap')
         # image_io.image_show(face_image)
         # image_io.image_show(phi_)
         # image_io.image_show(lambda_)
@@ -326,19 +318,28 @@ if __name__ == "__main__":
     # cubemap_ply_filepath = "../../data/cubemap_points.ply"
     # generage_cubic_ply(cubemap_ply_filepath)
 
-    # # 2) erp image to cube map
-    # erp_image_filepath = "../../data/replica_360/hotel_0/0001_rgb.jpg"
-    # cubemap_images_output = "../../data/"
-    # erp_image = image_io.image_read(erp_image_filepath)
-    # face_images = erp2cubemap_image(erp_image)
-    # for index in range(0, len(face_images)):
-    #     cubemap_images_name = cubemap_images_output + "cubemap_rgb_{}.jpg".format(index)
-    #     image_io.image_save(face_images[index], cubemap_images_name)
-    #     # image_io.image_show(face_images[0])
+    # 2) erp image to cube map
+    erp_image_filepath = "../../data/replica_360/apartment_0/0001_rgb.jpg"
+    cubemap_images_output = "../../data/"
+    erp_image = image_io.image_read(erp_image_filepath)
+    face_images_src = erp2cubemap_image(erp_image)
+    for index in range(0, len(face_images_src)):
+        cubemap_images_name = cubemap_images_output + "cubemap_rgb_src_{}.jpg".format(index)
+        image_io.image_save(face_images_src[index], cubemap_images_name)
+        # image_io.image_show(face_images[0])
+
+    erp_image_filepath = "../../data/replica_360/apartment_0/0002_rgb.jpg"
+    cubemap_images_output = "../../data/"
+    erp_image = image_io.image_read(erp_image_filepath)
+    face_images_tar = erp2cubemap_image(erp_image)
+    for index in range(0, len(face_images_tar)):
+        cubemap_images_name = cubemap_images_output + "cubemap_rgb_tar_{}.jpg".format(index)
+        image_io.image_save(face_images_tar[index], cubemap_images_name)
+        # image_io.image_show(face_images[0])
 
     # 3) erp flow to cube map
-    # erp_flow_filepath = "../../data/replica_360/hotel_0/0001_opticalflow_forward.flo" 
-    erp_flow_filepath = "/mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/replica_seq_data/0001_opticalflow_backward.flo"
+    # erp_flow_filepath = "../../data/replica_360/hotel_0/0001_opticalflow_forward.flo"
+    erp_flow_filepath = "../../data/replica_360/apartment_0/0001_opticalflow_forward.flo"
     cubemap_flow_output = "../../data/"
     erp_flow = flow_io.readFlowFile(erp_flow_filepath)
     face_flows = erp2cubemap_flow(erp_flow)
@@ -346,4 +347,12 @@ if __name__ == "__main__":
         cubemap_flow_name = cubemap_flow_output + "cubemap_flo_{}.jpg".format(index)
         face_flow_vis = flow_vis.flow_to_color(face_flows[index])
         image_io.image_save(face_flow_vis, cubemap_flow_name)
+        # image_io.image_show(face_flow_vis)
+
+    # 4) warp the cube map image with cube map flow
+    cubemap_flow_warp_output = "../../data/"
+    for index in range(0, len(face_flows)):
+        cubemap_flow_warp_name = cubemap_flow_output + "cubemap_warp_{}.jpg".format(index)
+        face_warp_image = flow_warp.warp_forward(face_images_src[index], face_flows[index])
+        image_io.image_save(face_warp_image, cubemap_flow_warp_name)
         # image_io.image_show(face_flow_vis)
