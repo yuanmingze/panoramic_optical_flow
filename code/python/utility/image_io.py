@@ -32,13 +32,21 @@ def image_show(image):
     """
     visualize the numpy array
     """
-    images = []
-    cmap = plt.get_cmap('rainbow')
-    fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
-    axs.set_title('--')
-    images.append(axs.imshow(image, cmap=cmap))
-    fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
-    plt.show()
+    if len(np.shape(image)) == 2:
+        print("visualize 1 channel raw data")
+        images = []
+        cmap = plt.get_cmap('rainbow')
+        fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
+        axs.set_title('--')
+        images.append(axs.imshow(image, cmap=cmap))
+        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
+        plt.show()
+    if len(np.shape(image)) == 3:
+        print("show 3 channels rgb image")
+        image_rgb = image.astype(int)
+        plt.axis("off")
+        plt.imshow(image_rgb)
+        plt.show()
 
 
 def image_save_rgba(image, image_file_path):
@@ -60,9 +68,17 @@ def image_save_rgba(image, image_file_path):
     img.save(image_file_path, "PNG")
 
 
-def image_save(image, image_file_path):
+def image_save(image_data, image_file_path):
     """ 
     save the numpy as image
     """
+    if image_data.dtype== np.float:
+        print("saved image array type is float, converting to uint8")
+        image = image_data.astype(np.uint8)
+    elif image_data.dtype== np.uint8:
+        image = image_data
+    else:
+        raise RuntimeError("Do not support save the numpy {} array to image".format(image.dtype()))
+
     im = Image.fromarray(image)
     im.save(image_file_path)

@@ -52,14 +52,14 @@ def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
     The index of triangle [0-4] is up, [5-9] middle-up, [10-14] middle-down, [15-19] down
     """
     rho = np.sqrt(x**2 + y**2)
-    if rho == 0:
-        return 0, 0
-    c = np.arctan(rho)
+    # if rho == 0:
+    #     return 0, 0
+    c = np.arctan2(rho, 1)
 
-    phi = np.arcsin(np.cos(c) * np.sin(phi_1) + y * np.sin(c) * np.cos(phi_1) / rho)
-    lambda_ = lambda_0 + np.arctan(x * np.sin(c) / (rho * np.cos(phi_1) * np.cos(c) - y * np.sin(phi_1) * np.sin(c)))
+    phi_ = np.arcsin(np.cos(c) * np.sin(phi_1) + (y * np.sin(c) * np.cos(phi_1)) / rho)
+    lambda_ = lambda_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_1) * np.cos(c) - y * np.sin(phi_1) * np.sin(c))
 
-    return lambda_, phi
+    return lambda_, phi_
 
 def get_tangent_point(triangle_index):
     """

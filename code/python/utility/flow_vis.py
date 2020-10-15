@@ -1,5 +1,9 @@
 import numpy as np
 
+from . import flow_io
+from . import flow_vis
+from . import image_io
+
 """
  optical flow visualization;
 reference 
@@ -119,3 +123,11 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
     u = u / (rad_max + epsilon)
     v = v / (rad_max + epsilon)
     return flow_uv_to_colors(u, v, convert_to_bgr)
+
+
+if __name__ == "__main__":
+        of_data = flow_io.readFlowFile("/home/mingze/Downloads/0001.flo")
+        image_io.image_show(of_data[:,:,0])
+        image_io.image_show(of_data[:,:,1])
+        of_data_vis = flow_vis.flow_to_color(of_data, [-3, 3])
+        image_io.image_show(of_data_vis)
