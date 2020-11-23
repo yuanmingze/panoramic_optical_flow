@@ -44,5 +44,3 @@ def scene_of_folder(root_dir):
             of_backward_list[index_number] = item.name
 
     return min_index, max_index, image_list, of_forward_list, of_backward_list
-
-

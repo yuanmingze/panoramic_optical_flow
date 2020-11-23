@@ -1,8 +1,8 @@
 import numpy as np
 
-from . import flow_io
-from . import flow_vis
-from . import image_io
+import flow_io
+import flow_vis
+import image_io
 
 """
  optical flow visualization;

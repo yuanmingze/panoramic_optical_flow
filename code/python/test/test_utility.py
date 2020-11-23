@@ -1,25 +1,26 @@
 import os
+import pathlib
 
 import numpy as np
+from PIL import Image
 
 import png
 import itertools
 
-from PIL import Image
+import sys
+sys.path.append("..")
 
 from utility import depth_io
 from utility import image_io
-
+from utility import flow_io
+from utility import flow_vis
+from utility import image_io
+from utility import depth_io
+from utility import flow_warp
 
 path = os.getcwd()
 TEST_DATA_ROOT_FOLDER = path + "/../../data/replica_360/office_0/"
 TEMP_DATA_ROOT_FOLDER = path + "/../../data/test_temp/"
-
-
-import os
-import pathlib
-
-from utility import flow_io, flow_vis, image_io, depth_io
 
 
 def of_vis(of_data_dir):
@@ -27,12 +28,15 @@ def of_vis(of_data_dir):
     """
     of_data_path = pathlib.Path(of_data_dir)
     for file_path in of_data_path.iterdir():
-        if not file_path.suffix == ".floss":
+        if  file_path.suffix == ".floss":
+            of_data = flow_io.readFlowFloss(str(file_path))
+        if  file_path.suffix == ".flo":
+            of_data = flow_io.readFlowFile(str(file_path))
+        else:
             continue
 
-        of_data = flow_io.readFlowFloss(str(file_path))
+        print(file_path)
         of_data_color = flow_vis.flow_to_color(of_data)
-
         flow_visual_file_path = str(file_path) + ".jpg"
         image_io.image_save(of_data_color, flow_visual_file_path)
 
@@ -132,6 +136,23 @@ def file_vis(root_dir):
             image_io.image_save(depth_visual, depth_visual_file_path)
 
 
+def test_warp():
+    """
+    """
+    data_root_dir = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/"
+    src_image_filepath = data_root_dir + "0001_pos2_rgb.jpg"
+    # tar_image_filepath = data_root_dir + "0001_pos0_rgb.jpg"
+    src_flo_forward_filepath = data_root_dir + "0001_pos2_opticalflow_forward.flo"
+    src_image_warp_filepath = data_root_dir + "0001_pos2_rgb_forward_warp.jpg"
+
+    src_image = image_io.image_read(src_image_filepath)
+    # tar_image = image_io.image_read(tar_image_filepath)
+    src_flo_forward = flow_io.readFlowFile(src_flo_forward_filepath)
+
+    src_image_warp = flow_warp.warp_forward(src_image, src_flo_forward)
+    image_io.image_save(src_image_warp, src_image_warp_filepath)
+
+
 if __name__ == "__main__":
     # depth_visual()
     #root_folder = "D:/workdata/casual_stereo_vr_2020_test/boatshed_colmap_00_below_omni/Cache/29-2k-2k-DIS/"
@@ -140,5 +161,9 @@ if __name__ == "__main__":
     # root_folder = "D:/workdata/casual_stereo_vr_2020_test/boatshed_colmap_00_below_omni_pano/Cache/29-2k-2k-DIS/"
     # of_vis(root_folder)
     # depth_map_format_transfrom()
-    root_folder = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/"
-    file_vis(root_folder)
+    # root_folder = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/"
+    # root_folder = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/"
+    # file_vis(root_folder)
+
+    of_vis("/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/")
+    test_warp()

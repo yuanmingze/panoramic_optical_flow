@@ -3,6 +3,9 @@ import pathlib
 import re
 import os
 
+import sys
+sys.path.append("..")
+
 from utility import replica_util
 from utility import flow_io
 from utility import flow_vis

@@ -4,6 +4,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 
+import sys
+sys.path.append("..")
+
 from utility import flow_vis
 from utility import flow_io
 from utility import flow_evaluate

@@ -4,6 +4,9 @@ import os
 
 import pathlib
 
+import sys
+sys.path.append("..")
+
 import utility.image_io
 import utility.flow_io
 import utility.image_evaluate

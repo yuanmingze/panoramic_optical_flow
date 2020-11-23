@@ -163,7 +163,8 @@ def writeFlowFloss(filename, uv, v=None):
 
 def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
     """
-    convert the pinhole optical flow to panoramic optical flow.
+    process the warp around of optical flow.
+    convert the pinhole type optical flow to panoramic optical flow.
     
     basic suppose: if optical flow in 
     :param:
@@ -194,8 +195,8 @@ def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
 def of_pano2ph(optical_flow, optical_flow_new):
     """
     panoramic optical flow to pinhole optical flow.
-
     process the panorama optical flow, change the warp around to normal optical flow.
+
     :param: the panoramic optical flow
     :param: the optical flow processed warp around
     """

@@ -7,6 +7,9 @@ from threading import Thread
 
 import numpy as np
 
+import sys
+sys.path.append("..")
+
 from utility import flow_estimate
 from utility import flow_evaluate
 from utility import flow_io

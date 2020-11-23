@@ -1,8 +1,8 @@
 import numpy as np
 
-from . import image_io
-from . import flow_vis
-from . import flow_io
+import image_io
+import flow_vis
+import flow_io
 
 
 def compute_occlusion():

@@ -9,7 +9,6 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 
 
-
 def depth_visual(depth_data):
     """
     visualize the depth map

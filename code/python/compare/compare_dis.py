@@ -4,6 +4,9 @@ import sys
 import csv
 import pathlib
 
+import sys
+sys.path.append("..")
+
 from utility import flow_io
 from utility import image_io
 from utility import flow_vis
