@@ -4,8 +4,7 @@ import os
 
 import pathlib
 
-import sys
-sys.path.append("..")
+import configuration as config
 
 import utility.image_io
 import utility.flow_io

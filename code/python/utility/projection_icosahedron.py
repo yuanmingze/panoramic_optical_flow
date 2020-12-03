@@ -456,12 +456,14 @@ def ico2erp_image_gnomonic(tangent_image_folder, output_folder, erp_image_size):
     print("2) the down 5 triangles")
 
 
-def erp2ico_image_gnomonic(erp_image_path, output_folder):
+def erp2ico_image_gnomonic(erp_image_path, output_folder, tangent_image_size = 480):
     """
     Generate tangent images with icosahedron projection. 
     With Gnomonic projection.
 
     TODO: process the pixels in the boundary of triangles
+
+    :param tangent_image_size for one hemisphere
     """
     image_path = erp_image_path
     tangent_image_root = output_folder
@@ -477,9 +479,6 @@ def erp2ico_image_gnomonic(erp_image_path, output_folder):
     radius_circumscribed = np.sin(2 * np.pi / 5.0)
     radius_inscribed = np.sqrt(3) / 12.0 * (3 + np.sqrt(5))
     radius_midradius = np.cos(np.pi / 5.0)
-
-    # tangent image size for one hemisphere
-    tangent_image_size = 480
 
     # 1) the up 5 triangles
     print("1) the up 5 triangles")
@@ -687,6 +686,13 @@ def erp2ico_image_gnomonic(erp_image_path, output_folder):
         image_io.image_save_rgba(tangent_image.astype(np.uint8), tangent_image_root + tangent_image_file_name.format(triangle_index + 15))
 
 
+def ico2erp_image_nfov():
+    """
+    projection the tangent image to sphere 
+    """
+    pass
+
+
 def erp2ico_image_nfov():
     """
     project the equirectangular image to tangent triangle image.
@@ -785,101 +791,6 @@ def erp2ico_image_3D():
 
 
 def ico2erp_image_3D():
-    """
-    projection the tangent image to sphere 
-    """
-    pass
-
-
-def erp2ico_nfov():
-    """
-    project the equirectangular image to tangent triangle image.
-    """
-    image_path = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_360/hotel_0/0001_rgb.jpg"
-    tangent_image_root = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_360/hotel_0/"
-    tangent_image_name = r"0001_rgb_{}_{:04d}.jpg"
-
-    image_data = image_io.image_read(image_path)
-    image_height = np.shape(image_data)[0]
-    image_width = np.shape(image_data)[1]
-
-    # compute the tangent image size
-    tangent_image_width = int(image_width / 5)
-    tangent_image_height_up = int(image_height * ((0.5 * np.pi - np.arctan(0.5)) / np.pi))
-    tangent_image_height_middle = int(image_height * (2 * np.arctan(0.5)) / np.pi)
-    tangent_image_height_down = int(image_height * ((0.5 * np.pi - np.arctan(0.5)) / np.pi))
-
-    radius_circumscribed = np.sin(2 * np.pi / 5.0)
-    radius_inscribed = np.sqrt(3) / 12.0 * (3 + np.sqrt(5))
-    radius_midradius = np.cos(np.pi / 5.0)
-    # transforme the erp image to tangent image to get the  icosahedron's 20 face
-
-    # 1) the up 5
-    tangent_image_hfov_up = 1. / 5.0
-    tangent_image_vfov_up = (0.5 * np.pi - np.arctan(0.5)) / np.pi
-    phi_up_center_step = 2.0 * np.pi / 5.0
-    theta_up_center = np.arccos(radius_inscribed / radius_circumscribed)
-
-    for face_index in range(0, 5):
-        nfov_obj = nfov.NFOV(height=tangent_image_height_up, width=tangent_image_width)
-        nfov_obj.FOV = [tangent_image_vfov_up, tangent_image_hfov_up]
-
-        phi_center = face_index * phi_up_center_step + phi_up_center_step * 0.5
-        theta_center = theta_up_center
-
-        # nfov center is at top-left
-        center_point = np.array([phi_center / (2 * np.pi), theta_center / np.pi], np.float)
-        tangent_image = nfov_obj.toNFOV(image_data, center_point)
-
-        tangent_image_path = tangent_image_root + tangent_image_name.format("up", face_index)
-        image_io.image_save(tangent_image, tangent_image_path)
-
-    # the middle 10 faces
-    tangent_image_hfov_middle = 1. / 5.0
-    tangent_image_vfov_middle = (2 * np.arctan(0.5)) / np.pi
-    phi_middle_center_step = 2.0 * np.pi / 10.0
-    theta_middle_center = np.pi / 2.0 - np.arccos(radius_inscribed / radius_circumscribed)
-
-    for face_index in range(0, 10):
-        nfov_obj = nfov.NFOV(height=tangent_image_height_middle, width=tangent_image_width)
-        nfov_obj.FOV = [tangent_image_vfov_middle, tangent_image_hfov_middle]
-
-        phi_center = face_index * phi_middle_center_step  # + phi_middle_center_step * 0.5
-        theta_center = np.pi / 2.0 - np.arccos(radius_inscribed / radius_circumscribed) - 2 * np.arccos(radius_inscribed / radius_midradius)
-        if face_index % 2 == 1:
-            theta_center = np.pi / 2.0 - theta_center
-        else:
-            theta_center = np.pi / 2.0 + theta_center
-
-        # nfov center is at top-left
-        center_point = np.array([phi_center / (2 * np.pi), theta_center / np.pi], np.float)
-        tangent_image = nfov_obj.toNFOV(image_data, center_point)
-
-        tangent_image_path = tangent_image_root + tangent_image_name.format("middle", face_index)
-        image_io.image_save(tangent_image, tangent_image_path)
-
-    # the down 5
-    tangent_image_vfov_down = (0.5 * np.pi - np.arctan(0.5)) / np.pi
-    tangent_image_hfov_down = 1. / 5.0
-    phi_down_center_step = 2.0 * np.pi / 5.0
-    theta_down_center = np.pi - np.arccos(radius_inscribed / radius_circumscribed)
-
-    for face_index in range(0, 5):
-        nfov_obj = nfov.NFOV(height=tangent_image_height_down, width=tangent_image_width)
-        nfov_obj.FOV = [tangent_image_vfov_down, tangent_image_hfov_down]
-
-        phi_center = face_index * phi_down_center_step
-        theta_center = theta_down_center
-
-        # nfov center is at top-left
-        center_point = np.array([phi_center / (2 * np.pi), theta_center / np.pi], np.float)
-        tangent_image = nfov_obj.toNFOV(image_data, center_point)
-
-        tangent_image_path = tangent_image_root + tangent_image_name.format("down", face_index)
-        image_io.image_save(tangent_image, tangent_image_path)
-
-
-def ico2erp_nfov():
     """
     projection the tangent image to sphere 
     """

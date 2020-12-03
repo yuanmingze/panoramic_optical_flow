@@ -7,8 +7,7 @@ from PIL import Image
 import png
 import itertools
 
-import sys
-sys.path.append("..")
+import configuration as config
 
 from utility import depth_io
 from utility import image_io

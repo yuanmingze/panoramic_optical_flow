@@ -4,8 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 
-import sys
-sys.path.append("..")
+import configuration as config
 
 from utility import flow_vis
 from utility import flow_io
@@ -38,7 +37,7 @@ def test_warp_image():
     # 2) load optical flow
     # print("load optical flow from {}".format(of_file_path))
     # of_forward = load_of_bin(of_file_path, width, height, False)
-    
+
     # visualization optical flow
     of_forward = flowio.readFlowFile(of_forward_file_path)
     of_forward_vis = flow_vis.flow_to_color(of_forward)
@@ -70,7 +69,7 @@ def test_metrics():
 
     print("EPE: 1) {}".format(flow_evaluate.EPE(of_forward, of_forward)))
     print("EPE: 2) {}".format(flow_evaluate.EPE(of_forward, of_backward)))
-    
+
     print("AAE: 1) {}".format(flow_evaluate.AAE(of_forward, of_forward)))
     print("AAE: 2) {}".format(flow_evaluate.AAE(of_forward, of_backward)))
 
@@ -96,10 +95,10 @@ def test_of_warping_image():
     data_root_folder = "/mnt/sda1/workdata/opticalflow_data/replica_360/hotel_0/replica_seq_data/"
     data_root_path = pathlib.Path(str(data_root_folder))
     #for item_file in data_root_path.iterdir():
-    for file_idx in range(0,17):
+    for file_idx in range(0, 17):
         # if not item_file.suffix == ".flo":
         #     continue
-            
+
         # file_idx = int(str(item_file.name)[0:4])
 
         if file_idx % 5 == 0:
@@ -119,7 +118,7 @@ def test_of_warping_image():
         of_forward = flowio.readFlowFile(of_forward_file_path)
         src_image_warped = warp_forward(src_image, of_forward, 100, 100)
         image_save(src_image_warped, src_image_warped_file_path)
-        
+
         # test backward optical flow & output
         of_backward = flowio.readFlowFile(of_backward_file_path)
         tar_image_warped = warp_forward(tar_image, of_backward, 100, 100)

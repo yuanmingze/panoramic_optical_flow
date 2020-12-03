@@ -358,10 +358,10 @@ def cubemap2erp_image(cubemap_images_list):
         face_theta_max = face_erp_range_sphere_list[image_index][1][1]
         face_erp_x_max, face_erp_y_min = spherical_coordinates.spherical2epr(face_phi_max, face_theta_max, erp_image_height)
 
-        # process the boundary of image 
+        # process the boundary of image
         face_erp_x_min = int(face_erp_x_min) if int(face_erp_x_min) > 0 else 0
         face_erp_x_max = int(face_erp_x_max + 0.5) if int(face_erp_x_max + 0.5) < erp_image_width else erp_image_width - 1
-        face_erp_y_min = int(face_erp_y_min ) if int(face_erp_y_min + 0.5) > 0 else 0
+        face_erp_y_min = int(face_erp_y_min) if int(face_erp_y_min + 0.5) > 0 else 0
         face_erp_y_max = int(face_erp_y_max + 0.5) if int(face_erp_y_max + 0.5) < erp_image_height else erp_image_height - 1
 
         # 1) get ERP image's pixels corresponding tangent image location
@@ -375,9 +375,9 @@ def cubemap2erp_image(cubemap_images_list):
 
         # 2) get the value of pixel in the tangent image and the spherical coordinate location coresponding the tangent image (x,y)
         face_x, face_y = gnomonic_projection.gnomonic_projection(face_phi_, face_theta_, lambda_0, phi_1)
-        pbc = 1.0 # projection_boundary_coefficient
+        pbc = 1.0  # projection_boundary_coefficient
         inside_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x.flatten(), face_y.flatten()), axis=1),
-                                    np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
+                                                            np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         face_x_available = (face_x[inside_list] + 1.0) * 0.5 * (cubemap_image_size - 1)
@@ -439,9 +439,9 @@ def cubemap2erp_flow(cubemap_flows_list):
 
         # process the boundary of image TODO there is seam in the ERP image!!
         face_erp_x_min = int(face_erp_x_min) if int(face_erp_x_min) > 0 else 0
-        face_erp_x_max = int(face_erp_x_max) if int(face_erp_x_max) < erp_flow_width else erp_flow_width - 1
+        face_erp_x_max = int(face_erp_x_max + 0.5) if int(face_erp_x_max + 0.5) < erp_flow_width else erp_flow_width - 1
         face_erp_y_min = int(face_erp_y_min) if int(face_erp_y_min) > 0 else 0
-        face_erp_y_max = int(face_erp_y_max) if int(face_erp_y_max) < erp_flow_height else erp_flow_height - 1
+        face_erp_y_max = int(face_erp_y_max + 0.5) if int(face_erp_y_max + 0.5) < erp_flow_height else erp_flow_height - 1
 
         # 2) get the pixels tangent image space location
 
@@ -457,8 +457,8 @@ def cubemap2erp_flow(cubemap_flows_list):
                                                                np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])).reshape(np.shape(face_x_src))
 
         # normailzed tangent image space --> tangent image space
-        face_x_src = (face_x_src + 1.0) * cubemap_image_size * 0.5
-        face_y_src = -(face_y_src - 1.0) * cubemap_image_size * 0.5
+        face_x_src = (face_x_src + 1.0) * 0.5 * (cubemap_image_size - 1)
+        face_y_src = -(face_y_src - 1.0) * 0.5 * (cubemap_image_size - 1)
 
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
@@ -492,8 +492,5 @@ def cubemap2erp_flow(cubemap_flows_list):
 
         erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] = face_flow_u
         erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] = face_flow_v
-
-        face_flow_vis = flow_vis.flow_to_color(erp_flow_mat)
-        image_io.image_show(face_flow_vis)
 
     return erp_flow_mat
