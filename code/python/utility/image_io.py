@@ -1,3 +1,4 @@
+import os
 from struct import pack, unpack
 
 import numpy as np
@@ -7,6 +8,11 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
+
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
 
 
 def image_read(image_file_path):
@@ -53,7 +59,8 @@ def visual_data(data_array, verbose=False):
         if verbose:
             print("error_visual(): max error {}, min error {}".format(max, min))
 
-    import ipdb; ipdb.set_trace()
+    import ipdb
+    ipdb.set_trace()
     norm = mpl.colors.Normalize(vmin=min, vmax=max)
     cmap = plt.get_cmap('jet')
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -91,35 +98,58 @@ def image_show(image, verbose=True):
 
 
 def image_save_rgba(image, image_file_path):
-    """ 
-    save the numpy as image
+    """save the numpy array image to RGBA image.
+
+    :param image: The RGBA image data, it request 4 channels.
+    :type image: numpy
+    :param image_file_path: The output image file path.
+    :type image_file_path: str
     """
+    # 0) check the file's extension
+    _, file_extension = os.path.splitext(image_file_path)
+    if file_extension.lower() != ".png":
+        log.error("You are saving RGBA image to {}. The RGBA image store in *.png file.".format(image_file_path))
+        return
+
+    # 1) save to png file
     img = Image.fromarray(image)
     img = img.convert("RGBA")
     datas = img.getdata()
 
-    newData = []
-    for item in datas:
-        if item[0] == 255 and item[1] == 255 and item[2] == 255:
-            newData.append((255, 255, 255, 0))
-        else:
-            newData.append(item)
+    ## set the the white pixel to transparent
+    # newData = []
+    # for item in datas:
+    #     if item[0] == 255 and item[1] == 255 and item[2] == 255:
+    #         newData.append((255, 255, 255, 0))
+    #     else:
+    #         newData.append(item)
 
-    img.putdata(newData)
+    img.putdata(datas)
     img.save(image_file_path, "PNG")
 
 
 def image_save(image_data, image_file_path):
-    """ 
-    save the numpy as image
-    """
-    if image_data.dtype == np.float:
-        print("saved image array type is float, converting to uint8")
-        image = image_data.astype(np.uint8)
-    elif image_data.dtype == np.uint8:
-        image = image_data
-    else:
-        raise RuntimeError("Do not support save the numpy {} array to image".format(image.dtype()))
+    """Save numpy array as image.
 
-    im = Image.fromarray(image)
-    im.save(image_file_path)
+    :param image_data: Numpy array store image data. numpy 
+    :type image_data: numpy
+    :param image_file_path: The image's path
+    :type image_file_path: str
+    """
+    # 0) convert the datatype
+    image = None
+    if image_data.dtype in [np.float, np.int64, np.int]:
+        print("saved image array type is {}, converting to uint8".format(image_data.dtype))
+        image = image_data.astype(np.uint8)
+    else:
+        image = image_data
+
+    # 1) save to image file
+    image_channels_number = image.shape[2]
+    if image_channels_number == 4:
+        image_save_rgba(image, image_file_path)
+    elif image_channels_number == 3:
+        im = Image.fromarray(image)
+        im.save(image_file_path)
+    else:
+        log.error("The image channel number is {}".format(image_channels_number))

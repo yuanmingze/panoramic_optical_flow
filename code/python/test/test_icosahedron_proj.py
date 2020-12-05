@@ -8,6 +8,14 @@ from utility import flow_io
 from utility import flow_vis
 from utility import projection_icosahedron as proj_ico
 
+def test_ico_parameters():
+    """
+    Check the icosahedron's paramters.
+    """
+    
+    
+
+
 def test_ico_image_stitch():
     """
     test stitch the icosahedron's image face.
@@ -29,11 +37,18 @@ def test_ico_image_proj(erp_image_filepath, ico_image_output):
     Project the ERP image to 20 faces flow.
     """
     erp_image = image_io.image_read(erp_image_filepath)
-    face_images_src = proj_ico.erp2ico_image_gnomonic(erp_image)
-    for index in range(0, len(face_images_src)):
-        cubemap_images_name = ico_image_output + "ico_rgb_src_{}.jpg".format(index)
-        image_io.image_save(face_images_src[index], cubemap_images_name)
+    tangent_image_size = 480
+    tangent_image_list = proj_ico.erp2ico_image_gnomonic(erp_image, tangent_image_size)
+    for index in range(0, len(tangent_image_list)):
+        cubemap_images_name = ico_image_output + "new_ico_rgb_src_{}.png".format(index)
+
+        image_io.image_save(tangent_image_list[index], cubemap_images_name)
         # image_io.image_show(face_images[0])
+
+    # for index in range(0,20):
+    #     ico_parameter = proj_ico.get_icosahedron_parameters(index)
+    #     print("index:{}, tangent_point:{}, triangle_points_sph:{}".format(index, ico_parameter["triangle_points_tangent"], ico_parameter["triangle_points_sph"]))
+
 
 
 def test_ico_flow_proj():

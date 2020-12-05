@@ -144,18 +144,29 @@ def erp2spherical(erp_points, erp_image_height=None):
     return np.stack((end_points_u, end_points_v))
 
 
-def spherical2epr(phi, theta, image_height):
-    """
-    Transform the spherical coordinate location to ERP image pixel location.
-    The range of erp phi is [-pi, +pi), theta is [-0.5pi, +0.5pi].
+def spherical2epr(phi, theta, image_height, wrap_around = False):
+    """ Transform the spherical coordinate location to ERP image pixel location.
+    The range of erp phi is [-pi, +pi), theta is [-0.5*pi, +0.5*pi].
     The origin of the ERP is in the Top-Left, and origin of the spherical at the center of ERP image.
 
-    :param phi: the 
-    :param theta:
+    :param phi: longitude 
+    :type phi: numpy
+    :param theta: latitude
+    :type theta: numpy
     :param image_height: the height of the ERP image. the image width is 2 times of image height
+    :type image_height: [type]
+    :param wrap_around: if yes process the wrap around case, if no do not.
+    :type wrap_around: bool, optional
+    :return: the pixel location in the ERP image.
+    :rtype: numpy
     """
     x = (phi + np.pi) / (2.0 * np.pi) * (2 * image_height)
     y = -(theta - 0.5 * np.pi) / np.pi * image_height
+
+    # process the wrap around case
+    if wrap_around:
+        x = np.remainder(x, image_height * 2)
+        y = np.remainder(y, image_height)
     return x, y
 
 

@@ -16,6 +16,7 @@ from utility import flow_vis
 from utility import image_io
 from utility import depth_io
 from utility import flow_warp
+from utility import gnomonic_projection as gp
 
 path = os.getcwd()
 TEST_DATA_ROOT_FOLDER = path + "/../../data/replica_360/office_0/"
@@ -152,6 +153,62 @@ def test_warp():
     image_io.image_save(src_image_warp, src_image_warp_filepath)
 
 
+import numpy as np
+
+
+def test_inside_polygon_2d():
+    """[summary]
+    """    
+    # test 1: the points on the boundary inside of polygon 2d
+    point_list = np.zeros((8, 2), dtype=np.float64)
+    point_list[0, :] = [0, 0]
+    point_list[1, :] = [0, 1.3]
+    point_list[2, :] = [0.5, -1]
+    point_list[3, :] = [-1, 0]
+    point_list[4, :] = [1, 0]
+    point_list[5, :] = [-1, -1.1]
+    point_list[6, :] = [-1, 0.5]
+    point_list[7, :] = [1, 0.5]
+
+    polygon_points_list = np.zeros((4, 2), dtype=np.float64)
+    polygon_points_list[0, :] = [-1, 1]
+    polygon_points_list[1, :] = [1, 1]
+    polygon_points_list[2, :] = [1, -1]
+    polygon_points_list[3, :] = [-1, -1]
+
+    from functools import reduce
+    result = gp.inside_polygon_2d(point_list, polygon_points_list, True, eps=1e-6)
+    print("Inside include on segment", result)
+    result_gt = [True, False,  True,  True,  True, False,  True,  True]
+    assert reduce((lambda x, y: x and y), result == result_gt)
+
+    result = gp.inside_polygon_2d(point_list, polygon_points_list, False, eps=1e-15)
+    print("Inside do not include on segment", result)
+    result_gt = [True, False,  False,  False,  False, False,  False,  False]
+    assert reduce((lambda x, y: x and y), result == result_gt)
+
+    # test 2
+    point_list_x, point_list_y = np.meshgrid(np.linspace(-2, 2, 400), np.linspace(-2, 2, 400))
+    point_list = np.stack((point_list_x.flatten(), point_list_y.flatten()), axis=1)
+    polygon_points_list = np.zeros((4, 2), dtype=np.float64)
+    polygon_points_list[0, :] = [-1, 1]
+    polygon_points_list[1, :] = [1, 1]
+    polygon_points_list[2, :] = [1, -1]
+    polygon_points_list[3, :] = [-1, -1]
+    result = gp.inside_polygon_2d(point_list, polygon_points_list, True).reshape(np.shape(point_list_x))
+    image_io.image_show(result, verbose=True)
+
+    # test 3
+    point_list_x, point_list_y = np.meshgrid(np.linspace(-1, 1, 400), np.linspace(-1, 1, 400))
+    point_list = np.stack((point_list_x.flatten(), point_list_y.flatten()), axis=1)
+    polygon_points_list = np.zeros((3, 2), dtype=np.float64)
+    polygon_points_list[0, :] = [0.,  0.76393202]
+    polygon_points_list[1, :] = [0.66158454, -0.38196601]
+    polygon_points_list[2, :] = [-0.66158454, -0.38196601]
+    result = gp.inside_polygon_2d(point_list, polygon_points_list, True, 2/400).reshape(np.shape(point_list_x))
+    image_io.image_show(result, verbose=False)
+
+
 if __name__ == "__main__":
     # depth_visual()
     #root_folder = "D:/workdata/casual_stereo_vr_2020_test/boatshed_colmap_00_below_omni/Cache/29-2k-2k-DIS/"
@@ -164,5 +221,6 @@ if __name__ == "__main__":
     # root_folder = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/"
     # file_vis(root_folder)
 
-    of_vis("/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/")
-    test_warp()
+    # of_vis("/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/replica_seq_data/")
+    # test_warp()
+    test_inside_polygon_2d()

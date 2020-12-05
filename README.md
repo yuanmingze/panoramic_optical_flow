@@ -22,10 +22,23 @@ The project file structure are like following image:
 
 Please read the README.md file in each folder to get more information.
 
+# Convention 
+
+## Spherical Coordinate System
+
+There is more one spherical coordinate symbol used in this project.
+
+The following symbols are equal:
+- (longitude, latitude) 
+- (phi, theta)
+- (lambda, phi): used in gnomonic projection;
+
+
 # TODO List
 
-- [ ] Optical Flow comparison;
-- [ ] use lzma to compress the optical flow (*.flo) and depth map (*.dpt);
-- [ ] Sun IJCV Matlab code;
-- [ ] Tangent Image projection code;
+- [ ] Icosahedron Tangent Image projection code;
+- [ ] clean logger.py's Logger class;
+- [ ] Optical Flow comparison, use lzma to compress the optical flow (*.flo) and depth map (*.dpt);
+- [ ] Compare Sun IJCV Matlab code ;
 - [ ] No-integer pixel image optical flow.
+- [ ] /mnt/sda1/workspace_windows/360imageflow/

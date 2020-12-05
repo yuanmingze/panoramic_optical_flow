@@ -39,19 +39,19 @@ def test_warp_image():
     # of_forward = load_of_bin(of_file_path, width, height, False)
 
     # visualization optical flow
-    of_forward = flowio.readFlowFile(of_forward_file_path)
+    of_forward = flow_io.readFlowFile(of_forward_file_path)
     of_forward_vis = flow_vis.flow_to_color(of_forward)
-    image_show(of_forward_vis, "of_forward_vis")
+    image_io.image_show(of_forward_vis, "of_forward_vis")
 
-    of_backward = flowio.readFlowFile(of_backward_file_path)
+    of_backward = flow_io.readFlowFile(of_backward_file_path)
     of_backward_vis = flow_vis.flow_to_color(of_backward)
-    image_show(of_backward_vis, "of_forward_vis")
+    image_io.image_show(of_backward_vis, "of_forward_vis")
 
     # 3) warp source image with optical flow
     image_warped = flow_evaluate.warp_backward(tar_image, of_forward, 0, 0)
     # image_warped = warp_forward(src_image, of_forward, 100, 100)
-    image_show(image_warped)
-    image_save(image_warped, tar_warped_image_file)
+    image_io.image_show(image_warped)
+    image_io.image_save(image_warped, tar_warped_image_file)
 
 
 def test_metrics():
@@ -85,7 +85,7 @@ def test_of_process_panorama():
     # of_pano2ph(of_data, of_data_new)
     of_ph2pano(of_data, of_data_new)
     of_data_vis = flow_vis.flow_to_color(of_data_new)
-    image_show(of_data_vis)
+    image_io.image_show(of_data_vis)
 
 
 def test_of_warping_image():
@@ -115,14 +115,14 @@ def test_of_warping_image():
         of_backward_file_path = data_root_path / "{:04d}_opticalflow_backward.flo".format(file_idx + 1)
 
         # test forward optical flow & output
-        of_forward = flowio.readFlowFile(of_forward_file_path)
+        of_forward = flow_io.readFlowFile(of_forward_file_path)
         src_image_warped = warp_forward(src_image, of_forward, 100, 100)
-        image_save(src_image_warped, src_image_warped_file_path)
+        image_io.image_save(src_image_warped, src_image_warped_file_path)
 
         # test backward optical flow & output
-        of_backward = flowio.readFlowFile(of_backward_file_path)
+        of_backward = flow_io.readFlowFile(of_backward_file_path)
         tar_image_warped = warp_forward(tar_image, of_backward, 100, 100)
-        image_save(tar_image_warped, tar_image_warped_file_path)
+        image_io.image_save(tar_image_warped, tar_image_warped_file_path)
 
 
 if __name__ == "__main__":
