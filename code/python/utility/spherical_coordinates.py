@@ -1,7 +1,6 @@
 import numpy as np
 import math
 
-import image_io
 
 """
 The optical flow U is corresponding phi, and V is corresponding theta.
@@ -121,9 +120,13 @@ def erp2spherical(erp_points, erp_image_height=None):
     convert the point from erp image pixel location to spherical coordinate.
     the point location in ERP image, the x coordinate is in range [0, width), y is in the ranage [0, hight).
     The first pixel 0 is corresponding azimuth -PI, and the last pixel image_width - 1 is corresponding (2PI) / image_width * (image_width -1 - 0.5* image_width). 
-    
+
     :param erp_points: the point location in ERP image, the x coordinate is in range [0, width), y is in the ranage [0, hight)
+    :type erp_points: numpy
+    :param erp_image_height: ERP image's height, defaults to None
+    :type erp_image_height: int, optional
     :return: the spherical coordinate points, theta is in the range [-pi, +pi), and phi is in the range [-pi/2, pi/2)
+    :rtype: numpy
     """
     # 0) the ERP image size
     if erp_image_height == None:
@@ -144,7 +147,7 @@ def erp2spherical(erp_points, erp_image_height=None):
     return np.stack((end_points_u, end_points_v))
 
 
-def spherical2epr(phi, theta, image_height, wrap_around = False):
+def spherical2epr(phi, theta, image_height, wrap_around=False):
     """ Transform the spherical coordinate location to ERP image pixel location.
     The range of erp phi is [-pi, +pi), theta is [-0.5*pi, +0.5*pi].
     The origin of the ERP is in the Top-Left, and origin of the spherical at the center of ERP image.

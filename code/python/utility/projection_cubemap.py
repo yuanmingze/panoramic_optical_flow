@@ -3,10 +3,6 @@
 import numpy as np
 from scipy import ndimage
 
-import image_io
-import flow_io
-import flow_vis
-import flow_warp
 import gnomonic_projection
 import spherical_coordinates
 

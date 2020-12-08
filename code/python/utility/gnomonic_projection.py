@@ -1,11 +1,11 @@
 
-import ipdb
 import numpy as np
 from numpy.lib.financial import ipmt
 
-import image_io
+from .logger import Logger
 
-import nfov
+log = Logger(__name__)
+log.logger.propagate = False
 
 """
 Implement the Gnomonic projection (forward and reverse projection).
@@ -125,16 +125,44 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
         return np.logical_and(point_inside, np.logical_not(online_index))
 
 
-def gnomonic_projection(lambda_, phi, lambda_0, phi_1):
+def gnomonic2imagepixel(gnomo_coord, image_width, image_height):
+    """gnomonic coordinate to pixel coordinate.
+    Transform the gnomonic coordinate to tangent image pixel coordinates. The origin of the tangent image the top-left.
+
+    :param gnomo_coord: The gnomonic coordinate list, size is [2, :]
+    :type gnomo_coord: list
+    :param image_width: the width of tangent image.
+    :type image_width: int
+    :param image_height: the tangent image's height.
+    :type image_height: int
     """
+    if len(gnomo_coord) !=2:
+        log.error("The gnomonic coordinate axis 1 should be 2.")
+
+    gnomo_coord_x = gnomo_coord[0]
+    gnomo_coord_y = gnomo_coord[1]
+
+    # convert to pixel's coordinate
+    gnomo_coord_x = (gnomo_coord_x + 1.0) / 2.0 * image_width
+    gnomo_coord_y = (-gnomo_coord_y + 1.0) / 2.0 * image_height
+    
+    return gnomo_coord_x, gnomo_coord_y
+
+
+def gnomonic_projection(lambda_, phi, lambda_0, phi_1):
+    """[summary]
     Convet point form the spherical coordinate to tangent image's coordinate.
 
-    :param lambda_: longitude, ERP phi
+    :param lambda_:  longitude, ERP phi
+    :type lambda_: numpy
     :param phi: latitude, ERP theta
-    :param lambda_0: the center of gnomonic projection
-    :param ph_1: 
-    
-    :return the point's coordinate in this tangent image
+    :type phi: numpy
+    :param lambda_0: the tangent point of gnomonic projection.
+    :type lambda_0: float
+    :param phi_1: the tangent point of gnomonic projection.
+    :type phi_1: float
+    :return: the point's normalized coordinate in this tangent image
+    :rtype: numpy
     """
     cos_c = np.sin(phi_1) * np.sin(phi) + np.cos(phi_1) * np.cos(phi) * np.cos(lambda_ - lambda_0)
     x = np.cos(phi) * np.sin(lambda_ - lambda_0) / cos_c
