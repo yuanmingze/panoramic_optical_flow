@@ -1,4 +1,6 @@
 import os
+import re
+
 from struct import pack, unpack
 
 import numpy as np
@@ -7,6 +9,39 @@ import matplotlib.pyplot as plt
 
 import matplotlib as mpl
 import matplotlib.cm as cm
+
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+from matplotlib import cm
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+
+def depth_visual_save(depth_data, output_path):
+    """save the visualized depth map to image file with value-bar.
+
+    :param dapthe_data: The depth data.
+    :type dapthe_data: numpy 
+    :param output_path: the absolute path of output image.
+    :type output_path: str
+    """
+    dapthe_data_temp = depth_data
+    if depth_data.dtype != np.float64:
+        dapthe_data_temp = depth_data.astype(np.float64)
+
+    # draw image
+    fig = plt.figure()
+    plt.subplots_adjust(left=0, bottom=0, right=0.1, top=0.1, wspace=None, hspace=None)
+    ax = fig.add_subplot(111)
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    fig.tight_layout()
+    im = ax.imshow(dapthe_data_temp, cmap=cm.jet)
+    #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
+    cbar = ax.figure.colorbar(im, ax=ax)
+    plt.savefig(dapthe_data_temp, dpi=150)
+    plt.close(fig)
 
 
 def depth_visual(depth_data):
@@ -19,7 +54,7 @@ def depth_visual(depth_data):
     cmap = plt.get_cmap('jet')
 
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
-    return (m.to_rgba(depth_data)[:,:,:3] * 255).astype(np.uint8)
+    return (m.to_rgba(depth_data)[:, :, :3] * 255).astype(np.uint8)
 
 
 def read_bin(binary_file_path, height, width):
@@ -124,3 +159,99 @@ def write_dpt(depth_data, dpt_file_path):
         np.array(width).astype(np.int32).tofile(file_handle)
         np.array(height).astype(np.int32).tofile(file_handle)
         depth_data.astype(np.float32).tofile(file_handle)
+
+
+def read_pfm(path):
+    """Read pfm file.
+
+    TODO: modify, it's from MiDaS
+
+    :param path: [description]
+    :type path: [type]
+    :raises Exception: [description]
+    :raises Exception: [description]
+    :return: [description]
+    :rtype: tuple: (data, scale)
+    """
+    with open(path, "rb") as file:
+
+        color = None
+        width = None
+        height = None
+        scale = None
+        endian = None
+
+        header = file.readline().rstrip()
+        if header.decode("ascii") == "PF":
+            color = True
+        elif header.decode("ascii") == "Pf":
+            color = False
+        else:
+            raise Exception("Not a PFM file: " + path)
+
+        dim_match = re.match(r"^(\d+)\s(\d+)\s$", file.readline().decode("ascii"))
+        if dim_match:
+            width, height = list(map(int, dim_match.groups()))
+        else:
+            raise Exception("Malformed PFM header.")
+
+        scale = float(file.readline().decode("ascii").rstrip())
+        if scale < 0:
+            # little-endian
+            endian = "<"
+            scale = -scale
+        else:
+            # big-endian
+            endian = ">"
+
+        data = np.fromfile(file, endian + "f")
+        shape = (height, width, 3) if color else (height, width)
+
+        data = np.reshape(data, shape)
+        data = np.flipud(data)
+
+        return data, scale
+
+
+def write_pfm(path, image, scale=1):
+    """Write depth data to pfm file.
+
+    TODO: modify, it's from MiDaS
+
+    :param path: pfm file path
+    :type path: [type]
+    :param image: depth data
+    :type image: numpy
+    :param scale: Scale, defaults to 1
+    :type scale: int, optional
+    :raises Exception: [description]
+    :raises Exception: [description]
+    """
+    with open(path, "wb") as file:
+        color = None
+
+        if image.dtype.name != "float32":
+            raise Exception("Image dtype must be float32.")
+
+        image = np.flipud(image)
+
+        if len(image.shape) == 3 and image.shape[2] == 3:  # color image
+            color = True
+        elif (
+            len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1
+        ):  # greyscale
+            color = False
+        else:
+            raise Exception("Image must have H x W x 3, H x W x 1 or H x W dimensions.")
+
+        file.write("PF\n" if color else "Pf\n".encode())
+        file.write("%d %d\n".encode() % (image.shape[1], image.shape[0]))
+
+        endian = image.dtype.byteorder
+
+        if endian == "<" or endian == "=" and sys.byteorder == "little":
+            scale = -scale
+
+        file.write("%f\n".encode() % scale)
+
+        image.tofile(file)

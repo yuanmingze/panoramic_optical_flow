@@ -85,83 +85,6 @@ def generate_icosphere_ply(mesh_file_path):
             mesh_file.write("3 {} {} {}\n".format(faces[index][0], faces[index][1], faces[index][2]))
 
 
-# def tangent2sphere(tangent_image_folder, output_folder, erp_image_size):
-#     """
-#     project a tangent images back to ERP image.
-#     :param erp_image_path: the input tangent image folder
-#     """
-#     tangent_image_file_name = r"erp_{:04d}.png"
-#     erp_image_height = erp_image_size[0]
-#     erp_image_width = erp_image_size[1]
-
-#     tangent_image_name = tangent_image_file_name.format(0)
-#     tangent_image_data = image_io.image_read(tangent_image_folder + tangent_image_name)
-
-#     tangent_image_height = np.shape(tangent_image_data)[0]
-#     tangent_image_width = np.shape(tangent_image_data)[1]
-
-#     # 0) the up 5 triangles
-#     print("0) the up 5 triangles")
-#     for triangle_index in range(0, 5):
-#         step_number = triangle_index - 0
-
-#         erp_image = np.full(erp_image_size, 255)
-
-#         tangent_image_name = tangent_image_file_name.format(triangle_index)
-#         tangent_image_data = image_io.image_read(tangent_image_folder + tangent_image_name)
-
-#         #
-#         tangent_triangle_points = get_tangent_triangle_points(triangle_index)
-
-#         index_x_start = 0
-#         index_x_stop = 480 - 1
-
-#         index_y_start = 0
-#         index_y_stop = 480 - 1
-
-#         lambda_0, phi_1 = get_tangent_point(triangle_index)
-
-#         for index_y in range(index_y_start, index_y_stop):
-#             for index_x in range(index_x_start, index_x_stop):
-
-#                 tangent_x = (index_x - tangent_image_width / 2.0) / (tangent_image_width / 2.0)
-#                 tangent_y = (index_y - tangent_image_height / 2.0) / (tangent_image_height / 2.0)
-
-#                 lambda_, phi = reverse_gnomonic_projection(tangent_x, tangent_y, lambda_0, phi_1)
-
-#                 erp_index_x = int((lambda_ + np.pi) / (2 * np.pi) * erp_image_width)
-#                 erp_index_y = int((-phi + np.pi / 2.0) / np.pi * erp_image_height)
-
-#                 #print(erp_index_x, erp_index_y, index_x, index_y)
-#                 erp_image[erp_index_y, erp_index_x] = tangent_image_data[index_y, index_x, 0:3]
-
-#     # 1) the middle 10 triangles
-#     print("1) the middle 10 triangles")
-#     # 1-0) the middle-up 5 triangles
-#     print("1-0) the middle-up 5 triangles")
-
-#     # 1-1) the middle-down 5 triangles
-#     print("1-1) the middle-down 5 triangles")
-
-#     # 2) the down 5 triangles
-#     print("2) the down 5 triangles")
-
-
-# def get_icosahedron_parameters():
-#     """
-#     Get icosahedron's tangent face's paramters.
-
-#     :return the each tangent face's tangent point and 3 vertices in spherical coordinate system.
-#     """
-#     tangent_points_list = []
-#     face_points_list = []
-#     face_erp_project_range = []
-
-#     for i in range(0, 20):
-#         tangent_points_list.append(get_tangent_point(i))
-#         face_points_list.append(get_tangent_triangle_points(i))
-
-
 def get_icosahedron_parameters_subdivsion(subdivision_level, triangle_index):
     """Get the parameters' of x-level subdivsion icosahedron.
 
@@ -605,7 +528,7 @@ def erp2ico_flow_gnomonic(erp_flow, tangent_image_size):
     pass
 
 
-def ico2erp_image_gnomonic(tangent_flows, erp_image_height):
+def ico2erp_flow_gnomonic(tangent_flows, erp_image_height):
     """Stitch all 20 tangent flows to a ERP flow.
 
     :param tangent_flows: The list of 20 tangnet flow data.

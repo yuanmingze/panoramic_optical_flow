@@ -114,7 +114,7 @@ def get_angle_uv(points_A_phi, points_A_theta,
     return angle_A
 
 
-def erp2spherical(erp_points, erp_image_height=None):
+def erp2spherical(erp_points, erp_image_height=None, wrap_around=False):
     """
     ERP image Original is top_left, spherical coordinate origin as center.
     convert the point from erp image pixel location to spherical coordinate.
@@ -125,6 +125,8 @@ def erp2spherical(erp_points, erp_image_height=None):
     :type erp_points: numpy
     :param erp_image_height: ERP image's height, defaults to None
     :type erp_image_height: int, optional
+    :param wrap_around: if true, process the input points wrap around to make all point's x and y in the range [-pi,+pi], [-pi/2, +pi/2]
+    :type wrap_around: bool
     :return: the spherical coordinate points, theta is in the range [-pi, +pi), and phi is in the range [-pi/2, pi/2)
     :rtype: numpy
     """
@@ -139,9 +141,13 @@ def erp2spherical(erp_points, erp_image_height=None):
         height = erp_image_height
         width = height * 2
 
-    # 1) point location to theta and phi
     erp_points_x = erp_points[0]
     erp_points_y = erp_points[1]
+    if wrap_around:
+        erp_points_x = np.remainder(erp_points_x, width)
+        erp_points_y = np.remainder(erp_points_x, height)
+
+    # 1) point location to theta and phi
     end_points_u = (erp_points_x - width / 2.0) / (width / 2.0) * np.pi
     end_points_v = -(erp_points_y - height / 2.0) / (height / 2.0) * (np.pi / 2.0)
     return np.stack((end_points_u, end_points_v))
@@ -227,54 +233,47 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     return np.stack((end_points_u, end_points_v))
 
 
-def car2sph(points_car, points_sph):
+def car2sph(points_car, points_sph, min_radius = 1e-10):
     """
-    Transform the optical flow from cartesian to spherical coordinate.
-    The coordinate system:
+    Transform the 3D point from cartesian to unit spherical coordinate.
 
-    :param points_car: the points array, first column is x, second is y, third is z
-    :param points_sph: the points array, theta, phi
+    Right hand coordinate system: 
+    The 3D coordinate system is right hand, X is back, Y is right, Z is up. 
+
+    :param points_car: The 3D point array, is [point_number, 3], first column is x, second is y, third is z
+    :type points_car: numpy
+    :return: the points spherical coordinate., [azimuth, polar] (theta, phi)
+    :rtype: numpy
     """
-    pass
+    radius = np.linalg.norm(points_car, axis=1)
+
+    valid_list = radius > min_radius # set the 0 radius to origin.
+   
+    azimuth = np.zeros((points_car.shape[0]), np.float)
+    azimuth[valid_list] = np.arctan2(points_car[:, 1][valid_list], -points_car[:, 0][valid_list])
+
+    polar = np.zeros((points_car.shape[0]), np.float)
+    polar[valid_list] = np.arcsin(np.divide(points_car[:, 2][valid_list], radius[valid_list]))
+
+    return np.stack((azimuth, polar), axis =1)
 
 
-if __name__ == "__main__":
-    # test great_circle_distance
-    point_pair = []
-    point_pair.append([[-np.pi / 2.0, np.pi / 2.0], [-np.pi / 2.0, 0.0]])
-    point_pair.append([[-np.pi / 4.0, np.pi / 4.0], [-np.pi / 4.0, -np.pi / 4.0]])
-    point_pair.append([[0.0, 0.0], [np.pi / 2.0, 0]])
-    point_pair.append([[np.pi / 2.0, 0], [np.pi / 2.0, -np.pi / 4.0]])
-    point_pair.append([[0.0, -np.pi / 4.0], [np.pi, -np.pi / 4.0]])
-    point_pair.append([[0.0, -np.pi / 2.0], [np.pi / 2.0, -np.pi / 2.0]])
-    point_pair.append([[-np.pi * 3.0 / 4.0, 0.0], [np.pi * 3.0 / 4.0, 0.0]])
-    point_pair.append([[0.0, 0.0], [0.0, 0.0]])
-    point_pair.append([[np.pi / 4.0, np.pi / 4.0], [np.pi / 4.0, np.pi / 4.0]])
+def sph2car(phi,theta, radius = 1.0):
+    """Transform the spherical coordinate to cartesian 3D point.
 
-    result = [np.pi / 2.0, np.pi / 2.0, np.pi / 2.0, np.pi / 4.0, np.pi / 2.0, 0.0, np.pi / 2.0, 0.0, 0.0]
+    :param phi: longitude
+    :type phi: numpy
+    :param theta: latitude
+    :type theta: numpy
+    :param radius: the radius of projection sphere
+    :type radius: float
+    :return: +x right, +y down, +z is froward
+    :rtype: numpy
+    """
+    # points_cartesian_3d = np.array.zeros((phi.shape[0],3),np.float)
+    x = radius * np.cos(theta) * np.sin(phi)
+    z = radius * np.cos(theta) * np.cos(phi)
+    y = -radius * np.sin(theta)
 
-    points_1_u = np.zeros(len(point_pair))
-    points_1_v = np.zeros(len(point_pair))
-    points_2_u = np.zeros(len(point_pair))
-    points_2_v = np.zeros(len(point_pair))
-    for index in range(len(point_pair)):
-        term = point_pair[index]
-        points_1_u[index] = point_pair[index][0][0]
-        points_1_v[index] = point_pair[index][0][1]
+    return np.stack((x,y,z), axis=1)
 
-        points_2_u[index] = point_pair[index][1][0]
-        points_2_v[index] = point_pair[index][1][1]
-
-    points_1_u = points_1_u[np.newaxis, ...]
-    points_1_v = points_1_v[np.newaxis, ...]
-    points_2_u = points_2_u[np.newaxis, ...]
-    points_2_v = points_2_v[np.newaxis, ...]
-
-    result_comput = great_circle_distance_uv(points_1_u, points_1_v, points_2_u, points_2_v, radius=1)
-    result_comput = result_comput[0]
-
-    for index in range(len(point_pair)):
-        print("----{}-----".format(index))
-        print("error:    {}".format(np.sqrt(np.abs(result_comput[index] - result[index]))))
-        print("GT:       {}".format(result[index]))
-        print("Computed: {}".format(result_comput[index]))

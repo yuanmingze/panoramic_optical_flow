@@ -2,7 +2,7 @@
 import numpy as np
 from numpy.lib.financial import ipmt
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -175,16 +175,16 @@ def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
     Reverse gnomonic projection. Get tangent image's point spherical coordinate.
     The index of triangle [0-4] is up, [5-9] middle-up, [10-14] middle-down, [15-19] down
 
-    :param x: [description]
-    :type x: [type]
-    :param y: [description]
-    :type y: [type]
-    :param lambda_0: [description]
-    :type lambda_0: [type]
-    :param phi_1: [description]
-    :type phi_1: [type]
-    :return: [description]
-    :rtype: [type]
+    :param x: the point's tangent plane coordinate x-axis location
+    :type x: numpy 
+    :param y: the point's tangent plane coordinate y-axis location
+    :type y: numpy
+    :param lambda_0: the tangent point's longitude
+    :type lambda_0: float
+    :param phi_1: the tangent point's latitude
+    :type phi_1: float
+    :return: the point array's spherical coordinate location. the longitude range is continuous and exceed the range [-pi, +pi]
+    :rtype: numpy
     """
     rho = np.sqrt(x**2 + y**2)
     # if rho == 0:
@@ -195,3 +195,49 @@ def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
     lambda_ = lambda_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_1) * np.cos(c) - y * np.sin(phi_1) * np.sin(c))
 
     return lambda_, phi_
+
+
+def gnomonic2pixel(coord_gnom_x, coord_gnom_y, padding_size, tangent_image_size):
+    """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
+    
+    Suppose the x range is [-1,+1], y range is [+1, -1] without padding.
+
+    :param face_x_src: [description]
+    :type face_x_src: numpy
+    :param face_y_src: [description]
+    :type face_y_src: numpy
+    :param padding_size: in gnomonic coordinate system, padding outside to boundary
+    :type padding_size: float
+    :param tangent_image_size: the image size with padding
+    :type tangent_image_size: numpy
+    :retrun:
+    :rtype:
+    """    
+    # normailzed tangent image space --> tangent image space
+    gnomonic2image_ratio = (tangent_image_size - 1.0) / ( 2.0 + padding_size * 2.0)
+    coord_pixel_x = (coord_gnom_x + 1.0 + padding_size) * gnomonic2image_ratio
+    coord_pixel_y = -(coord_gnom_y - 1.0 - padding_size) * gnomonic2image_ratio
+    return coord_pixel_x, coord_pixel_y
+
+
+# def pixel2gnomonic(coord_pixel_x, coord_pixel_y, padding_size, tangent_image_size):
+#     """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
+    
+#     Suppose the x range is [-1,+1], y range is [+1, -1] without padding.
+
+#     :param coord_pixel_x: [description]
+#     :type coord_pixel_x: numpy
+#     :param coord_pixel_y: [description]
+#     :type coord_pixel_y: numpy
+#     :param padding_size: in gnomonic coordinate system, padding outside to boundary
+#     :type padding_size: float
+#     :param tangent_image_size: the image size with padding
+#     :type tangent_image_size: numpy
+#     :retrun:
+#     :rtype:
+#     """    
+#     # normailzed tangent image space --> tangent image space
+#     gnomonic2image_ratio = (tangent_image_size - 1.0) / ( 2.0 + padding_size * 2.0)
+#     coord_pixel_x = (coord_gnom_x + 1.0 + padding_size) * gnomonic2image_ratio
+#     coord_pixel_y = -(coord_gnom_y - 1.0 - padding_size) * gnomonic2image_ratio
+#     return coord_pixel_x, coord_pixel_y

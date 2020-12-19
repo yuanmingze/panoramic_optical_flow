@@ -2,7 +2,8 @@ import os
 from struct import pack, unpack
 
 import numpy as np
-from .logger import Logger
+
+from logger import Logger
 
 """
  *.flo file read and wirte;

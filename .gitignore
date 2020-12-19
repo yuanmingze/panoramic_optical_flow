@@ -9,6 +9,7 @@ __pycache__/
 *$py.class
 /code/cpp/build/
 /code/cpp/replica360/build/
+/data/*
 /data/output/*
 
 
