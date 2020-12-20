@@ -310,7 +310,7 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
 
     :param erp_flow_mat: the equirectangular image's flow, dimension is [height, width, 3]
     :type erp_flow_mat: numpy
-    :param padding_size: [description], defaults to 0.1
+    :param padding_size: [description], defaults to 0.0
     :type padding_size: float, optional
     :retrun: 6 images of each fact of cubemap projection
     :rtype: list
@@ -322,9 +322,11 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
     erp_image_width = np.shape(erp_flow_mat)[1]
     erp_image_channel = np.shape(erp_flow_mat)[2]
 
-    cubemap_points = get_cubemap_parameters()
+    cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
     # tangent_gnomonic_range = cubemap_points["face_points_tangent"]
+    gnomonic2image_ratio = (face_image_size - 1) / (2.0 + padding_size * 2.0)
+    pbc = 1.0 + padding_size  # projection_boundary_coefficient
 
     for index in range(0, 6):
         center_point = tangent_points_list[index]
@@ -335,8 +337,8 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
         phi_1 = center_point[1]
 
         # the x,y of tangent image
-        x_grid = np.linspace(-1.0 - padding_size, 1.0 + padding_size, face_image_size)
-        y_grid = np.linspace(1.0 + padding_size, -1.0 - padding_size, face_image_size)
+        x_grid = np.linspace(-pbc, pbc, face_image_size)
+        y_grid = np.linspace(pbc - pbc, face_image_size)
         x, y = np.meshgrid(x_grid, y_grid)
 
         # get the value of pixel in the tangent image and the spherical coordinate location coresponding the tangent image (x,y)
@@ -372,7 +374,6 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
         phi_target = -erp_pixel_y_target / erp_image_height * np.pi + 0.5 * np.pi
         # spherical location to tangent location
         face_image_x_target, face_image_y_target = gnomonic_projection.gnomonic_projection(lambda_target, phi_target, lambda_0, phi_1)
-        gnomonic2image_ratio = (face_image_size - 1) / (2.0 + padding_size * 2.0)
         face_flow_u = (face_image_x_target - x) * gnomonic2image_ratio
         face_flow_v = (face_image_y_target - y) * gnomonic2image_ratio
         face_flow_v = -face_flow_v  # transform to image coordinate system (+y is to down)
@@ -405,6 +406,7 @@ def erp2cubemap_image(erp_image_mat, padding_size=0.0):
 
     cubemap_points = get_cubemap_parameters()
     tangent_points_list = cubemap_points["tangent_points"]
+    pbc = 1.0 + padding_size  # projection_boundary_coefficient
 
     for index in range(0, 6):
         center_point = tangent_points_list[index]
@@ -414,8 +416,8 @@ def erp2cubemap_image(erp_image_mat, padding_size=0.0):
         phi_1 = center_point[1]
 
         # the xy of tangent image
-        x_grid = np.linspace(-1.0 - padding_size, 1.0 + padding_size, face_image_size)
-        y_grid = np.linspace(1.0 + padding_size, -1.0 - padding_size, face_image_size)
+        x_grid = np.linspace(-pbc, pbc, face_image_size)
+        y_grid = np.linspace(pbc, -pbc, face_image_size)
         x, y = np.meshgrid(x_grid, y_grid)
 
         # get the value of pixel in the tangent image and the spherical coordinate location coresponding the tangent image (x,y)
@@ -465,6 +467,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     tangent_points_list = cubemap_points["tangent_points"]
     face_erp_range_sphere_list = cubemap_points["face_erp_range"]  # 7 pieces of image
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
+    gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
     for image_index in range(0, 6):
         # get the tangent ERP image pixel's spherical coordinate location
@@ -501,7 +504,6 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.
-        gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
         face_x_available = (face_x[inside_list] + pbc) * gnomonic2image_ratio
         face_y_available = -(face_y[inside_list] - pbc) * gnomonic2image_ratio
 
@@ -516,7 +518,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     return erp_image_mat
 
 
-def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.0):
+def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
 
@@ -547,7 +549,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.
 
     cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
-    face_erp_range_sphere_list = cubemap_points["face_erp_range"]  # 7 pieces of image
+    face_erp_range_sphere_list = cubemap_points["face_erp_range"]
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
     gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
@@ -555,12 +557,10 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.
         # get the tangent ERP image pixel's spherical coordinate location range for each face
         face_phi_min = face_erp_range_sphere_list[flow_index][3][0]
         face_theta_min = face_erp_range_sphere_list[flow_index][3][1]
-
         face_phi_max = face_erp_range_sphere_list[flow_index][1][0]
         face_theta_max = face_erp_range_sphere_list[flow_index][1][1]
         face_erp_x_min, face_erp_y_max = spherical_coordinates.spherical2epr(face_phi_min, face_theta_min, erp_flow_height, False)
         face_erp_x_max, face_erp_y_min = spherical_coordinates.spherical2epr(face_phi_max, face_theta_max, erp_flow_height, False)
-        # print("---{} :{} {} {} {}".format(flow_index, face_phi_min, face_phi_max, face_theta_min, face_theta_max))
 
         # process the boundary of image
         face_erp_x_min = int(face_erp_x_min) if int(face_erp_x_min) > 0 else int(face_erp_x_min - 0.5)
@@ -586,8 +586,8 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.
                                                                np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])).reshape(np.shape(face_x_src))
 
         # normailzed tangent image space --> tangent image space
-        face_x_src = (face_x_src + 1.0 + padding_size) * gnomonic2image_ratio
-        face_y_src = -(face_y_src - 1.0 - padding_size) * gnomonic2image_ratio
+        face_x_src = (face_x_src + pbc) * gnomonic2image_ratio
+        face_y_src = -(face_y_src - pbc) * gnomonic2image_ratio
 
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
@@ -606,8 +606,8 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.
 
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
-        face_x_tar_available = face_x_tar_available / gnomonic2image_ratio - 1.0 - padding_size
-        face_y_tar_available = -face_y_tar_available / gnomonic2image_ratio + 1.0 + padding_size
+        face_x_tar_available = face_x_tar_available / gnomonic2image_ratio - pbc
+        face_y_tar_available = -face_y_tar_available / gnomonic2image_ratio + pbc
         # tangent normailzed space --> spherical space
         face_phi_tar, face_theta_tar = gnomonic_projection.reverse_gnomonic_projection(face_x_tar_available, face_y_tar_available, lambda_0, phi_1)
         # spherical space --> ERP image space
@@ -620,6 +620,6 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height = None, padding_size=0.
         face_flow_v = face_y_tar_available - face_erp_y[available_list]
 
         erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] = face_flow_u
-        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] = face_flow_v
+        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 1] = face_flow_v
 
     return erp_flow_mat

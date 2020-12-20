@@ -75,9 +75,11 @@ def test_cubemap_flow_stitch(padding_size):
         face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
 
     # 2) test stitch the cubemap flow. Note enable test 3
-    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_flow_height = 480, padding_size = padding_size)
-    import ipdb; ipdb.set_trace()
-    flow_io.flow_write(erp_flow_stitch, cubemap_flow_output + "cubemap_stitch_flo_padding_test.flo" )
+    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_flow_height=480, padding_size=padding_size)
+    cubemap_stitch_flo = cubemap_flow_output + "cubemap_stitch_flo_padding_test.flo"
+    if os.path.exists(cubemap_stitch_flo):
+        os.remove(cubemap_stitch_flo)
+    flow_io.flow_write(erp_flow_stitch, cubemap_flow_output + "cubemap_stitch_flo_padding_test.flo")
 
     face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch)
     # image_io.image_show(face_flow_vis)
@@ -119,20 +121,19 @@ def test_cubmap_image_stitch(padding_size):
     image_io.image_save(erp_image_src, os.path.join(cubemap_images_output, "0001_rgb_stitch_padding.jpg"))
 
 
-
 def test_cubemap_flow_warp():
     """Warp the face image with face flow.
     """
     # 1) warp the cube map image with cube map flow
     cubemap_images_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
-    rgb_src_filename_exp = "cubemap_rgb_src_{}.jpg"
-    flo_filename_exp = "cubemap_flo_{}.flo"
+    rgb_src_filename_exp = "cubemap_rgb_src_padding_{}.jpg"
+    flo_filename_exp = "cubemap_flo_padding_{}.flo"
     flo_src_warp_filename_exp = "cubemap_rgb_src_warp_{}.jpg"
 
     for index in range(0, 6):
         image_path = cubemap_images_output + rgb_src_filename_exp.format(index)
         image_data = image_io.image_read(image_path)
-        flow_path= cubemap_images_output + flo_filename_exp.format(index)
+        flow_path = cubemap_images_output + flo_filename_exp.format(index)
         flow_data = flow_io.flow_read(flow_path)
 
         face_warp_image = flow_warp.warp_forward(image_data, flow_data)
@@ -141,8 +142,6 @@ def test_cubemap_flow_warp():
         # image_io.image_show(face_flow_vis)
 
     # 2) use the ERP optical flow to warp the ERP RGB image
-
-    # # 2) erp image to cube map
     erp_image_filepath = cubemap_images_output + "../0001_rgb.jpg"
     erp_image = image_io.image_read(erp_image_filepath)
     flow_path = cubemap_images_output + "cubemap_stitch_flo_padding_test.flo"
@@ -152,16 +151,16 @@ def test_cubemap_flow_warp():
 
 
 if __name__ == "__main__":
-    padding_size = 0.1
-    # test_cubmap_image_proj()
-    # test_cubmap_image_stitch()
+    padding_size = 0.0
+    # test_cubmap_image_proj(padding_size)
+    # test_cubmap_image_stitch(padding_size)
 
     # 1) test flow stitch and proj
     # generate_face_flow()
     # test_cubemap_flow_proj(padding_size)
     test_cubemap_flow_stitch(padding_size)
 
-    # test_cubemap_flow_warp()
+    test_cubemap_flow_warp()
 
     # return 0
     # # image_path = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_360/hotel_0/0001_rgb.jpg"

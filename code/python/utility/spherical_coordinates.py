@@ -233,7 +233,7 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     return np.stack((end_points_u, end_points_v))
 
 
-def car2sph(points_car, points_sph, min_radius = 1e-10):
+def car2sph(points_car, points_sph, min_radius=1e-10):
     """
     Transform the 3D point from cartesian to unit spherical coordinate.
 
@@ -247,18 +247,18 @@ def car2sph(points_car, points_sph, min_radius = 1e-10):
     """
     radius = np.linalg.norm(points_car, axis=1)
 
-    valid_list = radius > min_radius # set the 0 radius to origin.
-   
+    valid_list = radius > min_radius  # set the 0 radius to origin.
+
     azimuth = np.zeros((points_car.shape[0]), np.float)
     azimuth[valid_list] = np.arctan2(points_car[:, 1][valid_list], -points_car[:, 0][valid_list])
 
     polar = np.zeros((points_car.shape[0]), np.float)
     polar[valid_list] = np.arcsin(np.divide(points_car[:, 2][valid_list], radius[valid_list]))
 
-    return np.stack((azimuth, polar), axis =1)
+    return np.stack((azimuth, polar), axis=1)
 
 
-def sph2car(phi,theta, radius = 1.0):
+def sph2car(phi, theta, radius=1.0):
     """Transform the spherical coordinate to cartesian 3D point.
 
     :param phi: longitude
@@ -275,5 +275,4 @@ def sph2car(phi,theta, radius = 1.0):
     z = radius * np.cos(theta) * np.cos(phi)
     y = -radius * np.sin(theta)
 
-    return np.stack((x,y,z), axis=1)
-
+    return np.stack((x, y, z), axis=1)

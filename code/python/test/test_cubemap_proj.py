@@ -22,7 +22,7 @@ def test_cubemap_flow_proj():
     face_flows = proj_cm.erp2cubemap_flow(erp_flow)
     for index in range(0, len(face_flows)):
         cubemap_flow_name = cubemap_flow_output + "cubemap_flo_{}.jpg".format(index)
-        cubemap_flow_image_name = cubemap_flow_output + "cubemap_flo_{}.flo".format(index) 
+        cubemap_flow_image_name = cubemap_flow_output + "cubemap_flo_{}.flo".format(index)
         flow_io.flow_write(face_flows[index], cubemap_flow_image_name)
         face_flow_vis = flow_vis.flow_to_color(face_flows[index])
         # image_io.image_show(face_flow_vis)
@@ -92,7 +92,6 @@ def test_cubemap_flow_warp():
     """Warp the face image with face flow.
     """
 
-
     # # 2) erp image to cube map
     # erp_image_filepath = os.path.join(config.TEST_data_root_dir, "/replica_360/apartment_0/0001_rgb.jpg")
     # cubemap_images_output = config.TEST_data_root_dir
@@ -114,7 +113,7 @@ def test_cubemap_flow_warp():
 
     # 3) erp flow to cube map
     # erp_flow_filepath = "../../data/replica_360/hotel_0/0001_opticalflow_forward.flo"
-    erp_flow_filepath = os.path.join(config.TEST_data_root_dir,"/replica_360/apartment_0/0001_opticalflow_forward.flo")
+    erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "/replica_360/apartment_0/0001_opticalflow_forward.flo")
     cubemap_flow_output = "../../data/"
     erp_flow = flow_io.readFlowFile(erp_flow_filepath)
     face_flows = proj_cm.erp2cubemap_flow(erp_flow)
