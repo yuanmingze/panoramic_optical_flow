@@ -179,30 +179,6 @@ def spherical2epr(phi, theta, image_height, wrap_around=False):
     return x, y
 
 
-def process_warp_around_spherical():
-    """
-    process the ward around of spherical coordinate system.
-    The origin is in the center of image, the theta +0.5pi is on the top.
-
-    :pararm phi : range is [-0.5 * pi, + 0.5 * pi)
-    :param theta: range is [-pi, +pi)
-    :return: corrected phi and theta
-    """
-    pass
-
-
-def process_warp_around_erp(x, y, image_height):
-    """
-    The origian of ERP is on the TOP-Left of ERP image.
-
-    :param x: the array of x 
-    :param y: the array of y 
-    :param image_height:
-    :return : corrected x and y 
-    """
-    pass
-
-
 def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     """
     warp the the original points with the motion vector, meanwhile process the warp around.

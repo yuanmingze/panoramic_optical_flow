@@ -15,16 +15,12 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def generate_face_flow():
-    """Estimate the flow for each face image.
+def generate_face_forward_flow(cubemap_images_src_output, cubemap_images_tar_output, face_image_name_expression, face_flow_name_expression):
+    """Estimate the flow for each face image. output to cubemap source images' folder.
     The post-fix is dis.
     """
-    cubemap_images_src_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
-    cubemap_images_tar_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb_cubemap/")
     src_image_list = []
     tar_image_list = []
-    face_image_name_expression = "cubemap_rgb_src_{}.jpg"
-    face_flow_name_expression = "cubemap_flow_dis_{}.flo"
 
     # 1) load images
     for index in range(0, 6):
@@ -87,20 +83,18 @@ def test_cubemap_flow_stitch(padding_size):
     image_io.image_save(face_flow_vis, erp_flow_stitch_name)
 
 
-def test_cubmap_image_proj(padding_size):
+def test_cubmap_image_proj(padding_size, erp_image_filepath, cubemap_images_output_folder, face_image_name_expression):
     """Project the ERP image the 6 face.
     """
     # 1) erp image to cube map
-    erp_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
-    cubemap_images_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
-    if not os.path.exists(cubemap_images_output):
-        os.mkdir(cubemap_images_output)
+    if not os.path.exists(cubemap_images_output_folder):
+        os.mkdir(cubemap_images_output_folder)
 
     erp_image = image_io.image_read(erp_image_filepath)
     face_images_src = proj_cm.erp2cubemap_image(erp_image, padding_size)
 
     for index in range(0, len(face_images_src)):
-        cubemap_images_name = cubemap_images_output + "cubemap_rgb_src_padding_{}.jpg".format(index)
+        cubemap_images_name = cubemap_images_output_folder + face_image_name_expression.format(index)
         image_io.image_save(face_images_src[index], cubemap_images_name)
         # image_io.image_show(face_images[0])
 
@@ -129,6 +123,9 @@ def test_cubemap_flow_warp():
     rgb_src_filename_exp = "cubemap_rgb_src_padding_{}.jpg"
     flo_filename_exp = "cubemap_flo_padding_{}.flo"
     flo_src_warp_filename_exp = "cubemap_rgb_src_warp_{}.jpg"
+    erp_image_filepath = cubemap_images_output + "../0001_rgb.jpg"
+    flow_path = cubemap_images_output + "cubemap_stitch_flo_padding_test.flo"
+    warped_image_path = cubemap_images_output + "0001_rgb_warp.jpg"
 
     for index in range(0, 6):
         image_path = cubemap_images_output + rgb_src_filename_exp.format(index)
@@ -141,31 +138,106 @@ def test_cubemap_flow_warp():
         image_io.image_save(face_warp_image, cubemap_flow_warp_name)
         # image_io.image_show(face_flow_vis)
 
-    # 2) use the ERP optical flow to warp the ERP RGB image
-    erp_image_filepath = cubemap_images_output + "../0001_rgb.jpg"
+
+def test_erp_flow_warp(erp_image_filepath, erp_flow_filepath, erp_image_warped_filepath):
+    """[summary]
+    """
+    # # 1) warp the cube map image with cube map flow
+    # cubemap_images_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
+    # rgb_src_filename_exp = "cubemap_rgb_src_padding_{}.jpg"
+    # flo_filename_exp = "cubemap_flo_padding_{}.flo"
+    # flo_src_warp_filename_exp = "cubemap_rgb_src_warp_{}.jpg"
+
+    # use the ERP optical flow to warp the ERP RGB image
     erp_image = image_io.image_read(erp_image_filepath)
-    flow_path = cubemap_images_output + "cubemap_stitch_flo_padding_test.flo"
-    flow_data = flow_io.flow_read(flow_path)
+    flow_data = flow_io.flow_read(erp_flow_filepath)
     face_warp_image = flow_warp.warp_forward(erp_image, flow_data)
-    image_io.image_save(face_warp_image, cubemap_images_output + "0001_rgb_warp.jpg")
+    image_io.image_save(face_warp_image, erp_image_warped_filepath)
+
+
+def test_cubemap_flow_stitch_dis(padding_size, cubemap_flow_dir, face_flow_name_expression, cubemap_stitch_flo):
+    """Test stitch the dis's optical flow to ERP optical flow with weight padding.
+    """
+    log.info("{} stitch dis optical flow.".format(__name__))
+
+    # 1) load the flow file to memory
+    face_flows = []
+    for index in range(0, 6):
+        cubemap_flow_path = cubemap_flow_dir + face_flow_name_expression.format(index)
+        face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
+
+    # 2) test stitch the cubemap flow.
+    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_flow_height=480, padding_size=padding_size)
+    if os.path.exists(cubemap_stitch_flo):
+        os.remove(cubemap_stitch_flo)
+        log.warn("remove exist flow file {}".format(cubemap_stitch_flo))
+    flow_io.flow_write(erp_flow_stitch, cubemap_stitch_flo)
+
+    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch)
+    # image_io.image_show(face_flow_vis)
+    image_io.image_save(face_flow_vis, cubemap_stitch_flo + ".jpg")
 
 
 if __name__ == "__main__":
-    padding_size = 0.0
+
+    # 0) test on ground truth optical flow
+    # padding_size = 0.1
     # test_cubmap_image_proj(padding_size)
     # test_cubmap_image_stitch(padding_size)
 
-    # 1) test flow stitch and proj
+    # # test flow stitch and proj
     # generate_face_flow()
     # test_cubemap_flow_proj(padding_size)
-    test_cubemap_flow_stitch(padding_size)
+    # test_cubemap_flow_stitch(padding_size)
 
-    test_cubemap_flow_warp()
+    # test_cubemap_flow_warp()
 
-    # return 0
-    # # image_path = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_360/hotel_0/0001_rgb.jpg"
-    # image_path = "/mnt/sda1/workdoc/2020-06-18-360opticalflow/tangent_image_00.png"
-    # tangent_image_root = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/output/"
-    # gnomonic_projection.sphere2tangent(image_path, tangent_image_root)
-    # # gnomonic_projection.tangent2sphere(tangent_image_root, tangent_image_root, [480, 960,  3])
-    # test_cubemap_flow_stitch()
+    # 1) test on DIS estimated optical flow with padding
+    padding_size = 0.5
+    face_image_padding_name_expression = "cubemap_rgb_padding_{}.jpg"
+    face_flow_padding_name_expression = "cubemap_flow_dis_padding_{}.flo"
+
+    erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
+    erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
+    cubemap_src_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
+    cubemap_tar_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb_cubemap/")
+    cubemap_stitch_flo_filename = cubemap_src_images_output_folder + "cubemap_flo_dis_padding_stitch.flo"
+    erp_image_warped_filepath = cubemap_src_images_output_folder + "0001_rgb_warp_dis_padding.jpg"
+
+    # project the source image to 6 face
+    log.info("project the source image to 6 face")
+    test_cubmap_image_proj(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression)
+    # project the target image to 6 face
+    log.info("project the target image to 6 face")
+    test_cubmap_image_proj(padding_size, erp_tar_image_filepath, cubemap_tar_images_output_folder, face_image_padding_name_expression)
+    # compute the forward flow
+    log.info("compute the forward flow")
+    generate_face_forward_flow(cubemap_src_images_output_folder, cubemap_tar_images_output_folder, face_image_padding_name_expression, face_flow_padding_name_expression)
+    # stitch all faces
+    log.info("stitch all faces")
+    test_cubemap_flow_stitch_dis(padding_size, cubemap_src_images_output_folder, face_flow_padding_name_expression, cubemap_stitch_flo_filename)
+    # tranform to the second class optica flow.
+    
+    log.info("use stitched dis optical flow to wrap the src image")
+    test_erp_flow_warp(erp_src_image_filepath, cubemap_stitch_flo_filename, erp_image_warped_filepath)
+
+    # 2) test ERP DIS
+
+    # -------------------------------------
+
+    # cubemap_src_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
+    # rgb_src_filename_exp = "cubemap_rgb_src_padding_{}.jpg"
+    # flo_filename_exp = "cubemap_flo_padding_{}.flo"
+    # flo_src_warp_filename_exp = "cubemap_rgb_src_warp_{}.jpg"
+    # erp_image_filepath = cubemap_images_output + "../0001_rgb.jpg"
+    # flow_path = cubemap_images_output + "cubemap_stitch_flo_padding_test.flo"
+    # warped_image_path = cubemap_images_output + "0001_rgb_warp.jpg"
+    # erp_image_filepath = cubemap_src_images_output_folder + "../0001_rgb.jpg"
+    # erp_flow_filepath = cubemap_src_images_output_folder + "cubemap_stitch_flo_padding_test.flo"
+    # # # return 0
+    # # # # image_path = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_360/hotel_0/0001_rgb.jpg"
+    # # # image_path = "/mnt/sda1/workdoc/2020-06-18-360opticalflow/tangent_image_00.png"
+    # # # tangent_image_root = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/output/"
+    # # # gnomonic_projection.sphere2tangent(image_path, tangent_image_root)
+    # # # # gnomonic_projection.tangent2sphere(tangent_image_root, tangent_image_root, [480, 960,  3])
+    # # # test_cubemap_flow_stitch()

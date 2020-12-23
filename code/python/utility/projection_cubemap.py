@@ -1,6 +1,5 @@
 
 
-import ipdb
 import numpy as np
 from scipy import ndimage
 
@@ -338,7 +337,7 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
 
         # the x,y of tangent image
         x_grid = np.linspace(-pbc, pbc, face_image_size)
-        y_grid = np.linspace(pbc - pbc, face_image_size)
+        y_grid = np.linspace(pbc, - pbc, face_image_size)
         x, y = np.meshgrid(x_grid, y_grid)
 
         # get the value of pixel in the tangent image and the spherical coordinate location coresponding the tangent image (x,y)
@@ -358,7 +357,6 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
         erp_pixel_flow = np.zeros((face_image_size, face_image_size, erp_image_channel), dtype=float)
         for channel in range(0, erp_image_channel):
             erp_pixel_flow[:, :, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel], [erp_pixel_y, erp_pixel_x], order=1, mode='wrap')
-            # erp_pixel_flow[:, :, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel].T, [erp_pixel_x, erp_pixel_y], order=1)
 
         # 1) comput the end point location in the tangent image
         # convert the ERP optical flow's UV to tangent image's UV
@@ -518,6 +516,48 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     return erp_image_mat
 
 
+def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type):
+    """Compute the faces's weight.
+
+    :param face_x_src_gnomonic: the pixel's x location in tangent image
+    :type face_x_src_gnomonic: numpy, [pixel_number]
+    :param face_y_src_gnomonic: the pixel's y location in tangent image
+    :type face_y_src_gnomonic: numpy, [pixel_number]
+    :param weight_type: The weight compute method, [straightforward|cartesian_distance]
+    :type weight_type: str
+    :return: the cubemap's face weight used to blend different faces to ERP image.
+    :rtype: numpy
+    """
+    weight_map = np.zeros(face_x_src_gnomonic.shape[0], dtype=np.float)
+
+    if weight_type == "straightforward":
+        # just set the pixels in this cube map face range is available. [-1, +1, -1, +1]
+        pbc = 1
+        gnomonic_bounding_box = np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])
+        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box)
+        weight_map[available_list] = 1.0
+    elif weight_type == "cartesian_distance_log":
+        radius = np.linalg.norm(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), axis=1)
+        radius_log = np.log(radius + 1.1) / np.log(10)
+        # zeros_index = (radius == 0)
+        # radius[zeros_index] = np.finfo(np.float).eps
+        weight_map = 1.0 / radius_log
+    elif weight_type == "cartesian_distance_exp":
+        radius = np.linalg.norm(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), axis=1)
+        radius_log = np.exp(radius - 4)
+        weight_map = 1.0 / radius_log
+    elif weight_type == "normal_distribution":
+        center_point_x = 0.0  # TODO use the optical flow average to compute the center point
+        center_point_y = 0.0
+        mean = 0.0
+        stdev = 1
+        radius = np.linalg.norm(np.stack((face_x_src_gnomonic - center_point_x, face_y_src_gnomonic - center_point_y), axis=1), axis=1)
+        weight_map = (1.0 / (stdev * np.sqrt(2*np.pi))) * np.exp(-0.5*((radius - mean) / stdev) ** 2)
+    else:
+        log.error("the weight method {} do not exist.".format(weight_type))
+    return weight_map
+
+
 def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
@@ -546,6 +586,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
         log.error("The flow channels number is {}".format(erp_flow_channel))
 
     erp_flow_mat = np.zeros((erp_flow_height, erp_flow_width, 2), dtype=np.float64)
+    erp_flow_weight_mat = np.zeros((erp_flow_height, erp_flow_width), dtype=np.float64)
 
     cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
@@ -553,7 +594,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
     gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
-    for flow_index in range(0, 6):
+    for flow_index in range(0,  6):
         # get the tangent ERP image pixel's spherical coordinate location range for each face
         face_phi_min = face_erp_range_sphere_list[flow_index][3][0]
         face_theta_min = face_erp_range_sphere_list[flow_index][3][1]
@@ -581,18 +622,19 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
         center_point = tangent_points_list[flow_index]
         lambda_0 = center_point[0]
         phi_1 = center_point[1]
-        face_x_src, face_y_src = gnomonic_projection.gnomonic_projection(face_phi_, face_theta_, lambda_0, phi_1)
-        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src.flatten(), face_y_src.flatten()), axis=1),
-                                                               np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])).reshape(np.shape(face_x_src))
+        face_x_src_gnomonic, face_y_src_gnomonic = gnomonic_projection.gnomonic_projection(face_phi_, face_theta_, lambda_0, phi_1)
 
         # normailzed tangent image space --> tangent image space
-        face_x_src = (face_x_src + pbc) * gnomonic2image_ratio
-        face_y_src = -(face_y_src - pbc) * gnomonic2image_ratio
+        face_x_src_pixel = (face_x_src_gnomonic + pbc) * gnomonic2image_ratio
+        face_y_src_pixel = -(face_y_src_gnomonic - pbc) * gnomonic2image_ratio
 
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
-        face_x_src_available = face_x_src[available_list]
-        face_y_src_available = face_y_src[available_list]
+        # get ERP image's pixel available array, indicate pixels whether fall in the tangent face image
+        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic.flatten(), face_y_src_gnomonic.flatten()), axis=1),
+                                                               np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])).reshape(np.shape(face_x_src_gnomonic))
+        face_x_src_available = face_x_src_pixel[available_list]
+        face_y_src_available = face_y_src_pixel[available_list]
         # get the tangent images flow in the tangent image space
         face_flow_x = ndimage.map_coordinates(cubemap_flows_list[flow_index][:, :, 0],
                                               [face_y_src_available, face_x_src_available],
@@ -611,15 +653,34 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
         # tangent normailzed space --> spherical space
         face_phi_tar, face_theta_tar = gnomonic_projection.reverse_gnomonic_projection(face_x_tar_available, face_y_tar_available, lambda_0, phi_1)
         # spherical space --> ERP image space
-        face_x_tar_available, face_y_tar_available = spherical_coordinates.spherical2epr(face_phi_tar, face_theta_tar, erp_flow_height)
-
-        # TODO use wights to bland the boundary or padding area
+        face_x_tar_available, face_y_tar_available = spherical_coordinates.spherical2epr(face_phi_tar, face_theta_tar, erp_flow_height, True)
 
         # 4) get ERP flow with source and target pixels location
+        # 4-0) the ERP flow
         face_flow_u = face_x_tar_available - face_erp_x[available_list]
         face_flow_v = face_y_tar_available - face_erp_y[available_list]
 
-        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] = face_flow_u
-        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 1] = face_flow_v
+        # 4-1) blend the optical flow
+        # comput the all available pixels' weight
+        face_weight_mat = get_blend_weight(face_x_src_gnomonic[available_list].flatten(), face_y_src_gnomonic[available_list].flatten(), "normal_distribution")
+
+        # for debug weight
+        if flow_index == -1:
+            from . import image_io
+            temp = np.zeros(face_x_src_gnomonic.shape, np.float)
+            temp[available_list] = face_weight_mat
+            image_io.image_show(temp)
+
+        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] += face_flow_u * face_weight_mat
+        erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 1] += face_flow_v * face_weight_mat
+        erp_flow_weight_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64)] += face_weight_mat
+
+    # compute the final optical flow base on weight
+    # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float) # for debug
+    non_zero_weight_list = erp_flow_weight_mat != 0
+    if not np.all(non_zero_weight_list):
+        log.warn("the optical flow weight matrix contain 0.")
+    for channel_index in range(0, 2):
+        erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
 
     return erp_flow_mat

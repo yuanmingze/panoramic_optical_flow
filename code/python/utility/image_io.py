@@ -59,8 +59,6 @@ def visual_data(data_array, verbose=False):
         if verbose:
             print("error_visual(): max error {}, min error {}".format(max, min))
 
-    import ipdb
-    ipdb.set_trace()
     norm = mpl.colors.Normalize(vmin=min, vmax=max)
     cmap = plt.get_cmap('jet')
     m = cm.ScalarMappable(norm=norm, cmap=cmap)

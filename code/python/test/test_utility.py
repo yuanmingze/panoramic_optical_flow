@@ -156,6 +156,7 @@ def test_warp():
 import numpy as np
 
 
+
 def test_inside_polygon_2d():
     """[summary]
     """    
@@ -208,6 +209,15 @@ def test_inside_polygon_2d():
     result = gp.inside_polygon_2d(point_list, polygon_points_list, True, 2/400).reshape(np.shape(point_list_x))
     image_io.image_show(result, verbose=False)
 
+    # # test 4
+    # gnomonic_proj_range = [-1, +1,-1, +1]
+    # face_erp_x_grid = np.linspace(gnomonic_proj_range[0], gnomonic_proj_range[1], 50)
+    # face_erp_y_grid = np.linspace(gnomonic_proj_range[2], gnomonic_proj_range[3], 50)
+    #     face_erp_x, face_erp_y = np.meshgrid(face_erp_x_grid, face_erp_y_grid)
+    # pbc = 1.0
+    # gnomonic_bounding_box =  np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])
+    # available_list = gp.inside_polygon_2d(np.stack((face_erp_y_grid.flatten(), face_erp_x_grid.flatten()), axis=1), gnomonic_bounding_box).reshape(np.shape((50,50)))
+    # image_io.image_show(available_list, verbose=False)
 
 if __name__ == "__main__":
     # depth_visual()

@@ -14,76 +14,6 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
-    """
-    process the warp around of optical flow.
-    convert the pinhole type optical flow to panoramic optical flow.
-    
-    basic suppose: if optical flow in 
-    :param:
-    :param:
-    """
-    of_image_size = np.shape(optical_flow)
-    image_height = of_image_size[0]
-    image_width = of_image_size[1]
-    image_channels = of_image_size[2]
-    of_warp_around_threshold = image_width * of_warp_around_threshold
-
-    x_idx_arr = np.linspace(0, image_width - 1, image_width)
-    y_idx_arr = np.linspace(0, image_height - 1, image_height)
-    x_idx_tar, y_idx_tar = np.meshgrid(x_idx_arr, y_idx_arr)
-
-    of_forward_x = optical_flow[:, :, 0]
-    of_forward_y = optical_flow[:, :, 1]
-
-    optical_flow_new[:] = optical_flow
-
-    warp_around_idx = np.where(of_forward_x > of_warp_around_threshold)
-    optical_flow_new[:, :, 0][warp_around_idx] = of_forward_x[warp_around_idx] - image_width
-
-    warp_around_idx = np.where(of_forward_x < -of_warp_around_threshold)
-    optical_flow_new[:, :, 0][warp_around_idx] = of_forward_x[warp_around_idx] + image_width
-
-
-def of_pano2ph(optical_flow, optical_flow_new):
-    """
-    panoramic optical flow to pinhole optical flow.
-    process the panorama optical flow, change the warp around to normal optical flow.
-
-    :param: the panoramic optical flow
-    :param: the optical flow processed warp around
-    """
-    of_image_size = np.shape(optical_flow)
-    image_height = of_image_size[0]
-    image_width = of_image_size[1]
-    image_channels = of_image_size[2]
-
-    # 0) comput new location
-    x_idx_arr = np.linspace(0, image_width - 1, image_width)
-    y_idx_arr = np.linspace(0, image_height - 1, image_height)
-    x_idx_tar, y_idx_tar = np.meshgrid(x_idx_arr, y_idx_arr)
-
-    of_forward_x = optical_flow[:, :, 0]
-    of_forward_y = optical_flow[:, :, 1]
-    x_idx = (x_idx_tar + of_forward_x + 0.5).astype(np.int)
-    y_idx = (y_idx_tar + of_forward_y + 0.5).astype(np.int)
-
-    # 1) process the warp around
-    optical_flow_new[:] = optical_flow
-
-    # process optical flow x
-    x_idx_outrange_idx = np.where(x_idx >= image_width)
-    optical_flow_new[:, :, 0][x_idx_outrange_idx] = x_idx[x_idx_outrange_idx] - image_width
-    x_idx_outrange_idx = np.where(x_idx < 0)
-    optical_flow_new[:, :, 0][x_idx_outrange_idx] = x_idx[x_idx_outrange_idx] + image_width
-
-    # process optical flow y
-    y_idx_outrange_idx = np.where(y_idx >= image_height)
-    optical_flow_new[:, :, 1][y_idx_outrange_idx] = y_idx[y_idx_outrange_idx] - image_height
-    y_idx_outrange_idx = np.where(y_idx < 0)
-    optical_flow_new[:, :, 1][y_idx_outrange_idx] = y_idx[y_idx_outrange_idx] + image_height
-
-
 def flow_read(file_path):
     """Load the optical flow from file.
     :param file_path: the optical flow file path
@@ -109,7 +39,7 @@ def flow_write(flow_data, file_path):
     :type file_path: str
     """
     if os.path.exists(file_path):
-        log.error("file {} exist.".format(file_path))
+        log.warn("file {} exist.".format(file_path))
 
     # get the file format from the extension name
     _, format_str = os.path.splitext(file_path)
