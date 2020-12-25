@@ -16,9 +16,16 @@ log.logger.propagate = False
 
 
 def image_read(image_file_path):
-    """
-    :return: return the numpy array of image
-    """
+    """[summary]
+
+    :param image_file_path: the absolute path of image
+    :type image_file_path: str
+    :return: the numpy array of image
+    :rtype: numpy
+    """    
+    if not os.path.exists(image_file_path):
+        log.error("{} do not exist.".format(image_file_path))
+
     return np.asarray(Image.open(image_file_path))
 
 

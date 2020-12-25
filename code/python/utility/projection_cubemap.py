@@ -20,6 +20,8 @@ Reference: https://en.wikipedia.org/wiki/Cube_mapping
     In the spherical coordinate systehm the forward is +z, down is +y, right is +x.  The center of ERP's theta (latitude) and phi(longitude) is (0,0) 
 """
 
+image_erp_src = None
+image_erp_tar = None
 
 def generage_cubic_ply(mesh_file_path):
     """
@@ -516,15 +518,21 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     return erp_image_mat
 
 
-def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type):
+def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type, flow_uv=None, image_erp_src=None, image_erp_tar=None):
     """Compute the faces's weight.
 
-    :param face_x_src_gnomonic: the pixel's x location in tangent image
+    :param face_x_src_gnomonic: the pixel's gnomonic coordinate x in tangent image
     :type face_x_src_gnomonic: numpy, [pixel_number]
-    :param face_y_src_gnomonic: the pixel's y location in tangent image
+    :param face_y_src_gnomonic: the pixel's gnomonic coordinate y in tangent image
     :type face_y_src_gnomonic: numpy, [pixel_number]
     :param weight_type: The weight compute method, [straightforward|cartesian_distance]
     :type weight_type: str
+    :param flow_uv: the tangent face optical flow which is in image coordinate, unit is pixel.
+    :type flow_uv: numpy 
+    :param image_erp_src: the source ERP rgb image, used to compute the optical flow warp error
+    :type: numpy
+    :param image_erp_tar: the target ERP rgb image used to compute the optical flow warp error
+    :type: numpy
     :return: the cubemap's face weight used to blend different faces to ERP image.
     :rtype: numpy
     """
@@ -547,12 +555,37 @@ def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type):
         radius_log = np.exp(radius - 4)
         weight_map = 1.0 / radius_log
     elif weight_type == "normal_distribution":
-        center_point_x = 0.0  # TODO use the optical flow average to compute the center point
+        center_point_x = 0.0
         center_point_y = 0.0
+        mean = 0.5
+        stdev = 1
+        radius = np.linalg.norm(np.stack((face_x_src_gnomonic - center_point_x, face_y_src_gnomonic - center_point_y), axis=1), axis=1)
+        weight_map = (1.0 / (stdev * np.sqrt(2*np.pi))) * np.exp(-0.5*((radius - mean) / stdev) ** 2)
+    elif weight_type == "normal_distribution_flowcenter":
+        # TODO use the optical flow average to compute the center point
+        center_point_x = flow_uv[:, 0].mean() / (0.5 * np.sqrt(face_x_src_gnomonic.shape[0]))  # form pixel to gnomonic
+        center_point_y = flow_uv[:, 1].mean() / (0.5 * np.sqrt(face_x_src_gnomonic.shape[0]))
         mean = 0.0
         stdev = 1
         radius = np.linalg.norm(np.stack((face_x_src_gnomonic - center_point_x, face_y_src_gnomonic - center_point_y), axis=1), axis=1)
         weight_map = (1.0 / (stdev * np.sqrt(2*np.pi))) * np.exp(-0.5*((radius - mean) / stdev) ** 2)
+    elif weight_type == "image_warp_error":
+        # compute the weight base on the ERP RGB image warp match.
+        # flow_uv: target image's pixels coordinate corresponding the warpped pixels
+        pixels_number = face_x_src_gnomonic.shape[0]
+        channel_number = image_erp_src.shape[2]
+        image_erp_tar_flow = np.zeros((pixels_number, channel_number), np.float)
+        image_erp_src_flow = np.zeros((pixels_number, channel_number), np.float)
+        image_erp_warp_diff = np.zeros((pixels_number, channel_number), np.float)
+        for channel in range(0, channel_number):
+            image_erp_tar_flow[:, channel] = ndimage.map_coordinates(image_erp_tar[:, :, channel], [flow_uv[:, 1], flow_uv[:, 0]], order=1, mode='constant', cval=255)
+            image_erp_src_flow[:, channel] = ndimage.map_coordinates(image_erp_src[:, :, channel], [face_y_src_gnomonic, face_x_src_gnomonic], order=1, mode='constant', cval=255)
+            image_erp_warp_diff[:, channel] = np.absolute(image_erp_tar_flow[:, channel] - image_erp_src_flow[:, channel])
+
+        rgb_diff = np.linalg.norm(image_erp_warp_diff, axis=1)
+        non_zeros_index = rgb_diff != 0.0
+        weight_map = np.ones(face_x_src_gnomonic.shape[0], dtype=np.float)
+        weight_map[non_zeros_index] = 0.95 / rgb_diff[non_zeros_index]
     else:
         log.error("the weight method {} do not exist.".format(weight_type))
     return weight_map
@@ -662,10 +695,14 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
 
         # 4-1) blend the optical flow
         # comput the all available pixels' weight
-        face_weight_mat = get_blend_weight(face_x_src_gnomonic[available_list].flatten(), face_y_src_gnomonic[available_list].flatten(), "normal_distribution")
+        weight_type = "normal_distribution_flowcenter"
+        face_weight_mat_1 = get_blend_weight(face_x_src_gnomonic[available_list].flatten(), face_y_src_gnomonic[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1))
+        weight_type = "image_warp_error"
+        face_weight_mat_2 = get_blend_weight(face_erp_x[available_list], face_erp_y[available_list], weight_type, np.stack((face_x_tar_available, face_y_tar_available), axis=1), image_erp_src, image_erp_tar)
+        face_weight_mat = np.multiply(face_weight_mat_1, face_weight_mat_2)
 
         # for debug weight
-        if flow_index == -1:
+        if not flow_index == -1:
             from . import image_io
             temp = np.zeros(face_x_src_gnomonic.shape, np.float)
             temp[available_list] = face_weight_mat
@@ -676,11 +713,15 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
         erp_flow_weight_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64)] += face_weight_mat
 
     # compute the final optical flow base on weight
-    # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float) # for debug
+    # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float) # debug
     non_zero_weight_list = erp_flow_weight_mat != 0
     if not np.all(non_zero_weight_list):
         log.warn("the optical flow weight matrix contain 0.")
     for channel_index in range(0, 2):
         erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
+
+    
+    # TODO poseprocess : bilateral filter
+    
 
     return erp_flow_mat

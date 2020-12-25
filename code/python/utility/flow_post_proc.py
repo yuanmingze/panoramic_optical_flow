@@ -46,27 +46,25 @@ def convert_warp_around(flow_original):
     image_height = np.shape(flow_original)[0]
     image_width = np.shape(flow_original)[1]
 
-    flow_u = flow_original[:,:,0]
+    flow_u = flow_original[:, :, 0]
     index_u = flow_u > (image_width / 2.0)
     flow_u[index_u] = flow_u[index_u] - image_width
     index_u = flow_u < -(image_width / 2.0)
     flow_u[index_u] = flow_u[index_u] + image_width
 
-    flow_v = flow_original[:,:,1]
+    flow_v = flow_original[:, :, 1]
     index_v = flow_v > (image_height / 2.0)
     flow_v[index_v] = flow_v[index_v] - image_height
     index_v = flow_v < -(image_height / 2.0)
     flow_v[index_v] = flow_v[index_v] + image_height
 
-    return np.stack((flow_u, flow_v), axis =2)
+    return np.stack((flow_u, flow_v), axis=2)
 
 
-
-
-def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
+def of_ph2pano(optical_flow, of_warp_around_threshold=0.5):
     """
-    process the warp around of optical flow.
     convert the pinhole type optical flow to panoramic optical flow.
+    process the warp around of optical flow.
     
     basic suppose: if optical flow in 
     :param:
@@ -85,6 +83,7 @@ def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
     of_forward_x = optical_flow[:, :, 0]
     of_forward_y = optical_flow[:, :, 1]
 
+    optical_flow_new = np.zeros(optical_flow.shape, np.float)
     optical_flow_new[:] = optical_flow
 
     warp_around_idx = np.where(of_forward_x > of_warp_around_threshold)
@@ -93,8 +92,10 @@ def of_ph2pano(optical_flow, optical_flow_new, of_warp_around_threshold=0.5):
     warp_around_idx = np.where(of_forward_x < -of_warp_around_threshold)
     optical_flow_new[:, :, 0][warp_around_idx] = of_forward_x[warp_around_idx] + image_width
 
+    return optical_flow_new
 
-def of_pano2ph(optical_flow, optical_flow_new):
+
+def of_pano2ph(optical_flow):
     """
     panoramic optical flow to pinhole optical flow.
     process the panorama optical flow, change the warp around to normal optical flow.
@@ -118,6 +119,7 @@ def of_pano2ph(optical_flow, optical_flow_new):
     y_idx = (y_idx_tar + of_forward_y + 0.5).astype(np.int)
 
     # 1) process the warp around
+    optical_flow_new = np.zeros(optical_flow.shape, np.float)
     optical_flow_new[:] = optical_flow
 
     # process optical flow x
@@ -132,3 +134,4 @@ def of_pano2ph(optical_flow, optical_flow_new):
     y_idx_outrange_idx = np.where(y_idx < 0)
     optical_flow_new[:, :, 1][y_idx_outrange_idx] = y_idx[y_idx_outrange_idx] + image_height
 
+    return optical_flow_new

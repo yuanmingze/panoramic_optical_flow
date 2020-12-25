@@ -86,7 +86,7 @@ def warp_forward_padding(image_target, of_forward, padding_x=0, padding_y=0):
     return image_src
 
 
-def warp_forward(image_first, of_forward):
+def warp_forward(image_first, of_forward, wrap_around = False):
     """
     forward warp with optical flow. 
     warp image with interpolation, scipy.ndimage.map_coordinates
@@ -107,11 +107,18 @@ def warp_forward(image_first, of_forward):
     y_idx_new = (y_idx + of_forward[:, :, 1]).astype(int)
 
     # check index out of the image bounds
-    x_idx_new = np.where(x_idx_new > 0, x_idx_new, 0)
-    x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, image_width - 1)
+    if not wrap_around:
+        x_idx_new = np.where(x_idx_new > 0, x_idx_new, 0)
+        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, image_width - 1)
 
-    y_idx_new = np.where(y_idx_new > 0, y_idx_new, 0)
-    y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, image_height - 1)
+        y_idx_new = np.where(y_idx_new > 0, y_idx_new, 0)
+        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, image_height - 1)
+    else:
+        x_idx_new = np.where(x_idx_new > 0, x_idx_new, x_idx_new + image_width)
+        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, x_idx_new - image_width)
+
+        y_idx_new = np.where(y_idx_new > 0, y_idx_new, y_idx_new + image_height)
+        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, y_idx_new - image_height)
 
     for channel_index in range(0, image_channels):
         dest_image[y_idx_new, x_idx_new, channel_index] = ndimage.map_coordinates(image_first[:, :, channel_index], [y_idx, x_idx], order=1, mode='constant', cval=255)
