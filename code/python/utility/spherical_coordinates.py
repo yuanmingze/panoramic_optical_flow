@@ -114,7 +114,37 @@ def get_angle_uv(points_A_phi, points_A_theta,
     return angle_A
 
 
-def erp2spherical(erp_points, erp_image_height=None, wrap_around=False):
+def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
+    """
+    warp the the original points with the motion vector, meanwhile process the warp around.
+
+    :return: the target points
+    """
+    if np.shape(motion_flow_u) != np.shape(motion_flow_v):
+        raise Exception("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
+
+    # get the mesh grid
+    height = np.shape(motion_flow_u)[0]
+    width = np.shape(motion_flow_u)[1]
+    x_index = np.linspace(0, width - 1, width)
+    y_index = np.linspace(0, height - 1, height)
+    x_array, y_array = np.meshgrid(x_index, y_index)
+
+    # get end point location
+    end_points_u = x_array + motion_flow_u
+    end_points_v = y_array + motion_flow_v
+
+    # process the warp around
+    end_points_u[end_points_u >= width] = end_points_u[end_points_u >= width] - width
+    end_points_u[end_points_u < 0] = end_points_u[end_points_u < 0] + width
+
+    end_points_v[end_points_v >= height] = end_points_v[end_points_v >= height] - height
+    end_points_v[end_points_v < 0] = end_points_v[end_points_v < 0] + height
+
+    return np.stack((end_points_u, end_points_v))
+
+
+def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     """
     ERP image Original is top_left, spherical coordinate origin as center.
     convert the point from erp image pixel location to spherical coordinate.
@@ -153,7 +183,7 @@ def erp2spherical(erp_points, erp_image_height=None, wrap_around=False):
     return np.stack((end_points_u, end_points_v))
 
 
-def spherical2epr(phi, theta, image_height, wrap_around=False):
+def sph2epr(phi, theta, image_height, wrap_around=False):
     """ Transform the spherical coordinate location to ERP image pixel location.
     The range of erp phi is [-pi, +pi), theta is [-0.5*pi, +0.5*pi].
     The origin of the ERP is in the Top-Left, and origin of the spherical at the center of ERP image.
@@ -177,36 +207,6 @@ def spherical2epr(phi, theta, image_height, wrap_around=False):
         x = np.remainder(x, image_height * 2)
         y = np.remainder(y, image_height)
     return x, y
-
-
-def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
-    """
-    warp the the original points with the motion vector, meanwhile process the warp around.
-
-    :return: the target points
-    """
-    if np.shape(motion_flow_u) != np.shape(motion_flow_v):
-        raise Exception("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
-
-    # get the mesh grid
-    height = np.shape(motion_flow_u)[0]
-    width = np.shape(motion_flow_u)[1]
-    x_index = np.linspace(0, width - 1, width)
-    y_index = np.linspace(0, height - 1, height)
-    x_array, y_array = np.meshgrid(x_index, y_index)
-
-    # get end point location
-    end_points_u = x_array + motion_flow_u
-    end_points_v = y_array + motion_flow_v
-
-    # process the warp around
-    end_points_u[end_points_u >= width] = end_points_u[end_points_u >= width] - width
-    end_points_u[end_points_u < 0] = end_points_u[end_points_u < 0] + width
-
-    end_points_v[end_points_v >= height] = end_points_v[end_points_v >= height] - height
-    end_points_v[end_points_v < 0] = end_points_v[end_points_v < 0] + height
-
-    return np.stack((end_points_u, end_points_v))
 
 
 def car2sph(points_car, points_sph, min_radius=1e-10):

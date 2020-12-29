@@ -5,20 +5,34 @@ import configuration as config
 from utility import image_io
 from utility import projection_icosahedron as proj_ico
 
+
 def test_ico_parameters():
     """
     Check the icosahedron's paramters.
     """
-    
-    
+    for index in range(0,20):
+        ico_parameter = proj_ico.get_icosahedron_parameters(index)
+        print("index:{}, tangent_point:{}, triangle_points_sph:{}".format(index, ico_parameter["triangle_points_tangent"], ico_parameter["triangle_points_sph"]))
 
 
-def test_ico_image_stitch(input_folder_path, file_expression, output_folder_path):
+def test_ico_image_proj(erp_image_filepath, ico_images_expression, ico_image_output, tangent_image_size = 481):
+    """
+    Project the ERP image to 20 faces flow.
+    """
+    # test
+    erp_image = image_io.image_read(erp_image_filepath)
+
+    tangent_image_list = proj_ico.erp2ico_image(erp_image, tangent_image_size)
+    for index in range(0, len(tangent_image_list)):
+        cubemap_images_name = ico_image_output + ico_images_expression.format(index)
+        image_io.image_save(tangent_image_list[index], cubemap_images_name)
+        # image_io.image_show(face_images[0])
+
+
+def test_ico_image_stitch(input_folder_path, file_expression, erp_src_image_stitch_filepath, erp_image_height=960):
     """
     test stitch the icosahedron's image face.
     """
-    erp_image_height = 960
-
     # load the 20 tangnet images
     tangnet_images_list = []
     for index in range(0, 20):
@@ -26,37 +40,8 @@ def test_ico_image_stitch(input_folder_path, file_expression, output_folder_path
         tangnet_images_list.append(image_io.image_read(tangnet_images_name))
 
     # stitch image
-    erp_image = proj_ico.ico2erp_image_gnomonic(tangnet_images_list, erp_image_height)
-    image_io.image_save( erp_image, output_folder_path + "erp_image_stitched.png")
-
-
-def test_ico_flow_stitch(input_folder_path, output_path):
-    """
-    test stitch the icosahedron's 20 face flow.
-    """
-
-
-
-    pass
-
-
-def test_ico_image_proj(erp_image_filepath, ico_images_expression, ico_image_output):
-    """
-    Project the ERP image to 20 faces flow.
-    """
-    erp_image = image_io.image_read(erp_image_filepath)
-    tangent_image_size = 480
-    tangent_image_list = proj_ico.erp2ico_image_gnomonic(erp_image, tangent_image_size)
-    for index in range(0, len(tangent_image_list)):
-        cubemap_images_name = ico_image_output + ico_images_expression.format(index)
-
-        image_io.image_save(tangent_image_list[index], cubemap_images_name)
-        # image_io.image_show(face_images[0])
-
-    # for index in range(0,20):
-    #     ico_parameter = proj_ico.get_icosahedron_parameters(index)
-    #     print("index:{}, tangent_point:{}, triangle_points_sph:{}".format(index, ico_parameter["triangle_points_tangent"], ico_parameter["triangle_points_sph"]))
-
+    erp_image = proj_ico.ico2erp_image(tangnet_images_list, erp_image_height)
+    image_io.image_save(erp_image, erp_src_image_stitch_filepath)
 
 
 def test_ico_flow_proj():
@@ -66,20 +51,39 @@ def test_ico_flow_proj():
     pass
 
 
+def test_ico_flow_stitch(input_folder_path, output_path):
+    """
+    test stitch the icosahedron's 20 face flow.
+    """
+
+    pass
+
+
 if __name__ == "__main__":
-    erp_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
-    erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
+    erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
+    erp_src_image_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_ico_stitch.png")
 
-    ico_image_output = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_ico/")
-    ico_flow_output = ico_image_output
-    
-    tangent_image_filename_expression = "new_ico_rgb_src_{}.png"
+    erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
+    erp_tar_image_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb_ico_stitch.jpg")
 
-    if not os.path.exists(ico_image_output):
-        os.mkdir(ico_image_output)
+    tangent_image_size = 481
 
-    # test_ico_image_proj(erp_image_filepath, tangent_image_filename_expression, ico_image_output)
-    test_ico_image_stitch(ico_image_output, tangent_image_filename_expression, ico_image_output)
+    ico_src_image_output_dir = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_ico/")
+    ico_tar_image_output_dir = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb_ico/")
+    if not os.path.exists(ico_src_image_output_dir):
+        os.mkdir(ico_src_image_output_dir)
+    if not os.path.exists(ico_tar_image_output_dir):
+        os.mkdir(ico_tar_image_output_dir)
+
+    tangent_image_filename_expression = "ico_rgb_src_{}.png"
+
+    # 0) test the image project and stitch
+    # test_ico_image_proj(erp_src_image_filepath, tangent_image_filename_expression, ico_src_image_output_dir, tangent_image_size)
+    test_ico_image_stitch(ico_src_image_output_dir, tangent_image_filename_expression, erp_src_image_stitch_filepath)
+
+    # 1) test optical flow project and stitch
+    # erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
+    # tangent_flow_filename_expression = "ico_flow_src_{}.jpg"
 
     # test_ico_flow_proj()
     # test_ico_flow_stitch()

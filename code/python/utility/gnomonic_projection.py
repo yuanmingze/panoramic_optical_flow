@@ -101,7 +101,7 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
         if not test_result.any():
             continue
 
-        # get the intersection point
+        # get the intersection points
         if abs(polygon_1_y - polygon_2_y) < eps:
             test_result = np.logical_and(test_result, GREATER(points_x, min(polygon_1_x, polygon_2_x)))
             intersect_points_x = points_x[test_result]
@@ -109,7 +109,7 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
             intersect_points_x = (points_y[test_result] - polygon_1_y) * \
                 (polygon_2_x - polygon_1_x) / (polygon_2_y - polygon_1_y) + polygon_1_x
 
-        # the point on the line
+        # the points on the line
         on_line_list = LESS(abs(points_x[test_result] - intersect_points_x), eps)
         if on_line_list.any():
             online_index[test_result] = np.logical_or(online_index[test_result], on_line_list)
@@ -123,30 +123,6 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
         return np.logical_or(point_inside, online_index)
     else:
         return np.logical_and(point_inside, np.logical_not(online_index))
-
-
-def gnomonic2imagepixel(gnomo_coord, image_width, image_height):
-    """gnomonic coordinate to pixel coordinate.
-    Transform the gnomonic coordinate to tangent image pixel coordinates. The origin of the tangent image the top-left.
-
-    :param gnomo_coord: The gnomonic coordinate list, size is [2, :]
-    :type gnomo_coord: list
-    :param image_width: the width of tangent image.
-    :type image_width: int
-    :param image_height: the tangent image's height.
-    :type image_height: int
-    """
-    if len(gnomo_coord) !=2:
-        log.error("The gnomonic coordinate axis 1 should be 2.")
-
-    gnomo_coord_x = gnomo_coord[0]
-    gnomo_coord_y = gnomo_coord[1]
-
-    # convert to pixel's coordinate
-    gnomo_coord_x = (gnomo_coord_x + 1.0) / 2.0 * image_width
-    gnomo_coord_y = (-gnomo_coord_y + 1.0) / 2.0 * image_height
-    
-    return gnomo_coord_x, gnomo_coord_y
 
 
 def gnomonic_projection(lambda_, phi, lambda_0, phi_1):
@@ -187,57 +163,69 @@ def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
     :rtype: numpy
     """
     rho = np.sqrt(x**2 + y**2)
-    # if rho == 0:
-    #     return 0, 0
-    c = np.arctan2(rho, 1)
 
+    # get rho's zero element index
+    zeros_index = rho == 0
+    if np.any(zeros_index):
+        rho[zeros_index] = np.finfo(np.float).eps
+
+    c = np.arctan2(rho, 1)
     phi_ = np.arcsin(np.cos(c) * np.sin(phi_1) + (y * np.sin(c) * np.cos(phi_1)) / rho)
     lambda_ = lambda_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_1) * np.cos(c) - y * np.sin(phi_1) * np.sin(c))
+
+    if np.any(zeros_index):
+        phi_[zeros_index] = phi_1
+        lambda_[zeros_index] = lambda_0
 
     return lambda_, phi_
 
 
-def gnomonic2pixel(coord_gnom_x, coord_gnom_y, padding_size, tangent_image_size):
+def gnomonic2pixel(coord_gnom_x, coord_gnom_y, padding_size, tangent_image_width, tangent_image_height = None):
+    """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
+    
+    Suppose the tangent image gnomonic x range is [-1,+1], y range is [+1, -1] without padding.
+
+    :param face_x_src: tangent image's normalized x coordinate
+    :type face_x_src: numpy
+    :param face_y_src: tangent image's normalized y coordinate
+    :type face_y_src: numpy
+    :param padding_size: in gnomonic coordinate system, padding outside to boundary
+    :type padding_size: float
+    :param tangent_image_size: the image size with padding
+    :type tangent_image_size: float
+    :retrun: the pixel's location 
+    :rtype: numpy (int)
+    """
+    if tangent_image_height is None:
+        tangent_image_height = tangent_image_width
+
+    # normailzed tangent image space --> tangent image space
+    gnomonic2image_width_ratio = (tangent_image_width - 1.0) / ( 2.0 + padding_size * 2.0)
+    coord_pixel_x = (coord_gnom_x + 1.0 + padding_size) * gnomonic2image_width_ratio
+    coord_pixel_x = (coord_pixel_x + 0.5).astype(np.int)
+
+    gnomonic2image_height_ratio = (tangent_image_height - 1.0) / ( 2.0 + padding_size * 2.0)
+    coord_pixel_y = -(coord_gnom_y - 1.0 - padding_size) * gnomonic2image_height_ratio
+    coord_pixel_y = (coord_pixel_y + 0.5).astype(np.int)
+    
+    return coord_pixel_x, coord_pixel_y
+
+
+def pixel2gnomonic(coord_pixel_x, coord_pixel_y, padding_size, tangent_image_size):
     """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
     
     Suppose the x range is [-1,+1], y range is [+1, -1] without padding.
 
-    :param face_x_src: [description]
-    :type face_x_src: numpy
-    :param face_y_src: [description]
-    :type face_y_src: numpy
+    :param coord_pixel_x: [description]
+    :type coord_pixel_x: numpy
+    :param coord_pixel_y: [description]
+    :type coord_pixel_y: numpy
     :param padding_size: in gnomonic coordinate system, padding outside to boundary
     :type padding_size: float
     :param tangent_image_size: the image size with padding
     :type tangent_image_size: numpy
     :retrun:
     :rtype:
-    """    
-    # normailzed tangent image space --> tangent image space
-    gnomonic2image_ratio = (tangent_image_size - 1.0) / ( 2.0 + padding_size * 2.0)
-    coord_pixel_x = (coord_gnom_x + 1.0 + padding_size) * gnomonic2image_ratio
-    coord_pixel_y = -(coord_gnom_y - 1.0 - padding_size) * gnomonic2image_ratio
-    return coord_pixel_x, coord_pixel_y
-
-
-# def pixel2gnomonic(coord_pixel_x, coord_pixel_y, padding_size, tangent_image_size):
-#     """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
-    
-#     Suppose the x range is [-1,+1], y range is [+1, -1] without padding.
-
-#     :param coord_pixel_x: [description]
-#     :type coord_pixel_x: numpy
-#     :param coord_pixel_y: [description]
-#     :type coord_pixel_y: numpy
-#     :param padding_size: in gnomonic coordinate system, padding outside to boundary
-#     :type padding_size: float
-#     :param tangent_image_size: the image size with padding
-#     :type tangent_image_size: numpy
-#     :retrun:
-#     :rtype:
-#     """    
-#     # normailzed tangent image space --> tangent image space
-#     gnomonic2image_ratio = (tangent_image_size - 1.0) / ( 2.0 + padding_size * 2.0)
-#     coord_pixel_x = (coord_gnom_x + 1.0 + padding_size) * gnomonic2image_ratio
-#     coord_pixel_y = -(coord_gnom_y - 1.0 - padding_size) * gnomonic2image_ratio
-#     return coord_pixel_x, coord_pixel_y
+    """
+    # TODO 
+    pass
