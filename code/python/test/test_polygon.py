@@ -1,8 +1,9 @@
 import os
-import configuration as config
-from utility import polygon
 import numpy as np
 import matplotlib.pyplot as plt
+
+import configuration as config
+from utility import polygon
 
 
 def test_find_intersection():
@@ -63,6 +64,7 @@ def test_enlarge_polygon():
     plt.scatter(x_coordinates, y_coordinates)
     plt.plot(x_coordinates, y_coordinates)
     plt.show()
+
 
 if __name__ == "__main__":
     # test_find_intersection()

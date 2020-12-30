@@ -3,12 +3,8 @@ import copy
 import numpy as np
 from scipy import ndimage
 
-
-from . import image_io
-from . import nfov
 from . import gnomonic_projection as gp
 from . import spherical_coordinates as sc
-
 
 from .logger import Logger
 
@@ -110,8 +106,8 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
 
     :return the tangent face's tangent point and 3 vertices's location.
     """
-
-    radius_circumscribed = np.sin(2 * np.pi / 5.0)  # the
+    # reference: https://en.wikipedia.org/wiki/Regular_icosahedron
+    radius_circumscribed = np.sin(2 * np.pi / 5.0)
     radius_inscribed = np.sqrt(3) / 12.0 * (3 + np.sqrt(5))
     radius_midradius = np.cos(np.pi / 5.0)
 
@@ -119,7 +115,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     lambda_0 = None
     phi_1 = None
 
-    # the 3 points of tangent triangle
+    # the 3 points of tangent triangle in spherical coordinate
     triangle_point_00_lambda = None
     triangle_point_00_phi = None
     triangle_point_01_lambda = None
@@ -127,7 +123,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     triangle_point_02_lambda = None
     triangle_point_02_phi = None
 
-    # triangles' row/col range in the erp image 
+    # triangles' row/col range in the erp image
     erp_image_row_start = None
     erp_image_row_stop = None
     erp_image_col_start = None
@@ -241,15 +237,17 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     return {"tangent_points": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area}
 
 
-def erp2ico_image(erp_image, tangent_image_size, padding_size = 0.0):
+def erp2ico_image(erp_image, tangent_image_size, padding_size=0.0):
     """Project the equirectangular image to 20 triangle images.
 
     Project the equirectangular image to level-0 icosahedron.
 
     :param erp_image: the input equirectangular image.
-    :type erp_image_path: numpy array, [height, width, 3]
+    :type erp_image: numpy array, [height, width, 3]
     :param tangent_image_size: the output triangle image size, defaults to 480
     :type tangent_image_size: int, optional
+    :param padding_size: the output face image' padding size
+    :type padding_size: float
     :return: a list contain 20 triangle images, the image is 4 channels, invalided pixel's alpha is 0, others is 1
     :type list
     """
@@ -264,20 +262,29 @@ def erp2ico_image(erp_image, tangent_image_size, padding_size = 0.0):
 
     tangent_image_list = []
 
-    # the gnomonic projection range
-    gnom_range_x = np.linspace(-1, 1, num=tangent_image_size, endpoint=True)
-    gnom_range_y = np.linspace(-1, 1, num=tangent_image_size, endpoint=True)      
-    gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
+    tangent_image_width = tangent_image_size
+    tangent_image_height = int((tangent_image_width / 2.0) / np.tan(np.radians(30.0)) + 0.5)
 
     # generate tangent images
-    for triangle_index in range(0, 20):         
+    for triangle_index in range(0, 20):
         log.debug("generate the tangent image {}".format(triangle_index))
-        tangent_image = np.full([tangent_image_size, tangent_image_size, 4], 255)
         triangle_param = get_icosahedron_parameters(triangle_index)
 
-        # the tangent triangle points coordinate in tangent image
         tangent_triangle_vertices = np.array(triangle_param["triangle_points_tangent"])
-        inside_list = gp.inside_polygon_2d(np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1), tangent_triangle_vertices).reshape(np.shape(gnom_range_xv), on_line=True, eps=1.0)
+        # the face gnomonic range in tangent space
+        gnomonic_x_min = np.amin(tangent_triangle_vertices[:, 0], axis=0)
+        gnomonic_x_max = np.amax(tangent_triangle_vertices[:, 0], axis=0)
+        gnomonic_y_min = np.amin(tangent_triangle_vertices[:, 1], axis=0)
+        gnomonic_y_max = np.amax(tangent_triangle_vertices[:, 1], axis=0)
+        gnom_range_x = np.linspace(gnomonic_x_min, gnomonic_x_max, num=tangent_image_width, endpoint=True)
+        gnom_range_y = np.linspace(gnomonic_y_min, gnomonic_y_max, num=tangent_image_height, endpoint=True)
+        gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
+
+        tangent_image = np.full([tangent_image_height, tangent_image_width, 4], 255)
+        # the tangent triangle points coordinate in tangent image
+        gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
+        inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True)
+        inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
         # project to tangent image
         tangent_points = triangle_param["tangent_points"]
@@ -287,7 +294,9 @@ def erp2ico_image(erp_image, tangent_image_size, padding_size = 0.0):
         tangent_triangle_erp_pixel_x, tangent_triangle_erp_pixel_y = sc.sph2epr(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=True)
 
         # get the tangent image pixels value
-        tangent_image_x, tangent_image_y = gp.gnomonic2pixel(gnom_range_xv[inside_list], gnom_range_yv[inside_list], padding_size, tangent_image_size)
+        tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
+        tangent_image_x, tangent_image_y = gp.gnomonic2pixel(gnom_range_xv[inside_list], gnom_range_yv[inside_list],
+                                                             0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
 
         for channel in range(0, np.shape(erp_image)[2]):
             tangent_image[tangent_image_y, tangent_image_x, channel] = \
@@ -301,7 +310,7 @@ def erp2ico_image(erp_image, tangent_image_size, padding_size = 0.0):
     return tangent_image_list
 
 
-def ico2erp_image(tangent_images, erp_image_height, padding_size = 0.0):
+def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
     """Stitch the level-0 icosahedron's tangent image to ERP image.
 
     TODO there are seam on the stitched erp image.
@@ -310,6 +319,8 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size = 0.0):
     :type tangent_images: a list of numpy
     :param erp_image_height: the output erp image's height.
     :type erp_image_height: int
+    :param padding_size: the face image's padding size
+    :type padding_size: float
     :return: the stitched ERP image
     :type numpy
     """
@@ -348,13 +359,19 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size = 0.0):
         tangent_xv, tangent_yv = gp.gnomonic_projection(spherical_uv[0, :, :], spherical_uv[1, :, :], lambda_0, phi_1)
 
         # the pixels in the tangent triangle
-        triangle_points_tangent = triangle_param["triangle_points_tangent"]
+        triangle_points_tangent = np.array(triangle_param["triangle_points_tangent"])
         available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
                                                      triangle_points_tangent, on_line=True, eps=1e-3).reshape(tangent_xv.shape)
 
         # sample the pixel from the tangent image
-        tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list], \
-            padding_size, tangent_image_width, tangent_image_height)
+        gnomonic_x_min = np.amin(triangle_points_tangent[:, 0], axis=0)
+        gnomonic_x_max = np.amax(triangle_points_tangent[:, 0], axis=0)
+        gnomonic_y_min = np.amin(triangle_points_tangent[:, 1], axis=0)
+        gnomonic_y_max = np.amax(triangle_points_tangent[:, 1], axis=0)
+        tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
+        tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
+                                                   0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
+
         for channel in range(0, images_channels_number):
             erp_image[triangle_yv[available_pixels_list].astype(np.int), triangle_xv[available_pixels_list].astype(np.int), channel] = \
                 ndimage.map_coordinates(tangent_images[triangle_index][:, :, channel], [tangent_yv, tangent_xv], order=1, mode='constant', cval=255)
