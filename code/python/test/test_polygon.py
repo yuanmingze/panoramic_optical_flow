@@ -66,6 +66,21 @@ def test_enlarge_polygon():
     plt.show()
 
 
+def test_is_clockwise():
+    point_list = [[-1, 0], [0, 1], [1, 0]]
+    assert(polygon.is_clockwise(point_list))
+
+    point_list = [[0, 3], [3, 1], [1, -3]]
+    assert(polygon.is_clockwise(point_list))
+
+    point_list = [[0, 3], [1, -3], [3, 1]]
+    assert(polygon.is_clockwise(point_list) == False)
+
+    point_list = [[0, 1], [-1, 0], [1, 0]]
+    assert(polygon.is_clockwise(point_list) == False)
+
+
 if __name__ == "__main__":
     # test_find_intersection()
-    test_enlarge_polygon()
+    # test_enlarge_polygon()
+    test_is_clockwise()

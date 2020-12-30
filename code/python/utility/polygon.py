@@ -41,12 +41,28 @@ def find_intersection(p1,  p2,  p3,  p4):
     return intersection
 
 
+def is_clockwise(point_list):
+    """Check whether the list is clockwise. 
+
+    :param point_list: the point lists
+    :type point_list: numpy 
+    :return: yes if the points are clockwise, otherwise is no
+    :rtype: bool
+    """
+    sum = 0
+    for i in range(len(point_list)):
+        cur = point_list[i]
+        next = point_list[(i+1) % len(point_list)]
+        sum += (next[0] - cur[0]) * (next[1] + cur[1])
+    return sum > 0
+
+
 def enlarge_polygon(old_points, offset):
     """Return points representing an enlarged polygon.
 
     Reference: http://csharphelper.com/blog/2016/01/enlarge-a-polygon-in-c/
     
-    :param old_points: the points should be in clock wise
+    :param old_points: the polygon vertexes, and the points should be in clock wise
     :type: list [[x_1,y_1], [x_2, y_2]......]
     :param offset: the ratio of the polygon enlarged
     :type: float
@@ -57,8 +73,8 @@ def enlarge_polygon(old_points, offset):
     num_points = len(old_points)
     for j in range(num_points):
         # 0) find "out" side
-        # // TODO check whether is clockwise?
-        # https://stackoverflow.com/questions/3749678/expand-fill-of-convex-polygon
+        if not is_clockwise(old_points):
+            log.error("the points list is not clockwise.")
 
         # the points before and after j.
         i = (j - 1)

@@ -102,7 +102,7 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
             continue
 
         # get the intersection points
-        if abs(polygon_1_y - polygon_2_y) < eps:
+        if LESS(abs(polygon_1_y - polygon_2_y), eps):
             test_result = np.logical_and(test_result, GREATER(points_x, min(polygon_1_x, polygon_2_x)))
             intersect_points_x = points_x[test_result]
         else:
@@ -141,8 +141,19 @@ def gnomonic_projection(lambda_, phi, lambda_0, phi_1):
     :rtype: numpy
     """
     cos_c = np.sin(phi_1) * np.sin(phi) + np.cos(phi_1) * np.cos(phi) * np.cos(lambda_ - lambda_0)
+
+    # get cos_c's zero element index
+    zeros_index = cos_c == 0
+    if np.any(zeros_index):
+        cos_c[zeros_index] = np.finfo(np.float).eps
+
     x = np.cos(phi) * np.sin(lambda_ - lambda_0) / cos_c
     y = (np.cos(phi_1) * np.sin(phi) - np.sin(phi_1) * np.cos(phi) * np.cos(lambda_ - lambda_0)) / cos_c
+
+    if np.any(zeros_index):
+        x[zeros_index] = 0
+        y[zeros_index] = 0
+
     return x, y
 
 

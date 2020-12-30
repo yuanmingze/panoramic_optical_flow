@@ -5,6 +5,7 @@ from scipy import ndimage
 
 from . import gnomonic_projection as gp
 from . import spherical_coordinates as sc
+from . import polygon
 
 from .logger import Logger
 
@@ -101,9 +102,6 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     Get the tangent point theta and phi. Known as the lambda_0 and phi_1.
     The erp image origin as top-left corner
 
-    TODO check the points order, need clockwise!
-    TODO implement padding
-
     :return the tangent face's tangent point and 3 vertices's location.
     """
     # reference: https://en.wikipedia.org/wiki/Regular_icosahedron
@@ -124,10 +122,10 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     triangle_point_02_phi = None
 
     # triangles' row/col range in the erp image
-    erp_image_row_start = None
-    erp_image_row_stop = None
-    erp_image_col_start = None
-    erp_image_col_stop = None
+    # erp_image_row_start = None
+    # erp_image_row_stop = None
+    # erp_image_col_start = None
+    # erp_image_col_stop = None
 
     lambda_step = 2.0 * np.pi / 5.0
     # 1) the up 5 triangles
@@ -136,103 +134,138 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
         lambda_0 = - np.pi + lambda_step / 2.0 + triangle_index * lambda_step
         phi_1 = np.pi / 2 - np.arccos(radius_inscribed / radius_circumscribed)
         # the tangent triangle points coordinate in tangent image
-        triangle_point_00_lambda = -np.pi + np.pi * 2.0 / 5.0 / 2.0 + triangle_index * lambda_step
-        triangle_point_00_phi = np.pi / 2.0
-        triangle_point_01_lambda = -np.pi + triangle_index * lambda_step
-        triangle_point_01_phi = np.arctan(0.5)
+        triangle_point_00_lambda = -np.pi + triangle_index * lambda_step
+        triangle_point_00_phi = np.arctan(0.5)
+        triangle_point_01_lambda = -np.pi + np.pi * 2.0 / 5.0 / 2.0 + triangle_index * lambda_step
+        triangle_point_01_phi = np.pi / 2.0
         triangle_point_02_lambda = -np.pi + (triangle_index + 1) * lambda_step
         triangle_point_02_phi = np.arctan(0.5)
 
-        # availied area of ERP image
-        erp_image_row_start = 0
-        erp_image_row_stop = (np.pi / 2 - np.arctan(0.5)) / np.pi
-        erp_image_col_start = 1.0 / 5.0 * triangle_index
-        erp_image_col_stop = 1.0 / 5.0 * (triangle_index + 1)
+        # # availied area of ERP image
+        # erp_image_row_start = 0
+        # erp_image_row_stop = (np.pi / 2 - np.arctan(0.5)) / np.pi
+        # erp_image_col_start = 1.0 / 5.0 * triangle_index_temp
+        # erp_image_col_stop = 1.0 / 5.0 * (triangle_index_temp + 1)
 
     # 2) the middle 10 triangles
     # 2-0) middle-up triangles
     if 5 <= triangle_index <= 9:
-        triangle_index = triangle_index - 5
+        triangle_index_temp = triangle_index - 5
         # tangent point of inscribed spheric
-        lambda_0 = - np.pi + lambda_step / 2.0 + triangle_index * lambda_step
+        lambda_0 = - np.pi + lambda_step / 2.0 + triangle_index_temp * lambda_step
         phi_1 = np.pi / 2.0 - np.arccos(radius_inscribed / radius_circumscribed) - 2 * np.arccos(radius_inscribed / radius_midradius)
         # the tangent triangle points coordinate in tangent image
-        triangle_point_00_lambda = -np.pi + triangle_index * lambda_step
+        triangle_point_00_lambda = -np.pi + triangle_index_temp * lambda_step
         triangle_point_00_phi = np.arctan(0.5)
-        triangle_point_01_lambda = -np.pi + (triangle_index + 1) * lambda_step
+        triangle_point_01_lambda = -np.pi + (triangle_index_temp + 1) * lambda_step
         triangle_point_01_phi = np.arctan(0.5)
-        triangle_point_02_lambda = -np.pi + lambda_step / 2.0 + triangle_index * lambda_step
+        triangle_point_02_lambda = -np.pi + lambda_step / 2.0 + triangle_index_temp * lambda_step
         triangle_point_02_phi = -np.arctan(0.5)
 
-        # availied area of ERP image
-        erp_image_row_start = (np.arccos(radius_inscribed / radius_circumscribed) + np.arccos(radius_inscribed / radius_midradius)) / np.pi
-        erp_image_row_stop = (np.pi / 2.0 + np.arctan(0.5)) / np.pi
-        erp_image_col_start = 1 / 5.0 * triangle_index
-        erp_image_col_stop = 1 / 5.0 * (triangle_index + 1)
+        # # availied area of ERP image
+        # erp_image_row_start = (np.arccos(radius_inscribed / radius_circumscribed) + np.arccos(radius_inscribed / radius_midradius)) / np.pi
+        # erp_image_row_stop = (np.pi / 2.0 + np.arctan(0.5)) / np.pi
+        # erp_image_col_start = 1 / 5.0 * triangle_index_temp
+        # erp_image_col_stop = 1 / 5.0 * (triangle_index_temp + 1)
 
     # 2-1) the middle-down triangles
     if 10 <= triangle_index <= 14:
-        triangle_index = triangle_index - 10
+        triangle_index_temp = triangle_index - 10
         # tangent point of inscribed spheric
-        lambda_0 = - np.pi + triangle_index * lambda_step
+        lambda_0 = - np.pi + triangle_index_temp * lambda_step
         phi_1 = -(np.pi / 2.0 - np.arccos(radius_inscribed / radius_circumscribed) - 2 * np.arccos(radius_inscribed / radius_midradius))
         # the tangent triangle points coordinate in tangent image
-        triangle_point_00_lambda = -np.pi + triangle_index * lambda_step
-        triangle_point_00_phi = np.arctan(0.5)
-        triangle_point_01_phi = -np.arctan(0.5)
-        triangle_point_01_lambda = - np.pi - lambda_step / 2.0 + triangle_index * lambda_step
-        if triangle_index == 10:
+        triangle_point_00_phi = -np.arctan(0.5)
+        triangle_point_00_lambda = - np.pi - lambda_step / 2.0 + triangle_index_temp * lambda_step
+        if triangle_index_temp == 10:
             # cross the ERP image boundary
-            triangle_point_01_lambda = triangle_point_01_lambda + 2 * np.pi
-        triangle_point_02_lambda = - np.pi + lambda_step / 2.0 + triangle_index * lambda_step
+            triangle_point_00_lambda = triangle_point_00_lambda + 2 * np.pi
+        triangle_point_01_lambda = -np.pi + triangle_index_temp * lambda_step
+        triangle_point_01_phi = np.arctan(0.5)
+        triangle_point_02_lambda = - np.pi + lambda_step / 2.0 + triangle_index_temp * lambda_step
         triangle_point_02_phi = -np.arctan(0.5)
 
-        # availied area of ERP image
-        erp_image_row_start = (np.pi / 2.0 - np.arctan(0.5)) / np.pi
-        erp_image_row_stop = (np.pi - np.arccos(radius_inscribed / radius_circumscribed) - np.arccos(radius_inscribed / radius_midradius)) / np.pi
-        erp_image_col_start = 1.0 / 5.0 * triangle_index - 1.0 / 5.0 / 2.0
-        erp_image_col_stop = 1.0 / 5.0 * triangle_index + 1.0 / 5.0 / 2.0
+        # # availied area of ERP image
+        # erp_image_row_start = (np.pi / 2.0 - np.arctan(0.5)) / np.pi
+        # erp_image_row_stop = (np.pi - np.arccos(radius_inscribed / radius_circumscribed) - np.arccos(radius_inscribed / radius_midradius)) / np.pi
+        # erp_image_col_start = 1.0 / 5.0 * triangle_index_temp - 1.0 / 5.0 / 2.0
+        # erp_image_col_stop = 1.0 / 5.0 * triangle_index_temp + 1.0 / 5.0 / 2.0
 
     # 3) the down 5 triangles
     if 15 <= triangle_index <= 19:
-        triangle_index = triangle_index - 15
+        triangle_index_temp = triangle_index - 15
         # tangent point of inscribed spheric
-        lambda_0 = - np.pi + triangle_index * lambda_step
+        lambda_0 = - np.pi + triangle_index_temp * lambda_step
         phi_1 = - (np.pi / 2 - np.arccos(radius_inscribed / radius_circumscribed))
         # the tangent triangle points coordinate in tangent image
-        triangle_point_00_lambda = - np.pi - lambda_step / 2.0 + triangle_index * lambda_step
+        triangle_point_00_lambda = - np.pi - lambda_step / 2.0 + triangle_index_temp * lambda_step
         triangle_point_00_phi = -np.arctan(0.5)
-        triangle_point_01_lambda = - np.pi + lambda_step / 2.0 + triangle_index * lambda_step
+        triangle_point_01_lambda = - np.pi + lambda_step / 2.0 + triangle_index_temp * lambda_step
         # cross the ERP image boundary
-        if triangle_index == 15:
+        if triangle_index_temp == 15:
             triangle_point_01_lambda = triangle_point_01_lambda + 2 * np.pi
         triangle_point_01_phi = -np.arctan(0.5)
-        triangle_point_02_lambda = - np.pi + triangle_index * lambda_step
+        triangle_point_02_lambda = - np.pi + triangle_index_temp * lambda_step
         triangle_point_02_phi = -np.pi / 2.0
 
-        # spherical coordinate (0,0) is in the center of ERP image
-        erp_image_row_start = (np.pi / 2.0 + np.arctan(0.5)) / np.pi
-        erp_image_row_stop = 1.0
-        erp_image_col_start = 1.0 / 5.0 * triangle_index - 1.0 / 5.0 / 2.0
-        erp_image_col_stop = 1.0 / 5.0 * triangle_index + 1.0 / 5.0 / 2.0
+        # # spherical coordinate (0,0) is in the center of ERP image
+        # erp_image_row_start = (np.pi / 2.0 + np.arctan(0.5)) / np.pi
+        # erp_image_row_stop = 1.0
+        # erp_image_col_start = 1.0 / 5.0 * triangle_index_temp - 1.0 / 5.0 / 2.0
+        # erp_image_col_stop = 1.0 / 5.0 * triangle_index_temp + 1.0 / 5.0 / 2.0
 
     tangent_point = [lambda_0, phi_1]
 
-    triangle_points_sph = []
-    triangle_points_sph.append([triangle_point_00_lambda, triangle_point_00_phi])
-    triangle_points_sph.append([triangle_point_01_lambda, triangle_point_01_phi])
-    triangle_points_sph.append([triangle_point_02_lambda, triangle_point_02_phi])
-
+    # the 3 points gnomonic coordinate in tangent image's gnomonic space
     triangle_points_tangent = []
     triangle_points_tangent.append(gp.gnomonic_projection(triangle_point_00_lambda, triangle_point_00_phi, lambda_0, phi_1))
     triangle_points_tangent.append(gp.gnomonic_projection(triangle_point_01_lambda, triangle_point_01_phi, lambda_0, phi_1))
     triangle_points_tangent.append(gp.gnomonic_projection(triangle_point_02_lambda, triangle_point_02_phi, lambda_0, phi_1))
 
-    availied_ERP_area = []
-    availied_ERP_area.append(erp_image_row_start)
-    availied_ERP_area.append(erp_image_row_stop)
-    availied_ERP_area.append(erp_image_col_start)
-    availied_ERP_area.append(erp_image_col_stop)
+    # pading the tangent image
+    triangle_points_tangent_pading = polygon.enlarge_polygon(triangle_points_tangent, padding_size)
+
+    # if padding_size != 0.0:
+    triangle_points_tangent = copy.deepcopy(triangle_points_tangent_pading)
+
+    # the points in spherical location
+    triangle_points_sph = []
+    for index in range(3):
+        tri_pading_x, tri_pading_y = triangle_points_tangent_pading[index]
+        triangle_point_lambda, triangle_point_phi = gp.reverse_gnomonic_projection(tri_pading_x, tri_pading_y, lambda_0, phi_1)
+        triangle_points_sph.append([triangle_point_lambda, triangle_point_phi])
+
+    # compute bounding box of the face in spherical coordinate
+    # TODO fix it
+    availied_sph_area = []
+    availied_sph_area = np.array(copy.deepcopy(triangle_points_sph))
+    triangle_points_tangent_pading = np.array(triangle_points_tangent_pading)
+    point_insert_x = np.sort(triangle_points_tangent_pading[:, 0])[1]
+    point_insert_y = np.sort(triangle_points_tangent_pading[:, 1])[1]
+    availied_sph_area = np.append(availied_sph_area, [gp.reverse_gnomonic_projection(point_insert_x, point_insert_y, lambda_0, phi_1)], axis=0)
+    # the bounding box of the face with spherical coordinate
+    availied_ERP_area = [] # [min_longitude, max_longitude, min_latitude, max_lantitude]
+    availied_ERP_area.append(np.amin(availied_sph_area[:, 0]))
+    availied_ERP_area.append(np.amax(availied_sph_area[:, 0]))
+    if 0 <= triangle_index <= 4:
+        availied_ERP_area.append(np.pi / 2.0)
+        availied_ERP_area.append(np.amin(availied_sph_area[:, 1]))  # the ERP Y axis direction as down
+    elif 15 <= triangle_index <= 19:
+        availied_ERP_area.append(np.amax(availied_sph_area[:, 1]))
+        availied_ERP_area.append(-np.pi / 2.0)
+    else:
+        availied_ERP_area.append(np.amax(availied_sph_area[:, 1]))
+        availied_ERP_area.append(np.amin(availied_sph_area[:, 1]))
+
+    # else:
+    #     triangle_points_sph.append([triangle_point_00_lambda, triangle_point_00_phi])
+    #     triangle_points_sph.append([triangle_point_01_lambda, triangle_point_01_phi])
+    #     triangle_points_sph.append([triangle_point_02_lambda, triangle_point_02_phi])
+
+    #     availied_ERP_area.append(erp_image_row_start)
+    #     availied_ERP_area.append(erp_image_row_stop)
+    #     availied_ERP_area.append(erp_image_col_start)
+    #     availied_ERP_area.append(erp_image_col_stop)
 
     return {"tangent_points": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area}
 
@@ -268,7 +301,7 @@ def erp2ico_image(erp_image, tangent_image_size, padding_size=0.0):
     # generate tangent images
     for triangle_index in range(0, 20):
         log.debug("generate the tangent image {}".format(triangle_index))
-        triangle_param = get_icosahedron_parameters(triangle_index)
+        triangle_param = get_icosahedron_parameters(triangle_index, padding_size)
 
         tangent_triangle_vertices = np.array(triangle_param["triangle_points_tangent"])
         # the face gnomonic range in tangent space
@@ -283,7 +316,8 @@ def erp2ico_image(erp_image, tangent_image_size, padding_size=0.0):
         tangent_image = np.full([tangent_image_height, tangent_image_width, 4], 255)
         # the tangent triangle points coordinate in tangent image
         gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
-        inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True)
+        pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
+        inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
         inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
         # project to tangent image
@@ -340,30 +374,40 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
     # stitch all tangnet images to ERP image
     for triangle_index in range(0, 20):
         log.debug("stitch the tangent image {}".format(triangle_index))
-        triangle_param = get_icosahedron_parameters(triangle_index)
+        triangle_param = get_icosahedron_parameters(triangle_index, padding_size)
 
-        # get all tangent triangle's available pixels
+        # 1) get all tangent triangle's available pixels coordinate
         availied_ERP_area = triangle_param["availied_ERP_area"]
-        erp_image_row_start = int(availied_ERP_area[0] * (erp_image_height - 1))
-        erp_image_row_stop = int(availied_ERP_area[1] * (erp_image_height - 1))
-        erp_image_col_start = int(availied_ERP_area[2] * (erp_image_width - 1))
-        erp_image_col_stop = int(availied_ERP_area[3] * (erp_image_width - 1))
+        erp_image_col_start, erp_image_row_start = sc.sph2epr(availied_ERP_area[0], availied_ERP_area[2], erp_image_height, wrap_around=False)
+        erp_image_col_stop, erp_image_row_stop = sc.sph2epr(availied_ERP_area[1], availied_ERP_area[3], erp_image_height, wrap_around=False)
+
+        # process the image boundary
+        erp_image_col_start = int(erp_image_col_start) if int(erp_image_col_start) > 0 else int(erp_image_col_start - 0.5)
+        erp_image_col_stop = int(erp_image_col_stop + 0.5) if int(erp_image_col_stop) > 0 else int(erp_image_col_stop)
+        erp_image_row_start = int(erp_image_row_start) if int(erp_image_row_start) > 0 else int(erp_image_row_start - 0.5)
+        erp_image_row_stop = int(erp_image_row_stop + 0.5) if int(erp_image_row_stop) > 0 else int(erp_image_row_stop)
+
         triangle_x_range = np.linspace(erp_image_col_start, erp_image_col_stop, erp_image_col_stop - erp_image_col_start + 1)
         triangle_y_range = np.linspace(erp_image_row_start, erp_image_row_stop, erp_image_row_stop - erp_image_row_start + 1)
         triangle_xv, triangle_yv = np.meshgrid(triangle_x_range, triangle_y_range)
+        # process the wrap around
+        triangle_xv = np.remainder(triangle_xv, erp_image_width)
+        triangle_yv = np.remainder(triangle_yv, erp_image_height)
 
+        # 2) sample the pixel value from tanget image
         # project spherical coordinate to tangent plane
-        spherical_uv = sc.erp2sph([triangle_xv, triangle_yv], erp_image_height=erp_image_height)
+        spherical_uv = sc.erp2sph([triangle_xv, triangle_yv], erp_image_height=erp_image_height, wrap_around=False)
         lambda_0 = triangle_param["tangent_points"][0]
         phi_1 = triangle_param["tangent_points"][1]
         tangent_xv, tangent_yv = gp.gnomonic_projection(spherical_uv[0, :, :], spherical_uv[1, :, :], lambda_0, phi_1)
 
         # the pixels in the tangent triangle
         triangle_points_tangent = np.array(triangle_param["triangle_points_tangent"])
+        pixel_eps = abs(tangent_xv[0, 0] - tangent_xv[0, 1]) / (2 * tangent_image_width)
         available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
-                                                     triangle_points_tangent, on_line=True, eps=1e-3).reshape(tangent_xv.shape)
+                                                     triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
 
-        # sample the pixel from the tangent image
+        # the tangent available gnomonic coordinate sample the pixel from the tangent image
         gnomonic_x_min = np.amin(triangle_points_tangent[:, 0], axis=0)
         gnomonic_x_max = np.amax(triangle_points_tangent[:, 0], axis=0)
         gnomonic_y_min = np.amin(triangle_points_tangent[:, 1], axis=0)
@@ -389,6 +433,7 @@ def erp2ico_flow(erp_flow, tangent_image_size):
     :return: a list ontain 20 triangle images
     :type list of numpy
     """
+    # TODO implement
     pass
 
 
@@ -402,4 +447,5 @@ def ico2erp_flow(tangent_flows, erp_image_height):
     :return: the stitched ERP flow
     :type numpy
     """
+    # TODO implement
     pass
