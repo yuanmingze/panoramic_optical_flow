@@ -12,6 +12,7 @@ https://github.com/tomrunia/OpticalFlow_Visualization
 
 def make_colorwheel():
     """
+    # TODO change comment style
     Generates a color wheel for optical flow visualization as presented in:
         Baker et al. "A Database and Evaluation Methodology for Optical Flow" (ICCV, 2007)
         URL: http://vision.middlebury.edu/flow/flowEval-iccv07.pdf
@@ -62,6 +63,7 @@ def make_colorwheel():
 
 def flow_uv_to_colors(u, v, convert_to_bgr=False):
     """
+    # TODO change comment style
     Applies the flow color wheel to (possibly clipped) flow components u and v.
 
     According to the C++ source code of Daniel Scharstein
@@ -100,17 +102,17 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
 
 
 def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
-    """
-    Expects a two dimensional flow image of shape.
+    """ Expects a two dimensional flow image of shape.
 
-    Args:
-        flow_uv (np.ndarray): Flow UV image of shape [H,W,2]
-        clip_flow (float, optional): Clip maximum of flow values. Defaults to None e.g. [-100, 100]
-        convert_to_bgr (bool, optional): Convert output image to BGR. Defaults to False.
-
-    Returns:
-        np.ndarray: Flow visualization image of shape [H,W,3]
-    """
+    :param flow_uv: Flow UV image of shape [H,W,2]
+    :type flow_uv: numpy
+    :param clip_flow: Clip maximum of flow values. Defaults to None e.g. [-100, 100]
+    :type clip_flow: float
+    :param convert_to_bgr: Convert output image to BGR. Defaults to False.
+    :type convert_to_bgr: bool, optional
+    :return: Flow visualization image of shape [H,W,3]
+    :rtype: numpy
+    """    
     assert flow_uv.ndim == 3, 'input flow must have three dimensions'
     assert flow_uv.shape[2] == 2, 'input flow must have shape [H,W,2]'
     if clip_flow is not None:
@@ -123,11 +125,3 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
     u = u / (rad_max + epsilon)
     v = v / (rad_max + epsilon)
     return flow_uv_to_colors(u, v, convert_to_bgr)
-
-
-if __name__ == "__main__":
-        of_data = flow_io.readFlowFile("/home/mingze/Downloads/0001.flo")
-        image_io.image_show(of_data[:,:,0])
-        image_io.image_show(of_data[:,:,1])
-        of_data_vis = flow_vis.flow_to_color(of_data, [-3, 3])
-        image_io.image_show(of_data_vis)

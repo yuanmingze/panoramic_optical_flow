@@ -6,6 +6,8 @@ import configuration as config
 
 from utility import image_io
 from utility import projection_icosahedron as proj_ico
+from utility import flow_io
+from utility import flow_vis
 
 
 def test_ico_parameters(padding_size):
@@ -50,6 +52,7 @@ def test_ico_parameters(padding_size):
 
     plt.show()
 
+
 def test_ico_image_proj(erp_image_filepath, ico_images_expression, ico_image_output, tangent_image_size, padding_size):
     """
     Project the ERP image to 20 faces flow.
@@ -79,11 +82,25 @@ def test_ico_image_stitch(input_folder_path, file_expression, erp_src_image_stit
     image_io.image_save(erp_image, erp_src_image_stitch_filepath)
 
 
-def test_ico_flow_proj():
+def test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_size, padding_size):
     """
     Project the ERP flow to 20 faces flow.
+        Test stitch 6 face optical flow to single ERP flow.
     """
-    pass
+    if not os.path.exists(ico_src_image_output_dir):
+        os.mkdir(ico_src_image_output_dir)
+
+    # 1) ERP flow to cubemap flow
+    erp_flow = flow_io.read_flow_flo(erp_flow_filepath)
+    face_flows = proj_ico.erp2ico_flow(erp_flow, tangent_image_size, padding_size)
+    for index in range(0, len(face_flows)):
+        ico_flow_name = ico_src_image_output_dir + tangent_flow_filename_expression.format(index)
+        flow_io.write_flow_flo(face_flows[index], ico_flow_name)
+
+        ico_flow_vis_name = ico_src_image_output_dir + (tangent_flow_filename_expression + ".jpg").format(index)
+        face_flow_vis = flow_vis.flow_to_color(face_flows[index], [-300, 300])
+        # image_io.image_show(face_flow_vis)
+        image_io.image_save(face_flow_vis, ico_flow_vis_name)
 
 
 def test_ico_flow_stitch(input_folder_path, output_path):
@@ -95,7 +112,7 @@ def test_ico_flow_stitch(input_folder_path, output_path):
 
 
 if __name__ == "__main__":
-    padding_size = 0.3
+    padding_size = 0.0
 
     tangent_image_size = 481
     erp_image_height = 960
@@ -126,11 +143,13 @@ if __name__ == "__main__":
 
     # 3) test the image projection and stitch with padding
     # test_ico_image_proj(erp_src_image_filepath, tangent_padding_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
-    test_ico_image_stitch(ico_src_image_output_dir, tangent_padding_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size) 
+    # test_ico_image_stitch(ico_src_image_output_dir, tangent_padding_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
 
-    # 3) test optical flow project and stitch
-    # erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
-    # tangent_flow_filename_expression = "ico_flow_src_{}.jpg"
+    # 4) test optical flow project and stitch
+    erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
+    tangent_flow_filename_expression = "ico_flow_src_{}.flo"
 
-    # test_ico_flow_proj()
+    test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_size, padding_size)
+    # TODO use the optical flow to warp image
+    
     # test_ico_flow_stitch()
