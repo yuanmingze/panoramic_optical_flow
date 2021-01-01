@@ -243,7 +243,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     point_insert_y = np.sort(triangle_points_tangent_pading[:, 1])[1]
     availied_sph_area = np.append(availied_sph_area, [gp.reverse_gnomonic_projection(point_insert_x, point_insert_y, lambda_0, phi_1)], axis=0)
     # the bounding box of the face with spherical coordinate
-    availied_ERP_area = [] # [min_longitude, max_longitude, min_latitude, max_lantitude]
+    availied_ERP_area = []  # [min_longitude, max_longitude, min_latitude, max_lantitude]
     availied_ERP_area.append(np.amin(availied_sph_area[:, 0]))
     availied_ERP_area.append(np.amax(availied_sph_area[:, 0]))
     if 0 <= triangle_index <= 4:
@@ -443,8 +443,6 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
 
     # get the tangent image parameters
     tangent_image_height = int((tangent_image_width / 2.0) / np.tan(np.radians(30.0)) + 0.5)
-    gnomonic2image_width_ratio = (tangent_image_width - 1) / (2.0 + padding_size * 2.0)
-    gnomonic2image_height_ratio= (tangent_image_height - 1) / (2.0 + padding_size * 2.0)
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
 
     ico_tangent_flows = []
@@ -459,8 +457,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
         gnomonic_y_min = np.amin(tangent_triangle_vertices[:, 1], axis=0)
         gnomonic_y_max = np.amax(tangent_triangle_vertices[:, 1], axis=0)
         gnom_range_x = np.linspace(gnomonic_x_min, gnomonic_x_max, num=tangent_image_width, endpoint=True)
-        # TODO in gnomonic coordinate Y is to down
-        gnom_range_y = np.linspace(gnomonic_y_max,gnomonic_y_min, num=tangent_image_height, endpoint=True) 
+        gnom_range_y = np.linspace(gnomonic_y_max, gnomonic_y_min, num=tangent_image_height, endpoint=True)  # in gnomonic coordinate Y is to down
         gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
 
         # the tangent triangle points coordinate in tangent image
@@ -469,80 +466,41 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
         inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
         inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
-        # import image_io
-        # image_io.image_show(inside_list)
-
-        # 0) Get the location of tangent image's pixels corresponding location in ERP
-        # get the value of pixel in the tangent image and the spherical coordinate location coresponding the tangent image (x,y)
-        # the x,y of tangent image
-        # project to tangent image
-        # x_grid = np.linspace(-pbc, pbc, tangent_image_width)
-        # y_grid = np.linspace(pbc, - pbc, tangent_image_height)
-        # x, y = np.meshgrid(x_grid, y_grid)
-
-        # tangent center project point
-        tangent_points = triangle_param["tangent_points"]
+        # 0) Get the tangent image pixels' ERP location, convert the ERP optical flow's UV to tangent image's UV
+        # flow start point from gnomonic --> spherical coordinate --> pixel location
+        tangent_points = triangle_param["tangent_points"]  # tangent center project point
         tangent_triangle_lambda_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_points[0], tangent_points[1])
-
-        # spherical coordinate --> pixel location
-        # erp_pixel_x = ((lambda_ + np.pi) / (2 * np.pi)) * erp_image_width
-        # erp_pixel_y = (- phi_ + 0.5 * np.pi) / np.pi * erp_image_height
-        # sp
-        # tansform from spherical coordinate --> pixel location
         # TODO check the wrap around implement
         face_erp_pixel_x, face_erp_pixel_y = sc.sph2epr(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=True)
 
-        # import ipdb; ipdb.set_trace()
-
-        # get the tangent image pixels value
+        # 1) comput the end point location in the tangent image
+        # get the tangent image pixels flow value in ERP image
         tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
         tangent_image_x, tangent_image_y = gp.gnomonic2pixel(gnom_range_xv[inside_list], gnom_range_yv[inside_list], 0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
-
-        # interpollation
         face_flow_pixels_src = np.zeros((tangent_image_height, tangent_image_width, erp_flow_channel), dtype=float)
         for channel in range(0, erp_flow_channel):
             face_flow_pixels_src[tangent_image_y, tangent_image_x, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel], [face_erp_pixel_y, face_erp_pixel_x], order=1, mode='wrap')
 
-        # 1) comput the end point location in the tangent image
-        # convert the ERP optical flow's UV to tangent image's UV
+        # the flow end point in ERP image pixel coordinate
         face_erp_pixel_x_target = face_erp_pixel_x + face_flow_pixels_src[:, :, 0][inside_list]
         face_erp_pixel_y_target = face_erp_pixel_y + face_flow_pixels_src[:, :, 1][inside_list]
 
-
-        # # process warp around
-        # erp_pixel_x_target[erp_pixel_x_target < 0] = erp_pixel_x_target[erp_pixel_x_target < 0] + erp_image_width
-        # erp_pixel_x_target[erp_pixel_x_target >= erp_image_width] = erp_pixel_x_target[erp_pixel_x_target >= erp_image_width] - erp_image_width
-        # erp_pixel_y_target[erp_pixel_y_target < 0] = erp_pixel_y_target[erp_pixel_y_target < 0] + erp_image_height
-        # erp_pixel_y_target[erp_pixel_y_target >= erp_image_height] = erp_pixel_y_target[erp_pixel_y_target >= erp_image_height] - erp_image_height
-        # # convert the erp location to spherical coordinate location
-        # lambda_target = erp_pixel_x_target / erp_image_width * np.pi * 2 - np.pi
-        # phi_target = -erp_pixel_y_target / erp_image_height * np.pi + 0.5 * np.pi
-
-
+        # spherical location --> tangent pixel location
         face_pixel_sph = sc.erp2sph([face_erp_pixel_x_target, face_erp_pixel_y_target], erp_image_height=erp_image_height, wrap_around=False)
-
-
-        # spherical location to tangent location
         face_image_x_target, face_image_y_target = gp.gnomonic_projection(face_pixel_sph[0, :], face_pixel_sph[1, :], tangent_points[0], tangent_points[1])
 
-
+        # 2) copute the tangent image pixels optical flow
+        # gnomonic coordinate -> image coordinate
+        gnomonic2image_width_ratio = (tangent_image_width - 1) / ((gnomonic_x_max - gnomonic_x_min) + padding_size * 2.0)
+        gnomonic2image_height_ratio = (tangent_image_height - 1) / ((gnomonic_y_max - gnomonic_y_min) + padding_size * 2.0)
         face_flow_u = (face_image_x_target - gnom_range_xv[inside_list]) * gnomonic2image_width_ratio
         face_flow_v = (face_image_y_target - gnom_range_yv[inside_list]) * gnomonic2image_height_ratio
         face_flow_v = -face_flow_v  # transform to image coordinate system (+y is to down)
 
-        # temp = np.zeros((tangent_image_height, tangent_image_width), dtype=float)
-        # temp[inside_list] = face_pixel_sph[1, :]
-        # import image_io
-        # image_io.image_show(temp)
-        # import ipdb; ipdb.set_trace()
-        # 2) the optical flow of tangent image
-        # TODO the Invalid flow number?
+        # TODO how to express the Invalid flow number?
         tangent_flow = np.full([tangent_image_height, tangent_image_width, 2], 0)
         tangent_flow[:, :, 0][inside_list] = face_flow_u
         tangent_flow[:, :, 1][inside_list] = face_flow_v
-        # import ipdb; ipdb.set_trace()
-
-        # face_flow = np.stack((face_flow_u, face_flow_v), axis=2)
         ico_tangent_flows.append(tangent_flow)
 
     return ico_tangent_flows
