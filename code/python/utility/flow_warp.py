@@ -86,11 +86,26 @@ def warp_forward_padding(image_target, of_forward, padding_x=0, padding_y=0):
     return image_src
 
 
-def warp_forward(image_first, of_forward, wrap_around = False):
-    """
-    forward warp with optical flow. 
+def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparent = False):
+    """ forward warp with optical flow. 
     warp image with interpolation, scipy.ndimage.map_coordinates
+
+    :param image_first: input image, when it's 4 channels image, use the alpha channel to ignore the transparent area.
+    :type image_first: numpy
+    :param of_forward: forward optical flow.
+    :type of_forward: numpy
+    :param wrap_around: whether process the wrap around pixels, defaults to False
+    :type wrap_around: bool, optional
+    :param ignore_transparent: if yes do not warp the transparent are in the first image, defaults to False
+    :type ignore_transparent: bool, optional
+    :return: warped image
+    :rtype: numpy
     """
+    valid_pixels_index = None
+    if image_first.shape[2] ==4:
+        # RGBA images, ignore the transparent area
+        valid_pixels_index = image_first[:,:,3] == 255
+
     image_size = np.shape(image_first)
     image_height = image_size[0]
     image_width = image_size[1]
@@ -115,10 +130,16 @@ def warp_forward(image_first, of_forward, wrap_around = False):
         y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, image_height - 1)
     else:
         x_idx_new = np.where(x_idx_new > 0, x_idx_new, x_idx_new + image_width)
-        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, x_idx_new - image_width)
+        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, np.remainder(x_idx_new, image_width))
 
         y_idx_new = np.where(y_idx_new > 0, y_idx_new, y_idx_new + image_height)
-        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, y_idx_new - image_height)
+        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, np.remainder(y_idx_new, image_height))
+
+    if not valid_pixels_index is None:
+        x_idx_new = x_idx_new[valid_pixels_index]
+        y_idx_new = y_idx_new[valid_pixels_index]
+        x_idx = x_idx[valid_pixels_index]
+        y_idx = y_idx[valid_pixels_index]
 
     for channel_index in range(0, image_channels):
         dest_image[y_idx_new, x_idx_new, channel_index] = ndimage.map_coordinates(image_first[:, :, channel_index], [y_idx, x_idx], order=1, mode='constant', cval=255)

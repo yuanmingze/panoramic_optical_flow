@@ -120,9 +120,9 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
             point_inside[test_result] = np.logical_not(point_inside[test_result])
 
     if on_line:
-        return np.logical_or(point_inside, online_index)
+        return np.logical_or(point_inside, online_index).reshape(np.shape(points_list[:, 0]))
     else:
-        return np.logical_and(point_inside, np.logical_not(online_index))
+        return np.logical_and(point_inside, np.logical_not(online_index)).reshape(np.shape(points_list[:, 0]))
 
 
 def gnomonic_projection(lambda_, phi, lambda_0, phi_1):
@@ -196,8 +196,9 @@ def gnomonic2pixel(coord_gnom_x, coord_gnom_y,
                     tangent_image_width, tangent_image_height = None,
                     coord_gnom_xy_range = None):
     """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
-    
-    Suppose the tangent image gnomonic x range is [-1,+1], y range is [+1, -1] without padding.
+
+    The tangent image gnomonic x is right, y is up.
+    The tangent image pixel coordinate is x is right, y is down.
 
     :param coord_gnom_x: tangent image's normalized x coordinate
     :type coord_gnom_x: numpy
@@ -235,27 +236,56 @@ def gnomonic2pixel(coord_gnom_x, coord_gnom_y,
     coord_pixel_x = (coord_pixel_x + 0.5).astype(np.int)
 
     gnomonic2image_height_ratio = (tangent_image_height - 1.0) / (y_max - y_min + padding_size * 2.0)
-    coord_pixel_y = -(coord_gnom_y - (y_max + padding_size)) * gnomonic2image_height_ratio
+    coord_pixel_y = -(coord_gnom_y - y_max - padding_size) * gnomonic2image_height_ratio
     coord_pixel_y = (coord_pixel_y + 0.5).astype(np.int)
     
     return coord_pixel_x, coord_pixel_y
 
 
-def pixel2gnomonic(coord_pixel_x, coord_pixel_y, padding_size, tangent_image_size):
-    """Transform the tangent image's gnomonic coordinate to tangent image pixel coordinate.
-    
-    Suppose the x range is [-1,+1], y range is [+1, -1] without padding.
+# def pixel2gnomonic(coord_pixel_x, coord_pixel_y, padding_size, tangent_image_size):
 
-    :param coord_pixel_x: [description]
+def pixel2gnomonic(coord_pixel_x, coord_pixel_y,  padding_size, 
+        tangent_image_width, tangent_image_height=None, 
+        coord_gnom_xy_range=None):
+    """Transform the tangent image's from tangent image pixel coordinate to gnomonic coordinate.
+
+    :param coord_pixel_x: tangent image's pixels x coordinate
     :type coord_pixel_x: numpy
-    :param coord_pixel_y: [description]
+    :param coord_pixel_y: tangent image's pixels y coordinate
     :type coord_pixel_y: numpy
     :param padding_size: in gnomonic coordinate system, padding outside to boundary
     :type padding_size: float
-    :param tangent_image_size: the image size with padding
-    :type tangent_image_size: numpy
-    :retrun:
+    :param tangent_image_width: the image size with padding
+    :type tangent_image_width: numpy
+    :param tangent_image_height: the image size with padding
+    :type tangent_image_height: numpy
+    :param coord_gnom_xy_range: the range of gnomonic coordinate, [x_min, x_max, y_min, y_max]. It desn't includes padding outside to boundary.
+    :type coord_gnom_xy_range: list
+    :retrun: the pixel's location 
     :rtype:
     """
-    # TODO 
-    pass
+    if tangent_image_height is None:
+        tangent_image_height = tangent_image_width
+
+    # the gnomonic coordinate range of tangent image
+    if coord_gnom_xy_range is None:
+        x_min = -1.0
+        x_max = 1.0
+        y_min = -1.0
+        y_max = 1.0
+    else:
+        x_min = coord_gnom_xy_range[0]
+        x_max = coord_gnom_xy_range[1]
+        y_min = coord_gnom_xy_range[2]
+        y_max = coord_gnom_xy_range[3]
+
+    # tangent image space --> tangent normalized space
+    gnomonic_size_x = abs(coord_gnom_xy_range[1] - coord_gnom_xy_range[0])
+    gnomonic2image_ratio_width = (tangent_image_width - 1) / (gnomonic_size_x + padding_size * 2.0)
+    coord_gnom_x = coord_pixel_x  / gnomonic2image_ratio_width + x_min - padding_size
+
+    gnomonic_size_y = abs(coord_gnom_xy_range[3] - coord_gnom_xy_range[2])
+    gnomonic2image_ratio_height = (tangent_image_height - 1) / (gnomonic_size_y + padding_size * 2.0)
+    coord_gnom_y = - (coord_pixel_y / gnomonic2image_ratio_height + y_max + padding_size)
+    
+    return coord_gnom_x, coord_gnom_y
