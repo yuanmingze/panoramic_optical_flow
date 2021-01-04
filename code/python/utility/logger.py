@@ -9,16 +9,29 @@ import traceback
 
 import logging
 
+import colorama
+from colorama import Fore, Back, Style
+colorama.init()
+
+
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors
     reference: https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output/
     """
 
-    grey = "\x1b[38;21m"
-    yellow = "\x1b[33;21m"
-    red = "\x1b[31;21m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
+    import platform
+    if platform.system() == 'Windows':
+        grey = "\x1b[38;21m"
+        yellow = "\x1b[33;21m"
+        magenta = "\x1b[35;21m"
+        red = "\x1b[31;21m"
+        reset = "\x1b[0m"
+    else:
+        grey = Style.DIM
+        yellow = Fore.YELLOW
+        magenta = Fore.MAGENTA
+        red = Fore.RED
+        reset = Style.RESET_ALL
     format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
 
     FORMATS = {
@@ -26,51 +39,13 @@ class CustomFormatter(logging.Formatter):
         logging.INFO: grey + format + reset,
         logging.WARNING: yellow + format + reset,
         logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.CRITICAL: red + format + reset
     }
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
-
-
-# class ColoredFormatter(logging.Formatter):
-
-#     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-
-#     #The background is set with 40 plus the number of the color, and the foreground with 30
-
-#     #These are the sequences need to get colored ouput
-#     RESET_SEQ = "\033[0m"
-#     COLOR_SEQ = "\033[1;%dm"
-#     BOLD_SEQ = "\033[1m"
-
-#     def formatter_message(message, use_color = True):
-#         if use_color:
-#             message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
-#         else:
-#             message = message.replace("$RESET", "").replace("$BOLD", "")
-#         return message
-
-#     COLORS = {
-#         'WARNING': YELLOW,
-#         'INFO': WHITE,
-#         'DEBUG': BLUE,
-#         'CRITICAL': YELLOW,
-#         'ERROR': RED
-#     }
-
-#     def __init__(self, msg, use_color = True):
-#         logging.Formatter.__init__(self, msg)
-#         self.use_color = use_color
-
-#     def format(self, record):
-#         levelname = record.levelname
-#         if self.use_color and levelname in COLORS:
-#             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
-#             record.levelname = levelname_color
-#         return logging.Formatter.format(self, record)
 
 
 class Logger:
@@ -83,13 +58,10 @@ class Logger:
         # create console handler and set level to debug
         handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
-
-        # create formatter
-        # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-        # add formatter to ch
+        # add formatter
         handler.setFormatter(CustomFormatter())
 
-        # add ch to logger
+        # add handler to logger
         self.logger.addHandler(handler)
 
     # def check(self, condition, message=""):
@@ -123,11 +95,15 @@ class Logger:
     def warn(self, message):
         self.logger.warning(message)
 
-    def error(self, message):
-        self.logger.error(message)
+    def print_stack(self):
         print("---traceback---")
         for line in traceback.format_stack():
             print(line.strip())
 
-    def fatal(self, message):
+    def error(self, message):
+        self.logger.error(message)
+        self.print_stack()
+
+    def critical(self, message):
         self.logger.critical(message)
+        self.print_stack()
