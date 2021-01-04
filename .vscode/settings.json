@@ -1,53 +1,51 @@
+// windows env
 {
-    "python.pythonPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
-    "python.venvPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
+    "python.pythonPath": "D:\\workenv_windows\\conda_python3_8_common\\python.exe",
     "python.terminal.activateEnvironment": true,
-    "python.envFile": "${workspaceFolder}/.env",
     "python.formatting.provider": "autopep8",
-    "python.formatting.autopep8Args": ["--max-line-length=200"],
+    "python.formatting.autopep8Args": [
+        "--max-line-length=200"
+    ],
     "python.autoComplete.addBrackets": true,
     "python.autoComplete.extraPaths": [
-        "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/",
-        "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/test/"],
+        "${workspaceFolder}/code/python/",
+        "${workspaceFolder}/code/python/utility/",
+        "${workspaceFolder}/code/python/test/"
+    ],
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": ["--list-msgs"],
-    "python.linting.pylintPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/pylint",
-    "python.linting.pylintCategorySeverity.convention": "Information",
-    // "cmake.sourceDirectory": "${workspaceFolder}/code/cpp/replica360",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "files.associations": {
-        "charconv": "cpp"
-    },
-    "cmake.configureOnOpen": false,
-    "python.analysis.extraPaths": [
-        "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/"
+    "python.linting.pylintArgs": [
+        "--list-msgs",
+        "--rcfile",
+        "${workspaceFolder}/.vscode/pylintrc"
     ],
-    "python.analysis.completeFunctionParens": true,
+    "python.linting.pylintPath": "D:\\workenv_windows\\conda_python3_8_common\\Scripts\\pylint.exe",
+    "python.linting.pylintCategorySeverity.convention": "Information"
 }
-
-// // windows env
 // {
-//     "python.pythonPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/python.exe",
-//     "python.venvPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/python.exe",
+//     "python.pythonPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
+//     "python.venvPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
 //     "python.terminal.activateEnvironment": true,
+//     "python.envFile": "${workspaceFolder}/.env",
 //     "python.formatting.provider": "autopep8",
-//     "python.formatting.autopep8Args": ["--max-line-length", "250", "--experimental"],
-//     "python.formatting.blackArgs": ["--line-length", "250"],
-//     "_comment":"",
+//     "python.formatting.autopep8Args": ["--max-line-length=200"],
+//     "python.autoComplete.addBrackets": true,
+//     "python.autoComplete.extraPaths": [
+//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/",
+//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/test/"],
 //     "python.linting.enabled": true,
 //     "python.linting.pylintEnabled": true,
 //     "python.linting.pylintArgs": ["--list-msgs"],
-//     "python.linting.pylintPath": "D:/workenv_windows/python_3_7_7_megaparallax360/Scripts/pylint.exe",
+//     "python.linting.pylintPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/pylint",
 //     "python.linting.pylintCategorySeverity.convention": "Information",
-//     "cSpell.words": [
-//         "numpy",
-//         "openvslam",
-//         "traj"
-//     ],
+//     // "cmake.sourceDirectory": "${workspaceFolder}/code/cpp/replica360",
+//     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 //     "files.associations": {
-//         "vector": "cpp",
-//         "alignedvector3": "cpp",
-//         "fft": "cpp"
-//     }
+//         "charconv": "cpp"
+//     },
+//     "cmake.configureOnOpen": false,
+//     "python.analysis.extraPaths": [
+//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/"
+//     ],
+//     "python.analysis.completeFunctionParens": true,
 // }
