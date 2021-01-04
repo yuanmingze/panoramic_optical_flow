@@ -3,8 +3,7 @@ from scipy import ndimage
 
 import gnomonic_projection
 
-
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -81,3 +80,15 @@ def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type, flow
     else:
         log.error("the weight method {} do not exist.".format(weight_type))
     return weight_map
+
+
+
+def get_rotation(erp_flow):
+    """Compute the  two image rotation from the ERP image's optical flow.
+
+    :param erp_flow: the erp image's flow 
+    :type erp_flow: numpy 
+    :return: the offset of ERP image, [longitude shift, latitude shift
+    :rtype: float
+    """
+    pass

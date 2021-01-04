@@ -183,7 +183,7 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     return np.stack((end_points_u, end_points_v))
 
 
-def sph2epr(phi, theta, image_height, wrap_around=False):
+def sph2erp(phi, theta, image_height, wrap_around=False):
     """ Transform the spherical coordinate location to ERP image pixel location.
     The range of erp phi is [-pi, +pi), theta is [-0.5*pi, +0.5*pi].
     The origin of the ERP is in the Top-Left, and origin of the spherical at the center of ERP image.

@@ -323,7 +323,7 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0):
         tangent_triangle_lambda_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_points[0], tangent_points[1])
 
         # tansform from spherical coordinate to pixel location
-        tangent_triangle_erp_pixel_x, tangent_triangle_erp_pixel_y = sc.sph2epr(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=True)
+        tangent_triangle_erp_pixel_x, tangent_triangle_erp_pixel_y = sc.sph2erp(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=True)
 
         # get the tangent image pixels value
         tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
@@ -377,8 +377,8 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
 
         # 1) get all tangent triangle's available pixels coordinate
         availied_ERP_area = triangle_param["availied_ERP_area"]
-        erp_image_col_start, erp_image_row_start = sc.sph2epr(availied_ERP_area[0], availied_ERP_area[2], erp_image_height, wrap_around=False)
-        erp_image_col_stop, erp_image_row_stop = sc.sph2epr(availied_ERP_area[1], availied_ERP_area[3], erp_image_height, wrap_around=False)
+        erp_image_col_start, erp_image_row_start = sc.sph2erp(availied_ERP_area[0], availied_ERP_area[2], erp_image_height, wrap_around=False)
+        erp_image_col_stop, erp_image_row_stop = sc.sph2erp(availied_ERP_area[1], availied_ERP_area[3], erp_image_height, wrap_around=False)
 
         # process the image boundary
         erp_image_col_start = int(erp_image_col_start) if int(erp_image_col_start) > 0 else int(erp_image_col_start - 0.5)
@@ -471,7 +471,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
         tangent_points = triangle_param["tangent_points"]  # tangent center project point
         tangent_triangle_lambda_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_points[0], tangent_points[1])
         # TODO check the wrap around implement
-        face_erp_pixel_x, face_erp_pixel_y = sc.sph2epr(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=False)
+        face_erp_pixel_x, face_erp_pixel_y = sc.sph2erp(tangent_triangle_lambda_, tangent_triangle_phi_, erp_image_height, wrap_around=False)
 
         # 1) comput the end point location in the tangent image
         # # get the tangent image pixels flow value in ERP image
@@ -547,8 +547,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         # 1) get all tangent triangle's available pixels coordinate
         # availed ERP spherical range to ERP pixels range
         availied_ERP_area = triangle_param["availied_ERP_area"]
-        erp_flow_col_start, erp_flow_row_start = sc.sph2epr(availied_ERP_area[0], availied_ERP_area[2], erp_flow_height, wrap_around=False)
-        erp_flow_col_stop, erp_flow_row_stop = sc.sph2epr(availied_ERP_area[1], availied_ERP_area[3], erp_flow_height, wrap_around=False)
+        erp_flow_col_start, erp_flow_row_start = sc.sph2erp(availied_ERP_area[0], availied_ERP_area[2], erp_flow_height, wrap_around=False)
+        erp_flow_col_stop, erp_flow_row_stop = sc.sph2erp(availied_ERP_area[1], availied_ERP_area[3], erp_flow_height, wrap_around=False)
 
         # 2) get the pixels location in tangent image location
         # ERP image space --> spherical space
@@ -598,7 +598,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         # tangent normailzed space --> spherical space
         tangent_phi_tar_sph, tangent_theta_tar_sph = gp.reverse_gnomonic_projection(tangent_xv_tar_gnom, tangent_yv_tar_gnom, lambda_0, phi_1)
         # spherical space --> ERP image space
-        tangent_xv_tar_pixel, tangent_yv_tar_pixel = sc.sph2epr(tangent_phi_tar_sph, tangent_theta_tar_sph, erp_flow_height, True)
+        tangent_xv_tar_pixel, tangent_yv_tar_pixel = sc.sph2erp(tangent_phi_tar_sph, tangent_theta_tar_sph, erp_flow_height, True)
 
         # 4) get ERP flow with source and target pixels location
         # 4-0) the ERP flow

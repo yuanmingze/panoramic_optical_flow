@@ -1,21 +1,22 @@
 import os
+import sys
 import re
-
 from struct import pack, unpack
 
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
 
 import matplotlib as mpl
-import matplotlib.cm as cm
-
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
-from matplotlib import cm
-import matplotlib as mpl
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
 
 
 def depth_visual_save(depth_data, output_path):
@@ -26,9 +27,7 @@ def depth_visual_save(depth_data, output_path):
     :param output_path: the absolute path of output image.
     :type output_path: str
     """
-    dapthe_data_temp = depth_data
-    if depth_data.dtype != np.float64:
-        dapthe_data_temp = depth_data.astype(np.float64)
+    dapthe_data_temp = depth_data.astype(np.float64)
 
     # draw image
     fig = plt.figure()
@@ -40,7 +39,7 @@ def depth_visual_save(depth_data, output_path):
     im = ax.imshow(dapthe_data_temp, cmap=cm.jet)
     #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
     cbar = ax.figure.colorbar(im, ax=ax)
-    plt.savefig(dapthe_data_temp, dpi=150)
+    plt.savefig(output_path, dpi=150)
     plt.close(fig)
 
 
@@ -219,39 +218,32 @@ def write_pfm(path, image, scale=1):
     TODO: modify, it's from MiDaS
 
     :param path: pfm file path
-    :type path: [type]
+    :type path: str
     :param image: depth data
     :type image: numpy
     :param scale: Scale, defaults to 1
     :type scale: int, optional
-    :raises Exception: [description]
-    :raises Exception: [description]
     """
+    if image.dtype.name != "float32":
+        #raise Exception("Image dtype must be float32.")
+        log.warn("The depth map data is {}, convert to float32 and save to pfm format.".format(image.dtype.name))
+
+    image = np.flipud(image)
+
+    color = None
+    if len(image.shape) == 3 and image.shape[2] == 3:  # color image
+        color = True
+    elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1:  # greyscale
+        color = False
+    else:
+        log.error("Image must have H x W x 3, H x W x 1 or H x W dimensions.")
+        # raise Exception("Image must have H x W x 3, H x W x 1 or H x W dimensions.")
+
     with open(path, "wb") as file:
-        color = None
-
-        if image.dtype.name != "float32":
-            raise Exception("Image dtype must be float32.")
-
-        image = np.flipud(image)
-
-        if len(image.shape) == 3 and image.shape[2] == 3:  # color image
-            color = True
-        elif (
-            len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1
-        ):  # greyscale
-            color = False
-        else:
-            raise Exception("Image must have H x W x 3, H x W x 1 or H x W dimensions.")
-
         file.write("PF\n" if color else "Pf\n".encode())
         file.write("%d %d\n".encode() % (image.shape[1], image.shape[0]))
-
         endian = image.dtype.byteorder
-
         if endian == "<" or endian == "=" and sys.byteorder == "little":
             scale = -scale
-
         file.write("%f\n".encode() % scale)
-
         image.tofile(file)

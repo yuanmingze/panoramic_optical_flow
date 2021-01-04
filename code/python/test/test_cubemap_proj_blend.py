@@ -8,6 +8,7 @@ from utility import flow_io
 from utility import flow_vis
 from utility import projection_cubemap as proj_cm
 from utility import flow_warp
+from utility import depth_io
 
 from utility.logger import Logger
 
@@ -128,6 +129,34 @@ def test_cubmap_image_stitch(padding_size):
     image_io.image_save(erp_image_src, os.path.join(cubemap_images_output, "0001_rgb_stitch_padding.jpg"))
 
 
+def test_cubemap_depth_proj_stitch():
+    """Test stitch cubemap depht map to ERP depth map.
+    """
+    # 1) project the ERP RGB image to ERP RGB Image & estimate each face image's depth
+    padding_size = 0.2
+    erp_rgb_path = os.path.join(config.TEST_data_root_dir, "omniphotos/OsakaTemple6/OsakaTemple6-00.jpg")
+    erp_rgb_data = image_io.image_read(erp_rgb_path)
+    cubemap_rgb_list = proj_cm.erp2cubemap_image(erp_rgb_data, padding_size)
+
+    # 2) estimate each face image's depth
+    for index in range(0, len(cubemap_rgb_list)):
+        cubemap_faceimage_path = os.path.join(config.TEST_data_root_dir, "omniphotos/OsakaTemple6/OsakaTemple6-cubemap-{}.jpg".format(index))
+        image_io.image_save(cubemap_rgb_list[index], cubemap_faceimage_path)
+
+    # 3) stitch the cubemap depth map to ERP image.
+    erp_depth_path = os.path.join(config.TEST_data_root_dir, "omniphotos/OsakaTemple6/OsakaTemple6-00.pfm")
+    face_depthmap_list = []
+    for index in range(0, len(cubemap_rgb_list)):
+        cubemap_facedepth_path = os.path.join(config.TEST_data_root_dir, "omniphotos/OsakaTemple6/OsakaTemple6-cubemap-{}.pfm".format(index))
+        face_depthmap, _ = depth_io.read_pfm(cubemap_facedepth_path)
+        face_depthmap_list.append(face_depthmap)
+
+    # 4) stitch the depth map
+    erp_depth_data = proj_cm.cubemap2erp_depth(face_depthmap_list, padding_size= padding_size)
+    depth_io.depth_visual_save(erp_depth_data, erp_depth_path + ".jpg")
+    depth_io.write_pfm(erp_depth_path, erp_depth_data, scale=1)
+
+
 def test_cubemap_flow_warp():
     """Warp the face image with face flow.
     """
@@ -194,6 +223,10 @@ def test_cubemap_flow_stitch_dis(padding_size, cubemap_flow_dir, face_flow_name_
 
 
 if __name__ == "__main__":
+    test_cubemap_depth_proj_stitch()
+    exit()
+
+
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
     erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
     cubemap_src_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/")
