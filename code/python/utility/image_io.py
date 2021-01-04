@@ -72,13 +72,14 @@ def visual_data(data_array, verbose=False):
     return (m.to_rgba(visualized_data)[:, :, :3] * 255).astype(np.uint8)
 
 
-def image_show(image, verbose=True):
+def image_show(image, title=" ",  verbose=True):
     """
     visualize the numpy array
     """
     if len(np.shape(image)) == 3:
         print("show 3 channels rgb image")
         image_rgb = image.astype(int)
+        plt.title(title)
         plt.axis("off")
         plt.imshow(image_rgb)
         plt.show()
@@ -87,13 +88,14 @@ def image_show(image, verbose=True):
         images = []
         cmap = plt.get_cmap('rainbow')
         fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
-        axs.set_title('--')
+        axs.set_title(title)
         images.append(axs.imshow(image, cmap=cmap))
         fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
         plt.show()
     elif len(np.shape(image)) == 1:
         print("show 1 channels data array")
         image_rgb = visual_data(image, verbose=False)
+        plt.title(title)
         plt.axis("off")
         plt.imshow(image_rgb)
         plt.show()

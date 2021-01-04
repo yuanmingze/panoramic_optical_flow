@@ -280,12 +280,12 @@ def pixel2gnomonic(coord_pixel_x, coord_pixel_y,  padding_size,
         y_max = coord_gnom_xy_range[3]
 
     # tangent image space --> tangent normalized space
-    gnomonic_size_x = abs(coord_gnom_xy_range[1] - coord_gnom_xy_range[0])
-    gnomonic2image_ratio_width = (tangent_image_width - 1) / (gnomonic_size_x + padding_size * 2.0)
+    gnomonic_size_x = abs(x_max - x_min)
+    gnomonic2image_ratio_width = (tangent_image_width - 1.0) / (gnomonic_size_x + padding_size * 2.0)
     coord_gnom_x = coord_pixel_x  / gnomonic2image_ratio_width + x_min - padding_size
 
-    gnomonic_size_y = abs(coord_gnom_xy_range[3] - coord_gnom_xy_range[2])
-    gnomonic2image_ratio_height = (tangent_image_height - 1) / (gnomonic_size_y + padding_size * 2.0)
-    coord_gnom_y = - (coord_pixel_y / gnomonic2image_ratio_height + y_max + padding_size)
+    gnomonic_size_y = abs(y_max -y_min)
+    gnomonic2image_ratio_height = (tangent_image_height - 1.0) / (gnomonic_size_y + padding_size * 2.0)
+    coord_gnom_y = - coord_pixel_y / gnomonic2image_ratio_height + y_max + padding_size
     
     return coord_gnom_x, coord_gnom_y

@@ -1,5 +1,7 @@
 import os
 import numpy as np
+
+from PIL import Image
 import matplotlib.pyplot as plt
 
 import configuration as config
@@ -10,10 +12,11 @@ from utility import flow_io
 from utility import flow_vis
 from utility import flow_warp
 
-from utility.logger  import Logger
+from utility.logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
+
 
 def test_ico_parameters(padding_size):
     """
@@ -116,7 +119,9 @@ def test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow
         image_io.image_save(image_src_warpped, image_src_warpped_path)
 
 
-def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_src_image_stitch_filepath):
+def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_src_flow_stitch_filepath, 
+                        erp_image_height, padding_size,
+                        erp_src_image_stitch_filepath):
     """
     test stitch the icosahedron's 20 face flow.
     """
@@ -127,17 +132,28 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
         face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
 
     # 2) stitch the faces flow to ERP flow
-    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows)
-    flow_io.write_flow_flo(erp_flow_stitch,  erp_src_image_stitch_filepath)
+    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, erp_image_height, padding_size)
+    flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
     face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, [-100, 100])
     # image_io.image_show(face_flow_vis)
-    log.info("output flow to: {}".format(erp_src_image_stitch_filepath + "_vis.jpg"))
-    image_io.image_save(face_flow_vis, erp_src_image_stitch_filepath + "_vis.jpg")
+    log.info("output flow to: {}".format(erp_src_flow_stitch_filepath + "_vis.jpg"))
+    image_io.image_save(face_flow_vis, erp_src_flow_stitch_filepath + "_vis.jpg")
+
+    # 3) test the optical flow with warp
+    print("output warped result: "+ erp_src_image_stitch_filepath)
+    image_src = image_io.image_read(erp_src_image_stitch_filepath)
+    if image_src.shape[0:2] != erp_flow_stitch.shape[0:2]:
+        image_src = Image.fromarray(obj=image_src, mode='RGB').resize((erp_flow_stitch.shape[1], erp_flow_stitch.shape[0]))
+        image_src = np.array(image_src)
+
+    image_src_warpped = flow_warp.warp_forward(image_src, erp_flow_stitch)
+    image_src_warpped_path = erp_src_image_stitch_filepath + "_ico_stitch_warp.png"
+    image_io.image_save(image_src_warpped, image_src_warpped_path) 
 
 
 if __name__ == "__main__":
-    padding_size = 0.0
+    padding_size = 0.1
 
     tangent_image_size = 481
     erp_image_height = 960
@@ -176,5 +192,5 @@ if __name__ == "__main__":
     erp_flow_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward_stitch.flo")
     tangent_flow_filename_expression = "ico_flow_src_{}.flo"
 
-    # test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_filename_expression, tangent_image_size, padding_size)
-    test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_flow_stitch_filepath)
+    test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_filename_expression, tangent_image_size, padding_size)
+    test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_flow_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath)

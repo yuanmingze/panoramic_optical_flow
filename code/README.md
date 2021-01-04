@@ -11,9 +11,6 @@ Was tested on Python 3.7. And 3rd party Libraries:
 - Numpy;
 - Pillow;
 
-`
-
-`
 
 # Matlab
 

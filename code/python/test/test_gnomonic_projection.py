@@ -89,3 +89,4 @@ def test_gnomonic_projection():
 
 if __name__ == "__main__":
     test_gnomonic_projection()
+    test_reverse_gnomonic_projection()

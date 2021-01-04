@@ -535,8 +535,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
     erp_flow_mat = np.zeros((erp_flow_height, erp_flow_width, 2), dtype=np.float64)
     erp_flow_weight_mat = np.zeros((erp_flow_height, erp_flow_width), dtype=np.float64)
 
-    # for triangle_index in range(0, len(tangent_flows_list)):
-    for triangle_index in range(0, 1):
+    for triangle_index in range(0, len(tangent_flows_list)):
         log.debug("stitch the tangent image {}".format(triangle_index))
 
         triangle_param = get_icosahedron_parameters(triangle_index, padding_size)
@@ -545,13 +544,12 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         triangle_points_tangent = np.array(triangle_param["triangle_points_tangent"])
 
         # 1) get all tangent triangle's available pixels coordinate
-        # availed ERP spherical range to ERP pixels range
+        # availed pixles range in ERP spherical coordinate
         availied_ERP_area = triangle_param["availied_ERP_area"]
         erp_flow_col_start, erp_flow_row_start = sc.sph2erp(availied_ERP_area[0], availied_ERP_area[2], erp_flow_height, wrap_around=False)
         erp_flow_col_stop, erp_flow_row_stop = sc.sph2erp(availied_ERP_area[1], availied_ERP_area[3], erp_flow_height, wrap_around=False)
 
         # 2) get the pixels location in tangent image location
-        # ERP image space --> spherical space
         # process the tangent flow boundary
         erp_flow_col_start = int(erp_flow_col_start) if int(erp_flow_col_start) > 0 else int(erp_flow_col_start - 0.5)
         erp_flow_col_stop = int(erp_flow_col_stop + 0.5) if int(erp_flow_col_stop) > 0 else int(erp_flow_col_stop)
@@ -562,18 +560,17 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         triangle_xv, triangle_yv = np.meshgrid(triangle_x_range, triangle_y_range)
         triangle_xv = np.remainder(triangle_xv, erp_flow_width)  # process the wrap around
         triangle_yv = np.remainder(triangle_yv, erp_flow_height)
+        # ERP image space --> spherical space
         spherical_uv = sc.erp2sph((triangle_xv, triangle_yv), erp_flow_height, False)
 
         # spherical space --> normailzed tangent image space
         tangent_xv_gnom, tangent_yv_gnom = gp.gnomonic_projection(spherical_uv[0, :, :], spherical_uv[1, :, :], lambda_0, phi_1)
 
-        # the available pixels list
-        # TODO check eps
+        # the available (in the triangle) pixels list
         pixel_eps = abs(tangent_xv_gnom[0, 0] - tangent_xv_gnom[0, 1]) / (2 * tangent_flow_width)
         available_list = gp.inside_polygon_2d(np.stack((tangent_xv_gnom.flatten(), tangent_yv_gnom.flatten()), axis=1), triangle_points_tangent, on_line=True, eps=pixel_eps)
         available_list = available_list.reshape(tangent_xv_gnom.shape)
 
-        # the tangent available gnomonic coordinate sample the pixel from the tangent image
         # normailzed tangent image space --> tangent image space
         gnomonic_x_min = np.amin(triangle_points_tangent[:, 0], axis=0)
         gnomonic_x_max = np.amax(triangle_points_tangent[:, 0], axis=0)
@@ -584,7 +581,6 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
 
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
-        # get ERP image's pixel available array, indicate pixels whether fall in the tangent face image
         # get the tangent images flow in the tangent image space
         face_flow_x = ndimage.map_coordinates(tangent_flows_list[triangle_index][:, :, 0],[tangent_yv_pixel, tangent_xv_pixel], order=1, mode='constant', cval=255)
         tangent_xv_pixel_tar_available = tangent_xv_pixel + face_flow_x
@@ -600,17 +596,11 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         # spherical space --> ERP image space
         tangent_xv_tar_pixel, tangent_yv_tar_pixel = sc.sph2erp(tangent_phi_tar_sph, tangent_theta_tar_sph, erp_flow_height, True)
 
+
         # 4) get ERP flow with source and target pixels location
         # 4-0) the ERP flow
         face_flow_u = tangent_xv_tar_pixel - triangle_xv[available_list]
         face_flow_v = tangent_yv_tar_pixel - triangle_yv[available_list]
-        # face_flow_v = - face_flow_vc
-
-        # from . import image_io
-        # temp = np.zeros(triangle_xv.shape, np.float)
-        # temp[available_list] = face_flow_v
-        # image_io.image_show(temp)
-        
 
         # 4-1) TODO blend the optical flow
         # # comput the all available pixels' weight
@@ -641,5 +631,4 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
     # for channel_index in range(0, 2):
     #     erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
 
-    # TODO poseprocess : bilateral filter
     return erp_flow_mat
