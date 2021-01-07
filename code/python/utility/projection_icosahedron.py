@@ -270,7 +270,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     return {"tangent_points": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area_sph}
 
 
-def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0):
+def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image = False):
     """Project the equirectangular image to 20 triangle images.
 
     Project the equirectangular image to level-0 icosahedron.
@@ -281,6 +281,8 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0):
     :type tangent_image_width: int, optional
     :param padding_size: the output face image' padding size
     :type padding_size: float
+    :param full_face_image: If yes project all pixels in the face image, no just project the pixels in the face triangle, defaults to False
+    :type full_face_image: bool, optional
     :return: a list contain 20 triangle images, the image is 4 channels, invalided pixel's alpha is 0, others is 1
     :type list
     """
@@ -308,15 +310,18 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0):
         gnomonic_y_min = np.amin(tangent_triangle_vertices[:, 1], axis=0)
         gnomonic_y_max = np.amax(tangent_triangle_vertices[:, 1], axis=0)
         gnom_range_x = np.linspace(gnomonic_x_min, gnomonic_x_max, num=tangent_image_width, endpoint=True)
-        gnom_range_y = np.linspace(gnomonic_y_max, gnomonic_y_min, num=tangent_image_height, endpoint=True) # TODO the order of y axis
+        gnom_range_y = np.linspace(gnomonic_y_max, gnomonic_y_min, num=tangent_image_height, endpoint=True) 
+        # TODO Check the order of y axis
         # gnom_range_y = np.linspace(gnomonic_y_min, gnomonic_y_max, num=tangent_image_height, endpoint=True)
         gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
 
         # the tangent triangle points coordinate in tangent image
         gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
         pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
-        inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
-        inside_list = inside_list.reshape(gnom_range_xv.shape)
+        inside_list = np.full(gnom_range_xv.shape[:2], True, dtype=np.bool)
+        if not full_face_image:
+            inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
+            inside_list = inside_list.reshape(gnom_range_xv.shape)
 
         # project to tangent image
         tangent_points = triangle_param["tangent_points"]
@@ -422,7 +427,7 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
     return erp_image
 
 
-def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
+def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_face_image = False):
     """Project the ERP flow to the 20 tangent flows base on the gnomonic projection.
 
     :param erp_flow_mat: The ERP flow image.
@@ -431,6 +436,8 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
     :type tangent_image_width: int
     :param padding_size: the tangent image's padding size, defaults to 0.0
     :type padding_size: float, optional
+    :param full_face_image: If yes project all pixels in the face image, no just project the pixels in the face triangle, defaults to False
+    :type full_face_image: bool, optional
     :return: a list ontain 20 triangle images
     :rtype: list 
     """
@@ -463,8 +470,10 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size):
         # the valide pixels in the tangent triangle area
         gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
         pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
-        inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
-        inside_list = inside_list.reshape(np.shape(gnom_range_xv))
+        inside_list = np.full(gnom_range_xv.shape[:2], True, dtype=np.bool)
+        if not full_face_image:
+            inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
+            inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
         # 0) Get the tangent image pixels' ERP location, convert the ERP optical flow's UV to tangent image's UV
         # flow start point from gnomonic --> spherical coordinate --> pixel location
