@@ -24,18 +24,30 @@ Please read the README.md file in each folder to get more information.
 
 # Convention 
 
-## Spherical Coordinate System
+##  coordinate system
 
-There is more one spherical coordinate symbol used in this project.
+Gnomonic coordinate system: The +Y is up the +X is right, and the origin [0,0] is image center.
+
+The ERP image spherical coordinate system: 
+The +Y is up and +X is right, and the origin [0,0] is image center.
+The X axis range is [-pi, +pi] and Y axis range is [-pi/2, +pi/2].
+
+Gnomonic/ERP image coordinate system: The +Y is down ans +X is right, and the origin [0,0] is Top-Left.
+
+3D Cartesian coordinate system: The +X is right, +Z is forward and +Y is down.
+
+## Spherical Coordinate System naming
+
+There is more one spherical coordinate system notation used in this project.
 
 The following symbols are equal:
 - (longitude, latitude):
 - (phi, theta)
 - (lambda, phi): used in gnomonic projection;
 - (azimuth, elevation)
-And the corresponding range is [-pi, +pi] and [-pi/2, +pi/2], respectively.
-The ERP image pixel's spherical coordinate is at the center of image.
 
-The all 3D cartesian coordinate +x is right, +z is forward, +y is down.
 
-The image pixel's origin is at the top-left.
+## Optical flow
+
+The default, the ERP optical flow wrap around. 
+For example, if a pixel from the [0.8𝜋,0] cross the longitude [+𝜋,-] to [-0.9𝜋,0], the pixel's optical flow is +0.3𝜋 not 1.7𝜋.
