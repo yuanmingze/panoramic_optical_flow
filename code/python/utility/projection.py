@@ -2,6 +2,7 @@ import numpy as np
 from scipy import ndimage
 
 import gnomonic_projection
+from scipy.stats import norm
 
 from logger import Logger
 
@@ -82,8 +83,7 @@ def get_blend_weight(face_x_src_gnomonic, face_y_src_gnomonic, weight_type, flow
     return weight_map
 
 
-
-def get_rotation(erp_flow):
+def flow2offset(erp_flow, use_weight=True):
     """Compute the  two image rotation from the ERP image's optical flow.
 
     :param erp_flow: the erp image's flow 
@@ -91,4 +91,54 @@ def get_rotation(erp_flow):
     :return: the offset of ERP image, [longitude shift, latitude shift
     :rtype: float
     """
-    pass
+    erp_image_height = erp_flow.shape[0]
+    erp_image_width = erp_flow.shape[1]
+
+    # convert the pixel offset to rotation radian
+    azimuth_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
+    elevation_delta_array = np.pi * (erp_flow[:, :, 1] / erp_image_height)
+
+    if use_weight:
+        # weight of the u, width
+        stdev = erp_image_height * 0.5 * 0.25
+        weight_u_array_index = np.arange(erp_image_height)
+        weight_u_array = norm.pdf(weight_u_array_index, erp_image_height / 2.0, stdev)
+        azimuth_delta_array = np.average(azimuth_delta_array, axis=0, weights=weight_u_array)
+
+        # weight of the v, height
+        stdev = erp_image_width * 0.5 * 0.25
+        weight_v_array_index = np.arange(erp_image_width)
+        weight_v_array = norm.pdf(weight_v_array_index, erp_image_width / 2.0, stdev)
+        elevation_delta_array = np.average(elevation_delta_array, axis=1,  weights=weight_v_array)
+
+    azimuth_delta = np.mean(azimuth_delta_array)
+    elevation_delta = np.mean(elevation_delta_array)
+
+    return azimuth_delta, elevation_delta
+
+
+def image_align(erp_image_src, erp_flow):
+    """Rotate the source image base on the flow.
+
+    :param erp_image_src: the flow's source image
+    :type erp_image_src: numpy 
+    :param erp_flow: the erp image's flow, the optical flow is not processed the wrap around.
+    :type erp_flow: numpy 
+    :return: The rotated source image
+    :rtype: numpy
+    """
+    # 0) compuate the average of optical flow & get the delta phi and lambda
+    azimuth_delta, elevation_delta = flow2offset(erp_flow)
+
+    from scipy.spatial.transform import Rotation as R
+    rotation_matrix = R.from_euler("xyz", [np.degrees(elevation_delta), np.degrees(azimuth_delta), 0], degrees=True).as_dcm()
+
+    # 1) rotate the source image
+    from envmap import EnvironmentMap
+    envmap = EnvironmentMap(erp_image_src, format_='latlong')
+    newerp_image_src_new = envmap.rotate("DCM", rotation_matrix).data
+
+    if erp_image_src.dtype == np.uint8:
+        newerp_image_src_new = newerp_image_src_new.astype(np.uint8)
+
+    return newerp_image_src_new

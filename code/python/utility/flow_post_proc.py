@@ -1,112 +1,76 @@
 import numpy as np
 
-import image_io
-import flow_vis
-import flow_io
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
 
 
-def compute_occlusion():
-    """
-    
-    """
-    pass
+def erp2nonerp_of(flow_erp):
+    """ Convert the NonERP optical flow to ERP optical flow.
 
-
-def process_warp_around_spherical():
-    """
-    process the ward around of spherical coordinate system.
-    The origin is in the center of image, the theta +0.5pi is on the top.
-
-    :pararm phi : range is [-0.5 * pi, + 0.5 * pi)
-    :param theta: range is [-pi, +pi)
-    :return: corrected phi and theta
+    :param flow_erp: the Non-ERP optical flow.
+    :type  flow_erp: numpy
+    :return: The Non-ERP optical flow
+    :rtype: numpy
     """
     pass
 
 
-def process_warp_around_erp(x, y, image_height):
+def of_nonerp2erp(flow_nonerp, of_u_threshold=None, of_v_threshold=None):
+    """Convert the Non-ERP (without warp around) optical flow to ERP optical flow.
+
+    Replace the optical flow larger than threshold  with wrap around value.
+
+    :param flow_nonerp: the Non-ERP optical flow.
+    :type  flow_nonerp: numpy
+    :param of_u_threshold: The wrap-around threshold of optical flow u.
+    :type of_u_threshold: float
+    :param of_v_threshold: The wrap-around threshold of optical flow v.
+    :type of_v_threshold: float
+    :return: The ERP optical flow
+    :rtype: numpy
     """
-    The origian of ERP is on the TOP-Left of ERP image.
+    image_height = np.shape(flow_nonerp)[0]
+    image_width = np.shape(flow_nonerp)[1]
 
-    :param x: the array of x 
-    :param y: the array of y 
-    :param image_height:
-    :return : corrected x and y 
-    """
-    pass
+    if of_u_threshold is None:
+        of_u_threshold = image_width / 2.0
 
+    if of_v_threshold is None:
+        of_v_threshold = image_height / 2.0
 
-def convert_warp_around(flow_original):
-    """
-    Process the optical flow warp around.
-
-    :param flow: the flow without warp around
-    :return: corrected flow
-    """
-    image_height = np.shape(flow_original)[0]
-    image_width = np.shape(flow_original)[1]
-
-    flow_u = flow_original[:, :, 0]
-    index_u = flow_u > (image_width / 2.0)
+    flow_u = flow_nonerp[:, :, 0]
+    index_u = flow_u > of_u_threshold
     flow_u[index_u] = flow_u[index_u] - image_width
-    index_u = flow_u < -(image_width / 2.0)
+    index_u = flow_u < - of_u_threshold
     flow_u[index_u] = flow_u[index_u] + image_width
 
-    flow_v = flow_original[:, :, 1]
-    index_v = flow_v > (image_height / 2.0)
+    flow_v = flow_nonerp[:, :, 1]
+    index_v = flow_v > of_v_threshold
     flow_v[index_v] = flow_v[index_v] - image_height
-    index_v = flow_v < -(image_height / 2.0)
+    index_v = flow_v < -of_v_threshold
     flow_v[index_v] = flow_v[index_v] + image_height
 
     return np.stack((flow_u, flow_v), axis=2)
 
 
-def of_ph2pano(optical_flow, of_warp_around_threshold=0.5):
-    """
-    convert the pinhole type optical flow to panoramic optical flow.
-    process the warp around of optical flow.
-    
-    basic suppose: if optical flow in 
-    :param:
-    :param:
-    """
-    of_image_size = np.shape(optical_flow)
-    image_height = of_image_size[0]
-    image_width = of_image_size[1]
-    image_channels = of_image_size[2]
-    of_warp_around_threshold = image_width * of_warp_around_threshold
+def of_erp2nonerp(optical_flow):
+    """ Convert the ERP optical flow to NonERP optical flow.
 
-    x_idx_arr = np.linspace(0, image_width - 1, image_width)
-    y_idx_arr = np.linspace(0, image_height - 1, image_height)
-    x_idx_tar, y_idx_tar = np.meshgrid(x_idx_arr, y_idx_arr)
+    process the panorama optical flow, change the warp around to NonERP optical flow.
 
-    of_forward_x = optical_flow[:, :, 0]
-    of_forward_y = optical_flow[:, :, 1]
-
-    optical_flow_new = np.zeros(optical_flow.shape, np.float)
-    optical_flow_new[:] = optical_flow
-
-    warp_around_idx = np.where(of_forward_x > of_warp_around_threshold)
-    optical_flow_new[:, :, 0][warp_around_idx] = of_forward_x[warp_around_idx] - image_width
-
-    warp_around_idx = np.where(of_forward_x < -of_warp_around_threshold)
-    optical_flow_new[:, :, 0][warp_around_idx] = of_forward_x[warp_around_idx] + image_width
-
-    return optical_flow_new
-
-
-def of_pano2ph(optical_flow):
-    """
-    panoramic optical flow to pinhole optical flow.
-    process the panorama optical flow, change the warp around to normal optical flow.
-
-    :param: the panoramic optical flow
-    :param: the optical flow processed warp around
+    :param optical_flow: the panoramic optical flow
+    :type optical_flow: numpy
+    :return: the optical flow processed warp around
+    :rtype: numpy
     """
     of_image_size = np.shape(optical_flow)
     image_height = of_image_size[0]
     image_width = of_image_size[1]
-    image_channels = of_image_size[2]
+
+    if of_image_size[2] != 2:
+        log.critical("The optical flow's channel number is {}.".format(of_image_size[2]))
 
     # 0) comput new location
     x_idx_arr = np.linspace(0, image_width - 1, image_width)

@@ -1,16 +1,25 @@
 // windows env
 {
+    // pylance
+    "python.languageServer": "Pylance",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/code/python",
+        "${workspaceFolder}/code/python/utility",
+        "${workspaceFolder}/code/python/test"
+    ],
+    "python.analysis.completeFunctionParens": true,
+    //
     "python.pythonPath": "D:\\workenv_windows\\conda_python3_8_common\\python.exe",
     "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "autopep8",
     "python.formatting.autopep8Args": [
         "--max-line-length=200"
     ],
-    "python.autoComplete.addBrackets": true,
+    "python.autoComplete.addBrackets": false,
     "python.autoComplete.extraPaths": [
-        "${workspaceFolder}/code/python/",
-        "${workspaceFolder}/code/python/utility/",
-        "${workspaceFolder}/code/python/test/"
+        "${workspaceFolder}/code/python",
+        "${workspaceFolder}/code/python/utility",
+        "${workspaceFolder}/code/python/test"
     ],
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
@@ -20,7 +29,9 @@
         "${workspaceFolder}/.vscode/pylintrc"
     ],
     "python.linting.pylintPath": "D:\\workenv_windows\\conda_python3_8_common\\Scripts\\pylint.exe",
-    "python.linting.pylintCategorySeverity.convention": "Information"
+    "python.linting.pylintCategorySeverity.convention": "Information",
+    // cmake
+    "cmake.configureOnOpen": false,
 }
 // {
 //     "python.pythonPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",

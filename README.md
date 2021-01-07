@@ -30,7 +30,10 @@ Gnomonic coordinate system: The +Y is up the +X is right, and the origin [0,0] i
 
 The ERP image spherical coordinate system: 
 The +Y is up and +X is right, and the origin [0,0] is image center.
-The X axis range is [-pi, +pi] and Y axis range is [-pi/2, +pi/2].
+
+TODO theta +0.5pi is on the top?
+The X axis range is [-pi, +pi) and Y axis range is [-0.5 * pi, + 0.5 * pi).
+
 
 Gnomonic/ERP image coordinate system: The +Y is down ans +X is right, and the origin [0,0] is Top-Left.
 
@@ -51,3 +54,5 @@ The following symbols are equal:
 
 The default, the ERP optical flow wrap around. 
 For example, if a pixel from the [0.8𝜋,0] cross the longitude [+𝜋,-] to [-0.9𝜋,0], the pixel's optical flow is +0.3𝜋 not 1.7𝜋.
+The project name this optical flow as ERP optical flow.
+And another type of optical flow as Non-ERP optical flow.
