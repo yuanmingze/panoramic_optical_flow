@@ -19,6 +19,13 @@ def DIS(image_src, image_tar):
     :return: [description]
     :rtype: [type]
     """
+    # the image including alpha channel
+    if image_src.shape[2] == 4:
+        image_src = image_src[:,:,:3]
+    if image_tar.shape[2] == 4:
+        image_tar = image_tar[:,:,:3]
+
+    # RGB to gray 
     if image_src.shape[2] == 3:
         image_src_gray  = cv2.cvtColor(image_src, cv2.COLOR_BGR2GRAY)
         log.debug("the DIS input is gray, convert the RGB image to grapy.")

@@ -90,7 +90,7 @@ def read_png(png_file_path):
     return depth_map
 
 
-def write_png(depth_data, png_file_path):
+def write_png_int8(depth_data, png_file_path):
     """
     output the depth map to png file, 
     """
@@ -109,6 +109,37 @@ def write_png(depth_data, png_file_path):
     img = Image.fromarray(png_data.astype(np.uint8))
     img.save(png_file_path, compress_level=0)
 
+
+def write_png_int16(png_file_path, depth, bits=2):
+    """Write depth map to pfm and png file.
+
+    TODO test and convert
+
+    Args:
+        path (str): filepath without extension
+        depth (array): depth
+    """
+    # write_pfm(path + ".pfm", depth.astype(np.float32))
+
+    depth_min = depth.min()
+    depth_max = depth.max()
+
+    max_val = (2**(8*bits))-1
+
+    if depth_max - depth_min > np.finfo("float").eps:
+        out = max_val * (depth - depth_min) / (depth_max - depth_min)
+    else:
+        out = 0
+
+    if bits == 1:
+        # cv2.imwrite(path + ".png", out.astype("uint8"))
+        img = Image.fromarray(out.astype(np.uint8))
+        img.save(png_file_path, compress_level=0)
+    elif bits == 2:
+        # cv2.imwrite(path + ".png", out.astype("uint16"))
+        img = Image.fromarray(out.astype(np.uint16))
+        img.save(png_file_path, compress_level=0)
+    return
 
 def read_dpt(dpt_file_path):
     """

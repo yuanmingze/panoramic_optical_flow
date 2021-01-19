@@ -209,7 +209,7 @@ def sph2erp(phi, theta, image_height, wrap_around=False):
     return x, y
 
 
-def car2sph(points_car, points_sph, min_radius=1e-10):
+def car2sph(points_car, min_radius=1e-10):
     """
     Transform the 3D point from cartesian to unit spherical coordinate.
 
