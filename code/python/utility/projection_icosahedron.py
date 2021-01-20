@@ -1,14 +1,16 @@
 import math
 import copy
+import ipdb
 import numpy as np
 from scipy import ndimage
+from skimage.transform import resize
 
-from . import gnomonic_projection as gp
-from . import spherical_coordinates as sc
-from . import polygon
-from . import projection
+import gnomonic_projection as gp
+import spherical_coordinates as sc
+import polygon
+import projection
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -19,6 +21,8 @@ Reference:
 [1]: https://mathworld.wolfram.com/GnomonicProjection.html
 """
 
+image_erp_src = None
+image_erp_tar = None
 
 def generate_icosphere_ply(mesh_file_path):
     """
@@ -541,10 +545,18 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
     if not erp_flow_channel == 2:
         log.error("The flow channels number is {}".format(erp_flow_channel))
 
+    # resize the erp image
+    global image_erp_src, image_erp_tar
+    if image_erp_src.shape[:2] != [erp_flow_height, erp_flow_width]:
+        image_erp_src = resize(image_erp_src, (erp_flow_height, erp_flow_width)) * 255.0
+    if image_erp_tar.shape[:2] != [erp_flow_height, erp_flow_width]:
+        image_erp_tar = resize(image_erp_tar, (erp_flow_height, erp_flow_width)) * 255.0
+
     erp_flow_mat = np.zeros((erp_flow_height, erp_flow_width, 2), dtype=np.float64)
     erp_flow_weight_mat = np.zeros((erp_flow_height, erp_flow_width), dtype=np.float64)
 
     for triangle_index in range(0, len(tangent_flows_list)):
+    # for triangle_index in range(0, 2):
         log.debug("stitch the tangent image {}".format(triangle_index))
 
         triangle_param = get_icosahedron_parameters(triangle_index, padding_size)
@@ -605,39 +617,51 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         # spherical space --> ERP image space
         tangent_xv_tar_pixel, tangent_yv_tar_pixel = sc.sph2erp(tangent_phi_tar_sph, tangent_theta_tar_sph, erp_flow_height, True)
 
-
         # 4) get ERP flow with source and target pixels location
         # 4-0) the ERP flow
         face_flow_u = tangent_xv_tar_pixel - triangle_xv[available_list]
         face_flow_v = tangent_yv_tar_pixel - triangle_yv[available_list]
 
         # 4-1) TODO blend the optical flow
-        # # comput the all available pixels' weight
-        # weight_type = "normal_distribution_flowcenter"
-        # face_weight_mat_1 = projection.get_blend_weight(face_x_src_gnomonic[available_list].flatten(), face_y_src_gnomonic[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1))
-        # weight_type = "image_warp_error"
-        # face_weight_mat_2 = projection.get_blend_weight(face_erp_x[available_list], face_erp_y[available_list], weight_type, np.stack((face_x_tar_available, face_y_tar_available), axis=1), image_erp_src, image_erp_tar)
-        # face_weight_mat = np.multiply(face_weight_mat_1, face_weight_mat_2)
+        # comput the all available pixels' weight
+
+        # weight_type = "straightforward"
+        # triangle_points_tangent_weight = get_icosahedron_parameters(triangle_index, 0.0)["triangle_points_tangent"]
+        # face_weight_mat = projection.get_blend_weight(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1), gnomonic_bounding_box = triangle_points_tangent_weight)
+
+        face_weight_mat_1 = projection.get_blend_weight_ico(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(), 
+            "normal_distribution_flowcenter", np.stack((face_flow_x, face_flow_y), axis=1), 
+            gnomonic_bounding_box = triangle_points_tangent)
+        face_weight_mat_2 = projection.get_blend_weight_ico(triangle_xv[available_list], triangle_yv[available_list], 
+             "image_warp_error", np.stack((tangent_xv_tar_pixel, tangent_yv_tar_pixel), axis=1), 
+            image_erp_src, image_erp_tar)
+        face_weight_mat = face_weight_mat_1 * face_weight_mat_2
 
         # face_weight_mat = np.ones(tangent_yv_pixel.shape, dtype= np.float64)
         # face_weight_mat[available_list] = 1
         # # for debug weight
-        # if not flow_index == -1:
+        # if triangle_index == -1:
         #     from . import image_io
-        #     temp = np.zeros(face_x_src_gnomonic.shape, np.float)
+        #     temp = np.zeros(tangent_xv_gnom.shape, np.float)
         #     temp[available_list] = face_weight_mat
         #     image_io.image_show(temp)
 
-        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 0] = face_flow_u  # * face_weight_mat
-        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 1] = face_flow_v  # * face_weight_mat
-        # erp_flow_weight_mat[ triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64)] += face_weight_mat
+        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 0] += face_flow_u  * face_weight_mat
+        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 1] += face_flow_v  * face_weight_mat
+
+        erp_flow_weight_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64)] += face_weight_mat
 
     # compute the final optical flow base on weight
-    # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float) # debug
-    # non_zero_weight_list = erp_flow_weight_mat != 0
-    # if not np.all(non_zero_weight_list):
-    #     log.warn("the optical flow weight matrix contain 0.")
-    # for channel_index in range(0, 2):
-    #     erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
+    # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float)
+    # erp_flow_weight_mat = np.where(erp_flow_weight_mat < 1, erp_flow_weight_mat, 0)
+    # import image_io
+    # image_io.image_show(erp_flow_weight_mat)
+    # import ipdb; ipdb.set_trace()
+
+    non_zero_weight_list = erp_flow_weight_mat != 0.0
+    if not np.all(non_zero_weight_list):
+        log.warn("the optical flow weight matrix contain 0.")
+    for channel_index in range(0, 2):
+        erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
 
     return erp_flow_mat

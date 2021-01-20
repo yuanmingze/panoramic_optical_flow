@@ -39,6 +39,7 @@ Gnomonic/ERP image coordinate system: The +Y is down ans +X is right, and the or
 
 3D Cartesian coordinate system: The +X is right, +Z is forward and +Y is down.
 
+
 ## Spherical Coordinate System naming
 
 There is more one spherical coordinate system notation used in this project.
@@ -56,3 +57,9 @@ The default, the ERP optical flow wrap around.
 For example, if a pixel from the [0.8𝜋,0] cross the longitude [+𝜋,-] to [-0.9𝜋,0], the pixel's optical flow is +0.3𝜋 not 1.7𝜋.
 The project name this optical flow as ERP optical flow.
 And another type of optical flow as Non-ERP optical flow.
+
+
+## Data Order convention
+
+The image and flow data store in Numpy array.
+Image array shape is [height, width, 3], and optical flow array shape is [height, width, 2].

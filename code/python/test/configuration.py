@@ -10,3 +10,4 @@ sys.path.append(os.path.join(dir_scripts, "utility"))
 
 # setting the test data path
 TEST_data_root_dir = "../../../data/"
+TEMP_data_root_dir = "../../../data/temp/"

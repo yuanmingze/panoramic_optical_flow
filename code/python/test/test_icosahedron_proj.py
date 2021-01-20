@@ -24,7 +24,8 @@ log.logger.propagate = False
 
 def compute_ico_faces_DIS(src_folder_path, src_file_expression, 
                         dest_folder_path, dest_file_expression,
-                        flow_dis_output_path, flow_dis_expression, face_number = 20):
+                        flow_dis_output_path, flow_dis_expression, 
+                        face_number = 20):
     """Estimate the flow for each face image. output to cubemap source images' folder.
     The post-fix is dis.
     """
@@ -41,6 +42,7 @@ def compute_ico_faces_DIS(src_folder_path, src_file_expression,
 
     # 2) estimate them DIS optical flow
     for index in range(0, face_number):
+        import ipdb; ipdb.set_trace()
         face_flow = flow_estimate.DIS(src_image_list[index], tar_image_list[index])
 
         face_flow_path = os.path.join(flow_dis_output_path, flow_dis_expression.format(index))
@@ -48,6 +50,14 @@ def compute_ico_faces_DIS(src_folder_path, src_file_expression,
         face_flow_vis = flow_vis.flow_to_color(face_flow)
         image_io.image_save(face_flow_vis, face_flow_path + ".jpg")
         log.debug("output the DIS flow to {}".format(face_flow_path))
+
+        # warp image
+        print("output warped result: "+src_file_expression.format(index))
+        src_image_path = src_folder_path + src_file_expression.format(index)
+        image_src = image_io.image_read(src_image_path)
+        image_src_warpped = flow_warp.warp_forward(image_src, face_flow)
+        image_src_warpped_path = src_folder_path + src_file_expression.format(index) + "_warp_dis.png"
+        image_io.image_save(image_src_warpped, image_src_warpped_path)
 
 
 def test_ico_parameters(padding_size):
@@ -153,7 +163,8 @@ def test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow
 
 def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_src_flow_stitch_filepath, 
                         erp_image_height, padding_size,
-                        erp_src_image_stitch_filepath):
+                        erp_src_image_stitch_filepath, 
+                        src_erp_image_path, tar_erp_image_path):
     """
     test stitch the icosahedron's 20 face flow.
     """
@@ -164,10 +175,12 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
         face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
 
     # 2) stitch the faces flow to ERP flow
+    proj_ico.image_erp_src = image_io.image_read(src_erp_image_path)
+    proj_ico.image_erp_tar = image_io.image_read(tar_erp_image_path)
     erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, erp_image_height, padding_size)
     flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
-    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, [-100, 100])
+    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, [-40, 40])
     # image_io.image_show(face_flow_vis)
     log.info("output flow to: {}".format(erp_src_flow_stitch_filepath + "_vis.jpg"))
     image_io.image_save(face_flow_vis, erp_src_flow_stitch_filepath + "_vis.jpg")
@@ -230,13 +243,12 @@ if __name__ == "__main__":
 
     # # # 5) compute the each face's optical flow with DIS
     tangent_DIS_flow_filename_expression = "ico_flow_dis_src_{}.flo"
-
     # compute_ico_faces_DIS(ico_src_image_output_dir, tangent_image_filename_expression, 
     #                     ico_tar_image_output_dir, tangent_image_filename_expression,
-    #                     ico_src_image_output_dir, tangent_DIS_flow_filename_expression, ico_face_number)
-
+    #                     ico_src_image_output_dir, tangent_DIS_flow_filename_expression)
 
     # # 6) stitch all face DIS optical flow to ERP flow
     erp_flow_dis_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_dis_forward_stitch.flo")
     test_ico_flow_stitch(ico_src_image_output_dir, tangent_DIS_flow_filename_expression, 
-                erp_flow_dis_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath)
+                erp_flow_dis_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath,
+                erp_src_image_filepath, erp_tar_image_filepath)
