@@ -15,8 +15,6 @@ import os
 def test_multi_step_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_output_filepath):
     """Test 
     """
-    import ipdb
-    ipdb.set_trace()
     # load image to CPU memory
     src_erp_image = image_io.image_read(erp_src_image_filepath)
     tar_erp_image = image_io.image_read(erp_tar_image_filepath)

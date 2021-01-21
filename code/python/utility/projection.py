@@ -238,33 +238,44 @@ def flow_accumulate_endpoint(optical_flow, rotation):
 
     :param optical_flow: the original optical flow
     :type optical_flow: numpy
-    :param rotation: the rotation in radian, [longitude, latitude]
+    :param rotation: the rotation of spherical coordinate in radian, [longitude, latitude]
     :type rotation: list
     :return: the accumulated optical flow
     :rtype: numpy 
     """
-    flow_width = optical_flow.shape[1]
     flow_height = optical_flow.shape[0]
+    flow_width = optical_flow.shape[1]
 
-    end_points_array_x = np.linspace(0, flow_width, endpoint=False)
-    end_points_array_y = np.linspace(0, flow_height, endpoint=False)
-    end_points_array_xv, end_points_array_yv = np.meshgrid(end_points_array_x, end_points_array_y)
+    end_points_array_x = np.linspace(0, flow_width, flow_width, endpoint=False)
+    end_points_array_y = np.linspace(0, flow_height, flow_height, endpoint=False)
+    src_points_array_xv, src_points_array_yv = np.meshgrid(end_points_array_x, end_points_array_y)
 
     # get end point location in ERP coordinate
-    end_points_array_xv += optical_flow[:, :, 0]
-    end_points_array_yv += optical_flow[:, :, 1]
+    end_points_array_xv = src_points_array_xv + optical_flow[:, :, 0]
+    end_points_array_yv = src_points_array_yv + optical_flow[:, :, 1]
+
+    # # rotation the target points
+    # elevation_delta= rotation[1]
+    # azimuth_delta = rotation[0]
+    # from scipy.spatial.transform import Rotation as R
+    # rotation_matrix = R.from_euler("xyz", [np.degrees(elevation_delta), np.degrees(azimuth_delta), 0], degrees=True).as_dcm()
+    # from envmap import EnvironmentMap
+    # import ipdb; ipdb.set_trace()
+    # end_points_array_xv = EnvironmentMap(end_points_array_xv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
+    # end_points_array_yv = EnvironmentMap(end_points_array_yv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
 
     # erp -> spherical
-    end_points_sph = spherical_coordinates.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height, wrap_around=True)
+    end_points_sph = spherical_coordinates.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height)
 
-    end_points_sph[:, :, 0] = end_points_sph[:, :, 0] + rotation[0]
-    end_points_sph[:, :, 1] = end_points_sph[:, :, 1] + rotation[1]
+    end_points_sph[0, :, :] += rotation[0]
+    end_points_sph[1, :, :] += rotation[1]
 
     # spherical -> epr
-    end_points_erp_accu = spherical_coordinates.sph2erp(end_points_sph, end_points_sph, flow_height, wrap_around=True)
+    end_points_erp_accu_x, end_points_erp_accu_y = spherical_coordinates.sph2erp(
+        end_points_sph[0, :, :] , end_points_sph[1, :, :], flow_height)
 
     # erp pixles location to flow
-    end_points_erp_accu[:, :, 0] -= end_points_array_xv
-    end_points_erp_accu[:, :, 1] -= end_points_array_yv
+    end_points_erp_accu_x -= src_points_array_xv
+    end_points_erp_accu_y -= src_points_array_yv
 
-    return end_points_erp_accu
+    return np.stack((end_points_erp_accu_x, end_points_erp_accu_y), axis= -1)

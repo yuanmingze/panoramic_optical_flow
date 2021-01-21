@@ -175,7 +175,7 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     erp_points_y = erp_points[1]
     if wrap_around:
         erp_points_x = np.remainder(erp_points_x, width)
-        erp_points_y = np.remainder(erp_points_x, height)
+        erp_points_y = np.remainder(erp_points_y, height)
 
     # 1) point location to theta and phi
     end_points_u = (erp_points_x - width / 2.0) / (width / 2.0) * np.pi
@@ -188,9 +188,9 @@ def sph2erp(phi, theta, image_height, wrap_around=False):
     The range of erp phi is [-pi, +pi), theta is [-0.5*pi, +0.5*pi].
     The origin of the ERP is in the Top-Left, and origin of the spherical at the center of ERP image.
 
-    :param phi: longitude 
+    :param phi: longitude is radian
     :type phi: numpy
-    :param theta: latitude
+    :param theta: latitude is radian
     :type theta: numpy
     :param image_height: the height of the ERP image. the image width is 2 times of image height
     :type image_height: [type]
@@ -252,3 +252,29 @@ def sph2car(phi, theta, radius=1.0):
     y = -radius * np.sin(theta)
 
     return np.stack((x, y, z), axis=1)
+
+
+
+def rotate_array(data_array, rotate_longitude, rotate_latitude):
+    """Rotate the array along the longitude and latitude.
+
+    The envmap's 3d coordinate system is +x right, +y up and -z front.
+    So it's same as the our spherical coordinate system.
+
+    :param data_array: the data array, [height, height*2, :]
+    :type data_array: numpy
+    :param rotate_longitude: rotate along the latitude, radian
+    :type rotate_longitude: float
+    :param rotate_latitude: rotate along the longitude, radian
+    :type rotate_latitude: float 
+    :return: the rotated data array
+    :rtype: numpy
+    """
+    from scipy.spatial.transform import Rotation as R
+    rotation_matrix = R.from_euler("xyz", [np.degrees(rotate_latitude), np.degrees(rotate_longitude), 0], degrees=True).as_dcm()
+
+    # rotate the ERP image
+    from envmap import EnvironmentMap
+    envmap = EnvironmentMap(data_array, format_='latlong')
+    data_array_rot = envmap.rotate("DCM", rotation_matrix).data
+    return data_array_rot

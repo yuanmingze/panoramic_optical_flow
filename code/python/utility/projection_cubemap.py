@@ -21,9 +21,6 @@ Reference: https://en.wikipedia.org/wiki/Cube_mapping
     In the spherical coordinate systehm the forward is +z, down is +y, right is +x.  The center of ERP's theta (latitude) and phi(longitude) is (0,0) 
 """
 
-image_erp_src = None
-image_erp_tar = None
-
 
 def generage_cubic_ply(mesh_file_path):
     """
@@ -379,13 +376,15 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0):
     return cubmap_tangent_flows
 
 
-def erp2cubemap_image(erp_image_mat, padding_size=0.0):
+def erp2cubemap_image(erp_image_mat, padding_size=0.0, face_image_size = None):
     """
     Project the equirectangular optical flow to 6 face of cube map base on the inverse gnomonic projection.
     The (x,y) of tangent image's tangent point is (0,0) of tangent image.
 
     :param erp_image_mat: the equirectangular image, dimension is [height, width, 3]
     :type erp_image_mat: numpy 
+    :param  face_image_size: the tangent face image size 
+    :type face_image_size: int
     :param padding_size: the padding size outside the face boundary, defaults to 0.0, do not padding
     :type padding_size: the bound, optional
     :retrun: 6 images of each fact of cubemap projection
@@ -393,10 +392,13 @@ def erp2cubemap_image(erp_image_mat, padding_size=0.0):
     """
     # get the cube map with inverse of gnomonic projection.
     cubmap_tangent_images = []
-    face_image_size = 500  # the size of each face
+
     erp_image_height = np.shape(erp_image_mat)[0]
     erp_image_width = np.shape(erp_image_mat)[1]
     erp_image_channel = np.shape(erp_image_mat)[2]
+
+    if face_image_size is None:
+        face_image_size = int(erp_image_width / 4.0)
 
     cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
@@ -512,7 +514,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     return erp_image_mat
 
 
-def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0):
+def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
 
@@ -617,19 +619,19 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0)
         # 4-1) blend the optical flow
         # comput the all available pixels' weight
         weight_type = "normal_distribution_flowcenter"
-        face_weight_mat_1 = projection.get_blend_weight(face_x_src_gnomonic[available_list].flatten(
+        face_weight_mat_1 = projection.get_blend_weight_cubemap(face_x_src_gnomonic[available_list].flatten(
         ), face_y_src_gnomonic[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1))
         weight_type = "image_warp_error"
-        face_weight_mat_2 = projection.get_blend_weight(face_erp_x[available_list], face_erp_y[available_list], weight_type,
+        face_weight_mat_2 = projection.get_blend_weight_cubemap(face_erp_x[available_list], face_erp_y[available_list], weight_type,
                                                         np.stack((face_x_tar_available, face_y_tar_available), axis=1), image_erp_src, image_erp_tar)
         face_weight_mat = np.multiply(face_weight_mat_1, face_weight_mat_2)
 
-        # for debug weight
-        if not flow_index == -1:
-            from . import image_io
-            temp = np.zeros(face_x_src_gnomonic.shape, np.float)
-            temp[available_list] = face_weight_mat
-            image_io.image_show(temp)
+        # # for debug weight
+        # if not flow_index == -1:
+        #     import image_io
+        #     temp = np.zeros(face_x_src_gnomonic.shape, np.float)
+        #     temp[available_list] = face_weight_mat
+        #     image_io.image_show(temp)
 
         erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 0] += face_flow_u * face_weight_mat
         erp_flow_mat[face_erp_y[available_list].astype(np.int64), face_erp_x[available_list].astype(np.int64), 1] += face_flow_v * face_weight_mat

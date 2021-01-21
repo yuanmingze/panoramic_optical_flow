@@ -1,12 +1,17 @@
 import os
 
 import configuration as config
+import flow_estimate
+import flow_vis
+import flow_warp
+import spherical_coordinates
 
 from utility import projection
 from utility import image_io
 from utility import flow_io
 from utility import flow_post_proc
 
+import numpy as np
 
 def test_get_rotation(erp_src_image_path, erp_flow_path):
     """Test the get_rotation function.
@@ -25,6 +30,32 @@ def test_get_rotation(erp_src_image_path, erp_flow_path):
     image_io.image_save(erp_image_rotated, rotated_image_path)
 
 
+def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
+    """ Always rotate the target image.
+
+    TODO if set rotation_longitude and rotation_latitude to 0.0, there are offset between the input and output image. Check the reason! 
+    """
+    src_image_data = image_io.image_read(erp_src_image_filepath)
+    tar_image_data = image_io.image_read(erp_tar_image_filepath)
+
+    # rotation tar image
+    rotation_longitude = np.radians(-10.0)
+    rotation_latitude = np.radians(0.0)
+    tar_image_data_rot = spherical_coordinates.rotate_array(tar_image_data, rotation_longitude, rotation_latitude)
+    # image_io.image_save(tar_image_data_rot, erp_tar_image_filepath + "_rot.jpg") 
+
+    flow_dis = flow_estimate.DIS(src_image_data, tar_image_data_rot)
+    flow_vis_data = flow_vis.flow_to_color(flow_dis)
+    image_io.image_save(flow_vis_data, erp_src_image_filepath + "flow.jpg")
+
+    # warp the optical flow base on rotation
+    flow_dis_rot = projection.flow_accumulate_endpoint(flow_dis, [-rotation_longitude, -rotation_latitude])
+    flow_vis_data = flow_vis.flow_to_color(flow_dis_rot)
+    # image_io.image_save(flow_vis_data, erp_src_image_filepath + "flow_rot.jpg")
+    src_image_data_rot = flow_warp.warp_forward(src_image_data, flow_dis_rot)
+    image_io.image_save(src_image_data_rot, erp_src_image_filepath + "warp_rot.jpg")
+
+
 if __name__ == "__main__":
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
     erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
@@ -33,4 +64,5 @@ if __name__ == "__main__":
     erp_flow_dis_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/cubemap_flo_dis_padding_stitch.flo")
 
     # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
-    test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
+    # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
+    test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)

@@ -26,18 +26,14 @@ Please read the README.md file in each folder to get more information.
 
 ##  coordinate system
 
-Gnomonic coordinate system: The +Y is up the +X is right, and the origin [0,0] is image center.
+- Gnomonic coordinate system: The +X is right and +Y is up, and the origin [0,0] is image center.
 
-The ERP image spherical coordinate system: 
-The +Y is up and +X is right, and the origin [0,0] is image center.
-
-TODO theta +0.5pi is on the top?
+- spherical coordinate system:  +X is right and +Y is up, and the origin [0,0] is image center.
 The X axis range is [-pi, +pi) and Y axis range is [-0.5 * pi, + 0.5 * pi).
 
+- ERP image coordinate system: The +X is right and +Y is down, and the origin [0,0] is Top-Left.
 
-Gnomonic/ERP image coordinate system: The +Y is down ans +X is right, and the origin [0,0] is Top-Left.
-
-3D Cartesian coordinate system: The +X is right, +Z is forward and +Y is down.
+- 3D Cartesian coordinate system: The +X is right, +Y is down and +Z is forward, and the origin [0,0,0] is the center.
 
 
 ## Spherical Coordinate System naming

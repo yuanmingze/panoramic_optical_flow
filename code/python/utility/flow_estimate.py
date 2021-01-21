@@ -1,17 +1,19 @@
 import cv2
 
-from .logger import Logger
-import image_io
 import projection
 
 import projection_cubemap as proj_cm
 import projection_icosahedron as proj_ico
 
+import numpy as np
+
+from logger import Logger
+
 log = Logger(__name__)
 log.logger.propagate = False
 
 
-def DIS(image_src, image_tar):
+def DIS(image_src_original, image_tar_original):
     """Compute the DIS flow.
 
     :param image_src: The optical flow source image.
@@ -21,11 +23,20 @@ def DIS(image_src, image_tar):
     :return: the optical flow.
     :rtype: numpy
     """
+    image_src = image_src_original
+    image_tar = image_tar_original
+
     # the image including alpha channel
     if image_src.shape[2] == 4:
         image_src = image_src[:, :, :3]
     if image_tar.shape[2] == 4:
         image_tar = image_tar[:, :, :3]
+
+    # convert image dtype
+    if image_src.dtype != np.uint8:
+        image_src = image_src.astype(np.uint8)
+    if image_tar.dtype != np.uint8:
+        image_tar = image_tar.astype(np.uint8)
 
     # RGB to gray
     if image_src.shape[2] == 3:
@@ -46,7 +57,7 @@ def DIS(image_src, image_tar):
     return inst.calc(image_src_gray, image_tar_gray, None)
 
 
-def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None):
+def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None, debug = False):
     """Compute the optical flow with mulit-step and icosahedron projection.
 
     :param src_erp_image: the source ERP image data.
@@ -78,8 +89,7 @@ def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None):
     for index in range(0, len(cubeface_images_src_list)):
         optical_flow_cubemap = optical_flow_method(cubeface_images_src_list[index], cubeface_images_tar_list[index])
         cubemap_face_of_list.append(optical_flow_cubemap)
-    optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size=padding_size_cubemap)
-
+    optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image)
     # 1-2) warp target image
     tar_erp_image_rot_cubemap, image_rotation_cubemap = projection.image_align(tar_erp_image_rot_erp, optical_flow_cubemap)
 
@@ -87,14 +97,14 @@ def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None):
     log.debug("compute icosahedron projection image flow")
     # 2-1) erp image to cube map
     padding_size_ico = 0.1
-    icoface_images_src_list = proj_ico.erp2ico_image(src_erp_image, padding_size_ico)
-    icoface_images_tar_list = proj_ico.erp2ico_image(tar_erp_image_rot_cubemap, padding_size_ico)
+    tangent_image_width= 480
+    icoface_images_src_list = proj_ico.erp2ico_image(src_erp_image, tangent_image_width, padding_size_ico)
+    icoface_images_tar_list = proj_ico.erp2ico_image(tar_erp_image_rot_cubemap, tangent_image_width,padding_size_ico)
     ico_face_of_list = []
     for index in range(0, len(icoface_images_src_list)):
         optical_flow_ico = optical_flow_method(icoface_images_src_list[index], icoface_images_tar_list[index])
         ico_face_of_list.append(optical_flow_ico)
-    optical_flow_ico = proj_cm.cubemap2erp_flow(ico_face_of_list, erp_image_height, padding_size=padding_size_ico)
-
+    optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, padding_size_ico, src_erp_image, tar_erp_image)
     # 2-2) warp target image
     tar_erp_image_rot_ico, image_rotation_ico = projection.image_align(tar_erp_image_rot_cubemap, optical_flow_ico)
 

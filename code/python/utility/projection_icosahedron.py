@@ -21,8 +21,7 @@ Reference:
 [1]: https://mathworld.wolfram.com/GnomonicProjection.html
 """
 
-image_erp_src = None
-image_erp_tar = None
+
 
 def generate_icosphere_ply(mesh_file_path):
     """
@@ -518,7 +517,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_fa
     return ico_tangent_flows
 
 
-def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
+def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,image_erp_src = None, image_erp_tar = None):
     """Stitch all 20 tangent flows to a ERP flow.
 
     :param tangent_flows_list: The list of 20 tangnet flow data.
@@ -546,7 +545,6 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0):
         log.error("The flow channels number is {}".format(erp_flow_channel))
 
     # resize the erp image
-    global image_erp_src, image_erp_tar
     if image_erp_src.shape[:2] != [erp_flow_height, erp_flow_width]:
         image_erp_src = resize(image_erp_src, (erp_flow_height, erp_flow_width)) * 255.0
     if image_erp_tar.shape[:2] != [erp_flow_height, erp_flow_width]:
