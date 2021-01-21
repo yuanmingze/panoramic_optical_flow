@@ -62,19 +62,10 @@ def read_bin(binary_file_path, height, width):
     """
     xbash = np.fromfile(binary_file_path, dtype='float32')
     depth_data = xbash.reshape(height, width, 1)
-    # imgplot = plt.imshow(data[:,:,0])
-    # plt.show()
     return depth_data
 
 
-def write_bin(depth_data, binary_file_path):
-    """
-    write the depth map to bin file
-    """
-    raise RuntimeError("do not implement")
-
-
-def read_png(png_file_path):
+def read_png_int8(png_file_path):
     """
     read depth map from png file.
     """
@@ -91,8 +82,12 @@ def read_png(png_file_path):
 
 
 def write_png_int8(depth_data, png_file_path):
-    """
-    output the depth map to png file, 
+    """Write depth map to 24bit three channel png file.
+
+    :param depth_data: [description]
+    :type depth_data: [type]
+    :param png_file_path: [description]
+    :type png_file_path: [type]
     """
     depth_value = (depth_data * 65536.0).astype(int)
 
@@ -110,40 +105,37 @@ def write_png_int8(depth_data, png_file_path):
     img.save(png_file_path, compress_level=0)
 
 
-def write_png_int16(png_file_path, depth, bits=2):
-    """Write depth map to pfm and png file.
+def write_png_int16(png_file_path, depth,):
+    """Write depth map to 16bit single channel png file.
 
-    TODO test and convert
-
-    Args:
-        path (str): filepath without extension
-        depth (array): depth
+    :param png_file_path: png file path
+    :type png_file_path: str
+    :param depth: depth map data
+    :type depth: numpy
+    :param bits: the byte number store single pixel depth map, defaults to 2
+    :type bits: int, optional
     """
-    # write_pfm(path + ".pfm", depth.astype(np.float32))
-
     depth_min = depth.min()
     depth_max = depth.max()
 
-    max_val = (2**(8*bits))-1
+    max_val = (2**(8*2))-1
 
     if depth_max - depth_min > np.finfo("float").eps:
         out = max_val * (depth - depth_min) / (depth_max - depth_min)
     else:
         out = 0
 
-    if bits == 1:
-        # cv2.imwrite(path + ".png", out.astype("uint8"))
-        img = Image.fromarray(out.astype(np.uint8))
-        img.save(png_file_path, compress_level=0)
-    elif bits == 2:
-        # cv2.imwrite(path + ".png", out.astype("uint16"))
-        img = Image.fromarray(out.astype(np.uint16))
-        img.save(png_file_path, compress_level=0)
-    return
+    img = Image.fromarray(out.astype(np.uint16))
+    img.save(png_file_path, compress_level=0)
+
 
 def read_dpt(dpt_file_path):
-    """
-    read depth map from *.dpt file.
+    """read depth map from *.dpt file.
+
+    :param dpt_file_path: the dpt file path
+    :type dpt_file_path: str
+    :return: depth map data
+    :rtype: numpy
     """
     TAG_FLOAT = 202021.25  # check for this when READING the file
 
@@ -152,6 +144,7 @@ def read_dpt(dpt_file_path):
     assert len(ext) > 0, ('readFlowFile: extension required in fname %s' % dpt_file_path)
     assert ext == '.dpt', exit('readFlowFile: fname %s should have extension ''.flo''' % dpt_file_path)
 
+    fid = None
     try:
         fid = open(dpt_file_path, 'rb')
     except IOError:
@@ -175,11 +168,16 @@ def read_dpt(dpt_file_path):
 
 
 def write_dpt(depth_data, dpt_file_path):
+    """Save the depth map from a .dpt file (Sintel format).
+
+    :param depth_data: the depth map's data
+    :type depth_data: numpy
+    :param dpt_file_path: dpt file path
+    :type dpt_file_path: str
     """
-    Reads a .dpt file (Sintel format).
-    """
-    if not len(np.shape(data)) == 1:
-        raise RuntimeError("the depth dimension is not 1.")
+    if not len(depth_data.shape) == 2:
+        log.error("the depth dimension should be 2.")
+        # raise RuntimeError("the depth dimension is not 1.")
 
     width = np.shape(depth_data)[0]
     height = np.shape(depth_data)[1]
@@ -194,13 +192,9 @@ def write_dpt(depth_data, dpt_file_path):
 def read_pfm(path):
     """Read pfm file.
 
-    TODO: modify, it's from MiDaS
-
-    :param path: [description]
-    :type path: [type]
-    :raises Exception: [description]
-    :raises Exception: [description]
-    :return: [description]
+    :param path: the PFM file's path.
+    :type path: str
+    :return: the depth map array and scaler of depth
     :rtype: tuple: (data, scale)
     """
     with open(path, "rb") as file:
@@ -223,7 +217,7 @@ def read_pfm(path):
         if dim_match:
             width, height = list(map(int, dim_match.groups()))
         else:
-            raise Exception("Malformed PFM header.")
+            log.error("Malformed PFM header.")
 
         scale = float(file.readline().decode("ascii").rstrip())
         if scale < 0:
@@ -245,8 +239,6 @@ def read_pfm(path):
 
 def write_pfm(path, image, scale=1):
     """Write depth data to pfm file.
-
-    TODO: modify, it's from MiDaS
 
     :param path: pfm file path
     :type path: str
