@@ -2,10 +2,6 @@ import os
 import pathlib
 
 import numpy as np
-from PIL import Image
-
-import png
-import itertools
 
 import configuration as config
 

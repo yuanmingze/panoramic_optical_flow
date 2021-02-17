@@ -1,5 +1,3 @@
-
-
 import configuration as config
 
 from utility import flow_estimate

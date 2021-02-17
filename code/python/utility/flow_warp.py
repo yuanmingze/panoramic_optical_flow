@@ -92,7 +92,7 @@ def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparen
 
     :param image_first: input image, when it's 4 channels image, use the alpha channel to ignore the transparent area.
     :type image_first: numpy
-    :param of_forward: forward optical flow.
+    :param of_forward: forward optical flow. [width, height, 2]
     :type of_forward: numpy
     :param wrap_around: whether process the wrap around pixels, defaults to False
     :type wrap_around: bool, optional

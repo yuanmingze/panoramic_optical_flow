@@ -267,12 +267,14 @@ def flow_accumulate_endpoint(optical_flow, rotation):
     # erp -> spherical
     end_points_sph = spherical_coordinates.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height)
 
-    end_points_sph[0, :, :] += rotation[0]
-    end_points_sph[1, :, :] += rotation[1]
+    end_points_sph[0, :, :] += rotation[0] 
+    end_points_sph[1, :, :] += rotation[1]  # TODO correct
+
+
+    import ipdb; ipdb.set_trace()
 
     # spherical -> epr
-    end_points_erp_accu_x, end_points_erp_accu_y = spherical_coordinates.sph2erp(
-        end_points_sph[0, :, :] , end_points_sph[1, :, :], flow_height)
+    end_points_erp_accu_x, end_points_erp_accu_y = spherical_coordinates.sph2erp(end_points_sph[0, :, :] , end_points_sph[1, :, :], flow_height)
 
     # erp pixles location to flow
     end_points_erp_accu_x -= src_points_array_xv

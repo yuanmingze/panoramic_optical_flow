@@ -1,9 +1,5 @@
 import numpy as np
 
-import flow_io
-import flow_vis
-import image_io
-
 """
  optical flow visualization;
 reference 

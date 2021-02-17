@@ -2,12 +2,16 @@ import pathlib
 import subprocess
 import copy
 import os
+import sys
 from os import listdir
 from os.path import isfile, join
 import json
 import shutil
 
-#
+
+dir_scripts = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(dir_scripts)
+sys.path.append(dir_scripts)
 from replica360 import gen_video_path_mp
 from replica360 import post_process
 
@@ -59,7 +63,7 @@ def render_datasets():
     """
     # render_list = ["apartment_0", "hotel_0", "office_0", "office_4", "room_0", "room_1"]
     # render_list = ["cube_01_rendering"]
-    render_list = ["office_0"]
+    render_list = ["apartment_0"]
     # render_list = ["hotel_0","apartment_0", "office_0"]
 
     # get all folders name

@@ -1,11 +1,15 @@
-import os
-import numpy as np
 
 import configuration as config
 
-from utility import spherical_coordinates as cs
+from utility import spherical_coordinates as sc
+from utility import image_io
+from utility import flow_warp
+from utility import flow_vis
 
 from utility.logger import Logger
+
+import numpy as np
+import os
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -44,7 +48,7 @@ def test_great_circle_distance_uv():
     points_2_u = points_2_u[np.newaxis, ...]
     points_2_v = points_2_v[np.newaxis, ...]
 
-    result_comput = cs.great_circle_distance_uv(points_1_u, points_1_v, points_2_u, points_2_v, radius=1)
+    result_comput = sc.great_circle_distance_uv(points_1_u, points_1_v, points_2_u, points_2_v, radius=1)
     result_comput = result_comput[0]
 
     for index in range(len(point_pair)):
@@ -54,5 +58,24 @@ def test_great_circle_distance_uv():
         print("Computed: {}".format(result_comput[index]))
 
 
+def test_rotate_array_coord(erp_src_image_filepath):
+    src_image_data = image_io.image_read(erp_src_image_filepath)
+    image_size= [960, 480]
+    rotation_longitude = np.radians(10.0)
+    rotation_latitude = np.radians(10.0)
+    tar_image_data_rot = sc.rotate_array(src_image_data, rotation_longitude, rotation_latitude)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot.jpg")
+    
+    erp_motion_vector = sc.rotate_erp_motion_vector(image_size, -rotation_longitude, -rotation_latitude)
+    erp_motion_vector = np.moveaxis(erp_motion_vector, 0, -1)
+    src_image_data_rot = flow_warp.warp_forward(tar_image_data_rot, erp_motion_vector)
+    erp_motion_vector_vis = flow_vis.flow_to_color(erp_motion_vector)
+    image_io.image_save(erp_motion_vector_vis, erp_src_image_filepath + "_flow_vis.jpg") 
+    image_io.image_save(src_image_data_rot, erp_src_image_filepath + "_warp_rot.jpg") 
+
+    
 if __name__ == "__main__":
     test_great_circle_distance_uv()
+    
+    erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
+    test_rotate_array_coord(erp_src_image_filepath)

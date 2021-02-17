@@ -1,4 +1,8 @@
+import configuration as config
 
+from utility import image_io
+from utility import flow_io
+from utility import flow_vis
 
 if __name__ == "__main__":
     of_data = flow_io.readFlowFile("/home/mingze/Downloads/0001.flo")

@@ -6,7 +6,9 @@ Some optical flow functions are implemented by CPP and Python.
 Was tested on GCC 8.3.
 
 # Python
-Was tested on Python 3.7. And 3rd party Libraries:
+
+Recommand use canda.
+tested on Python 3.7. And 3rd party Libraries:
 
 - Numpy;
 - Pillow;
