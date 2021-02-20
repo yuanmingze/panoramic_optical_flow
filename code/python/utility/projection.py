@@ -175,33 +175,33 @@ def flow2offset(erp_flow, use_weight=True):
     :type erp_flow: numpy 
     :param use_weight: use the centre rows and columns to compute the rotation, default is True.
     :type: bool
-    :return: the offset of ERP image, [longitude shift, latitude shift
+    :return: the offset of ERP image, [theta shift, phi shift
     :rtype: float
     """
     erp_image_height = erp_flow.shape[0]
     erp_image_width = erp_flow.shape[1]
 
     # convert the pixel offset to rotation radian
-    azimuth_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
-    elevation_delta_array = np.pi * (erp_flow[:, :, 1] / erp_image_height)
+    theta_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
+    phi_delta_array = np.pi * (erp_flow[:, :, 1] / erp_image_height)
 
     if use_weight:
         # weight of the u, width
         stdev = erp_image_height * 0.5 * 0.25
         weight_u_array_index = np.arange(erp_image_height)
         weight_u_array = norm.pdf(weight_u_array_index, erp_image_height / 2.0, stdev)
-        azimuth_delta_array = np.average(azimuth_delta_array, axis=0, weights=weight_u_array)
+        theta_delta_array = np.average(theta_delta_array, axis=0, weights=weight_u_array)
 
         # weight of the v, height
         stdev = erp_image_width * 0.5 * 0.25
         weight_v_array_index = np.arange(erp_image_width)
         weight_v_array = norm.pdf(weight_v_array_index, erp_image_width / 2.0, stdev)
-        elevation_delta_array = np.average(elevation_delta_array, axis=1,  weights=weight_v_array)
+        phi_delta_array = np.average(phi_delta_array, axis=1,  weights=weight_v_array)
 
-    azimuth_delta = np.mean(azimuth_delta_array)
-    elevation_delta = np.mean(elevation_delta_array)
+    theta_delta = np.mean(theta_delta_array)
+    phi_delta = np.mean(phi_delta_array)
 
-    return azimuth_delta, elevation_delta
+    return theta_delta, phi_delta
 
 
 def image_align(erp_image, erp_flow):
@@ -215,11 +215,11 @@ def image_align(erp_image, erp_flow):
     :return: The rotated target image
     :rtype: numpy
     """
-    # 0) compuate the average of optical flow & get the delta phi and lambda
-    azimuth_delta, elevation_delta = flow2offset(erp_flow)
+    # 0) compuate the average of optical flow & get the delta theta and phi
+    theta_delta, phi_delta = flow2offset(erp_flow)
 
     from scipy.spatial.transform import Rotation as R
-    rotation_matrix = R.from_euler("xyz", [np.degrees(elevation_delta), np.degrees(azimuth_delta), 0], degrees=True).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [np.degrees(phi_delta), np.degrees(theta_delta), 0], degrees=True).as_dcm()
 
     # 1) rotate the ERP image
     from envmap import EnvironmentMap
@@ -229,7 +229,7 @@ def image_align(erp_image, erp_flow):
     if erp_image.dtype == np.uint8:
         erp_image_rot = erp_image_rot.astype(np.uint8)
 
-    return erp_image_rot, [azimuth_delta, elevation_delta]
+    return erp_image_rot, [theta_delta, phi_delta]
 
 
 def flow_accumulate_endpoint(optical_flow, rotation):
@@ -238,7 +238,7 @@ def flow_accumulate_endpoint(optical_flow, rotation):
 
     :param optical_flow: the original optical flow
     :type optical_flow: numpy
-    :param rotation: the rotation of spherical coordinate in radian, [longitude, latitude]
+    :param rotation: the rotation of spherical coordinate in radian, [theta, phi]
     :type rotation: list
     :return: the accumulated optical flow
     :rtype: numpy 
@@ -255,10 +255,10 @@ def flow_accumulate_endpoint(optical_flow, rotation):
     end_points_array_yv = src_points_array_yv + optical_flow[:, :, 1]
 
     # # rotation the target points
-    # elevation_delta= rotation[1]
-    # azimuth_delta = rotation[0]
+    # phi_delta= rotation[1]
+    # theta_delta = rotation[0]
     # from scipy.spatial.transform import Rotation as R
-    # rotation_matrix = R.from_euler("xyz", [np.degrees(elevation_delta), np.degrees(azimuth_delta), 0], degrees=True).as_dcm()
+    # rotation_matrix = R.from_euler("xyz", [np.degrees(phi_delta), np.degrees(theta_delta), 0], degrees=True).as_dcm()
     # from envmap import EnvironmentMap
     # import ipdb; ipdb.set_trace()
     # end_points_array_xv = EnvironmentMap(end_points_array_xv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]

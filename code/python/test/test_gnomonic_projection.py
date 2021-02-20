@@ -56,10 +56,10 @@ def test_gnomonic_projection():
     # tangent_point_phi = np.pi / 2.0
 
     # the north pole
-    tangent_point_theta = 0.0
-    tangent_point_phi = 0.0
-    # tangent_point_theta = 0.5
-    # tangent_point_phi = -0.1
+    # tangent_point_theta = 0.0
+    # tangent_point_phi = 0.0
+    tangent_point_theta = 0.3
+    tangent_point_phi = -0.4
 
     # tangent_list = np.array.zeros((3,2), dtype = np.float)
     tangent_x_list = np.linspace(-0.5, 0.5, num=40)

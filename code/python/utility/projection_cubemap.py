@@ -137,7 +137,7 @@ def get_cubemap_parameters(padding_size=0.0):
         phi_0 = tangent_center_point[1]
         if index == 0 or index == 1 or index == 4 or index == 5:
             # +x, -x , +z, -z
-            # theta (longitude) range
+            # theta range
             theta_min, _ = gnomonic_projection.reverse_gnomonic_projection(-tangent_padded_range, 0, theta_0, phi_0)
             theta_max, _ = gnomonic_projection.reverse_gnomonic_projection(tangent_padded_range, 0, theta_0, phi_0)
             # phi (latitude) range

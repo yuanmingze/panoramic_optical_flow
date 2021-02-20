@@ -22,7 +22,6 @@ Reference:
 """
 
 
-
 def generate_icosphere_ply(mesh_file_path):
     """
     Genterate a regular icosahedron mesh.
@@ -247,7 +246,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     point_insert_y = np.sort(triangle_points_tangent_pading[:, 1])[1]
     availied_sph_area = np.append(availied_sph_area, [gp.reverse_gnomonic_projection(point_insert_x, point_insert_y, theta_0, phi_0)], axis=0)
     # the bounding box of the face with spherical coordinate
-    availied_ERP_area_sph = []  # [min_longitude, max_longitude, min_latitude, max_lantitude]
+    availied_ERP_area_sph = []  # [min_theta, max_theta, min_phi, max_phi]
     availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 0]))
     availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 0]))
     if 0 <= triangle_index <= 4:
@@ -270,10 +269,10 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     #     availied_ERP_area.append(erp_image_col_start)
     #     availied_ERP_area.append(erp_image_col_stop)
 
-    return {"tangent_points": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area_sph}
+    return {"tangent_point": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area_sph}
 
 
-def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image = False):
+def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image=False):
     """Project the equirectangular image to 20 triangle images.
 
     Project the equirectangular image to level-0 icosahedron.
@@ -313,22 +312,22 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
         gnomonic_y_min = np.amin(tangent_triangle_vertices[:, 1], axis=0)
         gnomonic_y_max = np.amax(tangent_triangle_vertices[:, 1], axis=0)
         gnom_range_x = np.linspace(gnomonic_x_min, gnomonic_x_max, num=tangent_image_width, endpoint=True)
-        gnom_range_y = np.linspace(gnomonic_y_max, gnomonic_y_min, num=tangent_image_height, endpoint=True) 
+        gnom_range_y = np.linspace(gnomonic_y_max, gnomonic_y_min, num=tangent_image_height, endpoint=True)
         # TODO Check the order of y axis
         # gnom_range_y = np.linspace(gnomonic_y_min, gnomonic_y_max, num=tangent_image_height, endpoint=True)
         gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
 
         # the tangent triangle points coordinate in tangent image
-        gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
-        pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
         inside_list = np.full(gnom_range_xv.shape[:2], True, dtype=np.bool)
         if not full_face_image:
+            gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
+            pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
             inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
             inside_list = inside_list.reshape(gnom_range_xv.shape)
 
         # project to tangent image
-        tangent_points = triangle_param["tangent_points"]
-        tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_points[0], tangent_points[1])
+        tangent_point = triangle_param["tangent_point"]
+        tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_point[0], tangent_point[1])
 
         # tansform from spherical coordinate to pixel location
         tangent_triangle_erp_pixel_x, tangent_triangle_erp_pixel_y = sc.sph2erp(tangent_triangle_theta_, tangent_triangle_phi_, erp_image_height, wrap_around=True)
@@ -351,8 +350,12 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
     return tangent_image_list
 
 
-def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
+def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_method=None):
     """Stitch the level-0 icosahedron's tangent image to ERP image.
+
+    blender_method:
+        - None: just sample the triangle area;
+        - Mean: the mean value on the overlap area.
 
     TODO there are seam on the stitched erp image.
 
@@ -360,8 +363,10 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
     :type tangent_images: a list of numpy
     :param erp_image_height: the output erp image's height.
     :type erp_image_height: int
-    :param padding_size: the face image's padding size
+    :param padding_size: the face image's padding size.
     :type padding_size: float
+    :param blender_method: the method used to blend sub-images. 
+    :type blender_method: str
     :return: the stitched ERP image
     :type numpy
     """
@@ -370,13 +375,15 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
 
     images_channels_number = tangent_images[0].shape[2]
     if images_channels_number == 4:
-        log.debug("the face image is RGBA image, convert the output to RGB image.")
+        log.warn("the face image is RGBA image, convert the output to RGB image.")
         images_channels_number = 3
     erp_image_width = erp_image_height * 2
     erp_image = np.full([erp_image_height, erp_image_width, images_channels_number], 0)
 
     tangent_image_height = tangent_images[0].shape[0]
     tangent_image_width = tangent_images[0].shape[1]
+
+    erp_weight_mat = np.zeros((erp_image_height, erp_image_width), dtype=np.float64)
 
     # stitch all tangnet images to ERP image
     for triangle_index in range(0, 20):
@@ -404,33 +411,61 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0):
         # 2) sample the pixel value from tanget image
         # project spherical coordinate to tangent plane
         spherical_uv = sc.erp2sph([triangle_xv, triangle_yv], erp_image_height=erp_image_height, wrap_around=False)
-        theta_0 = triangle_param["tangent_points"][0]
-        phi_0 = triangle_param["tangent_points"][1]
+        theta_0 = triangle_param["tangent_point"][0]
+        phi_0 = triangle_param["tangent_point"][1]
         tangent_xv, tangent_yv = gp.gnomonic_projection(spherical_uv[0, :, :], spherical_uv[1, :, :], theta_0, phi_0)
 
         # the pixels in the tangent triangle
         triangle_points_tangent = np.array(triangle_param["triangle_points_tangent"])
-        pixel_eps = abs(tangent_xv[0, 0] - tangent_xv[0, 1]) / (2 * tangent_image_width)
-        available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
-                                                     triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
-
-        # the tangent available gnomonic coordinate sample the pixel from the tangent image
         gnomonic_x_min = np.amin(triangle_points_tangent[:, 0], axis=0)
         gnomonic_x_max = np.amax(triangle_points_tangent[:, 0], axis=0)
         gnomonic_y_min = np.amin(triangle_points_tangent[:, 1], axis=0)
         gnomonic_y_max = np.amax(triangle_points_tangent[:, 1], axis=0)
-        tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
-        tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
-                                                   0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
 
-        for channel in range(0, images_channels_number):
-            erp_image[triangle_yv[available_pixels_list].astype(np.int), triangle_xv[available_pixels_list].astype(np.int), channel] = \
-                ndimage.map_coordinates(tangent_images[triangle_index][:, :, channel], [tangent_yv, tangent_xv], order=1, mode='constant', cval=255)
+        tangent_gnomonic_range = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
+        pixel_eps = abs(tangent_xv[0, 0] - tangent_xv[0, 1]) / (2 * tangent_image_width)
+
+        if blender_method is None:
+            available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
+                                                         triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
+
+            # the tangent available gnomonic coordinate sample the pixel from the tangent image
+            tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
+                                                       0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
+
+            for channel in range(0, images_channels_number):
+                erp_image[triangle_yv[available_pixels_list].astype(np.int), triangle_xv[available_pixels_list].astype(np.int), channel] = \
+                    ndimage.map_coordinates(tangent_images[triangle_index][:, :, channel], [tangent_yv, tangent_xv], order=1, mode='constant', cval=255)
+        elif blender_method == "mean":
+            triangle_points_tangent = [[gnomonic_x_min, gnomonic_y_max],
+                                       [gnomonic_x_max, gnomonic_y_max],
+                                       [gnomonic_x_max, gnomonic_y_min],
+                                       [gnomonic_x_min, gnomonic_y_min]]
+            available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
+                                                         triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
+
+            tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
+                                                       0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
+            for channel in range(0, images_channels_number):
+                erp_face_image = ndimage.map_coordinates(tangent_images[triangle_index][:, :, channel], [tangent_yv, tangent_xv], order=1, mode='constant', cval=255)
+                erp_image[triangle_yv[available_pixels_list].astype(np.int), triangle_xv[available_pixels_list].astype(np.int), channel] += erp_face_image
+
+            face_weight_mat = np.ones(erp_face_image.shape, np.float64)
+            erp_weight_mat[triangle_yv[available_pixels_list].astype(np.int64), triangle_xv[available_pixels_list].astype(np.int64)] += face_weight_mat
+
+    # compute the final optical flow base on weight
+    if blender_method == "mean":
+        # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float) # debug
+        non_zero_weight_list = erp_weight_mat != 0
+        if not np.all(non_zero_weight_list):
+            log.warn("the optical flow weight matrix contain 0.")
+        for channel_index in range(0, images_channels_number):
+            erp_image[:, :, channel_index][non_zero_weight_list] = erp_image[:, :, channel_index][non_zero_weight_list] / erp_weight_mat[non_zero_weight_list]
 
     return erp_image
 
 
-def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_face_image = False):
+def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_image=False):
     """Project the ERP flow to the 20 tangent flows base on the gnomonic projection.
 
     :param erp_flow_mat: The ERP flow image.
@@ -471,17 +506,17 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_fa
         gnom_range_xv, gnom_range_yv = np.meshgrid(gnom_range_x, gnom_range_y)
 
         # the valide pixels in the tangent triangle area
-        gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
-        pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
         inside_list = np.full(gnom_range_xv.shape[:2], True, dtype=np.bool)
         if not full_face_image:
+            gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
+            pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
             inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
             inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
         # 0) Get the tangent image pixels' ERP location, convert the ERP optical flow's UV to tangent image's UV
         # flow start point from gnomonic --> spherical coordinate --> pixel location
-        tangent_points = triangle_param["tangent_points"]  # tangent center project point
-        tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_points[0], tangent_points[1])
+        tangent_point = triangle_param["tangent_point"]  # tangent center project point
+        tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_point[0], tangent_point[1])
         # TODO check the wrap around implement
         face_erp_pixel_x, face_erp_pixel_y = sc.sph2erp(tangent_triangle_theta_, tangent_triangle_phi_, erp_image_height, wrap_around=False)
 
@@ -497,7 +532,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_fa
 
         # spherical location --> tangent pixel location
         face_pixel_sph = sc.erp2sph([face_erp_pixel_x_target, face_erp_pixel_y_target], erp_image_height, wrap_around=False)
-        face_image_x_target, face_image_y_target = gp.gnomonic_projection(face_pixel_sph[0, :], face_pixel_sph[1, :], tangent_points[0], tangent_points[1])
+        face_image_x_target, face_image_y_target = gp.gnomonic_projection(face_pixel_sph[0, :], face_pixel_sph[1, :], tangent_point[0], tangent_point[1])
 
         # 2) copute the tangent image pixels optical flow
         # gnomonic coordinate -> image coordinate
@@ -517,7 +552,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size =  0.0, full_fa
     return ico_tangent_flows
 
 
-def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,image_erp_src = None, image_erp_tar = None):
+def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None):
     """Stitch all 20 tangent flows to a ERP flow.
 
     :param tangent_flows_list: The list of 20 tangnet flow data.
@@ -554,12 +589,12 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,imag
     erp_flow_weight_mat = np.zeros((erp_flow_height, erp_flow_width), dtype=np.float64)
 
     for triangle_index in range(0, len(tangent_flows_list)):
-    # for triangle_index in range(0, 2):
+        # for triangle_index in range(0, 2):
         log.debug("stitch the tangent image {}".format(triangle_index))
 
         triangle_param = get_icosahedron_parameters(triangle_index, padding_size)
-        theta_0 = triangle_param["tangent_points"][0]
-        phi_0 = triangle_param["tangent_points"][1]
+        theta_0 = triangle_param["tangent_point"][0]
+        phi_0 = triangle_param["tangent_point"][1]
         triangle_points_tangent = np.array(triangle_param["triangle_points_tangent"])
 
         # 1) get all tangent triangle's available pixels coordinate
@@ -601,7 +636,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,imag
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
         # get the tangent images flow in the tangent image space
-        face_flow_x = ndimage.map_coordinates(tangent_flows_list[triangle_index][:, :, 0],[tangent_yv_pixel, tangent_xv_pixel], order=1, mode='constant', cval=255)
+        face_flow_x = ndimage.map_coordinates(tangent_flows_list[triangle_index][:, :, 0], [tangent_yv_pixel, tangent_xv_pixel], order=1, mode='constant', cval=255)
         tangent_xv_pixel_tar_available = tangent_xv_pixel + face_flow_x
 
         face_flow_y = ndimage.map_coordinates(tangent_flows_list[triangle_index][:, :, 1], [tangent_yv_pixel, tangent_xv_pixel], order=1, mode='constant', cval=255)
@@ -609,7 +644,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,imag
 
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
-        tangent_xv_tar_gnom, tangent_yv_tar_gnom = gp.pixel2gnomonic(tangent_xv_pixel_tar_available, tangent_yv_pixel_tar_available, 0.0, tangent_flow_width, tangent_flow_height, tangent_gnomonic_range)
+        tangent_xv_tar_gnom, tangent_yv_tar_gnom = gp.pixel2gnomonic(tangent_xv_pixel_tar_available, tangent_yv_pixel_tar_available, 0.0,
+                                                                     tangent_flow_width, tangent_flow_height, tangent_gnomonic_range)
         # tangent normailzed space --> spherical space
         tangent_theta_tar_sph, tangent_phi_tar_sph = gp.reverse_gnomonic_projection(tangent_xv_tar_gnom, tangent_yv_tar_gnom, theta_0, phi_0)
         # spherical space --> ERP image space
@@ -627,12 +663,12 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,imag
         # triangle_points_tangent_weight = get_icosahedron_parameters(triangle_index, 0.0)["triangle_points_tangent"]
         # face_weight_mat = projection.get_blend_weight(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1), gnomonic_bounding_box = triangle_points_tangent_weight)
 
-        face_weight_mat_1 = projection.get_blend_weight_ico(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(), 
-            "normal_distribution_flowcenter", np.stack((face_flow_x, face_flow_y), axis=1), 
-            gnomonic_bounding_box = triangle_points_tangent)
-        face_weight_mat_2 = projection.get_blend_weight_ico(triangle_xv[available_list], triangle_yv[available_list], 
-             "image_warp_error", np.stack((tangent_xv_tar_pixel, tangent_yv_tar_pixel), axis=1), 
-            image_erp_src, image_erp_tar)
+        face_weight_mat_1 = projection.get_blend_weight_ico(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(),
+                                                            "normal_distribution_flowcenter", np.stack((face_flow_x, face_flow_y), axis=1),
+                                                            gnomonic_bounding_box=triangle_points_tangent)
+        face_weight_mat_2 = projection.get_blend_weight_ico(triangle_xv[available_list], triangle_yv[available_list],
+                                                            "image_warp_error", np.stack((tangent_xv_tar_pixel, tangent_yv_tar_pixel), axis=1),
+                                                            image_erp_src, image_erp_tar)
         face_weight_mat = face_weight_mat_1 * face_weight_mat_2
 
         # face_weight_mat = np.ones(tangent_yv_pixel.shape, dtype= np.float64)
@@ -644,8 +680,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0,imag
         #     temp[available_list] = face_weight_mat
         #     image_io.image_show(temp)
 
-        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 0] += face_flow_u  * face_weight_mat
-        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 1] += face_flow_v  * face_weight_mat
+        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 0] += face_flow_u * face_weight_mat
+        erp_flow_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64), 1] += face_flow_v * face_weight_mat
 
         erp_flow_weight_mat[triangle_yv[available_list].astype(np.int64), triangle_xv[available_list].astype(np.int64)] += face_weight_mat
 

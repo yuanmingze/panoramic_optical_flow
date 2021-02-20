@@ -19,7 +19,7 @@ def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
     
     :param points_list: The points locations numpy array whose size is [point_numb, 2]. The point storage list is as [[x_1, y_1], [x_2, y_2],...[x_n, y_n]].
     :type points_list: numpy
-    :param polygon_points: The clock-wise points sequence. The storage is the same as points_list.
+    :param polygon_points: The clock-wise points sequence. The storage is the same as points_list. size is [triangle_points_tangent, 2]
     :type polygon_points: numpy
     :param on_line: The inside point including the boundary points, if True. defaults to False
     :type on_line: bool, optional
@@ -108,7 +108,7 @@ def gnomonic_projection(theta, phi, theta_0, phi_0):
     return x, y
 
 
-def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
+def reverse_gnomonic_projection(x, y, theta_0, phi_0):
     """ Reverse gnomonic projection.
     Convert the gnomonic nomalized coordinate to spherical coordinate.
 
@@ -131,14 +131,14 @@ def reverse_gnomonic_projection(x, y, lambda_0, phi_1):
         rho[zeros_index] = np.finfo(np.float).eps
 
     c = np.arctan2(rho, 1)
-    phi_ = np.arcsin(np.cos(c) * np.sin(phi_1) + (y * np.sin(c) * np.cos(phi_1)) / rho)
-    lambda_ = lambda_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_1) * np.cos(c) - y * np.sin(phi_1) * np.sin(c))
+    phi_ = np.arcsin(np.cos(c) * np.sin(phi_0) + (y * np.sin(c) * np.cos(phi_0)) / rho)
+    theta_ = theta_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_0) * np.cos(c) - y * np.sin(phi_0) * np.sin(c))
 
     if np.any(zeros_index):
-        phi_[zeros_index] = phi_1
-        lambda_[zeros_index] = lambda_0
+        phi_[zeros_index] = phi_0
+        theta_[zeros_index] = theta_0
 
-    return lambda_, phi_
+    return theta_, phi_
 
 
 def gnomonic2pixel(coord_gnom_x, coord_gnom_y,

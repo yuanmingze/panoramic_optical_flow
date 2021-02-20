@@ -200,20 +200,20 @@ def car2sph(points_car, min_radius=1e-10):
 
     :param points_car: The 3D point array, is [point_number, 3], first column is x, second is y, third is z
     :type points_car: numpy
-    :return: the points spherical coordinate., [azimuth, polar] (theta, phi)
+    :return: the points spherical coordinate, (theta, phi)
     :rtype: numpy
     """
     radius = np.linalg.norm(points_car, axis=1)
 
     valid_list = radius > min_radius  # set the 0 radius to origin.
 
-    azimuth = np.zeros((points_car.shape[0]), np.float)
-    azimuth[valid_list] = np.arctan2(points_car[:, 0][valid_list], points_car[:, 2][valid_list])
+    theta = np.zeros((points_car.shape[0]), np.float)
+    theta[valid_list] = np.arctan2(points_car[:, 0][valid_list], points_car[:, 2][valid_list])
 
-    polar = np.zeros((points_car.shape[0]), np.float)
-    polar[valid_list] = -np.arcsin(np.divide(points_car[:, 1][valid_list], radius[valid_list]))
+    phi = np.zeros((points_car.shape[0]), np.float)
+    phi[valid_list] = -np.arcsin(np.divide(points_car[:, 1][valid_list], radius[valid_list]))
 
-    return np.stack((azimuth, polar), axis=1)
+    return np.stack((theta, phi), axis=1)
 
 
 def sph2car(theta, phi, radius=1.0):
@@ -237,21 +237,21 @@ def sph2car(theta, phi, radius=1.0):
     return np.stack((x, y, z), axis=0)
 
 
-def rotate_array(data_array, rotate_longitude, rotate_latitude):
+def rotate_array(data_array, rotate_theta, rotate_phi):
     """
-    Rotate the array along the longitude and latitude.
+    Rotate the array along the theta and phi.
 
     :param data_array: the data array, size is [height, height*2, :]
     :type data_array: numpy
-    :param rotate_longitude: rotate along the longitude, radian
-    :type rotate_longitude: float
-    :param rotate_latitude: rotate along the latitude, radian
-    :type rotate_latitude: float 
+    :param rotate_theta: rotate along the longitude, radian
+    :type rotate_theta: float
+    :param rotate_phi: rotate along the latitude, radian
+    :type rotate_phi: float 
     :return: the rotated data array
     :rtype: numpy
     """
     # The envmap's 3d coordinate system is +x right, +y up and -z front.
-    rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_latitude), np.degrees(rotate_longitude), 0], degrees=True).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_phi), np.degrees(rotate_theta), 0], degrees=True).as_dcm()
 
     # rotate the ERP image
     from envmap import EnvironmentMap
@@ -260,16 +260,16 @@ def rotate_array(data_array, rotate_longitude, rotate_latitude):
     return data_array_rot
 
 
-def rotate_erp_motion_vector(array_size, rotate_longitude, rotate_latitude):
+def rotate_erp_motion_vector(array_size, rotate_theta, rotate_phi):
     """
     Get the motion vector of coordinate after rotation.
 
     :param data_array: the array size, [array_width, array_hight]
     :type data_array: list
-    :param rotate_longitude: rotate along the longitude, radian
-    :type rotate_longitude: float
-    :param rotate_latitude:  rotate along the latitude, radian
-    :type rotate_latitude: float
+    :param rotate_theta: rotate along the longitude, radian
+    :type rotate_theta: float
+    :param rotate_phi:  rotate along the latitude, radian
+    :type rotate_phi: float
     """
     # 1) generage spherical coordinate for each pixel
     erp_x = np.linspace(0, array_size[0], array_size[0], endpoint=False)
@@ -280,7 +280,7 @@ def rotate_erp_motion_vector(array_size, rotate_longitude, rotate_latitude):
     sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[1], wrap_around=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
 
-    rotation_matrix = R.from_euler("xyz", [rotate_latitude, rotate_longitude, 0], degrees=False).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_dcm()
 
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
 

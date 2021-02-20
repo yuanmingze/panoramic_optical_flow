@@ -33,16 +33,16 @@ def test_get_rotation(erp_src_image_path, erp_flow_path):
 def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
     """ Always rotate the target image.
 
-    TODO if set rotation_longitude and rotation_latitude to 0.0, there are offset between the input and output image. Check the reason! 
+    TODO if set rotation_theta and rotation_phi to 0.0, there are offset between the input and output image. Check the reason! 
     """
     src_image_data = image_io.image_read(erp_src_image_filepath)
     tar_image_data = image_io.image_read(erp_tar_image_filepath)
 
     # 0) rotation tar image
     # Note: 
-    rotation_longitude = np.radians(10.0)
-    rotation_latitude = np.radians(10.0)
-    tar_image_data_rot = spherical_coordinates.rotate_array(tar_image_data, rotation_longitude, rotation_latitude)
+    rotation_theta = np.radians(10.0)
+    rotation_phi = np.radians(10.0)
+    tar_image_data_rot = spherical_coordinates.rotate_array(tar_image_data, rotation_theta, rotation_phi)
     image_io.image_save(tar_image_data_rot, erp_tar_image_filepath + "_rot.jpg") 
 
     # 1) compute the flow from src to rotated rotated tar image
@@ -52,7 +52,7 @@ def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath
 
     # 2) get the flow from src to original tar image
     # warp the optical flow base on rotation
-    flow_dis_rot = projection.flow_accumulate_endpoint(flow_dis, [-rotation_longitude, -rotation_latitude])
+    flow_dis_rot = projection.flow_accumulate_endpoint(flow_dis, [-rotation_theta, -rotation_phi])
     flow_vis_data = flow_vis.flow_to_color(flow_dis_rot)
     image_io.image_save(flow_vis_data, erp_src_image_filepath + "_flow_rot.jpg")
     src_image_data_rot = flow_warp.warp_forward(src_image_data, flow_dis_rot)

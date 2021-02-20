@@ -61,12 +61,12 @@ def test_great_circle_distance_uv():
 def test_rotate_array_coord(erp_src_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
     image_size= [960, 480]
-    rotation_longitude = np.radians(10.0)
-    rotation_latitude = np.radians(10.0)
-    tar_image_data_rot = sc.rotate_array(src_image_data, rotation_longitude, rotation_latitude)
+    rotation_theta = np.radians(10.0)
+    rotation_phi = np.radians(10.0)
+    tar_image_data_rot = sc.rotate_array(src_image_data, rotation_theta, rotation_phi)
     image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot.jpg")
     
-    erp_motion_vector = sc.rotate_erp_motion_vector(image_size, -rotation_longitude, -rotation_latitude)
+    erp_motion_vector = sc.rotate_erp_motion_vector(image_size, -rotation_theta, -rotation_phi)
     erp_motion_vector = np.moveaxis(erp_motion_vector, 0, -1)
     src_image_data_rot = flow_warp.warp_forward(tar_image_data_rot, erp_motion_vector)
     erp_motion_vector_vis = flow_vis.flow_to_color(erp_motion_vector)

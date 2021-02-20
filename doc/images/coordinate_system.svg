@@ -7,9 +7,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="192.69295mm"
+   width="193.63789mm"
    height="85.565109mm"
-   viewBox="0 0 192.69295 85.565109"
+   viewBox="0 0 193.6379 85.565109"
    version="1.1"
    id="svg8"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
@@ -345,9 +345,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="579.85067"
-     inkscape:cy="172.39344"
+     inkscape:zoom="1.4"
+     inkscape:cx="362.57268"
+     inkscape:cy="205.02701"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -357,7 +357,7 @@
      inkscape:object-nodes="true"
      inkscape:snap-smooth-nodes="true"
      inkscape:snap-midpoints="true"
-     inkscape:window-width="1920"
+     inkscape:window-width="1858"
      inkscape:window-height="1057"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
@@ -376,7 +376,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -652,14 +652,14 @@
          sodipodi:role="line">+x</tspan></text>
     <text
        id="text852-4-1-7-0-9"
-       y="171.28198"
-       x="134.10127"
+       y="158.45305"
+       x="134.30173"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.76389px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        xml:space="preserve"><tspan
          sodipodi:role="line"
          id="tspan2144"
-         x="134.10127"
-         y="171.28198">+y</tspan></text>
+         x="134.30173"
+         y="158.45305">+y</tspan></text>
     <path
        style="fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.356902"
        d="m 133.70865,164.49544 5.62686,-3.48244"
@@ -672,7 +672,7 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#00d900;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker2683)"
-       d="M 133.70865,171.68697 V 157.30391"
+       d="m 133.70865,156.7678 v 14.38306"
        id="path2522"
        sodipodi:nodetypes="cc" />
     <path
@@ -801,7 +801,7 @@
     <path
        inkscape:connector-curvature="0"
        id="path825-9"
-       d="m 216.36458,171.20785 v 46.83542"
+       d="M 216.36458,214.26608 V 167.43066"
        style="fill:none;stroke:#00d900;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker6791)"
        sodipodi:nodetypes="cc" />
     <text
@@ -890,13 +890,15 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88056px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="217.01892"
-       y="213.65691"
-       id="text5387-7"><tspan
+       x="217.95436"
+       y="170.09198"
+       id="text5387-7"
+       inkscape:transform-center-x="0.86862597"
+       inkscape:transform-center-y="-0.13363476"><tspan
          sodipodi:role="line"
          id="tspan5385-6"
-         x="217.01892"
-         y="213.65691"
+         x="217.95436"
+         y="170.09198"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88056px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583">φ</tspan></text>
     <text
        xml:space="preserve"
