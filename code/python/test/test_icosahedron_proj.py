@@ -197,7 +197,7 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
 
 
 if __name__ == "__main__":
-    padding_size = 0.1
+    padding_size = 0.5
     ico_face_number = 20
 
     tangent_image_size = 480

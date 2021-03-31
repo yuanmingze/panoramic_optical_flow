@@ -49,6 +49,7 @@ def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, point
 
 def get_angle(points_A, points_B, points_C):
     """
+    A triangle's angle on the surface of a sphere.
     Spherical trigonometry, \cos a= \cos b \cos c + \sin b \sin c \cos A
     Reference: https://en.wikipedia.org/wiki/Spherical_trigonometry
                https://mathworld.wolfram.com/SphericalTrigonometry.html

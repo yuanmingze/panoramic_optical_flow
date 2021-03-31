@@ -247,15 +247,27 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     availied_sph_area = np.append(availied_sph_area, [gp.reverse_gnomonic_projection(point_insert_x, point_insert_y, theta_0, phi_0)], axis=0)
     # the bounding box of the face with spherical coordinate
     availied_ERP_area_sph = []  # [min_theta, max_theta, min_phi, max_phi]
-    availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 0]))
-    availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 0]))
     if 0 <= triangle_index <= 4:
+        if padding_size > 0.0:
+            availied_ERP_area_sph.append(-np.pi)
+            availied_ERP_area_sph.append(np.pi)
+        else:
+            availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 0]))
+            availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 0]))
         availied_ERP_area_sph.append(np.pi / 2.0)
         availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 1]))  # the ERP Y axis direction as down
     elif 15 <= triangle_index <= 19:
+        if padding_size > 0.0:
+            availied_ERP_area_sph.append(-np.pi)
+            availied_ERP_area_sph.append(np.pi)
+        else:
+            availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 0]))
+            availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 0]))
         availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 1]))
         availied_ERP_area_sph.append(-np.pi / 2.0)
     else:
+        availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 0]))
+        availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 0]))
         availied_ERP_area_sph.append(np.amax(availied_sph_area[:, 1]))
         availied_ERP_area_sph.append(np.amin(availied_sph_area[:, 1]))
 
@@ -288,11 +300,17 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
     :return: a list contain 20 triangle images, the image is 4 channels, invalided pixel's alpha is 0, others is 1
     :type list
     """
+    if len(erp_image.shape) == 3:
+        if np.shape(erp_image)[2] == 4:
+            erp_image = erp_image[:, :, 0:3]
+    elif len(erp_image.shape) == 2:
+        log.info("project single channel disp or depth map")
+        erp_image = np.expand_dims(erp_image, axis=2)
+
     # ERP image size
-    if np.shape(erp_image)[2] == 4:
-        erp_image = erp_image[:, :, 0:3]
     erp_image_height = np.shape(erp_image)[0]
     erp_image_width = np.shape(erp_image)[1]
+    channel_number = np.shape(erp_image)[2]
 
     if erp_image_width != erp_image_height * 2:
         raise Exception("the ERP image dimession is {}".format(np.shape(erp_image)))
@@ -337,7 +355,13 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
         tangent_image_x, tangent_image_y = gp.gnomonic2pixel(gnom_range_xv[inside_list], gnom_range_yv[inside_list],
                                                              0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
 
-        tangent_image = np.full([tangent_image_height, tangent_image_width, 4], 255)
+        if channel_number == 1:
+            tangent_image = np.full([tangent_image_height, tangent_image_width, channel_number], 255)
+        elif channel_number == 3:
+            tangent_image = np.full([tangent_image_height, tangent_image_width, 4], 255)
+        else:
+            log.error("The channel number is {}".format(channel_number))
+
         for channel in range(0, np.shape(erp_image)[2]):
             tangent_image[tangent_image_y, tangent_image_x, channel] = \
                 ndimage.map_coordinates(erp_image[:, :, channel], [tangent_triangle_erp_pixel_y, tangent_triangle_erp_pixel_x], order=1, mode='wrap', cval=255)

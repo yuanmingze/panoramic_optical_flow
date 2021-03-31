@@ -1,0 +1,95 @@
+\section{Method}\label{sec:method}
+
+\subsection{Overview}
+
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.4\linewidth]{example-image-a}
+	\caption{method pipeline.}
+\label{fig:method:pipeline}
+\end{figure}
+
+
+% technicial pipline
+
+\subsection{Optical Flow}
+
+\begin{center}
+	\begin{tabular}{ c | c } 
+		\hline
+		Notice & Meaning  \\ [0.5ex] 
+		\hline\hline
+		$\textbf{f}$ & optical flow  \\ 
+		\hline
+		$(u,v)$ & the position of pixel   \\
+		\hline
+		$f(u,v)$ & the pixel's optical flow of image $I_{src}$ \\
+		\hline
+		$\textbf{I}$ & the RGB image  \\ [1ex] 
+		\hline
+	\end{tabular}
+\end{center}
+
+The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
+The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
+Optical flow 
+
+$I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
+
+
+\subsection{360 Optical Flow Expression}
+
+The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the pixel coordinate 0 exceed the range of image pixel $([0, image\_width), [0, image\_height))$. 
+
+The range of optical flow is 
+
+So the 360 optical flow is different with perspective image optical flow in the 
+
+, 360 optical flow is  in 
+
+So there are two-kinds of expression.
+
+One kind optical flow is just in target image range $[0, image_width - 1]$, which do not take the wrap around into account.
+
+So the range of optical flow is 
+Another's target image range is $[- n * image_width, + n * image_width]$
+
+Warp around
+
+
+
+
+\subsection{Warp Around}
+
+
+
+
+\subsubsection{Cross Image Boundary}
+
+
+\subsubsection{Poles}
+
+
+\subsection{Occlusion}
+
+
+\subsection{ERP Image}
+
+
+
+\subsection{Panoramic Optical Flow}
+
+
+\textbf{Regular icosahedron}
+a convex polyhedron with 20 faces, 30 edges and 12 vertices. 
+
+Reference:
+\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
+\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
+\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
+\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
+
+\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
+\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}
+

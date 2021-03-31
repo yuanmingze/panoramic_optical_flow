@@ -50,7 +50,7 @@ def test_enlarge_polygon():
     plt.scatter(x_coordinates, y_coordinates)
     plt.plot(x_coordinates, y_coordinates)
 
-    intersecion_point = polygon.enlarge_polygon(old_points, 0.3)
+    intersecion_point = polygon.enlarge_polygon(old_points, 0.5)
     x_coordinates = []
     y_coordinates = []
     for term in intersecion_point:
@@ -82,5 +82,5 @@ def test_is_clockwise():
 
 if __name__ == "__main__":
     # test_find_intersection()
-    # test_enlarge_polygon()
-    test_is_clockwise()
+    test_enlarge_polygon()
+    # test_is_clockwise()

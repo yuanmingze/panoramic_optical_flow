@@ -19,6 +19,25 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
+def depth2disparity(depth_map, baseline = 1.0, focal = 1.0):
+    """
+    Convert the depth map to disparity map.
+
+    :param depth_map: depth map data
+    :type depth_map: numpy
+    :param baseline: [description], defaults to 1
+    :type baseline: float, optional
+    :param focal: [description], defaults to 1
+    :type focal: float, optional
+    :return: disparity map data, 
+    :rtype: numpy
+    """    
+    no_zeros_index = np.where(depth_map != 0)
+    disparity_map = np.full(depth_map.shape, np.Inf, np.float64)
+    disparity_map[no_zeros_index] = (baseline * focal) / depth_map[no_zeros_index]
+    return disparity_map
+
+
 def depth_visual_save(depth_data, output_path):
     """save the visualized depth map to image file with value-bar.
 
