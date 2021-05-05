@@ -32,7 +32,8 @@ class CustomFormatter(logging.Formatter):
         magenta = Fore.MAGENTA
         red = Fore.RED
         reset = Style.RESET_ALL
-    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    # format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,

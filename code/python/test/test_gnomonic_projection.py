@@ -85,6 +85,30 @@ def test_gnomonic_projection():
     plt.show()
 
 
+def test_gnomonic_unit():
+    """Compute the tangent image's unit.
+    The relationship between the tangent image and radius.
+    Whether the projected point in tangent image is equal the gnomonic point.
+    """
+    theta_0 = np.radians(10.0)
+    phi_0 = np.radians(5.0)
+
+    theta = np.radians(np.array([10.0, 30.0, 45.0, 56.0], np.float))
+    phi = np.radians(np.array([20.0, 45.0, 60.0, -10.0], np.float))
+
+    # 1) compute the gnomonic projection
+    x_g, y_g = gp.gnomonic_projection(theta, phi, theta_0, phi_0)
+    print("1) Gnomonic Projection\nx: {} \ny: {}".format(x_g, y_g))
+
+    # 0) compute the 3D projection
+    x_t, y_t, z_t = gp.tangent3d_projection(theta, phi, theta_0, phi_0)
+    print("2) Tangent 3D Projection\nx: {} \ny: {}".format(x_t, y_t))
+
+    # TODO error is large
+    assert np.allclose(x_g, x_t) and np.allclose(y_g, y_t)
+
+
 if __name__ == "__main__":
-    test_gnomonic_projection()
-    test_reverse_gnomonic_projection()
+    # test_gnomonic_projection()
+    # test_reverse_gnomonic_projection()
+    test_gnomonic_unit()

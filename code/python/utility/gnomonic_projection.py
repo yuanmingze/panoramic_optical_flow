@@ -2,6 +2,7 @@
 import numpy as np
 
 from logger import Logger
+import spherical_coordinates
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -107,6 +108,33 @@ def gnomonic_projection(theta, phi, theta_0, phi_0):
 
     return x, y
 
+
+def tangent3d_projection(theta_, phi_, theta_0, phi_0):
+    """ Project the points on unit sphere to tangent image, to get the 3D points coordinate on tangent plane.
+    :param theta: radian
+    :param phi:
+    :theta_0:
+    :phi_0:
+    :return: the 3d point coordinate in tangent plane.
+    """
+    if theta_0 != 0.0 or phi_0 != 0.0:
+        theta, phi = spherical_coordinates.rotation_sph_coord(theta_, phi_, -theta_0, -phi_0)
+    else:
+        theta = theta_
+        phi = phi_
+
+    if (theta > np.pi * 0.5).any() or (theta < -np.pi * 0.5).any():
+        log.warn("Theta is not in the [-0.5π, 0.5π]")
+    if (phi > np.pi * 0.5).any() or (phi < -np.pi * 0.5).any():
+        log.warn("Phi is not in the [-0.5π, 0.5π]")
+
+    # TODO when t
+    x = 1.0 * np.tan(theta)
+    # TODO wehn np.cos(theta) is 0
+    y = (1.0 / np.cos(theta)) * np.tan(phi)
+    z = 1.0
+    return x, y, np.ones_like(x)
+    
 
 def reverse_gnomonic_projection(x, y, theta_0, phi_0):
     """ Reverse gnomonic projection.

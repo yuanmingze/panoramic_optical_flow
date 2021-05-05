@@ -261,6 +261,17 @@ def rotate_array(data_array, rotate_theta, rotate_phi):
     return data_array_rot
 
 
+def rotation_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
+    """ rotate the sph spherical coordinate, and 
+    :param sph_xy: the spherical coordinate array, size is [2, points_number]
+    """
+    xyz = sph2car(sph_theta, sph_phi, radius=1.0)
+    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_dcm()
+    xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
+    array_xy_rot = car2sph(xyz_rot.T).T
+    return array_xy_rot[0,:] , array_xy_rot[1,:]
+
+
 def rotate_erp_motion_vector(array_size, rotate_theta, rotate_phi):
     """
     Get the motion vector of coordinate after rotation.

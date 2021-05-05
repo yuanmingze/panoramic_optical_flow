@@ -57,7 +57,7 @@ def DIS(image_src_original, image_tar_original):
     return inst.calc(image_src_gray, image_tar_gray, None)
 
 
-def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None, debug = False):
+def pano_optical_flow(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir = None):
     """Compute the optical flow with mulit-step and icosahedron projection.
 
     :param src_erp_image: the source ERP image data.
@@ -66,6 +66,8 @@ def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None, debug
     :type tar_erp_image: numpy
     :param optical_flow_method: the optical flow estimation function.
     :type: function
+    :param debug_output_dir: The folder storing output debug information.
+    :type debug_output_dir: str
     :return: the optical flow from src image to tar image.
     :rtype: numpy
     """
@@ -75,12 +77,17 @@ def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None, debug
     erp_image_height = src_erp_image.shape[0]
 
     # 0) compute flow in ERP image & wrap image
-    log.debug("compute ERP image flow")
+    log.debug("0) compute ERP image flow")
     optical_flow_erp = optical_flow_method(src_erp_image, tar_erp_image)
     tar_erp_image_rot_erp, image_rotation_erp = projection.image_align(tar_erp_image, optical_flow_erp)
 
+    if debug_output_dir is not None:
+        # output OF and warped image 
+        iamge
+
+
     # 1) compute flow with cubemap projection & warp target image
-    log.debug("compute cubemap projection image flow")
+    log.debug("1) compute cubemap projection image flow")
     # 1-1) erp image to cube map
     padding_size_cubemap = 0.1
     cubeface_images_src_list = proj_cm.erp2cubemap_image(src_erp_image, padding_size_cubemap)
@@ -94,7 +101,7 @@ def multi_step_DIS(src_erp_image, tar_erp_image, optical_flow_method=None, debug
     tar_erp_image_rot_cubemap, image_rotation_cubemap = projection.image_align(tar_erp_image_rot_erp, optical_flow_cubemap)
 
     # 2) compute flow with icosahedron projection & warp image
-    log.debug("compute icosahedron projection image flow")
+    log.debug("2) compute icosahedron projection image flow")
     # 2-1) erp image to cube map
     padding_size_ico = 0.1
     tangent_image_width= 480
