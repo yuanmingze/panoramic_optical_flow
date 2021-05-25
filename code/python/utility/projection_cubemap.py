@@ -335,8 +335,6 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
     face_erp_range_sphere_list = cubemap_points["face_erp_range"]  # 7 pieces of image
-    pbc = 1.0 + padding_size  # projection_boundary_coefficient
-    gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
     for image_index in range(0, 6):
         # get the tangent ERP image pixel's spherical coordinate location
@@ -368,13 +366,15 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
         theta_0 = center_point[0]
         phi_0 = center_point[1]
         face_x, face_y = gnomonic_projection.gnomonic_projection(face_theta_, face_phi_, theta_0, phi_0)
+        pbc = 1.0 + padding_size  # projection_boundary_coefficient
         inside_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x.flatten(), face_y.flatten()), axis=1),
                                                             np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.
-        face_x_available = (face_x[inside_list] + pbc) * gnomonic2image_ratio
-        face_y_available = -(face_y[inside_list] - pbc) * gnomonic2image_ratio
+        tangent_gnomonic_range = [-1, +1, -1, +1]
+        face_x_available, face_y_available = gnomonic_projection.gnomonic2pixel(face_x[inside_list], face_y[inside_list],
+                                                       0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 
         # TODO blend boundary
 
@@ -387,7 +387,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     return erp_image_mat
 
 
-def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None):
+def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around = False):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
 
@@ -397,6 +397,8 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
     :type erp_flow_height: int
     :param padding_size: the cubemap's padding area size, defaults to 0.0
     :type padding_size: float, optional
+    :param wrap_around: True, the optical flow is as perspective optical flow, False, it's warp around.
+    :type wrap_around: bool
     :return: the ERP flow image the image size 
     :rtype: numpy
     """
@@ -524,7 +526,6 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
         erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
 
     # TODO poseprocess : bilateral filter
-
     return erp_flow_mat
 
 
@@ -561,14 +562,22 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
     cubemap_points = get_cubemap_parameters(padding_size)
     tangent_points_list = cubemap_points["tangent_points"]
     face_erp_range_sphere_list = cubemap_points["face_erp_range"]
+    # gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
+
+    # convert the perspective depth map to radian distance.
+    log.info("Convert the perspective depth map to radina depth map.")
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
-    gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
+    x_grid = np.linspace(-pbc, pbc, cubemap_image_size)
+    y_grid = np.linspace(pbc, -pbc, cubemap_image_size)
+    gnomonic_coord_x, gnomonic_coord_y = np.meshgrid(x_grid, y_grid)
+    cubemap_erp_depth_list = []
+    for subemap_depth_persp in cubemap_depth_list:
+        center2pixel_length = np.sqrt(np.square(gnomonic_coord_x) + np.square(gnomonic_coord_y) + np.ones_like(gnomonic_coord_y))
+        subimage_depthmap_erp = subemap_depth_persp * center2pixel_length
+        cubemap_erp_depth_list.append(subimage_depthmap_erp)
 
+    # stitch cubemap depth
     for face_index in range(0, 6):
-        # TODO remove
-        if face_index == 1:
-            continue
-
         # get the tangent ERP image pixel's spherical coordinate location
         # the spherical coordinate range for each face
         face_theta_min = np.amin(face_erp_range_sphere_list[face_index][:, 0], axis=0)
@@ -603,8 +612,11 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.
-        face_x_available = (face_x[inside_list] + pbc) * gnomonic2image_ratio
-        face_y_available = -(face_y[inside_list] - pbc) * gnomonic2image_ratio
+        # face_x_available = (face_x[inside_list] + pbc) * gnomonic2image_ratio
+        # face_y_available = -(face_y[inside_list] - pbc) * gnomonic2image_ratio
+        tangent_gnomonic_range = [-1, +1, -1, +1]
+        face_x_available, face_y_available = gnomonic_projection.gnomonic2pixel(face_x[inside_list], face_y[inside_list],
+                                                       0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 
         # 3) offset current face depth map to fit the references depth distribution.
         # copy the reference ERP depth map to reference
@@ -612,11 +624,11 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
         face_erp_y = face_erp_y[inside_list].astype(np.int64)
 
         erp_depthmap_face = np.full((erp_image_height, erp_image_width), 0,  dtype=np.float64)
-        erp_depthmap_face[face_erp_y, face_erp_x] = ndimage.map_coordinates(cubemap_depth_list[face_index][:, :], [face_y_available, face_x_available], order=1, mode='constant', cval=255)
+        erp_depthmap_face[face_erp_y, face_erp_x] = ndimage.map_coordinates(cubemap_erp_depth_list[face_index][:, :], [face_y_available, face_x_available], order=1, mode='constant', cval=0.0)
 
         if padding_size != 0 and face_index == 0:
             erp_depthmap_reference[face_erp_y, face_erp_x, 1] = 1
-            erp_depthmap_reference[face_erp_y, face_erp_x, 0] = ndimage.map_coordinates(cubemap_depth_list[face_index][:, :], [face_y_available, face_x_available], order=1, mode='constant', cval=255)
+            erp_depthmap_reference[face_erp_y, face_erp_x, 0] = ndimage.map_coordinates(cubemap_erp_depth_list[face_index][:, :], [face_y_available, face_x_available], order=1, mode='constant', cval=0.0)
 
         # compute the scale and offset, scaled them before stitch them.
         face2reference_function = None
@@ -641,7 +653,8 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
         # 4) get the value of interpolations.
         # erp_depthmap_weight = projection.get_blend_weight() # exclude the padding area
         if face2reference_function is None:
-            erp_depthmap[face_erp_y, face_erp_x] += erp_depthmap_face[face_erp_y, face_erp_x]
+            # TODO padding size 0, have overleap area
+            erp_depthmap[face_erp_y, face_erp_x] = erp_depthmap_face[face_erp_y, face_erp_x]
         else:
             erp_depthmap[face_erp_y, face_erp_x] += face2reference_function(erp_depthmap_face[face_erp_y, face_erp_x])
 

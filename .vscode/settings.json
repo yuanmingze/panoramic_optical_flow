@@ -9,7 +9,7 @@
     ],
     "python.analysis.completeFunctionParens": true,
     //
-    "python.pythonPath": "D:\\workenv_windows\\conda_python3_8_common\\python.exe",
+    "python.pythonPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/python.exe",
     "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "autopep8",
     "python.formatting.autopep8Args": [
@@ -28,7 +28,7 @@
         "--rcfile",
         "${workspaceFolder}/.vscode/pylintrc"
     ],
-    "python.linting.pylintPath": "D:\\workenv_windows\\conda_python3_8_common\\Scripts\\pylint.exe",
+    "python.linting.pylintPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/pylint.exe",
     "python.linting.pylintCategorySeverity.convention": "Information",
     // cmake
     "cmake.configureOnOpen": false,

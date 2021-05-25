@@ -48,6 +48,14 @@ def depth_visual_save(depth_data, output_path):
     """
     dapthe_data_temp = depth_data.astype(np.float64)
 
+    vmin_ = 0
+    vmax_ = 0
+    dispmap_array = depth_data.flatten()
+    vmin_idx = int(dispmap_array.size * 0.05)
+    vmax_idx = int(dispmap_array.size * 0.95)
+    vmin_ = np.partition(dispmap_array, vmin_idx)[vmin_idx]
+    vmax_ = np.partition(dispmap_array, vmax_idx)[vmax_idx]
+
     # draw image
     fig = plt.figure()
     plt.subplots_adjust(left=0, bottom=0, right=0.1, top=0.1, wspace=None, hspace=None)
@@ -55,7 +63,7 @@ def depth_visual_save(depth_data, output_path):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     fig.tight_layout()
-    im = ax.imshow(dapthe_data_temp, cmap=cm.jet)
+    im = ax.imshow(dapthe_data_temp, cmap=cm.jet, vmin=vmin_, vmax=vmax_)
     #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
     cbar = ax.figure.colorbar(im, ax=ax)
     plt.savefig(output_path, dpi=150)
@@ -189,7 +197,7 @@ def read_dpt(dpt_file_path):
 def write_dpt(depth_data, dpt_file_path):
     """Save the depth map from a .dpt file (Sintel format).
 
-    :param depth_data: the depth map's data
+    :param depth_data: the depth map's data [height, width]
     :type depth_data: numpy
     :param dpt_file_path: dpt file path
     :type dpt_file_path: str
@@ -198,8 +206,8 @@ def write_dpt(depth_data, dpt_file_path):
         log.error("the depth dimension should be 2.")
         # raise RuntimeError("the depth dimension is not 1.")
 
-    width = np.shape(depth_data)[0]
-    height = np.shape(depth_data)[1]
+    width = np.shape(depth_data)[1]
+    height = np.shape(depth_data)[0]
 
     with open(dpt_file_path, 'wb') as file_handle:
         file_handle.write("PIEH".encode())

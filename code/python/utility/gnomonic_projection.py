@@ -193,6 +193,9 @@ def gnomonic2pixel(coord_gnom_x, coord_gnom_y,
     :retrun: the pixel's location 
     :rtype: numpy (int)
     """
+    if padding_size != 0:
+        log.warn("The padding size is not 0, please check if coord_gnom_xy_range has included the padding!")
+
     if tangent_image_height is None:
         tangent_image_height = tangent_image_width
 
