@@ -13,7 +13,7 @@ import os
 #  +x, -x, +y, -y, +z, -z
 cubemap_face_abbre = ["R", "L", "U", "D", "F", "B"]
 
-# TODO debug the RGB, depth, opticalflow, stitch seam
+# TODO debug the opticalflow stitch seam
 
 
 def cubemap_flow_warp(dataroot_dir, cubemap_rgb_image_filename_exp, cubemap_opticalflow_filename_exp,  cubemap_opticalflow_warp_filename_exp):
@@ -134,7 +134,7 @@ def stitch_opticalflow(data_dir, cubemap_opticalflow_filename_exp, pano_opticalf
         erp_depth_data = proj_cm.cubemap2erp_flow(face_flo_list, padding_size=0.0)
         erp_depth_filepath = data_dir + pano_opticalflow_filename_exp.format(image_index)
         flow_io.flow_write(erp_depth_data, erp_depth_filepath)
-        erp_depth_vis = flow_vis.flow_to_color(erp_depth_data, [500, 500])
+        erp_depth_vis = flow_vis.flow_to_color(erp_depth_data, [-50,50])
         image_io.image_save(erp_depth_vis, erp_depth_filepath + ".jpg")
 
 
@@ -157,8 +157,8 @@ if __name__ == "__main__":
     # visual_data(dataroot_dir)
     # stitch_rgb(dataroot_dir, cubemap_rgb_image_filename_exp, pano_rgb_image_filename_exp)
     # stitch_depthmap(dataroot_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp)
-    # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp)
+    stitch_opticalflow(dataroot_dir, cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp)
     # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_backward_filename_exp, pano_opticalflow_backward_filename_exp)
     # cubemap_flow_warp(dataroot_dir, cubemap_rgb_image_filename_exp, cubemap_opticalflow_forward_filename_exp,  cubemap_rgb_forward_warp_filename_exp )
     # pano_flow_warp(dataroot_dir, pano_rgb_image_filename_exp, pano_opticalflow_forward_filename_exp,  pano_rgb_forward_warp_filename_exp)
-    erp_depth2pointcloud(dataroot_dir, pano_depthmap_filename_exp, pano_pointcloud_filename_exp)
+    # erp_depth2pointcloud(dataroot_dir, pano_depthmap_filename_exp, pano_pointcloud_filename_exp)
