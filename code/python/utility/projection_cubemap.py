@@ -410,7 +410,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
     # get ERP image size
     cubemap_image_size = np.shape(cubemap_flows_list[0])[0]
     if erp_flow_height is None:
-        erp_flow_height = int(cubemap_image_size * 2.0)
+        erp_flow_height = cubemap_image_size * 2.0
     erp_flow_height = int(erp_flow_height)
     erp_flow_width = int(erp_flow_height * 2.0)
     erp_flow_channel = np.shape(cubemap_flows_list[0])[2]
@@ -424,14 +424,15 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
     tangent_points_list = cubemap_points["tangent_points"]
     face_erp_range_sphere_list = cubemap_points["face_erp_range"]
     pbc = 1.0 + padding_size  # projection_boundary_coefficient
-    gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
+    # gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
     for flow_index in range(0,  6):
         # get the tangent ERP image pixel's spherical coordinate location range for each face
-        face_theta_min = face_erp_range_sphere_list[flow_index][3][0]
-        face_phi_min = face_erp_range_sphere_list[flow_index][3][1]
-        face_theta_max = face_erp_range_sphere_list[flow_index][1][0]
-        face_phi_max = face_erp_range_sphere_list[flow_index][1][1]
+        face_theta_min = np.amin(face_erp_range_sphere_list[flow_index][:, 0], axis=0)
+        face_theta_max = np.amax(face_erp_range_sphere_list[flow_index][:, 0], axis=0)
+        face_phi_min = np.amin(face_erp_range_sphere_list[flow_index][:, 1], axis=0)
+        face_phi_max = np.amax(face_erp_range_sphere_list[flow_index][:, 1], axis=0)
+
         face_erp_x_min, face_erp_y_max = spherical_coordinates.sph2erp(face_theta_min, face_phi_min, erp_flow_height, False)
         face_erp_x_max, face_erp_y_min = spherical_coordinates.sph2erp(face_theta_max, face_phi_max, erp_flow_height, False)
 
@@ -446,7 +447,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
         face_erp_x_grid = np.linspace(face_erp_x_min, face_erp_x_max, face_erp_x_max - face_erp_x_min + 1)
         face_erp_y_grid = np.linspace(face_erp_y_min, face_erp_y_max, face_erp_y_max - face_erp_y_min + 1)
         face_erp_x, face_erp_y = np.meshgrid(face_erp_x_grid, face_erp_y_grid)
-        face_erp_x = np.remainder(face_erp_x, erp_flow_width)  # TODO # process wrap around
+        face_erp_x = np.remainder(face_erp_x, erp_flow_width)
         face_erp_y = np.remainder(face_erp_y, erp_flow_height)
         face_theta_, face_phi_ = spherical_coordinates.erp2sph((face_erp_x, face_erp_y), erp_flow_height, False)
 
@@ -456,40 +457,32 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
         phi_0 = center_point[1]
         face_x_src_gnomonic, face_y_src_gnomonic = gnomonic_projection.gnomonic_projection(face_theta_, face_phi_, theta_0, phi_0)
 
+        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic.flatten(), face_y_src_gnomonic.flatten()), axis=1),
+                                                               np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x_src_gnomonic))
         # normailzed tangent image space --> tangent image space
-        face_x_src_pixel = (face_x_src_gnomonic + pbc) * gnomonic2image_ratio
-        face_y_src_pixel = -(face_y_src_gnomonic - pbc) * gnomonic2image_ratio
+        tangent_gnomonic_range = [-pbc, +pbc, -pbc, +pbc]
+        face_x_src_available, face_y_src_available = gnomonic_projection.gnomonic2pixel(face_x_src_gnomonic[available_list], face_y_src_gnomonic[available_list], 0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 
         # 3) get the value of interpollations
         # 3-0) remove the pixels outside the tangent image
         # get ERP image's pixel available array, indicate pixels whether fall in the tangent face image
-        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic.flatten(), face_y_src_gnomonic.flatten()), axis=1),
-                                                               np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])).reshape(np.shape(face_x_src_gnomonic))
-        face_x_src_available = face_x_src_pixel[available_list]
-        face_y_src_available = face_y_src_pixel[available_list]
         # get the tangent images flow in the tangent image space
-        face_flow_x = ndimage.map_coordinates(cubemap_flows_list[flow_index][:, :, 0],
-                                              [face_y_src_available, face_x_src_available],
-                                              order=1, mode='constant', cval=255)
+        face_flow_x = ndimage.map_coordinates(cubemap_flows_list[flow_index][:, :, 0], [face_y_src_available, face_x_src_available], order=1, mode='constant', cval=0.0)
         face_x_tar_pixel_available = face_x_src_available + face_flow_x
-
-        face_flow_y = ndimage.map_coordinates(cubemap_flows_list[flow_index][:, :, 1],
-                                              [face_y_src_available, face_x_src_available],
-                                              order=1, mode='constant', cval=255)
+        face_flow_y = ndimage.map_coordinates(cubemap_flows_list[flow_index][:, :, 1], [face_y_src_available, face_x_src_available], order=1, mode='constant', cval=0.0)
         face_y_tar_pixel_available = face_y_src_available + face_flow_y
 
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
-        face_x_tar_gnomonic_available = face_x_tar_pixel_available / gnomonic2image_ratio - pbc
-        face_y_tar_gnomonic_available = -face_y_tar_pixel_available / gnomonic2image_ratio + pbc
+        face_x_tar_gnomonic_available, face_y_tar_gnomonic_available = gnomonic_projection.pixel2gnomonic(face_x_tar_pixel_available, face_y_tar_pixel_available,0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 
         # tangent normailzed space --> spherical space
         face_theta_tar, face_phi_tar = gnomonic_projection.reverse_gnomonic_projection(face_x_tar_gnomonic_available, face_y_tar_gnomonic_available, theta_0, phi_0)
         # spherical space --> ERP image space
         face_x_tar_available, face_y_tar_available = spherical_coordinates.sph2erp(face_theta_tar, face_phi_tar, erp_flow_height, True)
 
-        # Process the face =Z, -y, +y, the line cross the boundary
-        if flow_index == 5 or flow_index == 2 or flow_index == 3:
+        # Process the face -z, -y, +y, cross the boundary
+        if (flow_index == 5 or flow_index == 2 or flow_index == 3) and not wrap_around:
             log.info("ERP optical flow with wrap around. Face index {}".format(flow_index))
             face_x_src_gnomonic_available = face_x_src_gnomonic[available_list]
             face_y_src_gnomonic_available = face_y_src_gnomonic[available_list]
@@ -528,8 +521,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
             face_weight_mat = np.multiply(face_weight_mat_1, face_weight_mat_2)
         else:
             weight_type = "straightforward"
-            face_weight_mat = projection.get_blend_weight_cubemap(face_x_src_gnomonic[available_list].flatten(
-            ), face_y_src_gnomonic[available_list].flatten(), weight_type)
+            face_weight_mat = projection.get_blend_weight_cubemap(face_x_src_gnomonic[available_list].flatten(), face_y_src_gnomonic[available_list].flatten(), weight_type)
 
         # # for debug weight
         # if not flow_index == 1:
@@ -639,7 +631,7 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
         # map the gnomonic coordinate to tangent image's pixel coordinate.
         # face_x_available = (face_x[inside_list] + pbc) * gnomonic2image_ratio
         # face_y_available = -(face_y[inside_list] - pbc) * gnomonic2image_ratio
-        tangent_gnomonic_range = [-1, +1, -1, +1]
+        tangent_gnomonic_range = [-pbc, +pbc, -pbc, +pbc]
         face_x_available, face_y_available = gnomonic_projection.gnomonic2pixel(face_x[inside_list], face_y[inside_list],
                                                        0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 

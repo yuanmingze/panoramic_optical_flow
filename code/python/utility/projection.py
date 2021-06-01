@@ -118,7 +118,7 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
         if gnomonic_bounding_box is None:
             pbc = 1
             gnomonic_bounding_box = np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])
-        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=False, eps=1e-7)
+        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=True, eps=1e-7)
         weight_map[available_list] = 1.0
     elif weight_type == "cartesian_distance_log":
         radius = np.linalg.norm(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), axis=1)

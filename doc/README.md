@@ -1,12 +1,11 @@
 
 # 1. Target
 
-3DV 2021: [Official Website](https://3dv2021.surrey.ac.uk/)
+BMVC 2021: [Official Website](https://www.bmvc2021.com/)
 
-- Paper registration	July 23, 2021
-- Paper submission	July 30, 2021
-- Demo submission	July 30, 2021
-- Supplementary	August 8, 2021
+18 Jun 2021	Paper Abstract Deadline
+25 Jun 2021	Paper Submission Deadline
+02 Jul 2021	Supplemental Material Deadline
 
 # 2. Related Work
 
