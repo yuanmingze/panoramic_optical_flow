@@ -3,7 +3,7 @@
 %% Enter your paper number here for the review copy
 \bmvcreviewcopy{??}
 
-\title{Author Guidelines for the\\ British Machine Vision Conference}
+\title{Panoramic Optical Flow With Icosahedron Sampling and Gnomonic Projection}
 
 % Enter the paper's authors in order
 % \addauthor{Name}{email/homepage}{INSTITUTION_CODE}
@@ -43,6 +43,17 @@
 
 \begin{abstract}
 
+Panoramic image is common input of , but it has drametic distortation at top and bottom of image, 
+The previous optical flow method use KTN to 
+But their method can not extend the conventiential optical flow method.
+in this paper we propose a (??) method which project the panoramic image to perspective images mitigating the distortaion.
+It 
+1. Use Icosehedron Sampling to uniform sampling the panoramic image to generate tangent images.
+
+2. The gnomonic projection give the 1-1 mapping relationship between the panoramic image and the tangent image at the sampling points.
+
+And we will release code and dataset.
+
 \end{abstract}
 
 
@@ -57,4 +68,5 @@
 \input{sections/5-discussion}
 
 \bibliography{egbib}
+
 \end{document}

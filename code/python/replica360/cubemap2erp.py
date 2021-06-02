@@ -73,7 +73,9 @@ def visual_data(data_dir):
             print(f"{counter} : {filename}")
         if filename.endswith(".dpt"):
             depth_data = depth_io.read_dpt(data_dir + filename)
-            depth_io.depth_visual_save(depth_data, data_dir + filename + ".jpg")
+            depth_io.depth_visual_save(depth_data, data_dir + filename + ".jpg", 0, 1.0)
+            # create the mask   
+            depth_io.create_depth_mask(depth_data, data_dir + filename + "_mask.png", 0.0)
         elif filename.endswith(".flo"):
             of_data = flow_io.read_flow_flo(data_dir + filename)
             of_data_vis = flow_vis.flow_to_color(of_data)
@@ -100,8 +102,6 @@ def stitch_rgb(data_dir, cubemap_rgb_image_filename_exp, pano_rgb_image_filename
 
 def stitch_depthmap(data_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp):
     """ Convert the cubemap depth map to ERP image.
-
-    TODO, convert the perspective depth to radian depth.
     """
     for image_index in range(0, 1):
         # 1) load the 6 image to memory.
@@ -154,10 +154,10 @@ if __name__ == "__main__":
 
     dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/"
 
-    # visual_data(dataroot_dir)
+    stitch_depthmap(dataroot_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp)
     # stitch_rgb(dataroot_dir, cubemap_rgb_image_filename_exp, pano_rgb_image_filename_exp)
-    # stitch_depthmap(dataroot_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp)
-    stitch_opticalflow(dataroot_dir, cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp)
+    visual_data(dataroot_dir)
+    # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp)
     # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_backward_filename_exp, pano_opticalflow_backward_filename_exp)
     # cubemap_flow_warp(dataroot_dir, cubemap_rgb_image_filename_exp, cubemap_opticalflow_forward_filename_exp,  cubemap_rgb_forward_warp_filename_exp )
     # pano_flow_warp(dataroot_dir, pano_rgb_image_filename_exp, pano_opticalflow_forward_filename_exp,  pano_rgb_forward_warp_filename_exp)

@@ -118,8 +118,8 @@ def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparen
     y_idx_arr = np.linspace(0, image_height - 1, image_height)
 
     x_idx, y_idx = np.meshgrid(x_idx_arr, y_idx_arr)
-    x_idx_new = (x_idx + of_forward[:, :, 0]).astype(int)
-    y_idx_new = (y_idx + of_forward[:, :, 1]).astype(int)
+    x_idx_new = (x_idx + of_forward[:, :, 0] + 0.5).astype(int)
+    y_idx_new = (y_idx + of_forward[:, :, 1] + 0.5).astype(int)
 
     # check index out of the image bounds
     if not wrap_around:
@@ -129,6 +129,7 @@ def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparen
         y_idx_new = np.where(y_idx_new > 0, y_idx_new, 0)
         y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, image_height - 1)
     else:
+        # TODO 
         x_idx_new = np.where(x_idx_new > 0, x_idx_new, x_idx_new + image_width)
         x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, np.remainder(x_idx_new, image_width))
 

@@ -19,6 +19,26 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
+def create_depth_mask(depth_map, output_filepath = None,  threshold= 0.0):
+    """Create the unavailable pixel mask from depth map.
+
+    The unavailable pixel is the value less than the threshold.
+    In the mask the available pixel label is no 0, unavailable pixel label is 0.
+
+    :param depth_map: The original depth map, shape is [hight, width]
+    :type depth_map: numpy
+    :param threshold: Threshold, defaults to 0.0
+    :type threshold: float, optional
+    """
+    pixel_mask = np.where(depth_map < threshold, 0, 65535)
+    
+    if output_filepath is not None:
+        img = Image.fromarray(pixel_mask.astype(np.uint8))
+        img.save(output_filepath, compress_level=0)
+
+    return pixel_mask
+
+
 def depth2disparity(depth_map, baseline = 1.0, focal = 1.0):
     """
     Convert the depth map to disparity map.
@@ -38,7 +58,7 @@ def depth2disparity(depth_map, baseline = 1.0, focal = 1.0):
     return disparity_map
 
 
-def depth_visual_save(depth_data, output_path):
+def depth_visual_save(depth_data, output_path, min_ratio = 0.05, max_ratio = 0.95):
     """save the visualized depth map to image file with value-bar.
 
     :param dapthe_data: The depth data.
@@ -51,10 +71,12 @@ def depth_visual_save(depth_data, output_path):
     vmin_ = 0
     vmax_ = 0
     dispmap_array = depth_data.flatten()
-    vmin_idx = int(dispmap_array.size * 0.05)
-    vmax_idx = int(dispmap_array.size * 0.95)
+    vmin_idx = int(dispmap_array.size * min_ratio)
+    vmax_idx = int((dispmap_array.size - 1) * max_ratio)
     vmin_ = np.partition(dispmap_array, vmin_idx)[vmin_idx]
     vmax_ = np.partition(dispmap_array, vmax_idx)[vmax_idx]
+    if min_ratio != 0 or max_ratio != 1.0:
+        log.warn("clamp the depth value form [{},{}] to [{},{}]".format(np.amin(depth_data), np.amax(depth_data), vmin_, vmax_))
 
     # draw image
     fig = plt.figure()
