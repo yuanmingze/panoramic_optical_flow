@@ -23,3 +23,10 @@ The project file structure are like following image:
 ```
 
 Please read the README.md file in each folder to get more information.
+
+
+# Dataset Generate
+
+The Replica-Dataset code generate the raw data, the `code/python/replica360/` code to post-process the data to generate the final dataset data.
+
+The core method implement in `code/python/utility`.

@@ -3,7 +3,7 @@
     "scene_name": "apartment_0",
     "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
     "render_type": "panorama",
-    "render_view":{
+    "render_view": {
         "_comment": "whether render data the camera at center of scene",
         "center_view": true,
         "_comment": "whether render data the camera at the trajectory",
@@ -15,23 +15,29 @@
         "fps": 50
     },
     "_comment": "config the pose-processing",
-    "post_proc":{
+    "post_proc": {
         "convert_format_traj": true,
         "convert_format_center": true,
+        "_comment": "msg file for omniphoto quantitative evaluation",
         "generate_msg_file": true
     },
     "camera_traj": {
         "_comment": "circle/grid",
         "type": "circle",
+        "_comment": "the interval of grid two points",
+        "grid_interval": 0.1,
         "_comment": "when lock direction is false, the camera view direction do not change",
-	    "lock_direction": false,
-        "step_number": 90,
+        "lock_direction": false,
+        "_comment": "the number of the circle path position",
+        "circle_step_number": 90,
         "radius": 0.5,
-        "start_position": {
+        "_comment": "The center of grid or circle path",
+        "center_position": {
             "x": 0.153774,
             "y": -5.88666,
-            "z": -0.38 
+            "z": -0.38
         },
+        "_comment": "the camera view direction of 1st position",
         "start_orientations": {
             "x": 0.0,
             "y": 0.0,

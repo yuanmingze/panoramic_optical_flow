@@ -1,21 +1,20 @@
-import pathlib
-import subprocess
-import copy
 import os
-import sys
 from os import listdir
 from os.path import isfile, join
+import sys
 import json
 import shutil
+import pathlib
+import subprocess
 
+from utility import depth_io, image_io
+from replica360 import omniphoto_post_process as post_process
+from replica360 import create_rendering_pose as gen_video_path_mp
 
 dir_scripts = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(dir_scripts)
 sys.path.append(dir_scripts)
-from replica360 import gen_video_path_mp
-from replica360 import post_process
 
-from utility import depth_io, image_io
 
 """ the model and texture's root folder"""
 # replica_data_root_dir= pathlib.Path("/mnt/sda1/workdata/panoramic_rendering/replica_360/")
@@ -56,7 +55,7 @@ def depth_map_process(dir_path):
             depth_data_vis = depth_io.depth_visual(depth_data)
             image_io.image_save(depth_data_vis, join(dir_path, filename + "_vis.jpg"))
 
-            
+
 def render_datasets():
     """
     render dataset queue

@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from scipy import ndimage
 
@@ -489,16 +487,17 @@ def cubemap2erp_flow(cubemap_flows_list, erp_flow_height=None, padding_size=0.0,
             p3 = np.stack((face_x_src_gnomonic_available, face_y_src_gnomonic_available))
             p4 = np.stack((face_x_tar_gnomonic_available, face_y_tar_gnomonic_available))
             # the line at tangent image cross the boundary (y axis of tangent image)
+            gnomonic_max = 99999999
             if flow_index == 5:
-                cross_x_axis = polygon.detect_intersection_segments_array([0, -1], [0, +1], p3, p4)
+                cross_x_axis = polygon.detect_intersection_segments_array([0, -gnomonic_max], [0, +gnomonic_max], p3, p4)
                 cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
                 cross_x_axis_minux2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
             elif flow_index == 2:
-                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, -1], p3, p4)
+                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, -gnomonic_max], p3, p4)
                 cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
                 cross_x_axis_minux2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
             elif flow_index == 3:
-                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, 1], p3, p4)
+                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, gnomonic_max], p3, p4)
                 cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
                 cross_x_axis_minux2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
             face_x_tar_available[cross_x_axis_minux2pi] = face_x_tar_available[cross_x_axis_minux2pi] - erp_flow_width

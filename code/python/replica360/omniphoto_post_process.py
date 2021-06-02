@@ -1,13 +1,10 @@
-import math
 import csv
 import re
 import sys
 import pathlib
-from datetime import datetime
 import os
 import shutil
 import argparse
-import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +14,7 @@ import msgpack
 
 # the filename with re expression
 # --- abbreviation ---
-# fw = forward, bw = backward, vis = visual, 
+# fw = forward, bw = backward, vis = visual,
 # fne = filename expression or full name, pc = point cloud
 # mp = MegaParallax
 # prep = preprocessing
@@ -38,7 +35,7 @@ flow_bw_bin_fne = index_digit_re + r"_opticalflow_forward.bin"
 center_rgb_fne = r"centre_rgb.jpg"
 center_depth_bin_fne = r"cnetre_depth.bin"
 
-# convtion step filename
+# convertion step filename
 flow_fw_flo_fne = index_digit_re + r"_opticalflow_forward.flo"
 flow_bw_flo_fne = index_digit_re + r"_opticalflow_backward.flo"
 flow_fw_vis_fne = index_digit_re + r"_opticalflow_forward_visual.jpg"
@@ -52,16 +49,17 @@ mp_prep_ov_traj_csv_fne = r"frame_trajectory.txt"
 mp_prep_ov_traj_obj_fne = r"frame_trajectory.obj"
 mp_prep_msg_fne = r"map.msg"
 mp_prep_camera_txt_fne = r"cameras.txt"
-mp_prep_rgb_fne = r"panoramic-"+ index_digit_re + r".jpg"
+mp_prep_rgb_fne = r"panoramic-" + index_digit_re + r".jpg"
 mp_prep_mfos_fne = r"modelFiles.openvslam"
 
 # MegaParallax viewer step filename
 mp_view_camera_csv_fne = r"Camera.csv"
 mp_view_flow_fw_flo_fne = r"panoramic-" + index_digit_re + r"-FlowToNext.flo"
-mp_view_flow_bw_flo_fne = r"panoramic-"+ index_digit_re + r"-FlowToPrevious.flo"
+mp_view_flow_bw_flo_fne = r"panoramic-" + index_digit_re + r"-FlowToPrevious.flo"
 mp_view_pc_csv_fne = r"PointCloud.csv"
 mp_view_centre_obj_fne = r"spherefit-depth-ground-truth.obj"
-mp_view_json_fne = r"PreprocessingSetup-"+ index_digit_re + r".json"
+mp_view_json_fne = r"PreprocessingSetup-" + index_digit_re + r".json"
+
 
 def load_motion_vector_raw_data(binary_file_path, height, width):
     """
@@ -79,7 +77,7 @@ def load_depth_raw_data(binary_file_path, height, width):
     load depht value form binary file
     """
     xbash = np.fromfile(binary_file_path, dtype='float32')
-    data = xbash.reshape(height,width,1)
+    data = xbash.reshape(height, width, 1)
     # imgplot = plt.imshow(data[:,:,0])
     # plt.show()
     return data
@@ -89,7 +87,7 @@ def visual_depth_map(binary_file_path, image_width, image_height):
     """
     """
     binary_file_path = '/mnt/sda1/workspace_linux/replica360/data/test_00/0000_depth.bin'
-    data = load_depth_raw_data(binary_file_path,image_height,image_width)
+    data = load_depth_raw_data(binary_file_path, image_height, image_width)
     plt.imshow(data)
     plt.show()
 
@@ -129,8 +127,8 @@ def load_replica_camera_traj(traj_file_path):
     return camera_traj
 
 
-def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center_file, \
-            original_traj_dir,  original_center_dir, dest_data_dir):
+def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center_file,
+                                 original_traj_dir,  original_center_dir, dest_data_dir):
     """
     :param replica_camera_traj_file: the camera trajectory file 
     :param replica_camera_center_file:
@@ -143,7 +141,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
     print("Generate {}..........".format(mp_prep_traj_csv_fne))
     replica_camera_poses = load_replica_camera_traj(replica_camera_traj_file)
     output_csv_header = ["#index", "filename", "trans_wc.x", "trans_wc.y", "trans_wc.z", "quat_wc.x", "quat_wc.y", "quat_wc.z", "quat_wc.w"]
- 
+
     mp_prep_ov_traj_csv_han = open(dest_data_dir + mp_prep_ov_traj_csv_fne, 'w', newline='')
     openvslam_ov_traj_csv = csv.writer(mp_prep_ov_traj_csv_han, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
 
@@ -159,12 +157,11 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
             image_idx = int(pose_item[0])
             image_name = mp_prep_rgb_fne.replace(index_digit_re, index_digit_format.format(image_idx))
 
-            
             # change rotation to quaternion
-            camera_rotation_x = float(pose_item[4]) #/ 180.0 * math.pi
-            camera_rotation_y = float(pose_item[5]) #/ 180.0 * math.pi
-            camera_rotation_z = float(pose_item[6]) #/ 180.0 * math.pi
-            
+            camera_rotation_x = float(pose_item[4])  # / 180.0 * math.pi
+            camera_rotation_y = float(pose_item[5])  # / 180.0 * math.pi
+            camera_rotation_z = float(pose_item[6])  # / 180.0 * math.pi
+
             # coordinate system conversion matrix from replica to openvslam
             # TODO: should be = coord_convert_r2o_R * rotation * coord_convert_r2o_R.inv()
             #rotation = R.from_euler('xyz', [camera_rotation_x, camera_rotation_y, camera_rotation_z], degrees=True)
@@ -185,7 +182,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
     print("finished\n")
 
     # 1) generate map.msg file
-    # load camera center 
+    # load camera center
     replica_center_camera_poses = load_replica_camera_traj(replica_camera_center_file)[0]
     replica_center_camera_pose = np.array([float(replica_center_camera_poses[1]), float(replica_center_camera_poses[2]), float(replica_center_camera_poses[3])])
     #coord_convert_r2o_R = R.from_matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]) # rotated in data format convertion
@@ -194,12 +191,12 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
     landmarks = {}
     obj_points = []
     for idx in range(len(point_cloud_data)):
-        point_word = replica_center_camera_pose  + np.array(point_cloud_data[idx])
+        point_word = replica_center_camera_pose + np.array(point_cloud_data[idx])
         point = coord_convert_r2o_R.apply(point_word)
-		# output for msg
+	# output for msg
         landmarks[str(idx)] = {"pos_w": list(point)}
-		# output for obj
-        obj_points.append(" ".join(["v",str(point[0]) ,str(point[1]) ,str(point[2])]))
+	# output for obj
+        obj_points.append(" ".join(["v", str(point[0]), str(point[1]), str(point[2])]))
     data_text = {"landmarks": landmarks}
     # pack and output
     msgpack_packer = msgpack.Packer(use_bin_type=True)
@@ -207,7 +204,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
     mapmsg_file.write(msgpack_packer.pack(data_text))
     mapmsg_file.close()
     # write of obj
-    obj_file_handle = open(dest_data_dir + mp_prep_msg_fne + ".obj",'w')
+    obj_file_handle = open(dest_data_dir + mp_prep_msg_fne + ".obj", 'w')
     obj_points_str = '\n'.join(obj_points)
     obj_file_handle.write(obj_points_str)
     obj_file_handle.close()
@@ -215,7 +212,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
 
     # 2) cameras.txt
     print("Generate {}..........".format(mp_prep_camera_txt_fne))
-    with open(dest_data_dir + mp_prep_camera_txt_fne , "w") as f:
+    with open(dest_data_dir + mp_prep_camera_txt_fne, "w") as f:
         f.write("# Camera list with one line of data per camera:\n")
         f.write("# CAMERA_ID, MODEL, WIDTH, HEIGHT, PARAMS[]\n")
         f.write("# Number of cameras: 1\n")
@@ -224,7 +221,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
 
     # 3) modelFiles.openvslam
     print("Generate {}..........".format(mp_prep_mfos_fne))
-    with open(dest_data_dir + mp_prep_mfos_fne , "w") as f:
+    with open(dest_data_dir + mp_prep_mfos_fne, "w") as f:
         f.write("../Capture/openvslam/cameras.txt\n")
         f.write("../Capture/openvslam/frame_trajectory_with_filename.txt\n")
         f.write("../Capture/openvslam/map.msg\n")
@@ -239,7 +236,7 @@ def generate_mp_preprocess_files(replica_camera_traj_file, replica_camera_center
             continue
         # get index, new file name
         index_digt = re.search(index_digit_re, item.name)
-        new_rgb_filename = mp_prep_rgb_fne.replace(index_digit_re,index_digt.group())
+        new_rgb_filename = mp_prep_rgb_fne.replace(index_digit_re, index_digt.group())
         new_rgb_file_path = dest_data_dir + new_rgb_filename
         shutil.copy(str(item), new_rgb_file_path)
         print("copy {} to {}".format(item.name, new_rgb_file_path))
@@ -268,7 +265,7 @@ def generate_mp_viewer_files(original_traj_dir, original_center_dir, dest_data_d
     flow_bw_flo_fne_pattern = re.compile(flow_bw_flo_fne)
     for item in pathlib.Path(original_traj_dir).iterdir():
         if flow_fw_flo_fne_pattern.match(item.name) is None and \
-            flow_bw_flo_fne_pattern.match(item.name) is None:
+                flow_bw_flo_fne_pattern.match(item.name) is None:
             continue
 
         src_filename = item.name
@@ -279,7 +276,7 @@ def generate_mp_viewer_files(original_traj_dir, original_center_dir, dest_data_d
             tar_filename = mp_view_flow_fw_flo_fne.replace(index_digit_re, index_digt)
         elif flow_bw_flo_fne_pattern.match(item.name):
             tar_filename = mp_view_flow_bw_flo_fne.replace(index_digit_re, index_digt)
-        
+
         # get index, new file name
         print("copy flo files from {} to {}".format(original_center_dir + src_filename, dest_data_dir + tar_filename))
         shutil.copy(original_traj_dir + src_filename, dest_data_dir + tar_filename)
@@ -293,11 +290,11 @@ def generate_mp_viewer_files(original_traj_dir, original_center_dir, dest_data_d
     print("finished\n")
 
 
-def post_process(root_dir, dataset_name, \
-                replica_camera_file, replica_center_camera_file, \
-                original_traj_dir, original_center_dir, \
-                preprocessing_folder = "Preprocessing/", viewer_folder = "Viewer/", \
-                input_image_width = 3840, input_image_height = 1920, input_FPS = 50):
+def post_process(root_dir, dataset_name,
+                 replica_camera_file, replica_center_camera_file,
+                 original_traj_dir, original_center_dir,
+                 preprocessing_folder="Preprocessing/", viewer_folder="Viewer/",
+                 input_image_width=3840, input_image_height=1920, input_FPS=50):
     """
     will generate megaparallax ready files on the root_dir, 
     named with *_Preprocessing and *_Viewer
@@ -323,7 +320,7 @@ def post_process(root_dir, dataset_name, \
         shutil.rmtree(temp_file, ignore_errors=False, onerror=None)
     os.mkdir(mp_prep_dest_data_dir)
 
-    if os.path.exists(mp_viewer_dest_data_dir): 
+    if os.path.exists(mp_viewer_dest_data_dir):
         print("the folder: {}, exist, and remove it.".format(mp_viewer_dest_data_dir))
         temp_file = root_dir + "Viewer_temp/"
         shutil.move(mp_viewer_dest_data_dir, temp_file)
@@ -332,7 +329,7 @@ def post_process(root_dir, dataset_name, \
 
     print("Target preprocessing directory: {}".format(mp_prep_dest_data_dir))
     print("Target viewer directory: {}".format(mp_viewer_dest_data_dir))
-    
+
     # 0) generate the MegaParallax Preprocessing step files
     generate_mp_preprocess_files(replica_camera_file, replica_center_camera_file, original_traj_dir, original_center_dir, mp_prep_dest_data_dir)
 
@@ -348,16 +345,16 @@ if __name__ == "__main__":
     # 4K: -d "hotel_0" -r "d:/workspace_linux/replica360/data/" -c "hotel_0_2020_05_10_15_21_25_circle.csv" -ot "hotel_0_2020-05-14-09-23-53/" -oc "hotel_0_2020-05-14-09-31-20/""
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', dest = 'dataset_name',type=str, help='the dataset name')
-    parser.add_argument('-r', dest = 'root_dir',type=str, help='the root directory')
-    parser.add_argument('-ct', dest = 'replica_camera_file', type=str, help='replica render input camera trajectory file')
-    parser.add_argument('-cc', dest = 'replica_center_camera_file', type=str, help='replica render input camera trajectory file')
-    parser.add_argument('-ot', dest = 'original_traj_dir', type=str, help='the rendered result')
-    parser.add_argument('-oc', dest = 'original_center_dir', type=str, help='the rendered  of center viewpoint')
+    parser.add_argument('-d', dest='dataset_name', type=str, help='the dataset name')
+    parser.add_argument('-r', dest='root_dir', type=str, help='the root directory')
+    parser.add_argument('-ct', dest='replica_camera_file', type=str, help='replica render input camera trajectory file')
+    parser.add_argument('-cc', dest='replica_center_camera_file', type=str, help='replica render input camera trajectory file')
+    parser.add_argument('-ot', dest='original_traj_dir', type=str, help='the rendered result')
+    parser.add_argument('-oc', dest='original_center_dir', type=str, help='the rendered  of center viewpoint')
 
-    parser.add_argument('-fps', dest = 'FPS', type=int, default=50, help='the data fps')
-    parser.add_argument('-h', dest = 'height', type=int, default=1920, help='the data height')  
-    parser.add_argument('-w', dest = 'width', type=int, default=3840, help='the data width')
+    parser.add_argument('-fps', dest='FPS', type=int, default=50, help='the data fps')
+    parser.add_argument('-h', dest='height', type=int, default=1920, help='the data height')
+    parser.add_argument('-w', dest='width', type=int, default=3840, help='the data width')
 
     args = parser.parse_args()
     if len(sys.argv) < 4:
@@ -370,7 +367,7 @@ if __name__ == "__main__":
     root_dir = pathlib.Path(args.root_dir)
     replica_camera_file = str(root_dir / args.replica_camera_file)
     replica_center_camera_file = str(root_dir / args.replica_center_camera_file)
-    original_traj_dir = str(root_dir / args.original_traj_dir)+ "/"
+    original_traj_dir = str(root_dir / args.original_traj_dir) + "/"
     original_center_dir = str(root_dir / args.original_center_dir) + "/"
 
     print("post-process dataset: {} in root directory: {}".format(dataset_name, root_dir))
@@ -378,7 +375,7 @@ if __name__ == "__main__":
     print("Original data directory: {}".format(original_traj_dir))
     print("Original center data directory: {}".format(original_center_dir))
 
-    post_process(str(root_dir) + "/", dataset_name, \
-                replica_camera_file, replica_center_camera_file, \
-                original_traj_dir, original_center_dir, \
-                input_image_width = args.width, input_image_height = args.height, input_FPS = args.FPS)
+    post_process(str(root_dir) + "/", dataset_name,
+                 replica_camera_file, replica_center_camera_file,
+                 original_traj_dir, original_center_dir,
+                 input_image_width=args.width, input_image_height=args.height, input_FPS=args.FPS)

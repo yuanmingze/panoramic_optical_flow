@@ -1,10 +1,21 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+import image_evaluate
+
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
+
 
 """
  optical flow visualization;
 reference 
 https://github.com/tomrunia/OpticalFlow_Visualization
 """
+
 
 def make_colorwheel():
     """
@@ -33,15 +44,15 @@ def make_colorwheel():
 
     # RY
     colorwheel[0:RY, 0] = 255
-    colorwheel[0:RY, 1] = np.floor(255*np.arange(0,RY)/RY)
+    colorwheel[0:RY, 1] = np.floor(255*np.arange(0, RY)/RY)
     col = col+RY
     # YG
-    colorwheel[col:col+YG, 0] = 255 - np.floor(255*np.arange(0,YG)/YG)
+    colorwheel[col:col+YG, 0] = 255 - np.floor(255*np.arange(0, YG)/YG)
     colorwheel[col:col+YG, 1] = 255
     col = col+YG
     # GC
     colorwheel[col:col+GC, 1] = 255
-    colorwheel[col:col+GC, 2] = np.floor(255*np.arange(0,GC)/GC)
+    colorwheel[col:col+GC, 2] = np.floor(255*np.arange(0, GC)/GC)
     col = col+GC
     # CB
     colorwheel[col:col+CB, 1] = 255 - np.floor(255*np.arange(CB)/CB)
@@ -49,7 +60,7 @@ def make_colorwheel():
     col = col+CB
     # BM
     colorwheel[col:col+BM, 2] = 255
-    colorwheel[col:col+BM, 0] = np.floor(255*np.arange(0,BM)/BM)
+    colorwheel[col:col+BM, 0] = np.floor(255*np.arange(0, BM)/BM)
     col = col+BM
     # MR
     colorwheel[col:col+MR, 2] = 255 - np.floor(255*np.arange(MR)/MR)
@@ -84,20 +95,20 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     k1[k1 == ncols] = 0
     f = fk - k0
     for i in range(colorwheel.shape[1]):
-        tmp = colorwheel[:,i]
+        tmp = colorwheel[:, i]
         col0 = tmp[k0] / 255.0
         col1 = tmp[k1] / 255.0
         col = (1-f)*col0 + f*col1
         idx = (rad <= 1)
-        col[idx]  = 1 - rad[idx] * (1-col[idx])
+        col[idx] = 1 - rad[idx] * (1-col[idx])
         col[~idx] = col[~idx] * 0.75   # out of range
         # Note the 2-i => BGR instead of RGB
         ch_idx = 2-i if convert_to_bgr else i
-        flow_image[:,:,ch_idx] = np.floor(255 * col)
+        flow_image[:, :, ch_idx] = np.floor(255 * col)
     return flow_image
 
 
-def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
+def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0):
     """ Expects a two dimensional flow image of shape.
 
     :param flow_uv: Flow UV image of shape [H,W,2]
@@ -108,16 +119,51 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False):
     :type convert_to_bgr: bool, optional
     :return: Flow visualization image of shape [H,W,3]
     :rtype: numpy
-    """    
+    """
+    # get the clip range
+    clip_flow = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)
+
+    # visualize optical flow
     assert flow_uv.ndim == 3, 'input flow must have three dimensions'
     assert flow_uv.shape[2] == 2, 'input flow must have shape [H,W,2]'
     if clip_flow is not None:
         flow_uv = np.clip(flow_uv, clip_flow[0], clip_flow[1])
-    u = flow_uv[:,:,0]
-    v = flow_uv[:,:,1]
+    u = flow_uv[:, :, 0]
+    v = flow_uv[:, :, 1]
     rad = np.sqrt(np.square(u) + np.square(v))
     rad_max = np.max(rad)
     epsilon = 1e-5
     u = u / (rad_max + epsilon)
     v = v / (rad_max + epsilon)
     return flow_uv_to_colors(u, v, convert_to_bgr)
+
+
+def flow_value_to_color(flow_uv, output_path, min_ratio=0.0, max_ratio=1.0):
+    """ Visualize U,V and show the bar.
+
+    :param flow_uv: optical flow. [height, width, 2]
+    :type flow_uv: numpy
+    """
+    # get vmin and vmax
+    vmin_, vmax_ = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)
+
+    # draw image
+    figure, axes = plt.subplots(2)
+
+    axes[0].get_xaxis().set_visible(False)
+    axes[0].get_yaxis().set_visible(False)
+    # add sub caption
+    axes[0].set_title("Optical Flow (U)")
+    im = axes[0].imshow(flow_uv[:, :, 0], cmap=cm.jet, vmin=vmin_, vmax=vmax_)
+
+    axes[1].get_xaxis().set_visible(False)
+    axes[1].get_yaxis().set_visible(False)
+    # add sub caption
+    axes[1].set_title("Optical Flow (V)")
+    im = axes[1].imshow(flow_uv[:, :, 1], cmap=cm.jet, vmin=vmin_, vmax=vmax_)
+
+    figure.tight_layout()
+    plt.colorbar(im, ax=axes.ravel().tolist())
+    plt.savefig(output_path, dpi=150)
+    plt.show()
+    plt.close(figure)

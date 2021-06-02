@@ -1,4 +1,3 @@
-import ipdb
 import numpy as np
 from logger import Logger
 
@@ -6,7 +5,7 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def detect_intersection_segments_array(p1_, p2_, p3, p4):
+def detect_intersection_segments_array(p1_, p2_, p3, p4, including_online=False):
     """
     1st segment p1->p2, 2nd segment p3->p4.
 
@@ -76,26 +75,30 @@ def detect_intersection_segments_array(p1_, p2_, p3, p4):
     # return True
 
     # Special Cases
-    # p1 , p2 and p3 are colinear and p3 lies on segment p1p2
-    # if ((o1 == 0) and onSegment(p1, p3, p2)):
-    #     return True
-    intersection_mat[np.logical_and(o1 == 0, onSegment(p1, p3, p2))] = True
-    # p1 , p2 and p4 are colinear and p4 lies on segment p1p2
-    # if ((o2 == 0) and onSegment(p1, p4, p2)):
-    #     return True
-    intersection_mat[np.logical_and(o2 == 0, onSegment(p1, p4, p2))] = True
-    # p3 , p4 and p1 are colinear and p1 lies on segment p3q4
-    # if ((o3 == 0) and onSegment(p3, p1, p4)):
-    #     return True
-    intersection_mat[np.logical_and(o3 == 0, onSegment(p3, p1, p4))] = True
-    # p3 , p4 and p2 are colinear and p2 lies on segment p3q4
-    # if ((o4 == 0) and onSegment(p3, p2, p4)):
-    #     return True
-    intersection_mat[np.logical_and(o4 == 0, onSegment(p3, p2, p4))] = True
+    if including_online:
+        intersection_mat[np.logical_and(o1 == 0, onSegment(p1, p3, p2))] = True
+        intersection_mat[np.logical_and(o2 == 0, onSegment(p1, p4, p2))] = True
+        intersection_mat[np.logical_and(o3 == 0, onSegment(p3, p1, p4))] = True
+        intersection_mat[np.logical_and(o4 == 0, onSegment(p3, p2, p4))] = True
+    else:
+        # p1 , p2 and p3 are colinear and p3 lies on segment p1p2
+        # if ((o1 == 0) and onSegment(p1, p3, p2)):
+        #     return True
+        intersection_mat[np.logical_and(o1 == 0, onSegment(p1, p3, p2))] = False
+        # p1 , p2 and p4 are colinear and p4 lies on segment p1p2
+        # if ((o2 == 0) and onSegment(p1, p4, p2)):
+        #     return True
+        intersection_mat[np.logical_and(o2 == 0, onSegment(p1, p4, p2))] = False
+        # p3 , p4 and p1 are colinear and p1 lies on segment p3q4
+        # if ((o3 == 0) and onSegment(p3, p1, p4)):
+        #     return True
+        intersection_mat[np.logical_and(o3 == 0, onSegment(p3, p1, p4))] = False
+        # p3 , p4 and p2 are colinear and p2 lies on segment p3q4
+        # if ((o4 == 0) and onSegment(p3, p2, p4)):
+        #     return True
+        intersection_mat[np.logical_and(o4 == 0, onSegment(p3, p2, p4))] = False
 
     return intersection_mat
-    # If none of the cases
-    # return False
 
 
 def detect_intersection_segments(p1, p2, p3, p4):
