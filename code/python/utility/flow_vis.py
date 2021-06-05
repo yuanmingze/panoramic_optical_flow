@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 import image_evaluate
+import image_io
 
 from logger import Logger
 
@@ -138,7 +139,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     return flow_uv_to_colors(u, v, convert_to_bgr)
 
 
-def flow_value_to_color(flow_uv, output_path, min_ratio=0.0, max_ratio=1.0):
+def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0):
     """ Visualize U,V and show the bar.
 
     :param flow_uv: optical flow. [height, width, 2]
@@ -164,6 +165,69 @@ def flow_value_to_color(flow_uv, output_path, min_ratio=0.0, max_ratio=1.0):
 
     figure.tight_layout()
     plt.colorbar(im, ax=axes.ravel().tolist())
-    plt.savefig(output_path, dpi=150)
-    plt.show()
+    if output_path is not None:
+        plt.savefig(output_path, dpi=150)
+    else:
+        plt.show()
     plt.close(figure)
+
+
+def flow_max_min_visual(flow_data, output_path=None,  min_ratio=0.1, max_ratio=0.9):
+    """ Visualize the max and min of the optical flow.
+    """
+    # get vmin and vmax
+    u_vmin_, u_vmax_ = image_evaluate.get_min_max(flow_data[:, :, 0], 0.0, 1.0)
+    v_vmin_, v_vmax_ = image_evaluate.get_min_max(flow_data[:, :, 1], 0.0, 1.0)
+    u_ratio_vmin_, u_ratio_vmax_ = image_evaluate.get_min_max(flow_data[:, :, 0], min_ratio, max_ratio)
+    v_ratio_vmin_, v_ratio_vmax_ = image_evaluate.get_min_max(flow_data[:, :, 1], min_ratio, max_ratio)
+    # new_u = np.where(flow_data[:,:,0] < vmin_, flow_data[:,:,0], 0)
+    # new_u = np.where(flow_data[:,:,0] > vmax_, flow_data[:,:,0], vmin_)
+    from skimage.morphology import dilation, square
+
+
+    def image_process(flow_data):
+        dilation_square_size = 10
+        return dilation(flow_data, square(dilation_square_size))
+        # return flow_data
+
+    figure, axes = plt.subplots(2, 2)
+    # u min
+    axes[0, 0].get_xaxis().set_visible(False)
+    axes[0, 0].get_yaxis().set_visible(False)
+    axes[0, 0].set_title("Optical Flow (U) Min")
+    flow_data_u_min = np.where(flow_data[:, :, 0] < u_ratio_vmin_, -flow_data[:, :, 0] + u_ratio_vmin_, 0)
+    # im = axes[0, 0].imshow(flow_data_u_min, cmap=plt.get_cmap("Greys") )#, vmin=0, vmax=u_ratio_vmin_)
+    im = axes[0, 0].imshow(image_process(flow_data_u_min), cmap=plt.get_cmap("Greys"))  # , vmin=0, vmax=u_ratio_vmin_)
+    figure.colorbar(im, ax=axes[0, 0])#.ravel().tolist())
+    # u max
+    axes[0, 1].get_xaxis().set_visible(False)
+    axes[0, 1].get_yaxis().set_visible(False)
+    axes[0, 1].set_title("Optical Flow (U) Max")
+    flow_data_u_max = np.where(flow_data[:, :, 0] > u_ratio_vmax_, flow_data[:, :, 0] - u_ratio_vmax_, 0)
+    im = axes[0, 1].imshow(image_process(flow_data_u_max), cmap=plt.get_cmap("Greys"))  # , vmin=u_ratio_vmax_, vmax=u_vmax_)
+    figure.colorbar(im, ax=axes[0, 1])#.ravel().tolist())
+    # v min
+    axes[1, 0].get_xaxis().set_visible(False)
+    axes[1, 0].get_yaxis().set_visible(False)
+    axes[1, 0].set_title("Optical Flow (V) Min")
+    flow_data_v_min = np.where(flow_data[:, :, 1] < v_ratio_vmin_, -flow_data[:, :, 1] + v_ratio_vmin_, 0)
+    im = axes[1, 0].imshow(image_process(flow_data_v_min), cmap=plt.get_cmap("Greys"))  # , vmin=v_vmin_, vmax=v_ratio_vmin_)
+    figure.colorbar(im, ax=axes[1, 0])#.ravel().tolist())
+    # v max
+    axes[1, 1].get_xaxis().set_visible(False)
+    axes[1, 1].get_yaxis().set_visible(False)
+    axes[1, 1].set_title("Optical Flow (V) Max")
+    flow_data_v_max = np.where(flow_data[:, :, 1] > v_ratio_vmax_, flow_data[:, :, 1] - v_ratio_vmax_, 0)
+    im = axes[1, 1].imshow(image_process(flow_data_v_max), cmap=plt.get_cmap("Greys"))  # , vmin=v_ratio_vmax_, vmax=v_vmax_)
+    figure.colorbar(im, ax=axes[1, 1])#.ravel().tolist())
+
+    # figure.tight_layout()
+    if output_path is not None:
+        plt.savefig(output_path, dpi=150)
+    else:
+        plt.show()
+    plt.close(figure)
+    # flow_data_max = np.where(flow_data > vmax_, flow_data, 0)
+    # image_io.image_show(dilation(flow_data_min[:,:,0], square(35)))
+    # image_io.image_show(dilation(flow_data_min[:,:,1], square(35)))
+    # flow_value_to_color(flow_data)

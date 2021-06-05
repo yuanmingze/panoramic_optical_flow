@@ -1,21 +1,21 @@
 
-# Comparison
+# 1. Comparison
 
-## Method
+## 1.1. Method
 Optical Flow Methods list:
 - DIS [3];
 - PWC-Net[];
 - FlowNetx[];
 - Sun IJCV[];
 
-## Host
+## 1.2. Host
 
-### DIS
+### 1.2.1. DIS
 
 The OpenCV DIS flow method.
 The code at `code/python/utility/flow_estimate.py`
 
-### PWC-Net
+### 1.2.2. PWC-Net
 
 Code is [official released code](https://github.com/NVlabs/PWC-Net).
 
@@ -27,7 +27,7 @@ With the PWC-Net office Caffe Code. And use the python code `python/compare_pwc-
 - Run the script `source set-env.sh` than `proc_images.py` python script as `./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
 - PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/Caffe/`
 
-### FlowNet2
+### 1.2.3. FlowNet2
 
 Code is [flownet2](https://github.com/lmb-freiburg/flownet2)
 - Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
@@ -38,7 +38,7 @@ Code is [flownet2](https://github.com/lmb-freiburg/flownet2)
  1. Estimate the optical flow files with 
     `python ./scripts/run-flownet-many.py ./models/FlowNet2-CSS/FlowNet2-CSS_weights.caffemodel.h5 ./models/FlowNet2-CSS/FlowNet2-CSS_deploy.prototxt.template /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/flownet2/replica_listfile.txt`
 
-### RAFT (ECCV 2020)
+### 1.2.4. RAFT (ECCV 2020)
 
 Get the code from [GitHub](https://github.com/princeton-vl/RAFT)
 
@@ -56,12 +56,12 @@ Inference:
 
 - RAFT model: `/mnt/sda1/workspace_linux/RAFT`
 
-### Sun IJCV
+### 1.2.5. Sun IJCV
 
 Code is [IJCV](http://cs.brown.edu/~dqsun/code/ijcv_flow_code.zip)
 - Matlab code: `/mnt/sda1/workspace_windows/IJCV_2013_matlab_opticalflow/ijcv_flow_code`
 
-## Output data
+## 1.3. Output data
 
 The output optical flow *.flo file, save to the original dataset folder.
 The input of the scripts is the folder of `replica_seq_data` of each dataset.
@@ -70,9 +70,9 @@ And the output data folders are named with :
 1. pwc_net:
 1. flownet2:
 
-## Garlick
+## 1.4. Garlick
 
-## Evaluation Result
+## 1.5. Evaluation Result
 
 The test ground truth data store in the folder:
 
@@ -87,26 +87,26 @@ Test the optical flow methods on the fellowing datasets:
 
 - 
 
-# Optical flow GT Generation
+# 2. Optical flow GT Generation
 
-## Convention
+## 2.1. Convention
 To define the optical flow warp around function.
 There are two methods to express the optical flow:
 - w/o warp around: ignore the ERP camera model, make the 360 image as normal images;
 - warp around: make the pixel warp around.
 
-## Panoramic Image Coordinate system
+## 2.2. Panoramic Image Coordinate system
 
 There is more detail about the corresponding coordinate system between the panoramic image can be found in [1].
 
 
-# Dataset
+# 3. Dataset
 
 Synthetic Datasets:
 - Replica360;
 
 
-## Replica_360 Optical Flow Ground Truth
+## 3.1. Replica_360 Optical Flow Ground Truth
 
 This data is rendered by replica 360 OpenGL code.
 
@@ -133,7 +133,7 @@ Folder structure:
 Compressed optical flow or depth map by LZMA algorithm [1][2] named with postfix *.xz'.
 
 
-# Reference
+# 4. Reference
 
 1. LZMA c++ SDK: https://www.7-zip.org/sdk.html
 2. LZMA python: https://docs.python.org/3/library/lzma.html

@@ -1,35 +1,18 @@
-\section{Method}\label{sec:method}
+\section{Approach}\label{sec:approach}
 
-\subsection{Overview}
+\todolist{Why use ERP Image representation the panoramic image?}
 
+\todolist{Overview our method, including steps.}
 
 \begin{figure}[hbt!]
 	\centering
-	\includegraphics[width=0.4\linewidth]{example-image-a}
-	\caption{method pipeline.}
-\label{fig:method:pipeline}
+	\includegraphics[width=0.95\linewidth]{images/method_pipeline_0.pdf}
+	\caption{method pipeline. \todolist{Refine.}}
+\label{fig:approach:pipeline}
 \end{figure}
 
 
-% technicial pipline
 
-\subsection{Optical Flow}
-
-\begin{center}
-	\begin{tabular}{ c | c } 
-		\hline
-		Notice & Meaning  \\ [0.5ex] 
-		\hline\hline
-		$\textbf{f}$ & optical flow  \\ 
-		\hline
-		$(u,v)$ & the position of pixel   \\
-		\hline
-		$f(u,v)$ & the pixel's optical flow of image $I_{src}$ \\
-		\hline
-		$\textbf{I}$ & the RGB image  \\ [1ex] 
-		\hline
-	\end{tabular}
-\end{center}
 
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
@@ -37,8 +20,11 @@ Optical flow
 
 $I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
 
+%\subsection{Preliminary}
 
-\subsection{360 Optical Flow Expression}
+
+\textbf{360 Optical Flow Expression (Wrap-around)}
+\todolist{GT data how to process the Warp Around, Cross Image Boundary.Why use the without warp around optical flow?}
 
 The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the pixel coordinate 0 exceed the range of image pixel $([0, image\_width), [0, image\_height))$. 
 
@@ -55,41 +41,55 @@ One kind optical flow is just in target image range $[0, image_width - 1]$, whic
 So the range of optical flow is 
 Another's target image range is $[- n * image_width, + n * image_width]$
 
-Warp around
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{ c | c } 
+			\hline
+			Notice & Meaning  \\ [0.5ex] 
+			\hline\hline
+			$\textbf{f}$ & optical flow  \\ 
+			\hline
+			$(u,v)$ & the position of pixel   \\
+			\hline
+			$f(u,v)$ & the pixel's optical flow of image $I_{src}$ \\
+			\hline
+			$\textbf{I}$ & the RGB image  \\ [1ex] 
+			\hline
+		\end{tabular}
+	\end{center}
+	\caption{Method pipeline. \todolist{Notations.}}
+	\label{tab:approach:notation}
+\end{table}
+
+\subsection{Projection \& Stitching}
+
+\textbf{Genometic Projection.}
+
+How the gnomomic projection project the 
+
+\textbf{Tangent/Center points selection.}
+Use cubemap or Icosahedron.
+
+\textbf{Panoramic image Projection}
+
+project the panoramic image to perspective images.
 
 
+\textbf{Perspective Image Stitch}
+
+\todolist{How to compute the weight and blending? Euqation.}
+\todolist{Visualized different weight and blend result.}
 
 
-\subsection{Warp Around}
+\subsection{Image \& Optical Flow Alignment}
 
+Inspired by the warp base optical flow \cite{?}, and coarst to fine 
 
+Use panoramic images optical flow estimation rotation to roughly align the two images.
 
+\todolist{How to convert the rough optical flow to rotation?}
 
-\subsubsection{Cross Image Boundary}
+The image warp, the rotation to warp the image, alignt the 
 
-
-\subsubsection{Poles}
-
-
-\subsection{Occlusion}
-
-
-\subsection{ERP Image}
-
-
-
-\subsection{Panoramic Optical Flow}
-
-
-\textbf{Regular icosahedron}
-a convex polyhedron with 20 faces, 30 edges and 12 vertices. 
-
-Reference:
-\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
-\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
-\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
-\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
-
-\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
-\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}
-
+The optical flow warping, to warp the final optical flow to restore the original images optical flow.

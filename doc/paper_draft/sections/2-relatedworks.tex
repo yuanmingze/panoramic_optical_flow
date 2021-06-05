@@ -1,65 +1,31 @@
 \section{Related Works}
 
 
-
-%%%%%%
-
-
-\subsection{Panoramic Image }
-
-With the
-Equirectangular Image format is most popular panoramic image format which have been part of 
-
-
-
-\subsubsection{CNN Method}
-
-
-
-
-
 \subsection{Optical Flow}
 
+Energy Minimization:
 
+The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{DIS, HS, BA}. Furthermore, 
 
+\cite{Borx} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image.
 
+\cite{sun} use midian filer in pose-processing step sharper objection boundary's the optical flow.
 
-%%%%%
+Supervised Learning:
 
+- FlowNet 1,2,3,lite, lift the correlation operation and multi-scale method, which help the CNN effectly find the corresponding relationship from two RGB images. 
 
+- PWCNet proposes the 4D volume to function the 
 
+\cite{teed2020raft} use the recurrent network to update optical flow from the 4D correlation volume, 
 
+Unsupervised Learning:
 
+\cite{aleotti2021learning} propose a training data generateion method, 
+which use estimated depth to generate new view point image and optical flow from single still image, to train the off-the-shelf optical flow method.
+This method propose for self-supervised learn pathway.
 
-\subsection{Geodesic Grids}
-
-
-
-\subsection{Tangent Image}
-
-
-Spherical Coordinate system.
-
-
-
-\subsubsection{Gnomonic Projection}
-
-\textbf{Sphere 2 Perspective Image}
-
-%Set the point $S$ as the centre point of the projection, who longitude and latitude is $(\theta, \phi)$
-
-For a projection with the central point $(\theta_0, \phi_0)$,
-
-
-
-\begin{itemize}
-	\item Ohttps://mathworld.wolfram.com/GnomonicProjection.html
-	\item Another entry in the list
-\end{itemize}
-
-
-
-\subsection{Panoramic Image Processing}
+\subsection{panoramic Image processing}
 
 Because of non-linear project between the scene and image, there is distortion in the image, especially in the poles of panoramic image.
 How to git ride of the distortion is key point of panoramic image processing method. 
@@ -69,8 +35,6 @@ How to git ride of the distortion is key point of panoramic image processing met
 Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
 
 \cite{eder2019mapped}
-
-
 
 
 %\subsection{Undistortion}
@@ -84,6 +48,20 @@ So the tangent plane is hired to mitigate the influence of the panoramic image  
 
 \textbf{Cube Map}
 
+With the
+Equirectangular Image format is most popular panoramic image format which have been part of 
+
+
+\cite{sun2020hohonet} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
+
+- Layout:
+- \cite{xxxx}
+
+- Depth:
+- \cite{wang2020bifuse} 
+- 
+- Semantic segmentation:
+
 
 \subsection{Panoramic Dataset}
 
@@ -91,4 +69,18 @@ So the tangent plane is hired to mitigate the influence of the panoramic image  
 SUMO
 
 Matterport3D
+
+%Realworld
+3D Mesh dataset:
+- Stanford2D3D \cite{armeni2017joint}
+- Matterport3D
+- Replica
+- iGibson (Gibson)
+
+360 Image dataset:
+- MatterportLayout dataset: https://github.com/ericsujw/Matterport3DLayoutAnnotation, labeled scene
+- 360D dataset:
+- Structured3D: https://structured3d-dataset.org/, synthetic dataset,room layout estimation
+- Omnidirectional Stereo Dataset: http://cvlab.hanyang.ac.kr/project/omnistereo/
+- Realtor360: 
 

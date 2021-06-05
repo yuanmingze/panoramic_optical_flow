@@ -1,110 +1,31 @@
 \section{Experiments}\label{sec:exp}
 
+\textbf{Time} 
 
-\subsection{Implementation}
+\todolist{How much time it will take for .}
+
+\subsection{Dataset \& Metric}
 
 
+\textbf{Dataset}
 
-\subsection{Synthesize Panoramic Optical Flow}\label{sec:app:panoof}
+The dataset will be released for open access.
 
-The real word data rich and colorful, but it is very hard to estimate or measure the accurate segmentation, motion flow, e.t.c form the real word scene.
-So the synthetic dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as ~\cite{habitat19iccv}.
-
-Meanwhile, the real word photo image is hard to estimate accurate optical flow.
-Although KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{Butler:ECCV:2012} pinhole image optical flow, e.t.c currently don't have any public panoramic optical flow dataset is available.
-
-\begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=\linewidth]{images/synthetic_optical_flow/of_render.pdf}
-	\caption{The pipeline of panoramic optical flow rendering.}
-	\label{fig:approach:panoof:pipline}
-\end{figure}
-
-The synthetic panoramic optical flow rendered with on-the-shelf OpenGL render pipeline and store in the ERP image.
-The input are textured 3D mesh and OpenGL's camera pose.
-The process shown as the Fig.~\ref{fig:approach:panoof:pipline} composing with the following 3 steps:
-
+\todolist{
 \begin{enumerate}
-	\item Camera Model: OpenGl render with Equirectangular projection (ERP);
-	\item Warp Around: Processing the warp around at the boundary of image;
-	\item Occlusion: estimate the occlusion of optical flow ;
+	\item How much frame;
+	\item What is the resolution;
+	\item What kinds of motion it has?
 \end{enumerate}
-
-\subsubsection{Camera Model}
-
-The traditional OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
-For synthesising ground truth panoramic RGB images and optical flow, we implement and hire equirectangular perspective camera model.
-
-The equirectangular perspective panoramic camera model render the 3D mesh to  equirectangular images.
-To achieve the camera model the OpenGL geometry shaders transform the 3D mesh from Cartesian coordinate system to spherical coordinate system. 
-The camera mode
-
-Furthermore, we use Replica to demonstrate. 
-The Replica dataset coordinate system show as the Fig.~\ref{fig:approach:coord_hotel_00}.
-
-\begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=\linewidth]{images/synthetic_optical_flow/coord_hotel_00.png}
-	\caption{A boat.}
-	\label{fig:approach:coord_hotel_00}
-\end{figure}
-
-And the coordinate system used in geometry OpenGL shader shown as Fig.~\ref{fig:approach:geometry_cs}.
-The forward is $+z$, up is $+y$ and left is $+x$.
-Meanwhile, the $\theta$ and 
-
-\begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=\linewidth]{images/synthetic_optical_flow/coord_hotel_00.png}
-	\caption{A boat.}
-	\label{fig:approach:geometry_cs}
-\end{figure}
+}
 
 
-
-\section{Dataset}\label{sec:exp:data}
+\textbf{Error Metric}
 
 It's very hard to measure the real word optical flow information, especially the equirectangular image. 
 And currently do not have any public optical flow equirectangular image dataset.
 So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
 Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
-
-
-\subsection{Synthetic Dataset}\label{sec:exp:data:syn}
-
-The rasterization render method OpenGL used to synthesize the ground truth optical flow.
-The equirectangular optical flow generation algorithm introduction in Section. \ref{sec:app:panoof}.
-Few public indoor 3D datasets are hired to render the ground truth data.
-
-Although, the 3D computer graphics software toolsets, e.g. Blender have functions to estimate the object motion information, e.g motion vector of Blender. 
-The rendered object motion used for motion blur e.t.c VFX is not accurate enough. 
-There are obviously artefacts at the boundary of moving objects, Figure. ~\ref{fig:exp:blendermv}. 
-
-\begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=\linewidth]{example-image-a}
-	\caption{Blender Motion Vector}
-	\label{fig:exp:blendermv}
-\end{figure}
-
-\textbf{Replica 360} ~\cite{replica19arxiv}
-
-
-
-\textbf{Matterport3D} ~\cite{Matterport3D}
-
-
-\subsection{Real World Dataset}
-
-We test our method on the real world dataset with warped image sequence.
-
-\section{Comparison}
-
-We compare our method with following state of the art methods, FlowNet2~\cite{ilg2017flownet}, Dense Inverse Search (DIS) optical flow~\cite{kroeger2016fast} and PWC-Net~\cite{sun2018pwc}. 
-The FlowNet2~\cite{ilg2017flownet} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
-The PWC-Net~\cite{sun2018pwc}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
-
-\subsection{Quantity Analysis}
 
 The metrics AAE, EPE and RMS is used for the quantity analysis.
 
@@ -112,7 +33,11 @@ The average endpoint error (\textbf{EPE}):  ~\cite{??}
 EPE is the absolute error of all the pixels. 
 
 \begin{equation}\label{equ_exp_epe}
-E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
+	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
+\end{equation}
+
+\begin{equation}\label{equ_exp_epe_sp}
+	E_{EPEs} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
 \end{equation}
 
 The average angular error (\textbf{AAE}):~\cite{??}
@@ -120,6 +45,10 @@ AAE is a metric to measure the deviation of angle:
 
 \begin{equation}\label{equ_exp_aae}
 	E_{AAE} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+\end{equation}
+
+\begin{equation}\label{equ_exp_aae_sp}
+	E_{AAEs} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
 \end{equation}
 
 The root mean square error (\textbf{RMSE}):~\cite{??}
@@ -133,8 +62,26 @@ To evaluate the error with same metric on the whole images, we extend EPE, AAE a
 Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
 The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
 
+\subsection{Comparison}
+
+We compare our method with following state of the art methods, FlowNet2~\cite{ilg2017flownet}, Dense Inverse Search (DIS) optical flow~\cite{kroeger2016fast} and PWC-Net~\cite{sun2018pwc}. 
+The FlowNet2~\cite{ilg2017flownet} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
+The PWC-Net~\cite{sun2018pwc}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
+
+
+\textbf{Quantitative  Evaluation.}
+
+
 The error in spherical coordinate shown as Tab. ~\ref{fig:exp:quality}.
 
+\todolist{Test on and a table to list them:
+\begin{enumerate}
+\item whole dataset;
+\item different kinds of camera motion and different magnitude motion;
+\item different image resolution 0.5K, 1K, 2K.
+\item Generalization: Compare the different opticalflow backbone result, to prove the generalizion of our method.
+\end{enumerate}
+}
 
 
 \begin{table}[h!]
@@ -157,82 +104,38 @@ The error in spherical coordinate shown as Tab. ~\ref{fig:exp:quality}.
 		\hline
 		room\_1 & - & - & -  & - & - & -  \\ 
 		\hline\hline
-		& \multicolumn{6}{c}{Flownet2} \\
-		\hline
-		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
-		\hline
-		apartment\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		hotel\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		office\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		office\_4 & - & - & -  & - & - & -  \\ 
-		\hline
-		room\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		room\_1 & - & - & -  & - & - & -  \\ 
-		\hline\hline
-		& \multicolumn{6}{c}{PWCNet} \\
-		\hline
-		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
-		\hline
-		apartment\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		hotel\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		office\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		office\_4 & - & - & -  & - & - & -  \\ 
-		\hline
-		room\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		room\_1 & - & - & -  & - & - & -  \\ 
-		\hline\hline
-		& \multicolumn{6}{c}{RAFT} \\
-		\hline
-		& ${AAE}$ & ${EPE}$ & ${RMS}$ & ${AAE_{cs}}$ & ${EPE_{cs}}$ & ${RMS_{cs}}$ \\
-		\hline
-		apartment\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		hotel\_0 & - & - & -  & - & - & -  \\ 
-		\hline
-		office\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		office\_4 & - & - & -  & - & - & -  \\ 
-		\hline
-		room\_0 & - & - & - & - & - & -  \\ 
-		\hline
-		room\_1 & - & - & -  & - & - & -  \\ 
-		\hline
 	\end{tabular}
 	\caption{Error of Replica dataset}
 	\label{fig:exp:quality}
 \end{table}
 
 
-%\begin{tikzpicture}
-%	% Read the file
-%	% if needed, define column separators by pgfplotstableread[col sep=...]{}{}
-%	\pgfplotstableread{data.csv}{\Data}
-%	\begin{groupplot}[
-%			group style = {group size = 2 by 1},
-%			height = 10cm,
-%			width = 10cm,
-%			ymin = 500,
-%			xticklabels from table = {\Data}{Day}, xtick = {1,...,19},
-%			xticklabel style = {rotate = 90, xshift = -0.8ex, anchor = mid east}
-%		]
-%		\nextgroupplot[xmin = 1, xmax = 19, ymax = 900]
-%		\addplot[very thick] table [x = Number, y = Orders] {\Data};
-%	\end{groupplot}
-%\end{tikzpicture}
+\todolist{analyze the error,where is larget, and why good and bad?}
 
 
+\textbf{Qualitative Evaluation.}
 
-\subsection{Quality Analysis}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.45\linewidth]{example-image}
+	\caption{Optical Flow from different method.}
+	\label{fig:exp:compflow}
+\end{figure}
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.45\linewidth]{example-image}
+	\caption{Optical Flow Different method backward warp result.}
+	\label{fig:exp:backwardwarp}
+\end{figure}
 
 
+\subsection{Ablations}
 
+\textbf{Multi-step warp.}
 
+Compare the result with and without the image alignment.
 
+\textbf{Stitch blending weight.}
+
+Test every terms of the weight,

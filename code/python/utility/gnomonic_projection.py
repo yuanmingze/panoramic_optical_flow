@@ -130,7 +130,7 @@ def tangent3d_projection(theta_, phi_, theta_0, phi_0):
 
     # TODO when t
     x = 1.0 * np.tan(theta)
-    # TODO wehn np.cos(theta) is 0
+    # TODO when np.cos(theta) is 0
     y = (1.0 / np.cos(theta)) * np.tan(phi)
     z = 1.0
     return x, y, np.ones_like(x)
