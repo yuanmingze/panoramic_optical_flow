@@ -1,6 +1,5 @@
 import math
 import copy
-import ipdb
 import numpy as np
 from scipy import ndimage
 from skimage.transform import resize
@@ -714,7 +713,6 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
     # erp_flow_weight_mat = np.where(erp_flow_weight_mat < 1, erp_flow_weight_mat, 0)
     # import image_io
     # image_io.image_show(erp_flow_weight_mat)
-    # import ipdb; ipdb.set_trace()
 
     non_zero_weight_list = erp_flow_weight_mat != 0.0
     if not np.all(non_zero_weight_list):

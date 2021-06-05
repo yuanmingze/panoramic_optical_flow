@@ -103,8 +103,6 @@ def test_enlarge_polygon():
     x_coordinates.append(intersecion_point[0][0])
     y_coordinates.append(intersecion_point[0][1])
 
-    # import ipdb; ipdb.set_trace()
-
     plt.scatter(x_coordinates, y_coordinates)
     plt.plot(x_coordinates, y_coordinates)
     plt.show()

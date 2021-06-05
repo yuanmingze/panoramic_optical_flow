@@ -3,6 +3,12 @@
     "scene_name": "apartment_0",
     "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
     "render_type": "panorama",
+    "_comment": "The c++ render opinions.",
+    "render_params": {
+        "texture_exposure": 1.0,
+        "texture_gamma": 1.0,
+        "texture_saturation": 1.0
+    },
     "render_view": {
         "_comment": "whether render data the camera at center of scene",
         "center_view": true,

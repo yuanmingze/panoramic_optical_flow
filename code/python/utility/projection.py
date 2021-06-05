@@ -260,7 +260,6 @@ def flow_accumulate_endpoint(optical_flow, rotation):
     # from scipy.spatial.transform import Rotation as R
     # rotation_matrix = R.from_euler("xyz", [np.degrees(phi_delta), np.degrees(theta_delta), 0], degrees=True).as_dcm()
     # from envmap import EnvironmentMap
-    # import ipdb; ipdb.set_trace()
     # end_points_array_xv = EnvironmentMap(end_points_array_xv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
     # end_points_array_yv = EnvironmentMap(end_points_array_yv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
 
@@ -269,9 +268,6 @@ def flow_accumulate_endpoint(optical_flow, rotation):
 
     end_points_sph[0, :, :] += rotation[0] 
     end_points_sph[1, :, :] += rotation[1]  # TODO correct
-
-
-    import ipdb; ipdb.set_trace()
 
     # spherical -> epr
     end_points_erp_accu_x, end_points_erp_accu_y = spherical_coordinates.sph2erp(end_points_sph[0, :, :] , end_points_sph[1, :, :], flow_height)

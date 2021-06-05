@@ -39,7 +39,6 @@ def compute_ico_faces_DIS(src_folder_path, src_file_expression,
 
     # 2) estimate them DIS optical flow
     for index in range(0, face_number):
-        # import ipdb; ipdb.set_trace()
         face_flow = flow_estimate.DIS(src_image_list[index], tar_image_list[index])
 
         face_flow_path = os.path.join(flow_dis_output_path, flow_dis_expression.format(index))

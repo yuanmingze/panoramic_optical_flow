@@ -29,7 +29,6 @@ def detect_intersection_segments_array(p1_, p2_, p3, p4, including_online=False)
         See https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/
         """
         val = ((q[1, :] - p[1, :]) * (r[0, :] - q[0, :])) - ((q[0, :] - p[0, :]) * (r[1, :] - q[1, :]))
-        # import ipdb; ipdb.set_trace()
         orientation_mat = np.full(p.shape[1], 0)  # default Colinear orientation
         orientation_mat = np.where(val > 0, 1, orientation_mat)  # Clockwise orientation
         orientation_mat = np.where(val < 0, 2, orientation_mat)  # Counterclockwise orientation
@@ -51,7 +50,6 @@ def detect_intersection_segments_array(p1_, p2_, p3, p4, including_online=False)
         # if ((q[0] <= max(p[0], r[0])) and (q[0] >= min(p[0], r[0])) and (q[1] <= max(p[1], r[1])) and (q[1] >= min(p[1], r[1]))):
         #     return True
         # return False
-        # import ipdb; ipdb.set_trace()
         onsegment_mat = np.logical_and(onsegment_mat, q[0, :] <= np.maximum(p[0, :], r[0, :]))
         onsegment_mat = np.logical_and(onsegment_mat, q[0, :] >= np.minimum(p[0, :], r[0, :]))
         onsegment_mat = np.logical_and(onsegment_mat, q[1, :] <= np.maximum(p[1, :], r[1, :]))
