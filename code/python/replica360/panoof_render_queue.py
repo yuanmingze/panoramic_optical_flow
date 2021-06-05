@@ -122,14 +122,14 @@ def render_panoramic_datasets(render_configs):
         render_args.append(str(render_configs.renderMotionVectorEnable))
 
         # run the render program
-        # render_seq_return = subprocess.check_call(render_args)
+        render_seq_return = subprocess.check_call(render_args)
 
     # 2) stitch cubemap to panoramic images
     for render_scene_name in render_configs.render_scene_names:
         if not render_scene_name in render_configs.replica_scene_name_list:
             continue
         print("stitch cubemap to panoramic images for {}".format(render_scene_name))
-
+ 
         replica_scene_data_root = render_configs.output_root_dir + render_scene_name + "/" + render_configs.output_cubemap_dir
         pano_output_dir = render_configs.output_root_dir + render_scene_name + "/" + render_configs.output_pano_dir
         fs_utility.dir_make(pano_output_dir)

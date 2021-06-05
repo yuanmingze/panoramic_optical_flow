@@ -77,12 +77,14 @@ def visual_data(data_dir):
             print(f"{counter} : {filename}")
         if filename.endswith(".dpt"):
             depth_data = depth_io.read_dpt(data_dir + filename)
-            depth_io.depth_visual_save(depth_data, data_dir + filename + ".jpg", 0, 1.0)
-            # create the mask   
-            depth_io.create_depth_mask(depth_data, data_dir + filename + "_mask.png", 0.0)
-        elif filename.endswith(".flo"):
+            # depth_io.depth_visual_save(depth_data, data_dir + filename + ".jpg", 0, 1.0)
+            # # create the mask   
+            # depth_io.create_depth_mask(depth_data, data_dir + filename + "_mask.png", 0.0)
+        elif filename.endswith(".flo"):# and filename == "0002_R_motionvector_forward.flo": 
             of_data = flow_io.read_flow_flo(data_dir + filename)
             of_data_vis = flow_vis.flow_to_color(of_data)
+            # of_data_vis_uv = flow_vis.flow_value_to_color(of_data)
+            # of_data_vis_uv = flow_vis.flow_max_min_visual(of_data, None)#"D:/1.jpg")
             image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
 
 
@@ -176,20 +178,25 @@ if __name__ == "__main__":
     cubemap_opticalflow_backward_filename_exp = "{:04d}_{}_motionvector_backward.flo"
     cubemap_rgb_forward_warp_filename_exp = "{:04d}_{}_rgb_forward_warp.jpg"
 
+    frame_number = 5
+
     pano_rgb_image_filename_exp = "{:04d}_rgb.jpg"
     pano_depthmap_filename_exp = "{:04d}_depth.dpt"
     pano_pointcloud_filename_exp = "{:04d}_depth.ply"
     pano_opticalflow_forward_filename_exp = "{:04d}_motionvector_forward.flo"
+    pano_opticalflow_visual_filename_exp = "{:04d}_motionvector_forward.jpg"
     pano_opticalflow_backward_filename_exp = "{:04d}_motionvector_backward.flo"
     pano_rgb_forward_warp_filename_exp = "{:04d}_rgb_forward_warp.jpg"
 
     # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/"
+    # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/office_0/cubemap/"
     dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/office_0/cubemap/"
+    output_dir = "D:/workdata/opticalflow_data/replic_cubemap/office_0/pano/"
 
     # stitch_depthmap(dataroot_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp)
     # stitch_rgb(dataroot_dir, cubemap_rgb_image_filename_exp, pano_rgb_image_filename_exp)
-    visual_data(dataroot_dir)
-    # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp)
+    # visual_data(dataroot_dir)
+    stitch_opticalflow(dataroot_dir, output_dir,frame_number,cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp, pano_opticalflow_visual_filename_exp)
     # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_backward_filename_exp, pano_opticalflow_backward_filename_exp)
     # cubemap_flow_warp(dataroot_dir, cubemap_rgb_image_filename_exp, cubemap_opticalflow_forward_filename_exp,  cubemap_rgb_forward_warp_filename_exp )
     # pano_flow_warp(dataroot_dir, pano_rgb_image_filename_exp, pano_opticalflow_forward_filename_exp,  pano_rgb_forward_warp_filename_exp)

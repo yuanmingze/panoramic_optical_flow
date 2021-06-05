@@ -122,7 +122,12 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     :rtype: numpy
     """
     # get the clip range
-    clip_flow = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)
+    if min_ratio !=0 and max_ratio!=1.0:
+        clip_flow = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)
+
+    # u_min,u_max = image_evaluate.get_min_max(flow_uv[:,:,0], min_ratio, max_ratio)
+    # v_min,v_max = image_evaluate.get_min_max(flow_uv[:,:,1], min_ratio, max_ratio)
+    # log.info("optical flow U range are [{}, {}], V range are [{}, {}]".format(u_min, u_max, v_min,v_max))
 
     # visualize optical flow
     assert flow_uv.ndim == 3, 'input flow must have three dimensions'
