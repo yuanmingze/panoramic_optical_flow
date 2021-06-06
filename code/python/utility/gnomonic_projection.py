@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from logger import Logger
 import spherical_coordinates
 
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

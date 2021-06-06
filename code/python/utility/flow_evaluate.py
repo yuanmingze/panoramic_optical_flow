@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 
-from . import spherical_coordinates
-
+import spherical_coordinates
+from logger import Logger
+log = Logger(__name__)
+log.logger.propagate = False
 
 """
 functions used to evaluate the quality of optical flow;
@@ -16,7 +18,6 @@ functions used to evaluate the quality of optical flow;
 UNKNOWN_FLOW_THRESH = 1e7
 SMALLFLOW = 0.0
 # LARGEFLOW = 1e8
-
 
 def error_visual(error_data, max=None, min=None, verbose=False):
     """
@@ -38,347 +39,197 @@ def error_visual(error_data, max=None, min=None, verbose=False):
     return (m.to_rgba(error_data)[:, :, :3] * 255).astype(np.uint8)
 
 
-def available_pixel(flow, unknown_value=UNKNOWN_FLOW_THRESH):
+def available_pixel(flow, of_mask=None, unknown_value=UNKNOWN_FLOW_THRESH):
     """
     The criterion of the available optical flow pixel.
-    1) not unknown value (very large or NaN)
+    1) not very large; 2) not a NaN; 3) mask is not 0;
 
-    :return: available pixel index, a numpy boolon array, True is valid and False is invalid
+    :param of_mask: 0 is the un-available pixel, 1 is available pixel, size is [height, width].
+    :type of_mask: numpy, optional
+    :return: available pixel lable matrix, True is valid and False is invalid
+    :rtype: numpy, boolon
     """
-    min_value = -1
-
+    min_value = 0
     flow_u = flow[:, :, 0]
     flow_v = flow[:, :, 1]
 
-    # unknown pixel optical flow
-    index_unknown = (abs(flow_u) > unknown_value) | (abs(flow_v) > unknown_value)
-    index_know = np.logical_not(index_unknown)
-
+    # very large optical flow
+    index_unlarge = np.logical_not(abs(flow_u) > unknown_value) | (abs(flow_v) > unknown_value)
+    # nan optical flow
+    index_unnan = np.logical_not(np.isnan(flow_u) | np.isnan(flow_v))
     # zero optical flow
     index_unzero = (np.absolute(flow_u) > min_value) | (np.absolute(flow_v) > min_value)
+    # index_unzero = np.full_like(index_know, False)
 
     # valid pixels index
-    index_valid = np.logical_and(index_know, index_unzero)
+    index_valid = index_unlarge & index_unnan & index_unzero
+    if of_mask is not None:
+        index_valid = index_valid & of_mask
+
+    if np.sum(index_valid) != index_valid.size():
+        log.info("In the optical flow there are {} pixels are unavailable.".format(np.sum(index_valid)))
+
     return index_valid
 
 
-def EPE(of_ground_truth, of_evaluation, spherical=False):
+def EPE(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     """
-    endpoint error (EE)
+    Endpoint error (EE)
     reference : https://github.com/prgumd/GapFlyt/blob/master/Code/flownet2-tf-umd/src/flowlib.py
 
-    :param spherical: whether compute the EPE in spherical coordinate, 
-    return: average of EPE
+    :param of_ground_truth: The ground truth optical flow, [height, width, 2], first channel is U, second channel is U.
+    :type of_ground_truth: numpy
+    :param of_evaluation: @see of_ground_truth
+    :type of_evaluation: numpy
+    :param spherical: True: the EPE is geodesic distance of united sphere, False: EPE is image pixels distance.
+    :type spherical: bool, optional
+    :return: average of EPE
+    :rtype: float
     """
-    stu = of_ground_truth[:, :, 0]
-    stv = of_ground_truth[:, :, 1]
-    su = of_evaluation[:, :, 0]
-    sv = of_evaluation[:, :, 1]
+    epe, of_gt_available_index = EPE_mat(of_ground_truth, of_evaluation, spherical, of_mask)
+    mepe = np.sum(epe) / np.sum(of_gt_available_index)
+    return mepe
 
-    # remove the invalid data
-    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    stu[idxUnknow] = 0
-    stv[idxUnknow] = 0
-    su[idxUnknow] = 0
-    sv[idxUnknow] = 0
 
-    ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-    # index_su = su[ind2]
-    # index_sv = sv[ind2]
-    # # an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
-    # # un = index_su * an
-    # # vn = index_sv * an
+def EPE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
+    """
+    @see EPE
 
-    # index_stu = stu[ind2]
-    # index_stv = stv[ind2]
-    # # tn = 1.0 / np.sqrt(index_stu ** 2 + index_stv ** 2 + 1)
-    # # tun = index_stu * tn
-    # # tvn = index_stv * tn
+    :return: the each pixel is EPE, unavailable pixels is 0. [height, width]
+    :rtype: numpy
+    """
+    of_gt_u = of_ground_truth[:, :, 0]
+    of_gt_v = of_ground_truth[:, :, 1]
+    of_u = of_evaluation[:, :, 0]
+    of_v = of_evaluation[:, :, 1]
 
-    # # angle = un * tun + vn * tvn + (an * tn)
-    # # index = [angle == 1.0]
-    # # angle[index] = 0.999
-    # # ang = np.arccos(angle)
-    # # mang = np.mean(ang)
-    # # mang = mang * 180 / np.pi
+    # set the invalid optical flow
+    of_gt_available_index = available_pixel(of_ground_truth, of_mask)
+    of_unavailable_index = np.logical_not(of_gt_available_index)
+    of_gt_u[of_unavailable_index] = 0
+    of_gt_v[of_unavailable_index] = 0
+    of_u[of_unavailable_index] = 0
+    of_v[of_unavailable_index] = 0
 
     if spherical:
-        # compute end point
-        height = np.shape(stu)[0]
-        width = np.shape(stu)[1]
-        x_index = np.linspace(0, width - 1, width)
-        y_index = np.linspace(0, height - 1, height)
-        x_array, y_array = np.meshgrid(x_index, y_index)
-
-        end_points_gt_u = x_array + stu
-        end_points_gt_v = y_array + stv
-        end_points_eva_u = x_array + su
-        end_points_eva_v = y_array + sv
-
-        # end point location to theta and phi
-        end_points_gt_u = (end_points_eva_u - width / 2.0) / (width / 2.0) * np.pi
-        end_points_gt_v = -(end_points_eva_v - height / 2.0) / (height / 2.0) * (np.pi / 2.0)
-
-        end_points_eva_u = (end_points_eva_u - width / 2.0) / (width / 2.0) * np.pi
-        end_points_eva_v = -(end_points_eva_v - height / 2.0) / (height / 2.0) * (np.pi / 2.0)
-
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(stu, stv)
+        # compute the end point
+        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
 
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(su, sv)
+        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
 
         # get great circle distance
         epe = spherical_coordinates.great_circle_distance(of_gt_endpoints_uv, of_eva_endpoints_uv)
     else:
-        epe = np.sqrt((stu - su) ** 2 + (stv - sv) ** 2)
+        epe = np.sqrt((of_gt_u - of_u) ** 2 + (of_gt_v - of_v) ** 2)
 
-    epe = epe[ind2]
-    mepe = np.mean(epe)
-
-    return mepe
+    return epe, of_gt_available_index
 
 
-def EPE_mat(of_ground_truth, of_evaluation, spherical=False):
+def RMSE(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     """
-    endpoint error (EE)
-    reference : https://github.com/prgumd/GapFlyt/blob/master/Code/flownet2-tf-umd/src/flowlib.py
+    compute the root mean square error(RMSE) of optical flow.
+    @see EPE
 
-    return: average of EPE data 
+    :retrun: RMSE
+    :rtype: float
     """
-    stu = of_ground_truth[:, :, 0]
-    stv = of_ground_truth[:, :, 1]
-    su = of_evaluation[:, :, 0]
-    sv = of_evaluation[:, :, 1]
-
-    # remove the invalid data
-    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    stu[idxUnknow] = 0
-    stv[idxUnknow] = 0
-    su[idxUnknow] = 0
-    sv[idxUnknow] = 0
-
-    # ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-    # index_su = su[ind2]
-    # index_sv = sv[ind2]
-    # # an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
-    # # un = index_su * an
-    # # vn = index_sv * an
-
-    # index_stu = stu[ind2]
-    # index_stv = stv[ind2]
-    # tn = 1.0 / np.sqrt(index_stu ** 2 + index_stv ** 2 + 1)
-    # tun = index_stu * tn
-    # tvn = index_stv * tn
-
-    # angle = un * tun + vn * tvn + (an * tn)
-    # index = [angle == 1.0]
-    # angle[index] = 0.999
-    # ang = np.arccos(angle)
-    # mang = np.mean(ang)
-    # mang = mang * 180 / np.pi
-    # epe[ind2] = 0
-    # mepe = np.mean(epe)
-
-    if spherical:
-        # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(stu, stv)
-        of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
-
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(su, sv)
-        of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
-
-        # get great circle distance
-        epe = spherical_coordinates.great_circle_distance_uv(of_gt_endpoints_uv[0], of_gt_endpoints_uv[1], of_eva_endpoints_uv[0], of_eva_endpoints_uv[1])
-    else:
-        epe = np.sqrt((stu - su) ** 2 + (stv - sv) ** 2)
-
-    return epe
-
-
-def RMSE(of_ground_truth, of_evaluation, spherical=False):
-    """
-    compute the root mean square error(RMSE) of optical flow
-
-    retrun: rmse
-    """
-    # stu = of_ground_truth[:, :, 0]
-    # stv = of_ground_truth[:, :, 1]
-    # su = of_evaluation[:, :, 0]
-    # sv = of_evaluation[:, :, 1]
-
-    # # ignore the invalid data
-    # idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    # stu[idxUnknow] = 0
-    # stv[idxUnknow] = 0
-
-    # ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-
-    # diff_u = stu[ind2] - su[ind2]
-    # diff_v = stv[ind2] - sv[ind2]
-
-    # rmse = np.sqrt(np.sum(diff_u ** 2 + diff_v ** 2) / np.shape(diff_u)[0])
-    rmse_mat = RMSE_mat(of_ground_truth, of_evaluation, spherical)
-    rmse = np.sqrt(np.sum(rmse_mat) / (np.shape(rmse_mat)[0] * np.shape(rmse_mat)[1]))
+    rmse_mat, of_gt_available_index = RMSE_mat(of_ground_truth, of_evaluation, spherical, of_mask)
+    rmse = np.sqrt(np.sum(rmse_mat) / np.sum(of_gt_available_index))
     return rmse
 
 
-def RMSE_mat(of_ground_truth, of_evaluation, spherical=False):
+def RMSE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     """
-    compute the root mean square error(RMSE) of optical flow.
-    The return is the array with element-wise (u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2).
+    Compute pixel-wise ((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2).
+    @see EPE
 
-    retrun: a array
+    :retrun: each pixel square distance
+    :rtype: numpy
     """
-    stu = of_ground_truth[:, :, 0]
-    stv = of_ground_truth[:, :, 1]
-    su = of_evaluation[:, :, 0]
-    sv = of_evaluation[:, :, 1]
+    of_gt_u = of_ground_truth[:, :, 0]
+    of_gt_v = of_ground_truth[:, :, 1]
+    of_u = of_evaluation[:, :, 0]
+    of_v = of_evaluation[:, :, 1]
 
     # ignore the invalid data
-    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    stu[idxUnknow] = 0
-    stv[idxUnknow] = 0
-
-    # ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-    # diff_u = stu[ind2] - su[ind2]
-    # diff_v = stv[ind2] - sv[ind2]
+    of_gt_available_index = available_pixel(of_ground_truth, of_mask)
+    of_unavailable_index = np.logical_not(of_gt_available_index)
+    of_gt_u[of_unavailable_index] = 0
+    of_gt_v[of_unavailable_index] = 0
+    of_u[of_unavailable_index] = 0
+    of_v[of_unavailable_index] = 0
 
     if spherical:
         # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(stu, stv)
+        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
-
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(su, sv)
+        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
 
         # get the Spherical Triangle angle
         rmse_mat = spherical_coordinates.great_circle_distance(of_gt_endpoints_uv, of_eva_endpoints_uv)
         rmse_mat = rmse_mat ** 2
     else:
-        diff_u = stu - su
-        diff_v = stv - sv
-        # rmse_mat = np.sqrt(diff_u ** 2 + diff_v ** 2)
+        diff_u = of_gt_u - of_u
+        diff_v = of_gt_v - of_v
         rmse_mat = diff_u ** 2 + diff_v ** 2
-        # rmse_mat = rmse_mat.reshape(np.shape(su))
-    return rmse_mat
+    return rmse_mat, of_gt_available_index
 
 
-def AAE(of_ground_truth, of_evaluation, spherical=False):
+def AAE(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     """
     The average angular error(AAE) 
-
     The result is between 0 and 2 * PI.
+
+    :retrun: AAE
+    :rtype: float
     """
-    stu = of_ground_truth[:, :, 0]
-    stv = of_ground_truth[:, :, 1]
-    su = of_evaluation[:, :, 0]
-    sv = of_evaluation[:, :, 1]
-
-    # # remove the invalid data
-    # idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    # stu[idxUnknow] = 0
-    # stv[idxUnknow] = 0
-    # su[idxUnknow] = 0
-    # sv[idxUnknow] = 0
-    # ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-
-    # #
-    # index_su = su#su[ind2]
-    # index_sv = sv#sv[ind2]
-    # index_stu = stu#stu[ind2]
-    # index_stv = stv#stv[ind2]
-
-    # valid_index = np.logical_or(ind2,  np.logical_not(idxUnknow))
-
-    valid_index_gt = available_pixel(of_ground_truth)
-    valid_index_eva = available_pixel(of_evaluation)
-    valid_index = np.logical_and(valid_index_eva, valid_index_gt)
-
-    # get the valid pixels index
-    if spherical:
-        # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(stu, stv)
-        of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
-
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(su, sv)
-        of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
-
-        of_origin_endpoints = spherical_coordinates.flow_warp_meshgrid(np.zeros(np.shape(su)), np.zeros(np.shape(su)))
-        of_origin_endpoints_uv = spherical_coordinates.erp2spherical(of_origin_endpoints)
-
-        # get the Spherical Triangle angle
-        angles = spherical_coordinates.get_angle(of_origin_endpoints_uv, of_gt_endpoints_uv, of_eva_endpoints_uv)
-
-    else:
-        # compute the average angle
-        uv_cross = su * stv - stu * sv
-        uv_dot = su * stu + stv * sv
-        angles = np.arctan2(uv_cross, uv_dot)
-        angles = np.abs(angles)
-
-    valid_pixel_number = np.count_nonzero(valid_index)
-    aae = np.sum(angles[valid_index]) / valid_pixel_number
-    return aae
-
-    # x = sum(math.cos(a) for a in angles)
-    # y = sum(math.sin(a) for a in angles)
-    # if x == 0 and y == 0:
-    #     raise ValueError("The angle average of the inputs is undefined: %r" % angles)
-    # return math.fmod(math.atan2(y, x) + 2 * math.pi, 2 * math.pi) * 180 / np.pi
+    aae_mat, of_available_index = AAE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None)
+    return np.sum(aae_mat) / np.sum(of_available_index)
 
 
-def AAE_mat(of_ground_truth, of_evaluation, spherical=False):
+def AAE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     """
     Return the mat of the average angular error(AAE) 
+    The angle is radian [0, 2 * PI].
 
-    The result is between 0 and 2 * PI.
+    :retrun: AAE matrix.
+    :rtype: numpy 
     """
-    stu = of_ground_truth[:, :, 0]
-    stv = of_ground_truth[:, :, 1]
-    su = of_evaluation[:, :, 0]
-    sv = of_evaluation[:, :, 1]
+    of_gt_u = of_ground_truth[:, :, 0]
+    of_gt_v = of_ground_truth[:, :, 1]
+    of_u = of_evaluation[:, :, 0]
+    of_v = of_evaluation[:, :, 1]
 
-    # remove the invalid data
-    idxUnknow = (abs(stu) > UNKNOWN_FLOW_THRESH) | (abs(stv) > UNKNOWN_FLOW_THRESH)
-    stu[idxUnknow] = 0
-    stv[idxUnknow] = 0
-    su[idxUnknow] = 0
-    sv[idxUnknow] = 0
-
-    ind2 = (np.absolute(stu) > SMALLFLOW) | (np.absolute(stv) > SMALLFLOW)
-    index_su = su[ind2]
-    index_sv = sv[ind2]
-
-    index_stu = stu[ind2]
-    index_stv = stv[ind2]
+    # ignore the invalid data
+    of_gt_available_index = available_pixel(of_ground_truth, of_mask)
+    of_eva_available_index = available_pixel(of_ground_truth, of_mask)
+    of_available_index = of_eva_available_index & of_gt_available_index
+    of_unavailable_index = np.logical_not(of_available_index)
+    of_gt_u[of_unavailable_index] = 0
+    of_gt_v[of_unavailable_index] = 0
+    of_u[of_unavailable_index] = 0
+    of_v[of_unavailable_index] = 0
 
     if spherical:
         # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(stu, stv)
+        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
-
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(su, sv)
+        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
-
-        of_origin_endpoints = spherical_coordinates.flow_warp_meshgrid(np.zeros(np.shape(su)), np.zeros(np.shape(su)))
+        of_origin_endpoints = spherical_coordinates.flow_warp_meshgrid(np.zeros_like(of_gt_u), np.zeros_like(of_gt_v))
         of_origin_endpoints_uv = spherical_coordinates.erp2spherical(of_origin_endpoints)
 
         # get the Spherical Triangle angle
         angles_mat = spherical_coordinates.get_angle(of_origin_endpoints_uv, of_gt_endpoints_uv, of_eva_endpoints_uv)
     else:
         # compute the average angle
-        uv_cross = index_su * index_stv - index_stu * index_sv
-        uv_dot = index_su * index_stu + index_stv * index_sv
+        uv_cross = of_gt_u * of_v - of_gt_v * of_u
+        uv_dot = of_gt_u * of_u + of_gt_v * of_v
         angles = np.arctan2(uv_cross, uv_dot)
-        angles_mat = angles.reshape(np.shape(su))
-
+        angles_mat = angles.reshape(np.shape(of_gt_u))
         angles_mat = abs(angles_mat)
 
-    # x = sum(math.cos(a) for a in angles)
-    # y = sum(math.sin(a) for a in angles)
-    # if x == 0 and y == 0:
-    #     raise ValueError(
-    #         "The angle average of the inputs is undefined: %r" % angles)
-
-    return angles_mat
+    return angles_mat, of_available_index

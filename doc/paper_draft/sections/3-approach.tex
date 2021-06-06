@@ -1,9 +1,5 @@
 \section{Approach}\label{sec:approach}
 
-\todolist{Why use ERP Image representation the panoramic image?}
-
-\todolist{Overview our method, including steps.}
-
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[width=0.95\linewidth]{images/method_pipeline_0.pdf}
@@ -11,7 +7,9 @@
 \label{fig:approach:pipeline}
 \end{figure}
 
+\todolist{Why use ERP Image representation the panoramic image?}
 
+\todolist{Overview our method, including steps.}
 
 
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
@@ -68,8 +66,29 @@ Another's target image range is $[- n * image_width, + n * image_width]$
 
 How the gnomomic projection project the 
 
+Set the tangent point $S$ as the centre point of the projection, who longitude and latitude is $(\theta_0, \phi_0)$,
+The sphercial points is $(\theta, \phi)$
+
+%Azimuthal equidistant projection:
+%- https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection
+%- https://fr.maplesoft.com/applications/view.aspx?SID=3583&view=html
+%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html
+%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html#SECTION00021100000000000000
+%- http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Perspective.htm
+
+
 \textbf{Tangent/Center points selection.}
-Use cubemap or Icosahedron.
+Use cubemap or Regular icosahedron, which is a convex polyhedron with 20 faces, 30 edges and 12 vertices.
+
+%Reference:
+%\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
+%\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
+%\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
+%\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
+%
+%\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
+%\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}
+
 
 \textbf{Panoramic image Projection}
 

@@ -44,8 +44,8 @@ class ReplicaConfig():
     replica_pano_opticalflow_backward_visual_filename_exp = "{:04d}_opticalflow_backward_pano_visual.jpg"
     replica_pano_mask_filename_exp = "{:04d}_mask_pano.png"
 
-    replica_pano_rgb_froward_of_forwardwarp_filename_exp = "{:04d}_motionvector_forward_rgb_forwardwarp.jpg"
-    replica_pano_rgb_backward_of_forwardwarp_filename_exp = "{:04d}_motionvector_backward_rgb_forwardwarp.jpg"
+    replica_pano_rgb_froward_of_forwardwarp_filename_exp = "{:04d}_opticalflow_forward_rgb_forwardwarp.jpg"
+    replica_pano_rgb_backward_of_forwardwarp_filename_exp = "{:04d}_opticalflow_backward_rgb_forwardwarp.jpg"
 
     # 2) data generating programs
     program_root_dir = "D:/workspace_windows/replica/Replica-Dataset_360/build_msvc/ReplicaSDK/Release/"

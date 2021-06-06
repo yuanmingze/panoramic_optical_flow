@@ -22,7 +22,7 @@ def image_read(image_file_path):
     :type image_file_path: str
     :return: the numpy array of image
     :rtype: numpy
-    """    
+    """
     if not os.path.exists(image_file_path):
         log.error("{} do not exist.".format(image_file_path))
 
@@ -72,7 +72,7 @@ def visual_data(data_array, verbose=False):
     return (m.to_rgba(visualized_data)[:, :, :3] * 255).astype(np.uint8)
 
 
-def image_show(image, title=" ",  verbose=True):
+def image_show(image, title=" "):
     """
     visualize the numpy array
     """

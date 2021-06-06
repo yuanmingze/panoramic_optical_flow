@@ -2,7 +2,7 @@ import os
 from struct import pack, unpack
 
 import numpy as np
-
+import image_io
 from logger import Logger
 
 """
@@ -208,46 +208,29 @@ def write_flow_floss(filename, uv, v=None):
     f.close()
 
 
-# def load_of_bin(binary_file_path, height, width, visual_enable=True):
-def read_flow_bin(binary_file_path, height, width, visual_enable=True):
+def read_flow_bin(binary_file_path, height, width):
     """
-    load depth value form binary file, replica360 generated 
+    load depth value form binary file, replica360 generated.
     """
     xbash = np.fromfile(binary_file_path, dtype='float32')
     data = xbash.reshape(width, height, 4)
-
-    if visual_enable:
-        cmap = plt.get_cmap('rainbow')
-        fig, axs = plt.subplots(nrows=2, sharex=True, figsize=(3, 5))
-
-        images = []
-        axs[0].set_title('optical flow x')
-        images.append(axs[0].imshow(data[:, :, 0], cmap=cmap))
-
-        axs[1].set_title('optical flow y')
-        images.append(axs[1].imshow(data[:, :, 1], cmap=cmap))
-
-        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
-        plt.show()
-
-    if visual_enable:
-        fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
-
-        images = []
-        axs.set_title('optical flow x')
-        images.append(axs.imshow(data[:, :, 0], cmap=cmap))
-
-        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
-        plt.show()
-
-    if visual_enable:
-        fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
-
-        images = []
-        axs.set_title('optical flow y')
-        images.append(axs.imshow(data[:, :, 1], cmap=cmap))
-
-        fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1, shrink=0.4)
-        plt.show()
-
     return data[:, :, 0:2], data[:, :, 2:4]
+
+
+def read_mask(mask_filepath):
+    """Read the unavailable pixel mask from file.
+    PNG file, available pixel is True (Not 0), unavailable pixel is Flase (0).
+
+    :param mask_filepath: the file path.
+    :type mask_filepath: str
+    :return: the mask matrix.
+    :rtype: numpy
+    """
+    _, file_extension = os.path.splitext(mask_filepath)
+    mask_mat = None
+    if file_extension == ".png":
+        mask_mat = image_io.image_read(mask_filepath)
+    else:
+        log.warn("Do not support {} format mask".format(file_extension))
+
+    return mask_mat

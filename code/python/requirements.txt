@@ -1,39 +1,5 @@
-astroid==2.4.2
-autopep8==1.5.2
-backcall==0.2.0
-certifi==2020.12.5
-colorama==0.4.3
-cycler==0.10.0
-decorator==4.4.2
-ipdb==0.13.4
-ipython==7.19.0
-ipython-genutils==0.2.0
-isort==4.3.21
-jedi==0.18.0
-kiwisolver @ file:///D:/bld/kiwisolver_1604322452227/work
-lazy-object-proxy==1.4.3
-matplotlib @ file:///D:/bld/matplotlib-suite_1605180506412/work
-mccabe==0.6.1
-numpy @ file:///D:/bld/numpy_1604946157939/work
-olefile @ file:///home/conda/feedstock_root/build_artifacts/olefile_1602866521163/work
-parso==0.8.1
-pickleshare==0.7.5
-Pillow @ file:///D:/bld/pillow_1604748918199/work
-prompt-toolkit==3.0.8
-pycodestyle==2.5.0
-Pygments==2.7.3
-pylint==2.5.3
-pyparsing==2.4.7
-PyQt5==5.12.3
-PyQt5-sip==4.19.18
-PyQtChart==5.12
-PyQtWebEngine==5.12.1
-python-dateutil==2.8.1
-scipy @ file:///C:/bld/scipy_1604304921792/work
-six==1.15.0
-toml==0.10.1
-tornado @ file:///D:/bld/tornado_1604105353952/work
-traitlets==5.0.5
-wcwidth==0.2.5
-wincertstore==0.2
-wrapt==1.12.1
+colorama
+matplotlib
+numpy
+Pillow
+scipy

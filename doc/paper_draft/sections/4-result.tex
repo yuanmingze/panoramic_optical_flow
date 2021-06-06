@@ -11,6 +11,29 @@
 
 The dataset will be released for open access.
 
+
+The synthetic panoramic optical flow rendered with on-the-shelf OpenGL render pipeline and store in the ERP image.
+The input are textured 3D mesh and OpenGL's camera pose.
+The process shown as the Fig.~\ref{fig:approach:panoof:pipline} composing with the following 3 steps:
+
+\begin{enumerate}
+	\item Camera Model: OpenGl render with Equirectangular projection (ERP);
+	\item Warp Around: Processing the warp around at the boundary of image;
+	\item Occlusion: estimate the occlusion of optical flow ;
+\end{enumerate}
+
+The traditional OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
+For synthesising ground truth panoramic RGB images and optical flow, we implement and hire equirectangular perspective camera model.
+The equirectangular perspective panoramic camera model render the 3D mesh to equirectangular images.
+To achieve the camera model the OpenGL geometry shaders transform the 3D mesh from Cartesian coordinate system to spherical coordinate system. 
+
+We also test our method on the real world dataset with warped image sequence.
+It's very hard to measure the real word optical flow information, especially the equirectangular image. 
+And currently do not have any public optical flow equirectangular image dataset.
+So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
+Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
+
+
 \todolist{
 \begin{enumerate}
 	\item How much frame;
@@ -52,6 +75,8 @@ AAE is a metric to measure the deviation of angle:
 \end{equation}
 
 The root mean square error (\textbf{RMSE}):~\cite{??}
+
+\todolist{A diagram to show what the sphere version EPE and AAE like.}
 
 \begin{equation}\label{equ_exp_rmse}
 	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
@@ -135,6 +160,7 @@ The error in spherical coordinate shown as Tab. ~\ref{fig:exp:quality}.
 \textbf{Multi-step warp.}
 
 Compare the result with and without the image alignment.
+\todolist{How rotation affects accuracy?}
 
 \textbf{Stitch blending weight.}
 
