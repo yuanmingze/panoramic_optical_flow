@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 
+import image_evaluate
 from logger import Logger
 
 log = Logger(__name__)
@@ -47,29 +48,41 @@ def image_diff(image_generated, image_gt, output_path=""):
         plt.savefig(output_path)
 
 
-def visual_data(data_array, verbose=False):
+def visual_data(data_array, min_ratio=0.1, max_ratio=0.9):
     """
-    visualize the boolean or float etc. data to heatmap.
+    visualize the single channel boolean or float etc. data to heatmap.
     """
-    max = 1.0
-    min = 0.0
+    max = None
+    min = None
     visualized_data = None
-    if len(np.shape(data_array)) == 1 and data_array.dtype != np.bool:
-        # is bool or float
+    if len(np.shape(data_array)) == 2 and data_array.dtype != np.bool:
         visualized_data = data_array
-        max = np.max(data_array)
-        min = np.min(data_array)
-        if verbose:
-            print("error_visual(): max error {}, min error {}".format(max, min))
-    if len(np.shape(data_array)) == 1 and data_array.dtype == np.bool:
+        min, max = image_evaluate.get_min_max(data_array, min_ratio, max_ratio)
+        log.debug("error_visual(): max error {}, min error {}".format(max, min))
+    elif len(np.shape(data_array)) == 2 and data_array.dtype == np.bool:
         visualized_data = data_array.astype(float)
-        if verbose:
-            print("error_visual(): max error {}, min error {}".format(max, min))
+        max = 1.0
+        min = 0.0
+        log.debug("error_visual(): max error {}, min error {}".format(max, min))
+    else:
+        log.error("Data shape is {}, just support single channel data.".format(data_array.shape))
 
+    fig, axes = plt.subplots()
+    axes.axis("off")
     norm = mpl.colors.Normalize(vmin=min, vmax=max)
-    cmap = plt.get_cmap('jet')
-    m = cm.ScalarMappable(norm=norm, cmap=cmap)
-    return (m.to_rgba(visualized_data)[:, :, :3] * 255).astype(np.uint8)
+    smap = cm.ScalarMappable(norm=norm, cmap=plt.get_cmap('jet'))
+    fig.colorbar(mappable=smap)
+    axes.imshow(smap.to_rgba(visualized_data))
+    # plt.show()
+    fig.canvas.draw()  # draw the renderer
+    w, h = fig.canvas.get_width_height()     # Get the RGBA buffer from the figure
+    buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
+    buf.shape = (w, h, 4)
+    # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
+    buf = np.roll(buf, 3, axis=2)
+    image = Image.frombytes("RGBA", (w, h), buf.tostring())
+    image = np.asarray(image)
+    return image[:, :, 0:3]
 
 
 def image_show(image, title=" "):

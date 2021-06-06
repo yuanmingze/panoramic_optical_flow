@@ -1,25 +1,22 @@
 import os
 import sys
 import re
-from struct import pack, unpack
 
 import numpy as np
 from PIL import Image
 
-import matplotlib as mpl
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
+import image_evaluate
 from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
 
 
-def create_depth_mask(depth_map, output_filepath = None,  threshold= 0.0):
+def create_depth_mask(depth_map, output_filepath=None,  threshold=0.0):
     """Create the unavailable pixel mask from depth map.
 
     The unavailable pixel is the value less than the threshold.
@@ -31,7 +28,7 @@ def create_depth_mask(depth_map, output_filepath = None,  threshold= 0.0):
     :type threshold: float, optional
     """
     pixel_mask = np.where(depth_map < threshold, 0, 65535)
-    
+
     if output_filepath is not None:
         img = Image.fromarray(pixel_mask.astype(np.uint8))
         img.save(output_filepath, compress_level=0)
@@ -39,7 +36,7 @@ def create_depth_mask(depth_map, output_filepath = None,  threshold= 0.0):
     return pixel_mask
 
 
-def depth2disparity(depth_map, baseline = 1.0, focal = 1.0):
+def depth2disparity(depth_map, baseline=1.0, focal=1.0):
     """
     Convert the depth map to disparity map.
 
@@ -51,30 +48,23 @@ def depth2disparity(depth_map, baseline = 1.0, focal = 1.0):
     :type focal: float, optional
     :return: disparity map data, 
     :rtype: numpy
-    """    
+    """
     no_zeros_index = np.where(depth_map != 0)
     disparity_map = np.full(depth_map.shape, np.Inf, np.float64)
     disparity_map[no_zeros_index] = (baseline * focal) / depth_map[no_zeros_index]
     return disparity_map
 
 
-def depth_visual_save(depth_data, output_path, min_ratio = 0.05, max_ratio = 0.95):
+def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.95):
     """save the visualized depth map to image file with value-bar.
 
     :param dapthe_data: The depth data.
     :type dapthe_data: numpy 
-    :param output_path: the absolute path of output image.
+    :param output_path: the absolute path of output image, if is None return rendering result.
     :type output_path: str
     """
     dapthe_data_temp = depth_data.astype(np.float64)
-
-    vmin_ = 0
-    vmax_ = 0
-    dispmap_array = depth_data.flatten()
-    vmin_idx = int(dispmap_array.size * min_ratio)
-    vmax_idx = int((dispmap_array.size - 1) * max_ratio)
-    vmin_ = np.partition(dispmap_array, vmin_idx)[vmin_idx]
-    vmax_ = np.partition(dispmap_array, vmax_idx)[vmax_idx]
+    vmin_, vmax_ = image_evaluate.get_min_max(depth_data, min_ratio, max_ratio)
     if min_ratio != 0 or max_ratio != 1.0:
         log.warn("clamp the depth value form [{},{}] to [{},{}]".format(np.amin(depth_data), np.amax(depth_data), vmin_, vmax_))
 
@@ -88,21 +78,18 @@ def depth_visual_save(depth_data, output_path, min_ratio = 0.05, max_ratio = 0.9
     im = ax.imshow(dapthe_data_temp, cmap=cm.jet, vmin=vmin_, vmax=vmax_)
     #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
     cbar = ax.figure.colorbar(im, ax=ax)
-    plt.savefig(output_path, dpi=150)
+    result_image = None
+    if output_path is not None:
+        plt.savefig(output_path, dpi=150)
+    else:
+        fig.canvas.draw()  # draw the renderer
+        w, h = fig.canvas.get_width_height()  # Get the RGBA buffer from the figure
+        buf = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
+        buf.shape = (w, h, 3)
+        image = Image.frombytes("RGB", (w, h), buf.tostring())
+        result_image = np.asarray(image)
     plt.close(fig)
-
-
-def depth_visual(depth_data):
-    """
-    visualize the depth map
-    """
-    min = np.min(depth_data)
-    max = np.max(depth_data)
-    norm = mpl.colors.Normalize(vmin=min, vmax=max)
-    cmap = plt.get_cmap('jet')
-
-    m = cm.ScalarMappable(norm=norm, cmap=cmap)
-    return (m.to_rgba(depth_data)[:, :, :3] * 255).astype(np.uint8)
+    return result_image
 
 
 def read_bin(binary_file_path, height, width):

@@ -1,48 +1,45 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
 
 def great_circle_distance(points_1, points_2, radius=1):
     """
     Get the distance between two points in the sphere, the grate-circle distance.
     Reference: https://en.wikipedia.org/wiki/Great-circle_distance.
 
-    :param first: the numpy array [theta_1, phi_1]
-    :param second: the numpy array [theta_2, phi_2]
+    :param points_1: the numpy array [theta_1, phi_1]
+    :type points_1: numpy
+    :param points_2: the numpy array [theta_2, phi_2]
+    :type points_2: numpy
     :param radius: the radius, the default is 1
     :return distance: the great-circle distance of two point.
+    :rtype: numpy
     """
     return great_circle_distance_uv(points_1[0], points_1[1], points_2[0], points_2[1], radius)
 
 
 def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, points_2_phi, radius=1):
     """
-    @see great_circle_distance
+    @see great_circle_distance (haversine distances )
+    https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.haversine_distances.html
 
-    :param points_1_theta:
-    :param points_1_phi:
-    :param points_2_theta:
-    :param points_2_phi:
+    :param points_1_theta: theta in radians
+    :type points_1_theta : numpy
+    :param points_1_phi: phi in radians
+    :param points_2_theta: radians
+    :param points_2_phi: radians
     """
-    # # compute great circle distance
-    # theta_diff = np.abs(points_1_theta - points_2_theta)
-    # param_1 = np.sin(points_1_theta) * np.sin(points_2_theta)
-    # param_2 = np.cos(points_1_theta) * np.cos(points_2_theta)
-    # central_angle_delta = np.arccos(param_1 + param_2 * np.cos(theta_diff))
-
-    # HaversineDistance
-    lat1 = points_1_phi
-    lon1 = points_1_theta
-    lat2 = points_2_phi
-    lon2 = points_2_theta
-    dlat = lat2-lat1
-    dlon = lon2-lon1
-    a = np.sin(dlat/2) * np.sin(dlat/2) + np.cos(lat1) \
-        * np.cos(lat2) * np.sin(dlon/2) * np.sin(dlon/2)
+    delta_theta = points_2_theta - points_1_theta
+    delta_phi = points_2_phi - points_1_phi
+    a = np.sin(delta_phi * 0.5) ** 2 + np.cos(points_1_phi) * np.cos(points_2_phi) * np.sin(delta_theta * 0.5) ** 2
     central_angle_delta = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
 
     if np.isnan(central_angle_delta).any():
-        raise Exception("the angle contain NAN")
+        log.warn("the circle angle have NAN")
 
     return radius * central_angle_delta
 
@@ -252,7 +249,7 @@ def rotate_array(data_array, rotate_theta, rotate_phi):
     :rtype: numpy
     """
     # The envmap's 3d coordinate system is +x right, +y up and -z front.
-    rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_phi), np.degrees(rotate_theta), 0], degrees=True).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_phi), np.degrees(rotate_theta), 0], degrees=True).as_matrix()
 
     # rotate the ERP image
     from envmap import EnvironmentMap

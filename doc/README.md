@@ -22,6 +22,7 @@ There are two steps:
 - Change Choen's FFT to DCT, to solve the rotation invariance
 - Kernel transform NN, 
 - GNN the get the alignment coefficients;
+- Fine Tune perspective CNN on 360 images, use panoramic image train the perspective image CNN;
 
 ## 2.1. Reference
 

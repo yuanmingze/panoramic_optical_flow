@@ -66,7 +66,7 @@ def available_pixel(flow, of_mask=None, unknown_value=UNKNOWN_FLOW_THRESH):
     if of_mask is not None:
         index_valid = index_valid & of_mask
 
-    if np.sum(index_valid) != index_valid.size():
+    if np.sum(index_valid) != index_valid.size:
         log.info("In the optical flow there are {} pixels are unavailable.".format(np.sum(index_valid)))
 
     return index_valid
@@ -114,10 +114,10 @@ def EPE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     if spherical:
         # compute the end point
         of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
-        of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
+        of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
 
         of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
-        of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
+        of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
 
         # get great circle distance
         epe = spherical_coordinates.great_circle_distance(of_gt_endpoints_uv, of_eva_endpoints_uv)
@@ -136,7 +136,7 @@ def RMSE(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     :rtype: float
     """
     rmse_mat, of_gt_available_index = RMSE_mat(of_ground_truth, of_evaluation, spherical, of_mask)
-    rmse = np.sqrt(np.sum(rmse_mat) / np.sum(of_gt_available_index))
+    rmse = np.sqrt(np.sum(np.square(rmse_mat)) / np.sum(of_gt_available_index))
     return rmse
 
 
@@ -164,9 +164,9 @@ def RMSE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     if spherical:
         # get the three points of the triangle
         of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
-        of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
+        of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
         of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
-        of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
+        of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
 
         # get the Spherical Triangle angle
         rmse_mat = spherical_coordinates.great_circle_distance(of_gt_endpoints_uv, of_eva_endpoints_uv)
@@ -174,7 +174,7 @@ def RMSE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     else:
         diff_u = of_gt_u - of_u
         diff_v = of_gt_v - of_v
-        rmse_mat = diff_u ** 2 + diff_v ** 2
+        rmse_mat = np.sqrt(diff_u ** 2 + diff_v ** 2)
     return rmse_mat, of_gt_available_index
 
 
@@ -216,11 +216,11 @@ def AAE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
     if spherical:
         # get the three points of the triangle
         of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
-        of_gt_endpoints_uv = spherical_coordinates.erp2spherical(of_gt_endpoints)
+        of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
         of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
-        of_eva_endpoints_uv = spherical_coordinates.erp2spherical(of_eva_endpoints)
+        of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
         of_origin_endpoints = spherical_coordinates.flow_warp_meshgrid(np.zeros_like(of_gt_u), np.zeros_like(of_gt_v))
-        of_origin_endpoints_uv = spherical_coordinates.erp2spherical(of_origin_endpoints)
+        of_origin_endpoints_uv = spherical_coordinates.erp2sph(of_origin_endpoints)
 
         # get the Spherical Triangle angle
         angles_mat = spherical_coordinates.get_angle(of_origin_endpoints_uv, of_gt_endpoints_uv, of_eva_endpoints_uv)

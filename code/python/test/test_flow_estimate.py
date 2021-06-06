@@ -10,6 +10,17 @@ from utility import flow_warp
 import os
 
 
+def test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_output_filepath):
+    # load image to CPU memory
+    src_erp_image = image_io.image_read(erp_src_image_filepath)
+    tar_erp_image = image_io.image_read(erp_tar_image_filepath)
+
+    of_forward = flow_estimate.DIS(src_erp_image, tar_erp_image)
+    flow_io.flow_write(of_forward, erp_of_dif_output_filepath)
+    of_forward_vis = flow_vis.flow_to_color(of_forward)
+    image_io.image_save(of_forward_vis, erp_of_dif_output_filepath + ".jpg")
+
+
 def test_multi_step_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_output_filepath):
     """Test 
     """
@@ -38,5 +49,7 @@ if __name__ == "__main__":
     erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
 
     erp_opticalflow_output_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_multisteps.flo")
+    erp_of_dif_output_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward_dis.flo")
 
-    test_multi_step_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_output_filepath)
+    # test_multi_step_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_output_filepath)
+    test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_output_filepath)
