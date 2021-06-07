@@ -150,12 +150,13 @@ def test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow
         image_io.image_save(face_flow_vis, ico_flow_vis_name)
 
         # warp image
-        print("output warped result: "+tangent_image_filename_expression.format(index))
         src_image_path = ico_src_image_output_dir + tangent_image_filename_expression.format(index)
-        image_src = image_io.image_read(src_image_path)
-        image_src_warpped = flow_warp.warp_forward(image_src, face_flows[index])
-        image_src_warpped_path = ico_src_image_output_dir + tangent_image_filename_expression.format(index) + "_warp.png"
-        image_io.image_save(image_src_warpped, image_src_warpped_path)
+        if os.path.exists(src_image_path):
+            print("output warped result: "+tangent_image_filename_expression.format(index))
+            image_src = image_io.image_read(src_image_path)
+            image_src_warpped = flow_warp.warp_forward(image_src, face_flows[index])
+            image_src_warpped_path = ico_src_image_output_dir + tangent_image_filename_expression.format(index) + "_warp.png"
+            image_io.image_save(image_src_warpped, image_src_warpped_path)
 
 
 def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_src_flow_stitch_filepath,
@@ -180,7 +181,7 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
     erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar,of_wrap_around=True)
     flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
-    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, min_ratio=0.0, max_ratio=1.0)
+    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, min_ratio=0.1, max_ratio=0.9)
     # image_io.image_show(face_flow_vis)
     log.info("output flow to: {}".format(erp_src_flow_stitch_filepath + "_vis.jpg"))
     image_io.image_save(face_flow_vis, erp_src_flow_stitch_filepath + "_vis.jpg")
@@ -199,7 +200,7 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
     # 4) compute the error map
     if erp_flo_error_filename_prefix is not None:
         erp_flow_gt = flow_io.flow_read(erp_flow_gt_filepath)
-        flow_evaluate.opticalflow_metric(erp_flow_gt, erp_flow_stitch, erp_flo_error_filename_prefix, min_ratio=0.0, max_ratio=1.0)
+        flow_evaluate.opticalflow_metric(erp_flow_gt, erp_flow_stitch, erp_flo_error_filename_prefix, min_ratio=0.1, max_ratio=0.9)
 
 
 if __name__ == "__main__":

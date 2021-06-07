@@ -247,7 +247,7 @@ def read_pfm(path):
         elif header.decode("ascii") == "Pf":
             color = False
         else:
-            raise Exception("Not a PFM file: " + path)
+            log.error("Not a PFM file: " + path)
 
         dim_match = re.match(r"^(\d+)\s(\d+)\s$", file.readline().decode("ascii"))
         if dim_match:

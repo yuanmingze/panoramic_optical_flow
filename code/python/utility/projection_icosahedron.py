@@ -8,6 +8,7 @@ import gnomonic_projection as gp
 import spherical_coordinates as sc
 import polygon
 import projection
+import flow_post_proc
 
 from logger import Logger
 
@@ -312,7 +313,7 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
     channel_number = np.shape(erp_image)[2]
 
     if erp_image_width != erp_image_height * 2:
-        raise Exception("the ERP image dimession is {}".format(np.shape(erp_image)))
+        log.error("the ERP image dimession is {}".format(np.shape(erp_image)))
 
     tangent_image_list = []
     tangent_image_height = int((tangent_image_width / 2.0) / np.tan(np.radians(30.0)) + 0.5)
@@ -505,7 +506,6 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
     # TODO Test padding
     # get the ERP flow map parameters
     erp_image_height = np.shape(erp_flow_mat)[0]
-    erp_image_width = np.shape(erp_flow_mat)[1]
     erp_flow_channel = np.shape(erp_flow_mat)[2]
     if erp_flow_channel != 2:
         log.error("The flow is not 2 channels.")
@@ -550,8 +550,8 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
             face_flow_pixels_src[:, channel] = ndimage.map_coordinates(erp_flow_mat[:, :, channel], [face_erp_pixel_y, face_erp_pixel_x], order=1, mode='wrap')
 
         # the flow end point in ERP image pixel coordinate
-        face_erp_pixel_x_target = face_erp_pixel_x + face_flow_pixels_src[:, 0]  # [inside_list]
-        face_erp_pixel_y_target = face_erp_pixel_y + face_flow_pixels_src[:, 1]  # [inside_list]
+        face_erp_pixel_x_target = face_erp_pixel_x + face_flow_pixels_src[:, 0]
+        face_erp_pixel_y_target = face_erp_pixel_y + face_flow_pixels_src[:, 1]
 
         # spherical location --> tangent pixel location
         face_pixel_sph = sc.erp2sph([face_erp_pixel_x_target, face_erp_pixel_y_target], erp_image_height, wrap_around=False)
@@ -623,8 +623,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         erp_flow_col_stop = int(erp_flow_col_stop + 0.5) if int(erp_flow_col_stop) > 0 else int(erp_flow_col_stop)
         erp_flow_row_start = int(erp_flow_row_start) if int(erp_flow_row_start) > 0 else int(erp_flow_row_start - 0.5)
         erp_flow_row_stop = int(erp_flow_row_stop + 0.5) if int(erp_flow_row_stop) > 0 else int(erp_flow_row_stop)
-        triangle_x_range = np.linspace(erp_flow_col_start, erp_flow_col_stop, erp_flow_col_stop - erp_flow_col_start + 1)
-        triangle_y_range = np.linspace(erp_flow_row_start, erp_flow_row_stop, erp_flow_row_stop - erp_flow_row_start + 1)
+        triangle_x_range = np.linspace(erp_flow_col_start, erp_flow_col_stop, erp_flow_col_stop - erp_flow_col_start + 1, endpoint=True)
+        triangle_y_range = np.linspace(erp_flow_row_start, erp_flow_row_stop, erp_flow_row_stop - erp_flow_row_start + 1, endpoint=True)
 
         face_src_x_erp, face_src_y_erp = np.meshgrid(triangle_x_range, triangle_y_range)
         face_src_x_erp = np.remainder(face_src_x_erp, erp_flow_width)  # process the wrap around
@@ -666,18 +666,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         face_tar_x_sph_avail, face_tar_y_sph_avail = gp.reverse_gnomonic_projection(face_tar_x_gnom_avail, face_tar_y_gnom_avail, theta_0, phi_0)
 
         # 3-2) process the optical flow wrap-around, including face, use the shorted path as real path.
-        if of_wrap_around:
-            log.info("ERP optical flow with wrap around. Face index {}".format(face_index))
-            face_src_x_sph_avail = face_src_xy_sph[0, :, :][available_list]
-            cross_boundary = np.abs(face_src_x_sph_avail - face_tar_x_sph_avail) > np.pi
-            cross_x_axis_minus2pi = np.logical_and(cross_boundary, face_src_x_sph_avail < 0)
-            cross_x_axis_plus2pi = np.logical_and(cross_boundary, face_src_x_sph_avail >= 0)
-            face_tar_x_sph_avail[cross_x_axis_minus2pi] = face_tar_x_sph_avail[cross_x_axis_minus2pi] - np.pi * 2
-            face_tar_x_sph_avail[cross_x_axis_plus2pi] = face_tar_x_sph_avail[cross_x_axis_plus2pi] + np.pi * 2
-            # spherical space --> ERP image space
-            face_tar_x_erp, face_tar_y_erp = sc.sph2erp(face_tar_x_sph_avail, face_tar_y_sph_avail, erp_flow_height, False)
-        else:
-            face_tar_x_erp, face_tar_y_erp = sc.sph2erp(face_tar_x_sph_avail, face_tar_y_sph_avail, erp_flow_height, True)
+        face_tar_x_erp, face_tar_y_erp = sc.sph2erp(face_tar_x_sph_avail, face_tar_y_sph_avail, erp_flow_height, True)
 
         # 4) get ERP flow with source and target pixels location
         # 4-0) the ERP flow
@@ -728,5 +717,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         log.warn("the optical flow weight matrix contain 0.")
     for channel_index in range(0, 2):
         erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
+
+    if of_wrap_around:
+        erp_flow_mat = flow_post_proc.erp_of_wraparound(erp_flow_mat)
 
     return erp_flow_mat

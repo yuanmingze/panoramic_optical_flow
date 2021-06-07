@@ -58,7 +58,7 @@ def read_flow_flo(file_name):
         flow (numpy array) numpy array of shape (height, width, 2)
     '''
     if not os.path.exists(file_name):
-        raise RuntimeError("{} do not exist!".format(file_name))
+        log.error("{} do not exist!".format(file_name))
 
     TAG_FLOAT = 202021.25  # check for this when READING the file
 

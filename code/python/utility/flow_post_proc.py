@@ -6,24 +6,13 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def erp2nonerp_of(flow_erp):
-    """ Convert the NonERP optical flow to ERP optical flow.
+def erp_of_wraparound(erp_flow, of_u_threshold=None, of_v_threshold=None):
+    """Convert the ERP optical flow without warp around to ERP optical flow.
 
-    :param flow_erp: the Non-ERP optical flow.
-    :type  flow_erp: numpy
-    :return: The Non-ERP optical flow
-    :rtype: numpy
-    """
-    pass
+    Replace the optical flow larger than threshold with wrap around value.
 
-
-def of_nonerp2erp(flow_nonerp, of_u_threshold=None, of_v_threshold=None):
-    """Convert the Non-ERP (without warp around) optical flow to ERP optical flow.
-
-    Replace the optical flow larger than threshold  with wrap around value.
-
-    :param flow_nonerp: the Non-ERP optical flow.
-    :type  flow_nonerp: numpy
+    :param erp_flow: the Non-ERP optical flow.
+    :type  erp_flow: numpy
     :param of_u_threshold: The wrap-around threshold of optical flow u.
     :type of_u_threshold: float
     :param of_v_threshold: The wrap-around threshold of optical flow v.
@@ -31,32 +20,29 @@ def of_nonerp2erp(flow_nonerp, of_u_threshold=None, of_v_threshold=None):
     :return: The ERP optical flow
     :rtype: numpy
     """
-    image_height = np.shape(flow_nonerp)[0]
-    image_width = np.shape(flow_nonerp)[1]
-
+    image_width = np.shape(erp_flow)[1]
     if of_u_threshold is None:
         of_u_threshold = image_width / 2.0
 
-    if of_v_threshold is None:
-        of_v_threshold = image_height / 2.0
-
-    flow_u = flow_nonerp[:, :, 0]
+    flow_u = erp_flow[:, :, 0]
     index_u = flow_u > of_u_threshold
     flow_u[index_u] = flow_u[index_u] - image_width
     index_u = flow_u < - of_u_threshold
     flow_u[index_u] = flow_u[index_u] + image_width
 
-    flow_v = flow_nonerp[:, :, 1]
-    index_v = flow_v > of_v_threshold
-    flow_v[index_v] = flow_v[index_v] - image_height
-    index_v = flow_v < -of_v_threshold
-    flow_v[index_v] = flow_v[index_v] + image_height
+    # image_height = np.shape(erp_flow)[0]
+    # if of_v_threshold is None:
+    #     of_v_threshold = (image_height - 1.0) / 2.0
+    # flow_v = erp_flow[:, :, 1]
+    # index_v = flow_v > of_v_threshold
+    # flow_v[index_v] = flow_v[index_v] - image_height
+    # index_v = flow_v < -of_v_threshold
+    # flow_v[index_v] = flow_v[index_v] + image_height
+    return np.stack((flow_u, erp_flow[:, :, 1]), axis=2)
 
-    return np.stack((flow_u, flow_v), axis=2)
 
-
-def of_erp2nonerp(optical_flow):
-    """ Convert the ERP optical flow to NonERP optical flow.
+def erp_of_unwraparound(optical_flow):
+    """ Convert the warp-around ERP optical flow to un-warp-around optical flow.
 
     process the panorama optical flow, change the warp around to NonERP optical flow.
 
@@ -65,6 +51,7 @@ def of_erp2nonerp(optical_flow):
     :return: the optical flow processed warp around
     :rtype: numpy
     """
+    # TODO ignore the y warp around
     of_image_size = np.shape(optical_flow)
     image_height = of_image_size[0]
     image_width = of_image_size[1]

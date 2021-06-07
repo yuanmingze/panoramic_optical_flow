@@ -321,7 +321,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
     """
     # check the face images number
     if not 6 == len(cubemap_images_list):
-        raise RuntimeError("the cubemap images number is not 6")
+        log.error("the cubemap images number is not 6")
 
     # get ERP image size
     cubemap_image_size = np.shape(cubemap_images_list[0])[0]

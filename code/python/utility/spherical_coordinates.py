@@ -114,7 +114,7 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     :return: the target points
     """
     if np.shape(motion_flow_u) != np.shape(motion_flow_v):
-        raise Exception("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
+        log.error("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
 
     # get the mesh grid
     height = np.shape(motion_flow_u)[0]
@@ -140,14 +140,15 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
 def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     """
     convert the point from erp image pixel location to spherical coordinate.
+    The image center is spherical coordinate origin.
 
-    :param erp_points: the point location in ERP image, size is [2, :]
+    :param erp_points: the point location in ERP image (x,y), size is [2, :]
     :type erp_points: numpy
     :param erp_image_height: ERP image's height, defaults to None
     :type erp_image_height: int, optional
-    :param wrap_around: if true, process the input points wrap around to make all point's x and y in the range [-pi,+pi], [-pi/2, +pi/2]
+    :param wrap_around: if true, process the input points wrap around, make all pixel in [0, width), and [0, height).
     :type wrap_around: bool
-    :return: the spherical coordinate points, theta is in the range [-pi, +pi), and phi is in the range [-pi/2, pi/2)
+    :return: the spherical coordinate points, theta is in the range (-pi, +pi), and phi is in the range (-pi/2, pi/2)
     :rtype: numpy
     """
     # 0) the ERP image size
@@ -156,7 +157,7 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
         width = np.shape(erp_points)[2]
 
         if (height * 2) != width:
-            raise Exception("the ERP image width {} is not two time of height {}".format(width, height))
+            log.error("the ERP image width {} is not two time of height {}".format(width, height))
     else:
         height = erp_image_height
         width = height * 2
@@ -168,9 +169,9 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
         erp_points_y = np.remainder(erp_points_y, height)
 
     # 1) point location to theta and phi
-    end_points_u = (erp_points_x - width / 2.0) / (width / 2.0) * np.pi
-    end_points_v = -(erp_points_y - height / 2.0) / (height / 2.0) * (np.pi / 2.0)
-    return np.stack((end_points_u, end_points_v))
+    points_theta = (erp_points_x - (width - 1) * 0.5) * (2 * np.pi / width)
+    points_phi = -(erp_points_y - (height - 1) * 0.5) * (np.pi / height)
+    return np.stack((points_theta, points_phi))
 
 
 def sph2erp(theta, phi, image_height, wrap_around=False):
@@ -188,8 +189,8 @@ def sph2erp(theta, phi, image_height, wrap_around=False):
     :return: the pixel location in the ERP image.
     :rtype: numpy
     """
-    x = (theta + np.pi) / (2.0 * np.pi) * (2 * image_height)
-    y = -(phi - 0.5 * np.pi) / np.pi * image_height
+    x = (theta + np.pi) / (2.0 * np.pi) * (2 * image_height - 1)
+    y = -(phi - 0.5 * np.pi) / np.pi * (image_height - 1)
 
     # process the wrap around case
     if wrap_around:
