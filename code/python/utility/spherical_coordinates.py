@@ -41,18 +41,22 @@ def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, point
     if np.isnan(central_angle_delta).any():
         log.warn("the circle angle have NAN")
 
-    return radius * central_angle_delta
+    return np.abs(radius * central_angle_delta)
 
 
 def get_angle(points_A, points_B, points_C):
     """
-    A triangle's angle on the surface of a sphere.
-    Spherical trigonometry, \cos a= \cos b \cos c + \sin b \sin c \cos A
+    A triangle's angle between AB and AC on the surface of a sphere.
+
     Reference: https://en.wikipedia.org/wiki/Spherical_trigonometry
                https://mathworld.wolfram.com/SphericalTrigonometry.html
-    :param points_A:
-    :param points_B:
-    :param points_C:
+
+    :param points_A: The (theta, phi) radian of point A on sphere.
+    :type points_A: list or tuple
+    :param points_B: 
+    :type points_B: list or tuple
+    :param points_C: 
+    :type points_C: list or tuple
     :return: the angle between AB and AC
     """
     points_A_theta = points_A[0]
@@ -68,8 +72,12 @@ def get_angle_uv(points_A_theta, points_A_phi,
                  points_B_theta, points_B_phi,
                  points_C_theta, points_C_phi):
     """
+    # TODO test this function
     @see get_angle
     
+    https://en.wikipedia.org/wiki/Spherical_trigonometry 
+    Half-angle and half-side formulae
+
     :return: the angle between AB and AC
     """
     length_AB = great_circle_distance_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, radius=1)
@@ -90,20 +98,18 @@ def get_angle_uv(points_A_theta, points_A_phi,
     s = 0.5 * (length_BC + length_AC + length_AB)
     numerator = np.sin(s-length_AC) * np.sin(s-length_AB)
     denominator = np.sin(s) * np.sin(s-length_BC)
-    #denominator[denominator == 0] = pow(0.1, 10)
+    if denominator[denominator == 0].any():
+        # log.warn("The angle_A contain NAN")
+        denominator[denominator == 0] = pow(0.1, 10)
     temp_data = numerator / denominator
     # angle_sign = np.sign(temp_data)
     angle_A = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
-
-    if np.isnan(angle_A).any():
-        raise Exception("the angle_A contain NAN")
-
     return angle_A
 
 
 def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     """
-    warp the the original points with the motion vector, meanwhile process the warp around.
+    warp the the original points (image's mesh grid) with the motion vector, meanwhile process the warp around.
 
     :return: the target points
     """
@@ -237,9 +243,9 @@ def sph2car(theta, phi, radius=1.0):
 
 def rotate_array(data_array, rotate_theta, rotate_phi):
     """
-    Rotate the array along the theta and phi.
+    Rotate the image along the theta and phi.
 
-    :param data_array: the data array, size is [height, height*2, :]
+    :param data_array: the data array (image, depth map, etc.), size is [height, height*2, :]
     :type data_array: numpy
     :param rotate_theta: rotate along the longitude, radian
     :type rotate_theta: float
@@ -263,7 +269,7 @@ def rotation_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
     :param sph_xy: the spherical coordinate array, size is [2, points_number]
     """
     xyz = sph2car(sph_theta, sph_phi, radius=1.0)
-    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
     return array_xy_rot[0,:] , array_xy_rot[1,:]
@@ -271,7 +277,7 @@ def rotation_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
 
 def rotate_erp_motion_vector(array_size, rotate_theta, rotate_phi):
     """
-    Get the motion vector of coordinate after rotation.
+    Rotate the image's mesh grid.
 
     :param data_array: the array size, [array_width, array_hight]
     :type data_array: list
@@ -289,7 +295,7 @@ def rotate_erp_motion_vector(array_size, rotate_theta, rotate_phi):
     sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[1], wrap_around=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
 
-    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_dcm()
+    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
 
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
 

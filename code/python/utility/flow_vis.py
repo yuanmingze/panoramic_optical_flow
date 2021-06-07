@@ -144,7 +144,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     return flow_uv_to_colors(u, v, convert_to_bgr)
 
 
-def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0):
+def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap = "RdPu"):
     """ Visualize U,V and show the bar.
 
     :param flow_uv: optical flow. [height, width, 2]
@@ -160,13 +160,13 @@ def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0)
     axes[0].get_yaxis().set_visible(False)
     # add sub caption
     axes[0].set_title("Optical Flow (U)")
-    im = axes[0].imshow(flow_uv[:, :, 0], cmap=cm.jet, vmin=vmin_, vmax=vmax_)
+    im = axes[0].imshow(flow_uv[:, :, 0], cmap=cm.get_cmap(visual_colormap), vmin=vmin_, vmax=vmax_)
 
     axes[1].get_xaxis().set_visible(False)
     axes[1].get_yaxis().set_visible(False)
     # add sub caption
     axes[1].set_title("Optical Flow (V)")
-    im = axes[1].imshow(flow_uv[:, :, 1], cmap=cm.jet, vmin=vmin_, vmax=vmax_)
+    im = axes[1].imshow(flow_uv[:, :, 1], cmap=cm.get_cmap(visual_colormap), vmin=vmin_, vmax=vmax_)
 
     figure.tight_layout()
     plt.colorbar(im, ax=axes.ravel().tolist())

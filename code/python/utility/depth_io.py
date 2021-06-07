@@ -55,7 +55,7 @@ def depth2disparity(depth_map, baseline=1.0, focal=1.0):
     return disparity_map
 
 
-def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.95):
+def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.95, visual_colormap = "RdPu"):
     """save the visualized depth map to image file with value-bar.
 
     :param dapthe_data: The depth data.
@@ -75,7 +75,7 @@ def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     fig.tight_layout()
-    im = ax.imshow(dapthe_data_temp, cmap=cm.jet, vmin=vmin_, vmax=vmax_)
+    im = ax.imshow(dapthe_data_temp, cmap=cm.get_cmap(visual_colormap), vmin=vmin_, vmax=vmax_)
     #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
     cbar = ax.figure.colorbar(im, ax=ax)
     result_image = None

@@ -5,6 +5,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 import configuration as config
+import flow_evaluate
 
 from utility import image_io
 from utility import projection_icosahedron as proj_ico
@@ -160,7 +161,8 @@ def test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow
 def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_src_flow_stitch_filepath,
                          erp_image_height, padding_size,
                          erp_src_image_stitch_filepath,
-                         src_erp_image_path, tar_erp_image_path):
+                         src_erp_image_path, tar_erp_image_path, 
+                         erp_flo_error_filename_prefix=None,erp_flow_gt_filepath=None):
     """
     test stitch the icosahedron's 20 face flow.
     """
@@ -174,10 +176,11 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
     image_erp_src = image_io.image_read(src_erp_image_path)
     image_erp_tar = image_io.image_read(tar_erp_image_path)
 
-    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, erp_image_height, padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar)
+    log.info("stitch face optical flow to ERP optical flow.")
+    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar,of_wrap_around=True)
     flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
-    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, [-40, 40])
+    face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, min_ratio=0.0, max_ratio=1.0)
     # image_io.image_show(face_flow_vis)
     log.info("output flow to: {}".format(erp_src_flow_stitch_filepath + "_vis.jpg"))
     image_io.image_save(face_flow_vis, erp_src_flow_stitch_filepath + "_vis.jpg")
@@ -190,13 +193,17 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
         image_src = np.array(image_src)
 
     image_src_warpped = flow_warp.warp_forward(image_src, erp_flow_stitch)
-    # TODO the result look wired check !
     image_src_warpped_path = erp_src_image_stitch_filepath + "_ico_stitch_warp.png"
     image_io.image_save(image_src_warpped, image_src_warpped_path)
 
+    # 4) compute the error map
+    if erp_flo_error_filename_prefix is not None:
+        erp_flow_gt = flow_io.flow_read(erp_flow_gt_filepath)
+        flow_evaluate.opticalflow_metric(erp_flow_gt, erp_flow_stitch, erp_flo_error_filename_prefix, min_ratio=0.0, max_ratio=1.0)
+
 
 if __name__ == "__main__":
-    padding_size = 0.5
+    padding_size = 0.0
     ico_face_number = 20
 
     tangent_image_size = 480
@@ -219,34 +226,47 @@ if __name__ == "__main__":
     tangent_image_filename_expression = "ico_rgb_src_{}.png"
     tangent_padding_image_filename_expression = "ico_rgb_src_padding_{}.png"
 
-    # 1) test padding size
-    test_ico_parameters(padding_size)
+    test_list = [4]
 
-    # 2) test the image project and stitch
-    test_ico_image_proj(erp_src_image_filepath, tangent_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
-    test_ico_image_stitch(ico_src_image_output_dir, tangent_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
-    test_ico_image_proj(erp_tar_image_filepath, tangent_image_filename_expression, ico_tar_image_output_dir, tangent_image_size, padding_size)
+    if 1 in test_list:
+        # 1) test padding size
+        test_ico_parameters(padding_size)
 
-    # 3) test the image projection and stitch with padding
-    test_ico_image_proj(erp_src_image_filepath, tangent_padding_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
-    test_ico_image_stitch(ico_src_image_output_dir, tangent_padding_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
+    if 2 in test_list:
+        # 2) test the image project and stitch
+        test_ico_image_proj(erp_src_image_filepath, tangent_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
+        test_ico_image_stitch(ico_src_image_output_dir, tangent_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
+        test_ico_image_proj(erp_tar_image_filepath, tangent_image_filename_expression, ico_tar_image_output_dir, tangent_image_size, padding_size)
 
-    # 4) test optical flow project and stitch
-    erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
-    erp_flow_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward_stitch.flo")
-    tangent_flow_filename_expression = "ico_flow_src_{}.flo"
+    if 3 in test_list:
+        # 3) test the image projection and stitch with padding
+        test_ico_image_proj(erp_src_image_filepath, tangent_padding_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
+        test_ico_image_stitch(ico_src_image_output_dir, tangent_padding_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
 
-    test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_filename_expression, tangent_image_size, padding_size)
-    test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_flow_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath, erp_src_image_filepath, erp_tar_image_filepath)
+    if 4 in test_list:
+        # 4) test optical flow project and stitch
+        erp_flow_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
+        erp_flow_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward_stitch.flo")
+        tangent_flow_filename_expression = "ico_flow_src_{}.flo"
+        erp_flo_error_filename_prefix = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward_error")
 
-    # 5) compute the each face's optical flow with DIS
-    tangent_DIS_flow_filename_expression = "ico_flow_dis_src_{}.flo"
-    compute_ico_faces_DIS(ico_src_image_output_dir, tangent_image_filename_expression,
-                        ico_tar_image_output_dir, tangent_image_filename_expression,
-                        ico_src_image_output_dir, tangent_DIS_flow_filename_expression)
+        log.info("Project GT optical flow to {}".format(ico_src_image_output_dir))
+        test_ico_flow_proj(erp_flow_filepath, ico_src_image_output_dir, tangent_flow_filename_expression, tangent_image_filename_expression, tangent_image_size, padding_size)
+        
+        log.info("Stitch GT optical flow ico face to {}".format(erp_flow_stitch_filepath))
+        test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_expression, erp_flow_stitch_filepath,
+                             erp_image_height, padding_size, erp_src_image_filepath, erp_src_image_filepath, erp_tar_image_filepath, erp_flo_error_filename_prefix, erp_flow_filepath)
 
-    # 6) stitch all face DIS optical flow to ERP flow
-    erp_flow_dis_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_dis_forward_stitch.flo")
-    test_ico_flow_stitch(ico_src_image_output_dir, tangent_DIS_flow_filename_expression,
-                erp_flow_dis_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath,
-                erp_src_image_filepath, erp_tar_image_filepath)
+    if 5 in test_list:
+        # 5) compute the each face's optical flow with DIS
+        tangent_DIS_flow_filename_expression = "ico_flow_dis_src_{}.flo"
+        compute_ico_faces_DIS(ico_src_image_output_dir, tangent_image_filename_expression,
+                              ico_tar_image_output_dir, tangent_image_filename_expression,
+                              ico_src_image_output_dir, tangent_DIS_flow_filename_expression)
+
+    if 6 in test_list:
+        # 6) stitch all face DIS optical flow to ERP flow
+        erp_flow_dis_stitch_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_dis_forward_stitch.flo")
+        test_ico_flow_stitch(ico_src_image_output_dir, tangent_DIS_flow_filename_expression,
+                             erp_flow_dis_stitch_filepath, erp_image_height, padding_size, erp_src_image_filepath,
+                             erp_src_image_filepath, erp_tar_image_filepath)

@@ -7,6 +7,8 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 
 import spherical_coordinates
+import image_io
+
 from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
@@ -19,7 +21,8 @@ UNKNOWN_FLOW_THRESH = 1e7
 SMALLFLOW = 0.0
 # LARGEFLOW = 1e8
 
-def error_visual(error_data, max=None, min=None, verbose=False):
+
+def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap = "RdPu"):
     """
     visualize the error data, and return colored error image.
 
@@ -31,9 +34,9 @@ def error_visual(error_data, max=None, min=None, verbose=False):
     if min is None:
         min = np.min(error_data)
     if verbose:
-        print("error_visual(): max error {}, min error {}".format(max, min))
+        log.info("error_visual(): max error {}, min error {}".format(max, min))
     norm = mpl.colors.Normalize(vmin=min, vmax=max)
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(visual_colormap)
 
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
     return (m.to_rgba(error_data)[:, :, :3] * 255).astype(np.uint8)
@@ -170,7 +173,7 @@ def RMSE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
 
         # get the Spherical Triangle angle
         rmse_mat = spherical_coordinates.great_circle_distance(of_gt_endpoints_uv, of_eva_endpoints_uv)
-        rmse_mat = rmse_mat ** 2
+        # rmse_mat = rmse_mat ** 2
     else:
         diff_u = of_gt_u - of_u
         diff_v = of_gt_v - of_v
@@ -233,3 +236,55 @@ def AAE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
         angles_mat = abs(angles_mat)
 
     return angles_mat, of_available_index
+
+
+def opticalflow_metric(flo_gt, flo_eva, erp_flo_error_filename_prefix, flo_mask=None, min_ratio=0.1, max_ratio=0.9):
+    """ Compute error and error map.
+
+    :param flo_gt: The ground truth optical flow.
+    :type flo_gt: numpy
+    :param flo_eva: The evaluated optical flow.
+    :type flo_eva: numpy
+    :param erp_flo_output_dir: The outo
+    :type erp_flo_output_dir: str
+    :param flo_mask: The optical flow mask, 0 is unavailable, defaults to None
+    :type flo_mask: numpy, optional
+    """
+    log.info("AAE: {}".format(AAE(flo_gt, flo_eva, False, flo_mask)))
+    log.info("EPE: {}".format(EPE(flo_gt, flo_eva, False, flo_mask)))
+    log.info("RMS: {}".format(RMSE(flo_gt, flo_eva, False, flo_mask)))
+
+    log.info("AAE Spherical: {}".format(AAE(flo_gt, flo_eva, True, flo_mask)))
+    log.info("EPE Spherical: {}".format(EPE(flo_gt, flo_eva, True, flo_mask)))
+    log.info("RMS Spherical: {}".format(RMSE(flo_gt, flo_eva, True, flo_mask)))
+
+
+    log.info("AAE_mat: {}".format(erp_flo_error_filename_prefix + "_aae_mat.jpg"))
+    aae_mat, _ = AAE_mat(flo_gt, flo_eva, False, flo_mask)
+    aae_mat_vis = image_io.visual_data(aae_mat, min_ratio, max_ratio)
+    image_io.image_save(aae_mat_vis, erp_flo_error_filename_prefix + "_aae_mat.jpg")
+
+    log.info("AAE_Sph_mat: {}".format(erp_flo_error_filename_prefix + "_aae_mat_sph.jpg"))
+    aae_mat_sph, _ = AAE_mat(flo_gt, flo_eva, True, flo_mask)
+    aae_mat_sph_vis = image_io.visual_data(aae_mat_sph, min_ratio, max_ratio)
+    image_io.image_save(aae_mat_sph_vis, erp_flo_error_filename_prefix + "_aae_mat_sph.jpg")
+
+    log.info("EPE_mat: {}".format(erp_flo_error_filename_prefix + "_epe_mat.jpg"))
+    epe_mat, _ = EPE_mat(flo_gt, flo_eva,  False, flo_mask)
+    epe_mat_vis = image_io.visual_data(epe_mat, min_ratio, max_ratio)
+    image_io.image_save(epe_mat_vis, erp_flo_error_filename_prefix + "_epe_mat.jpg")
+
+    log.info("EPE_Sph_mat: {}".format(erp_flo_error_filename_prefix + "_epe_mat_sph.jpg"))
+    epe_mat_sph, _ = EPE_mat(flo_gt, flo_eva,  True, flo_mask)
+    epe_mat_sph_vis = image_io.visual_data(epe_mat_sph, min_ratio, max_ratio)
+    image_io.image_save(epe_mat_sph_vis, erp_flo_error_filename_prefix + "_epe_mat_sph.jpg")
+
+    log.info("RMS_mat: {}".format(erp_flo_error_filename_prefix + "_rms_mat.jpg"))
+    rms_mat, _ = RMSE_mat(flo_gt, flo_eva,  False, flo_mask)
+    rms_mat_vis = image_io.visual_data(rms_mat, min_ratio, max_ratio)
+    image_io.image_save(rms_mat_vis, erp_flo_error_filename_prefix + "_rms_mat.jpg")
+
+    log.info("RMS_Sph_mat: {}".format(erp_flo_error_filename_prefix + "_rms_mat_sph.jpg"))
+    rms_mat_sph, _ = RMSE_mat(flo_gt, flo_eva,  True, flo_mask)
+    rms_mat_sph_vis = image_io.visual_data(rms_mat_sph, min_ratio, max_ratio)
+    image_io.image_save(rms_mat_sph_vis, erp_flo_error_filename_prefix + "_rms_mat_sph.jpg")

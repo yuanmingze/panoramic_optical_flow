@@ -4,6 +4,8 @@
 
 \todolist{How much time it will take for .}
 
+\todolist{How to select the weight blending weight.}
+
 \subsection{Dataset \& Metric}
 
 
@@ -18,8 +20,9 @@ The process shown as the Fig.~\ref{fig:approach:panoof:pipline} composing with t
 
 \begin{enumerate}
 	\item Camera Model: OpenGl render with Equirectangular projection (ERP);
-	\item Warp Around: Processing the warp around at the boundary of image;
-	\item Occlusion: estimate the occlusion of optical flow ;
+	\item Warp Around: Processing the warp around at the boundary of image; When project the sphere to ERP, the point along the plane x=0,y,-z are split to two side of ERP image, so the continued . It happend on theta (longitude), but in ERP image the phi (latitude) is continued, mean do not to consider/process the phi's warp around. \ref{fig:result:wraparound} (to warp a rainbow image to explain the wrap-around case.). So we use geodisic metric to replace the cartesian distrance.
+	\item Occlusion: estimate the occlusion of optical flow (Do not talk it in this paper becasue the GT otpical flow do not have perfact occlusion yet.);
+	\item The panoramic motion ambiguity; In 360 scnen, because the wrap-around we the pixel have two stright line path from source postion to target position, e.g. from left or right. In the paper we use the shortest path as the pixels optical flow path by default.
 \end{enumerate}
 
 The traditional OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
@@ -51,9 +54,13 @@ So we evaluate our method estimated optical flow quantity in the synthetic equir
 Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
 
 The metrics AAE, EPE and RMS is used for the quantity analysis.
+$n$ is the number of pixels, meanwhile set the unavailable pixels optical flow to 0 both ground truth and estimated optical flow.
 
-The average endpoint error (\textbf{EPE}):  ~\cite{??}
-EPE is the absolute error of all the pixels. 
+The average endpoint error (\textbf{EPE}):  ~\cite{FlowEvalIJCV2011}
+EPE is the absolute error of all the pixels.
+
+Use the shortest path on unit sphere to compute the EPE.
+\todolist{The greate circle equation.}
 
 \begin{equation}\label{equ_exp_epe}
 	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
