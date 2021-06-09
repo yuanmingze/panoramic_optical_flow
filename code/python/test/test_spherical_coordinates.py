@@ -68,27 +68,67 @@ def test_great_circle_distance_uv():
             log.error(" ")
 
 
+def test_rotation2erp_motion_vector(erp_src_image_filepath):
+    src_image_data = image_io.image_read(erp_src_image_filepath)
+    image_size = src_image_data.shape[0:2]
+    rotation_theta = np.radians(0.0)
+    rotation_phi = np.radians(0.0)
+    erp_motion_vector = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi)
+    # flow_color = flow_vis.flow_to_color(erp_motion_vector)
+    # image_io.image_save(flow_color,erp_src_image_filepath + "_flow.jpg" )
+    flow_color = flow_vis.flow_value_to_color(erp_motion_vector)
+
+
+def test_rotate_erp_array(erp_src_image_filepath):
+    src_image_data = image_io.image_read(erp_src_image_filepath)
+
+    # double side rotation
+    rotation_theta = np.radians(10.0)
+    rotation_phi = np.radians(30.0)
+    tar_image_data_rot, rotation_mat = sc.rotate_erp_array(src_image_data, rotation_theta, rotation_phi)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot_0.jpg")
+    tar_image_data_rot, _ = sc.rotate_erp_array(tar_image_data_rot, rotation_mat=rotation_mat.T)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot_1.jpg")
+
+    # multi wrap around
+    rotation_theta = np.radians(90.0)
+    rotation_phi = np.radians(0.0)
+    rotation_theta = np.radians(0.0)
+    rotation_phi = np.radians(45.0)
+    tar_image_data_rot = src_image_data
+    for index in range(0, 32):
+        tar_image_data_rot = sc.rotate_erp_array(tar_image_data_rot, rotation_theta, rotation_phi)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot_2.jpg")
+
+
 def test_rotate_array_coord(erp_src_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
-    image_size = [960, 480]
+    image_size = src_image_data.shape[0:2]
     rotation_theta = np.radians(0.0)
     rotation_phi = np.radians(30.0)
 
-    # # envmap rotate
-    # tar_image_data_rot = sc.rotate_array(src_image_data, rotation_theta, rotation_phi)
-    # image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot.jpg")
+    #  rotate
+    tar_image_data_rot = sc.rotate_erp_array(src_image_data, rotation_theta, rotation_phi)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_rot.jpg")
 
     # self rotate
-    erp_motion_vector = sc.rotate_erp_motion_vector(image_size, -rotation_theta, -rotation_phi)
-    erp_motion_vector = np.moveaxis(erp_motion_vector, 0, -1)
-    src_image_data_rot = flow_warp.warp_forward(src_image_data, erp_motion_vector)
+    erp_motion_vector = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi)
+    # erp_motion_vector = np.moveaxis(erp_motion_vector, 0, -1)
+
     erp_motion_vector_vis = flow_vis.flow_to_color(erp_motion_vector)
     image_io.image_save(erp_motion_vector_vis, erp_src_image_filepath + "_flow_vis.jpg")
-    image_io.image_save(src_image_data_rot, erp_src_image_filepath + "_warp_rot.jpg")
+
+    # src_image_data_rot = flow_warp.warp_forward(tar_image_data_rot, erp_motion_vector)
+    # image_io.image_save(src_image_data_rot, erp_src_image_filepath + "_warp_forward_rot.jpg")
+
+    tar_image_data_rot = flow_warp.warp_backward(tar_image_data_rot, erp_motion_vector)
+    image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_warp_backward_rot.jpg")
 
 
 if __name__ == "__main__":
     # test_great_circle_distance_uv()
 
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
-    test_rotate_array_coord(erp_src_image_filepath)
+    # test_rotate_array_coord(erp_src_image_filepath)
+    test_rotate_erp_array(erp_src_image_filepath)
+    # test_rotation2erp_motion_vector(erp_src_image_filepath)

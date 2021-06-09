@@ -20,7 +20,6 @@ https://github.com/tomrunia/OpticalFlow_Visualization
 
 def make_colorwheel():
     """
-    # TODO change comment style
     Generates a color wheel for optical flow visualization as presented in:
         Baker et al. "A Database and Evaluation Methodology for Optical Flow" (ICCV, 2007)
         URL: http://vision.middlebury.edu/flow/flowEval-iccv07.pdf
@@ -28,10 +27,9 @@ def make_colorwheel():
     Code follows the original C++ source code of Daniel Scharstein.
     Code follows the the Matlab source code of Deqing Sun.
 
-    Returns:
-        np.ndarray: Color wheel
+    :return: Color wheel
+    :rtype: numpy
     """
-
     RY = 15
     YG = 6
     GC = 4
@@ -71,19 +69,19 @@ def make_colorwheel():
 
 def flow_uv_to_colors(u, v, convert_to_bgr=False):
     """
-    # TODO change comment style
     Applies the flow color wheel to (possibly clipped) flow components u and v.
 
     According to the C++ source code of Daniel Scharstein
     According to the Matlab source code of Deqing Sun
 
-    Args:
-        u (np.ndarray): Input horizontal flow of shape [H,W]
-        v (np.ndarray): Input vertical flow of shape [H,W]
-        convert_to_bgr (bool, optional): Convert output image to BGR. Defaults to False.
-
-    Returns:
-        np.ndarray: Flow visualization image of shape [H,W,3]
+    :param u:  Input horizontal flow of shape [H,W]
+    :type u: numpy
+    :param v: Input vertical flow of shape [H,W]
+    :type v: numpy
+    :param convert_to_bgr: Convert output image to BGR. Defaults to False.
+    :type convert_to_bgr: bool, optional
+    :return:  Flow visualization image of shape [H,W,3]
+    :rtype: numpy
     """
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
@@ -122,7 +120,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     :rtype: numpy
     """
     # get the clip range
-    if min_ratio !=0 and max_ratio!=1.0:
+    if min_ratio != 0 and max_ratio != 1.0:
         clip_flow = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)
 
     # u_min,u_max = image_evaluate.get_min_max(flow_uv[:,:,0], min_ratio, max_ratio)
@@ -141,10 +139,11 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     epsilon = 1e-5
     u = u / (rad_max + epsilon)
     v = v / (rad_max + epsilon)
+    # TODO add color wheel and range to image.
     return flow_uv_to_colors(u, v, convert_to_bgr)
 
 
-def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap = "RdPu"):
+def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap="RdPu"):
     """ Visualize U,V and show the bar.
 
     :param flow_uv: optical flow. [height, width, 2]
@@ -189,7 +188,6 @@ def flow_max_min_visual(flow_data, output_path=None,  min_ratio=0.1, max_ratio=0
     # new_u = np.where(flow_data[:,:,0] > vmax_, flow_data[:,:,0], vmin_)
     from skimage.morphology import dilation, square
 
-
     def image_process(flow_data):
         dilation_square_size = 10
         return dilation(flow_data, square(dilation_square_size))
@@ -203,28 +201,28 @@ def flow_max_min_visual(flow_data, output_path=None,  min_ratio=0.1, max_ratio=0
     flow_data_u_min = np.where(flow_data[:, :, 0] < u_ratio_vmin_, -flow_data[:, :, 0] + u_ratio_vmin_, 0)
     # im = axes[0, 0].imshow(flow_data_u_min, cmap=plt.get_cmap("Greys") )#, vmin=0, vmax=u_ratio_vmin_)
     im = axes[0, 0].imshow(image_process(flow_data_u_min), cmap=plt.get_cmap("Greys"))  # , vmin=0, vmax=u_ratio_vmin_)
-    figure.colorbar(im, ax=axes[0, 0])#.ravel().tolist())
+    figure.colorbar(im, ax=axes[0, 0])  # .ravel().tolist())
     # u max
     axes[0, 1].get_xaxis().set_visible(False)
     axes[0, 1].get_yaxis().set_visible(False)
     axes[0, 1].set_title("Optical Flow (U) Max")
     flow_data_u_max = np.where(flow_data[:, :, 0] > u_ratio_vmax_, flow_data[:, :, 0] - u_ratio_vmax_, 0)
     im = axes[0, 1].imshow(image_process(flow_data_u_max), cmap=plt.get_cmap("Greys"))  # , vmin=u_ratio_vmax_, vmax=u_vmax_)
-    figure.colorbar(im, ax=axes[0, 1])#.ravel().tolist())
+    figure.colorbar(im, ax=axes[0, 1])  # .ravel().tolist())
     # v min
     axes[1, 0].get_xaxis().set_visible(False)
     axes[1, 0].get_yaxis().set_visible(False)
     axes[1, 0].set_title("Optical Flow (V) Min")
     flow_data_v_min = np.where(flow_data[:, :, 1] < v_ratio_vmin_, -flow_data[:, :, 1] + v_ratio_vmin_, 0)
     im = axes[1, 0].imshow(image_process(flow_data_v_min), cmap=plt.get_cmap("Greys"))  # , vmin=v_vmin_, vmax=v_ratio_vmin_)
-    figure.colorbar(im, ax=axes[1, 0])#.ravel().tolist())
+    figure.colorbar(im, ax=axes[1, 0])  # .ravel().tolist())
     # v max
     axes[1, 1].get_xaxis().set_visible(False)
     axes[1, 1].get_yaxis().set_visible(False)
     axes[1, 1].set_title("Optical Flow (V) Max")
     flow_data_v_max = np.where(flow_data[:, :, 1] > v_ratio_vmax_, flow_data[:, :, 1] - v_ratio_vmax_, 0)
     im = axes[1, 1].imshow(image_process(flow_data_v_max), cmap=plt.get_cmap("Greys"))  # , vmin=v_ratio_vmax_, vmax=v_vmax_)
-    figure.colorbar(im, ax=axes[1, 1])#.ravel().tolist())
+    figure.colorbar(im, ax=axes[1, 1])  # .ravel().tolist())
 
     # figure.tight_layout()
     if output_path is not None:

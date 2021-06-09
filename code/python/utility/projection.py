@@ -1,12 +1,11 @@
 import numpy as np
 from scipy import ndimage
-
-import gnomonic_projection
 from scipy.stats import norm
 
-from logger import Logger
-import spherical_coordinates
+import gnomonic_projection
+import spherical_coordinates as sc
 
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -167,7 +166,7 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
     return weight_map
 
 
-def flow2offset(erp_flow, use_weight=True):
+def flow2sph_rotation(erp_flow, use_weight=True):
     """Compute the  two image rotation from the ERP image's optical flow.
     The rotation is from the first image to second image.
 
@@ -204,56 +203,56 @@ def flow2offset(erp_flow, use_weight=True):
     return theta_delta, phi_delta
 
 
-def image_align(erp_image, erp_flow):
-    """Backward rotate the target image base on the flow. 
-    Make it align withe the source ERP image.
+def image_rotate_flow(erp_image, erp_flow):
+    """
+    Rotate the ERP image base on the flow. 
+    The flow is from erp_image to another image.
 
-    :param erp_image_src: the flow's target image
-    :type erp_image_src: numpy 
-    :param erp_flow: the erp image's flow, the optical flow is not processed the wrap around.
+    :param erp_image: the flow's ERP image, the image is 
+    :type erp_image: numpy 
+    :param erp_flow: the erp image's flow.
     :type erp_flow: numpy 
-    :return: The rotated target image
+    :return: The rotated ERP image
     :rtype: numpy
     """
-    # 0) compuate the average of optical flow & get the delta theta and phi
-    theta_delta, phi_delta = flow2offset(erp_flow)
-
-    from scipy.spatial.transform import Rotation as R
-    rotation_matrix = R.from_euler("xyz", [np.degrees(phi_delta), np.degrees(theta_delta), 0], degrees=True).as_dcm()
-
-    # 1) rotate the ERP image
-    from envmap import EnvironmentMap
-    envmap = EnvironmentMap(erp_image, format_='latlong')
-    erp_image_rot = envmap.rotate("DCM", rotation_matrix).data
-
+    # compuate the average of optical flow & get the delta theta and phi
+    # TODO check the flow overflow or not
+    theta_delta, phi_delta = flow2sph_rotation(erp_flow)
+    # rotate the ERP image
+    erp_image_rot = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
     if erp_image.dtype == np.uint8:
         erp_image_rot = erp_image_rot.astype(np.uint8)
+    return erp_image_rot, theta_delta, phi_delta
 
-    return erp_image_rot, [theta_delta, phi_delta]
 
-
-def flow_accumulate_endpoint(optical_flow, rotation):
+def flow_rotate_endpoint(optical_flow, rotation):
     """ Add the rotation offset to the end points of optical flow.
-    And return the new optical flow.
 
-    :param optical_flow: the original optical flow
+    :param optical_flow: the original optical flow, [height, width, 2]
     :type optical_flow: numpy
     :param rotation: the rotation of spherical coordinate in radian, [theta, phi]
-    :type rotation: list
-    :return: the accumulated optical flow
+    :type rotation: tuple
+    :return: the new optical flow
     :rtype: numpy 
     """
     flow_height = optical_flow.shape[0]
     flow_width = optical_flow.shape[1]
-
     end_points_array_x = np.linspace(0, flow_width, flow_width, endpoint=False)
     end_points_array_y = np.linspace(0, flow_height, flow_height, endpoint=False)
     src_points_array_xv, src_points_array_yv = np.meshgrid(end_points_array_x, end_points_array_y)
 
     # get end point location in ERP coordinate
-    end_points_array_xv = src_points_array_xv + optical_flow[:, :, 0]
-    end_points_array_yv = src_points_array_yv + optical_flow[:, :, 1]
+    end_points_array_xv = np.remainder(src_points_array_xv + optical_flow[:, :, 0], flow_width)
+    end_points_array_yv = np.remainder(src_points_array_yv + optical_flow[:, :, 1], flow_height)
+    end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation[0],  rotation[1])
 
+    end_points_array_xv += ndimage.map_coordinates(end_points_array[:, :, 0], [end_points_array_yv, end_points_array_xv], order=1, mode='constant', cval=255)
+    end_points_array_yv += ndimage.map_coordinates(end_points_array[:, :, 1], [end_points_array_yv, end_points_array_xv], order=1, mode='constant', cval=255)
+    end_points_array_xv = np.remainder(end_points_array_xv, flow_width)
+    end_points_array_yv = np.remainder(end_points_array_yv, flow_height)   
+
+    # end_points_array_xv = sc.rotate_erp_array(end_points_array_xv,  rotation[0],  rotation[1])
+    # end_points_array_yv = sc.rotate_erp_array(end_points_array_yv,  rotation[0],  rotation[1])
     # # rotation the target points
     # phi_delta= rotation[1]
     # theta_delta = rotation[0]
@@ -262,18 +261,14 @@ def flow_accumulate_endpoint(optical_flow, rotation):
     # from envmap import EnvironmentMap
     # end_points_array_xv = EnvironmentMap(end_points_array_xv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
     # end_points_array_yv = EnvironmentMap(end_points_array_yv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
-
-    # erp -> spherical
-    end_points_sph = spherical_coordinates.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height)
-
-    end_points_sph[0, :, :] += rotation[0] 
-    end_points_sph[1, :, :] += rotation[1]  # TODO correct
-
-    # spherical -> epr
-    end_points_erp_accu_x, end_points_erp_accu_y = spherical_coordinates.sph2erp(end_points_sph[0, :, :] , end_points_sph[1, :, :], flow_height)
+    # # erp -> spherical
+    # end_points_sph = sc.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height)
+    # end_points_sph[0, :, :] += rotation[0]
+    # end_points_sph[1, :, :] += rotation[1]  # TODO correct
+    # # spherical -> epr
+    # end_points_erp_accu_x, end_points_erp_accu_y = sc.sph2erp(end_points_sph[0, :, :], end_points_sph[1, :, :], flow_height)
 
     # erp pixles location to flow
-    end_points_erp_accu_x -= src_points_array_xv
-    end_points_erp_accu_y -= src_points_array_yv
-
-    return np.stack((end_points_erp_accu_x, end_points_erp_accu_y), axis= -1)
+    end_points_array_xv -= src_points_array_xv
+    end_points_array_yv -= src_points_array_yv
+    return np.stack((end_points_array_xv, end_points_array_yv), axis=-1)

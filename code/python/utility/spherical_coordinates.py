@@ -1,10 +1,14 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+import spherical_coordinates as sc
+import flow_warp
+
 from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
+
 
 def great_circle_distance(points_1, points_2, radius=1):
     """
@@ -142,7 +146,7 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     convert the point from erp image pixel location to spherical coordinate.
     The image center is spherical coordinate origin.
 
-    :param erp_points: the point location in ERP image (x,y), size is [2, :]
+    :param erp_points: the point location in ERP image x∊[0, width-1], y∊[0, height-1] , size is [2, :]
     :type erp_points: numpy
     :param erp_image_height: ERP image's height, defaults to None
     :type erp_image_height: int, optional
@@ -169,8 +173,10 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
         erp_points_y = np.remainder(erp_points_y, height)
 
     # 1) point location to theta and phi
-    points_theta = (erp_points_x - (width - 1) * 0.5) * (2 * np.pi / width)
-    points_phi = -(erp_points_y - (height - 1) * 0.5) * (np.pi / height)
+    # points_theta = (erp_points_x - (width - 1) * 0.5) * (2 * np.pi / width)
+    # points_phi = -(erp_points_y - (height - 1) * 0.5) * (np.pi / height)
+    points_theta = erp_points_x * (2 * np.pi / width) + np.pi / width - np.pi
+    points_phi = -(erp_points_y * (np.pi / height) + np.pi / height * 0.5) + 0.5 * np.pi
     return np.stack((points_theta, points_phi))
 
 
@@ -189,12 +195,17 @@ def sph2erp(theta, phi, image_height, wrap_around=False):
     :return: the pixel location in the ERP image.
     :rtype: numpy
     """
-    x = (theta + np.pi) / (2.0 * np.pi) * (2 * image_height - 1)
-    y = -(phi - 0.5 * np.pi) / np.pi * (image_height - 1)
+    image_width = 2 * image_height
+    # x = (theta + np.pi) / (2.0 * np.pi) * (2 * image_height - 1)
+    # y = -(phi - 0.5 * np.pi) / np.pi * (image_height - 1)
+    # x = ((theta + np.pi) / (2.0 * np.pi / image_width)).astype(np.int)
+    # y = (-(phi - 0.5 * np.pi) / (np.pi / image_height)).astype(np.int)
+    x = (theta + np.pi - (np.pi / image_width)) / (2.0 * np.pi / image_width)
+    y = -(phi - 0.5 * np.pi + (np.pi / image_height * 0.5)) / (np.pi / image_height)
 
     # process the wrap around case
     if wrap_around:
-        x = np.remainder(x, image_height * 2)
+        x = np.remainder(x, image_width)
         y = np.remainder(y, image_height)
     return x, y
 
@@ -242,7 +253,25 @@ def sph2car(theta, phi, radius=1.0):
     return np.stack((x, y, z), axis=0)
 
 
-def rotate_array(data_array, rotate_theta, rotate_phi):
+def rotate_erp_array(erp_image, rotation_theta=None, rotation_phi=None, rotation_mat=None):
+    """ Rotate the ERP image with the theta and phi.
+
+    :param erp_image: The ERP image, [height, width, 3]
+    :type erp_image: numpy
+    :param rotation_theta: The source to target rotation's theta.
+    :type rotation_theta: float
+    :param rotation_phi: The source to target rotation's phi.
+    :type rotation_phi: float
+    """
+    # flow from tar to src
+    if rotation_mat is not None:
+        opticalflow, rotation_mat_ret = rotation2erp_motion_vector(erp_image.shape[0:2], rotation_matrix=rotation_mat)
+    else:
+        opticalflow, rotation_mat_ret = rotation2erp_motion_vector(erp_image.shape[0:2], -rotation_theta, -rotation_phi)
+    return flow_warp.warp_backward(erp_image, opticalflow), rotation_mat_ret    # the image backword warp
+
+
+def rotate_erp_array_skylib(data_array, rotate_theta, rotate_phi):
     """
     Rotate the image along the theta and phi.
 
@@ -265,46 +294,56 @@ def rotate_array(data_array, rotate_theta, rotate_phi):
     return data_array_rot
 
 
-def rotation_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
-    """ rotate the sph spherical coordinate, and 
-    :param sph_xy: the spherical coordinate array, size is [2, points_number]
+def rotate_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
+    """ Rotate the sph spherical coordinate with the rotation (theta, phi).
+
+    :param sph_theta: The spherical coordinate's theta array.
+    :type sph_theta: numpy
+    :param sph_phi: The spherical coordinate's phi array.
+    :type sph_phi: numpy
+    :param rotate_theta: The rotation along the theta
+    :type rotate_theta: float
+    :param rotate_phi: [description]
+    :type rotate_phi: float
+    :return: Target points theta and phi array.
+    :rtype: tuple
     """
     xyz = sph2car(sph_theta, sph_phi, radius=1.0)
     rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
-    return array_xy_rot[0,:] , array_xy_rot[1,:]
+    return array_xy_rot[0, :], array_xy_rot[1, :]
 
 
-def rotate_erp_motion_vector(array_size, rotate_theta, rotate_phi):
+def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None):
     """
-    Rotate the image's mesh grid.
+    Convert the spherical coordinate rotation to ERP coordinate motion flow.
+    With rotate the image's mesh grid.
 
-    :param data_array: the array size, [array_width, array_hight]
+    :param data_array: the array size, [array_hight, array_width]
     :type data_array: list
     :param rotate_theta: rotate along the longitude, radian
     :type rotate_theta: float
-    :param rotate_phi:  rotate along the latitude, radian
+    :param rotate_phi: rotate along the latitude, radian
     :type rotate_phi: float
     """
     # 1) generage spherical coordinate for each pixel
-    erp_x = np.linspace(0, array_size[0], array_size[0], endpoint=False)
-    erp_y = np.linspace(0, array_size[1], array_size[1], endpoint=False)
+    erp_x = np.linspace(0, array_size[1], array_size[1], endpoint=False)
+    erp_y = np.linspace(0, array_size[0], array_size[0], endpoint=False)
     erp_vx, erp_vy = np.meshgrid(erp_x, erp_y)
 
     # 1) spherical system to Cartesian system and rotate the points
-    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[1], wrap_around=False)
+    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], wrap_around=False)
+    # erp_x_rot, erp_y_rot = sph2erp(sph_xy[0, :], sph_xy[1, :], array_size[0], wrap_around=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
-
-    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
-
+    if rotation_matrix is None:
+        rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
-
     array_xy_rot = car2sph(xyz_rot.T).T
-    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[1], wrap_around=False)
+    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], wrap_around=False)
 
     # get motion vector
-    motion_vector_x = erp_x_rot.reshape((array_size[1], array_size[0])) - erp_vx
-    motion_vector_y = erp_y_rot.reshape((array_size[1], array_size[0])) - erp_vy
+    motion_vector_x = erp_x_rot.reshape((array_size[0], array_size[1])) - erp_vx
+    motion_vector_y = erp_y_rot.reshape((array_size[0], array_size[1])) - erp_vy
 
-    return np.stack((motion_vector_x, motion_vector_y))
+    return np.stack((motion_vector_x, motion_vector_y), -1), rotation_matrix

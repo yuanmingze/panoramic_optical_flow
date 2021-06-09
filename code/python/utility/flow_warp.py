@@ -1,28 +1,48 @@
 import numpy as np
 from scipy import ndimage
 
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
+
+
 def warp_backward(image_target, of_forward):
     """
-    forward warp with optical flow. 
-    warp image with interpolation, scipy.ndimage.map_coordinates
-    """
-    image_size = np.shape(image_target)
-    image_height = image_size[0]
-    image_width = image_size[1]
-    image_channels = image_size[2]
+    Backward warp with optical flow from the target image to generate the source image. 
 
-    dest_image = np.zeros(np.shape(image_target), dtype=image_target.dtype)
+    :param image_target: The terget image of optical flow, [height, width, channel].
+    :type image_target: numpy
+    :param of_forward:  optical flow from source to target, [height, width, 2].
+    :type of_forward: numpy
+    :return: Generated source image.
+    :rtype: numpy
+    """
+    image_height = image_target.shape[0]
+    image_width = image_target.shape[1]
+    image_channels = None
+    if len(image_target.shape) == 3:
+        image_channels = image_target.shape[2]
+    elif len(image_target.shape) == 2:
+        image_channels = None
+    else:
+        log.error("The image shape is {}, do not support.".format(image_target.shape))
+    dest_image = np.zeros_like(image_target, dtype=image_target.dtype)
 
     # 0) comput new location
     x_idx_arr = np.linspace(0, image_width - 1, image_width)
     y_idx_arr = np.linspace(0, image_height - 1, image_height)
-
     x_idx, y_idx = np.meshgrid(x_idx_arr, y_idx_arr)
+    # x_idx_new = np.remainder(x_idx + of_forward[:, :, 0], image_width)
+    # y_idx_new = np.remainder(y_idx + of_forward[:, :, 1], image_height)
     x_idx_new = (x_idx + of_forward[:, :, 0])
     y_idx_new = (y_idx + of_forward[:, :, 1])
 
-    for channel_index in range(0, image_channels):
-        dest_image[y_idx.astype(int), x_idx.astype(int), channel_index] = ndimage.map_coordinates(image_target[:, :, channel_index], [y_idx_new, x_idx_new], order=1, mode='constant', cval=255)
+    if image_channels is not None:
+        for channel_index in range(0, image_channels):
+            dest_image[y_idx.astype(int), x_idx.astype(int), channel_index] = ndimage.map_coordinates(image_target[:, :, channel_index], [y_idx_new, x_idx_new], order=1, mode='wrap')
+    else:
+        dest_image[y_idx.astype(int), x_idx.astype(int)] = ndimage.map_coordinates(image_target[:, :], [y_idx_new, x_idx_new], order=1, mode='constant', cval=255)
 
     return dest_image
 
@@ -75,13 +95,13 @@ def warp_forward_padding(image_target, of_forward, padding_x=0, padding_y=0):
     return image_src
 
 
-def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparent = False):
+def warp_forward(image_first, of_forward, wrap_around=False, ignore_transparent=False):
     """ forward warp with optical flow. 
     warp image with interpolation, scipy.ndimage.map_coordinates
 
-    :param image_first: input image, when it's 4 channels image, use the alpha channel to ignore the transparent area.
+    :param image_first: input image, when it's 4 channels image, use the alpha channel to ignore the transparent area [height,width,:].
     :type image_first: numpy
-    :param of_forward: forward optical flow. [width, height, 2]
+    :param of_forward: forward optical flow. [height, width,  2]
     :type of_forward: numpy
     :param wrap_around: whether process the wrap around pixels, defaults to False
     :type wrap_around: bool, optional
@@ -91,46 +111,44 @@ def warp_forward(image_first, of_forward, wrap_around = False, ignore_transparen
     :rtype: numpy
     """
     valid_pixels_index = None
-    if image_first.shape[2] ==4:
+    if image_first.shape[2] == 4:
         # RGBA images, ignore the transparent area
-        valid_pixels_index = image_first[:,:,3] == 255
+        valid_pixels_index = image_first[:, :, 3] == 255
 
     image_size = np.shape(image_first)
     image_height = image_size[0]
     image_width = image_size[1]
     image_channels = image_size[2]
 
-    dest_image = np.zeros(np.shape(image_first), dtype=image_first.dtype)
-
     # 0) comput new location
     x_idx_arr = np.linspace(0, image_width - 1, image_width)
     y_idx_arr = np.linspace(0, image_height - 1, image_height)
-
     x_idx, y_idx = np.meshgrid(x_idx_arr, y_idx_arr)
-    x_idx_new = (x_idx + of_forward[:, :, 0] + 0.5).astype(int)
-    y_idx_new = (y_idx + of_forward[:, :, 1] + 0.5).astype(int)
+    # x_idx, y_idx = np.mgrid[0:image_height, 0: image_width]
+    x_idx_new = x_idx + of_forward[:, :, 0]
+    y_idx_new = y_idx + of_forward[:, :, 1]
 
     # check index out of the image bounds
-    if not wrap_around:
-        x_idx_new = np.where(x_idx_new > 0, x_idx_new, 0)
-        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, image_width - 1)
-
-        y_idx_new = np.where(y_idx_new > 0, y_idx_new, 0)
-        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, image_height - 1)
-    else:
-        # TODO 
+    if wrap_around:
         x_idx_new = np.where(x_idx_new > 0, x_idx_new, x_idx_new + image_width)
-        x_idx_new = np.where(x_idx_new < image_width - 1, x_idx_new, np.remainder(x_idx_new, image_width))
-
+        x_idx_new = np.where(x_idx_new < image_width, x_idx_new, np.remainder(x_idx_new, image_width))
         y_idx_new = np.where(y_idx_new > 0, y_idx_new, y_idx_new + image_height)
-        y_idx_new = np.where(y_idx_new < image_height - 1, y_idx_new, np.remainder(y_idx_new, image_height))
+        y_idx_new = np.where(y_idx_new < image_height, y_idx_new, np.remainder(y_idx_new, image_height))
+    else:
+        x_idx_new = np.where(x_idx_new > 0, x_idx_new, 0)
+        x_idx_new = np.where(x_idx_new < image_width, x_idx_new, image_width - 1)
+        y_idx_new = np.where(y_idx_new > 0, y_idx_new, 0)
+        y_idx_new = np.where(y_idx_new < image_height, y_idx_new, image_height - 1)
 
-    if not valid_pixels_index is None:
+    if valid_pixels_index is not None:
         x_idx_new = x_idx_new[valid_pixels_index]
         y_idx_new = y_idx_new[valid_pixels_index]
         x_idx = x_idx[valid_pixels_index]
         y_idx = y_idx[valid_pixels_index]
 
+    x_idx_new = x_idx_new.astype(int)
+    y_idx_new = y_idx_new.astype(int)
+    dest_image = np.zeros(np.shape(image_first), dtype=image_first.dtype)
     for channel_index in range(0, image_channels):
         dest_image[y_idx_new, x_idx_new, channel_index] = ndimage.map_coordinates(image_first[:, :, channel_index], [y_idx, x_idx], order=1, mode='constant', cval=255)
 
