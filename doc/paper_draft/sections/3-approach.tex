@@ -34,6 +34,17 @@ $I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))
 \textbf{360 Optical Flow Expression (Wrap-around)}
 \todolist{GT data how to process the Warp Around, Cross Image Boundary.Why use the without warp around optical flow?}
 
+The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position si beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
+But the pixel along the y-axis is continuous.
+\todolist{add a diagram to explain the continuation.}
+
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.45\linewidth]{images/wrap-around-0.jpg}
+	\caption{Optical Flow wrap-around.}
+	\label{fig:app:warparound}
+\end{figure}
+
 The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the pixel coordinate 0 exceed the range of image pixel $([0, image\_width), [0, image\_height))$. 
 
 The range of optical flow is 

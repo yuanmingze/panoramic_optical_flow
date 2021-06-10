@@ -2,7 +2,7 @@ import os
 
 import configuration as config
 
-from utility import flow_estimate, flow_post_proc, gnomonic_projection
+from utility import flow_estimate, flow_postproc, gnomonic_projection
 from utility import image_io
 from utility import flow_io
 from utility import flow_vis
@@ -22,8 +22,8 @@ def compute_erp_flow(src_image_path, target_image_path, optical_flow_output_path
     src_image = image_io.image_read(src_image_path)
     tar_image = image_io.image_read(target_image_path)
 
-    face_flow = flow_estimate.DIS(src_image, tar_image)
-    face_flow = flow_post_proc.of_ph2pano(face_flow)
+    face_flow = flow_estimate.of_methdod_DIS(src_image, tar_image)
+    face_flow = flow_postproc.erp_of_wraparound(face_flow)
     flow_io.flow_write(face_flow, optical_flow_output_path)
     face_flow_vis = flow_vis.flow_to_color(face_flow)
     image_io.image_save(face_flow_vis, optical_flow_output_path + ".jpg")
@@ -42,9 +42,9 @@ def generate_face_forward_flow(cubemap_images_src_output, cubemap_images_tar_out
         src_image_list.append(image_io.image_read(os.path.join(cubemap_images_src_output, face_image_name)))
         tar_image_list.append(image_io.image_read(os.path.join(cubemap_images_tar_output, face_image_name)))
 
-    # 2) estimate them DIS optical flow
+    # 2) estimate them of_methdod_DIS optical flow
     for index in range(0, 6):
-        face_flow = flow_estimate.DIS(src_image_list[index], tar_image_list[index])
+        face_flow = flow_estimate.of_methdod_DIS(src_image_list[index], tar_image_list[index])
         face_flow_path = os.path.join(cubemap_images_src_output, face_flow_name_expression.format(index))
         flow_io.flow_write(face_flow, face_flow_path)
         face_flow_vis = flow_vis.flow_to_color(face_flow)
@@ -133,7 +133,7 @@ def test_cubemap_flow_warp(cubemap_images_output,rgb_src_filename_exp, flo_filen
         flow_path = cubemap_images_output + flo_filename_exp.format(index)
         flow_data = flow_io.flow_read(flow_path)
 
-        face_warp_image = flow_warp.warp_forward(image_data, flow_data, True)
+        face_warp_image = flow_warp.warp_forward(image_data, flow_data, False)
         cubemap_flow_warp_name = cubemap_images_output + flo_src_warp_filename_exp.format(index)
         image_io.image_save(face_warp_image, cubemap_flow_warp_name)
         # image_io.image_show(face_flow_vis)
@@ -174,7 +174,7 @@ def test_cubemap_flow_stitch_dis(padding_size, cubemap_flow_dir, face_flow_name_
         os.remove(cubemap_stitch_flo)
         log.warn("remove exist flow file {}".format(cubemap_stitch_flo))
     flow_io.flow_write(erp_flow_stitch, cubemap_stitch_flo)
-    # erp_flow_stitch = flow_post_proc.of_ph2pano(erp_flow_stitch)  # tranform to the second class optica flow.
+    # erp_flow_stitch = flow_postproc.of_ph2pano(erp_flow_stitch)  # tranform to the second class optica flow.
     face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch)
     # image_io.image_show(face_flow_vis)
     image_io.image_save(face_flow_vis, cubemap_stitch_flo + ".jpg")

@@ -16,7 +16,7 @@ from utility import flow_io
 from utility import image_io
 from utility import flow_vis
 from utility import replica_util
-from utility import flow_post_proc
+from utility import flow_postproc
 
 """
 evalute the estimated optical flow and output the error to csv file
@@ -125,7 +125,7 @@ def flow_evaluate_frames(flow_gt_dir, flow_estimated_dir):
 
             of_gt = flow_io.readFlowFile(of_gt_file_path)
             # process the warp around
-            of_gt = flow_post_proc.convert_warp_around(of_gt)
+            of_gt = flow_postproc.convert_warp_around(of_gt)
 
             of_estimated = flow_io.readFlowFile(of_estimated_file_path)
 

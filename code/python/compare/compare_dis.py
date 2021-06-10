@@ -74,14 +74,14 @@ def flow_estimate_dis(input_dir, flo_output_dir):
         rgb_image_B_data = image_io.image_read(rgb_image_B_file_name)
 
         #
-        flow_A_B_data = flow_estimate.DIS(rgb_image_A_data, rgb_image_B_data)
+        flow_A_B_data = flow_estimate.of_methdod_DIS(rgb_image_A_data, rgb_image_B_data)
         flow_A_B_file_name = flow_fw_fne_str.replace(index_digit_re, index_digit_format.format(index))
         flow_io.writeFlowFile(flow_A_B_data, flo_output_dir + flow_A_B_file_name)
 
         flow_visual_data = flow_vis.flow_to_color(flow_A_B_data)
         image_io.image_save(flow_visual_data, flo_output_dir + os.path.splitext(flow_A_B_file_name)[0] + "_vis.jpg")
 
-        flow_B_A_data = flow_estimate.DIS(rgb_image_B_data, rgb_image_A_data)
+        flow_B_A_data = flow_estimate.of_methdod_DIS(rgb_image_B_data, rgb_image_A_data)
         flow_B_A_file_name = flow_bw_fne_str.replace(index_digit_re, index_digit_format.format(index))
         flow_io.writeFlowFile(flow_B_A_data, flo_output_dir + flow_B_A_file_name)
 

@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import ndimage
+from scipy.spatial.transform import rotation
 from scipy.stats import norm
+import flow_postproc
 
 import gnomonic_projection
 import spherical_coordinates as sc
@@ -166,7 +168,7 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
     return weight_map
 
 
-def flow2sph_rotation(erp_flow, use_weight=True):
+def flow2sph_rotation(erp_flow_, use_weight=True):
     """Compute the  two image rotation from the ERP image's optical flow.
     The rotation is from the first image to second image.
 
@@ -177,12 +179,31 @@ def flow2sph_rotation(erp_flow, use_weight=True):
     :return: the offset of ERP image, [theta shift, phi shift
     :rtype: float
     """
-    erp_image_height = erp_flow.shape[0]
-    erp_image_width = erp_flow.shape[1]
+    erp_image_height = erp_flow_.shape[0]
+    erp_image_width = erp_flow_.shape[1]
 
     # convert the pixel offset to rotation radian
+    erp_flow = flow_postproc.erp_of_wraparound(erp_flow_)
     theta_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
-    phi_delta_array = np.pi * (erp_flow[:, :, 1] / erp_image_height)
+    theta_delta = np.mean(theta_delta_array)
+
+    # just the center column of the optical flow.
+    delta = theta_delta / (2.0 * np.pi)
+    flow_col_start = int(erp_image_width * (0.5 - delta))
+    flow_col_end = int(erp_image_width * (0.5 + delta))
+    if delta < 0:
+        temp = flow_col_start
+        flow_col_start = flow_col_end
+        flow_col_end = temp
+    flow_col_center = np.full((erp_image_height, erp_image_width), False, dtype=np.bool)
+    flow_col_center[:, flow_col_start:flow_col_end] = True
+    flow_sign = np.sign(np.sum(np.sign(erp_flow[flow_col_center, 1])))
+    # phi_delta_array = np.pi * (erp_flow[flow_col_start:flow_col_end, :, 1] / erp_image_height)
+    if flow_sign < 0:
+        positive_index = np.logical_and(erp_flow[:, :, 1] < 0, flow_col_center)
+    else:
+        positive_index = np.logical_and(erp_flow[:, :, 1] > 0, flow_col_center)
+    phi_delta_array = -np.pi * (erp_flow[positive_index, 1] / erp_image_height)
 
     if use_weight:
         # weight of the u, width
@@ -197,7 +218,6 @@ def flow2sph_rotation(erp_flow, use_weight=True):
         weight_v_array = norm.pdf(weight_v_array_index, erp_image_width / 2.0, stdev)
         phi_delta_array = np.average(phi_delta_array, axis=1,  weights=weight_v_array)
 
-    theta_delta = np.mean(theta_delta_array)
     phi_delta = np.mean(phi_delta_array)
 
     return theta_delta, phi_delta
@@ -230,7 +250,7 @@ def flow_rotate_endpoint(optical_flow, rotation):
 
     :param optical_flow: the original optical flow, [height, width, 2]
     :type optical_flow: numpy
-    :param rotation: the rotation of spherical coordinate in radian, [theta, phi]
+    :param rotation: the rotation of spherical coordinate in radian, [theta, phi] or rotation matrix.
     :type rotation: tuple
     :return: the new optical flow
     :rtype: numpy 
@@ -244,29 +264,19 @@ def flow_rotate_endpoint(optical_flow, rotation):
     # get end point location in ERP coordinate
     end_points_array_xv = np.remainder(src_points_array_xv + optical_flow[:, :, 0], flow_width)
     end_points_array_yv = np.remainder(src_points_array_yv + optical_flow[:, :, 1], flow_height)
-    end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation[0],  rotation[1])
+    end_points_array = None
+    if isinstance(rotation, (list, tuple)):
+        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation[0],  rotation[1])
+    elif isinstance(rotation, np.ndarray):
+        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation_matrix=rotation)
+    else:
+        log.error("Do not support rotation data type {}.".format(type(rotation)))
 
-    end_points_array_xv += ndimage.map_coordinates(end_points_array[:, :, 0], [end_points_array_yv, end_points_array_xv], order=1, mode='constant', cval=255)
-    end_points_array_yv += ndimage.map_coordinates(end_points_array[:, :, 1], [end_points_array_yv, end_points_array_xv], order=1, mode='constant', cval=255)
-    end_points_array_xv = np.remainder(end_points_array_xv, flow_width)
-    end_points_array_yv = np.remainder(end_points_array_yv, flow_height)   
+    rotation_flow_u = ndimage.map_coordinates(end_points_array[:, :, 0], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
+    rotation_flow_v = ndimage.map_coordinates(end_points_array[:, :, 1], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
 
-    # end_points_array_xv = sc.rotate_erp_array(end_points_array_xv,  rotation[0],  rotation[1])
-    # end_points_array_yv = sc.rotate_erp_array(end_points_array_yv,  rotation[0],  rotation[1])
-    # # rotation the target points
-    # phi_delta= rotation[1]
-    # theta_delta = rotation[0]
-    # from scipy.spatial.transform import Rotation as R
-    # rotation_matrix = R.from_euler("xyz", [np.degrees(phi_delta), np.degrees(theta_delta), 0], degrees=True).as_dcm()
-    # from envmap import EnvironmentMap
-    # end_points_array_xv = EnvironmentMap(end_points_array_xv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
-    # end_points_array_yv = EnvironmentMap(end_points_array_yv[:,:,np.newaxis], format_='latlong').rotate("DCM", rotation_matrix).data[:,:,0]
-    # # erp -> spherical
-    # end_points_sph = sc.erp2sph([end_points_array_xv, end_points_array_yv], erp_image_height=flow_height)
-    # end_points_sph[0, :, :] += rotation[0]
-    # end_points_sph[1, :, :] += rotation[1]  # TODO correct
-    # # spherical -> epr
-    # end_points_erp_accu_x, end_points_erp_accu_y = sc.sph2erp(end_points_sph[0, :, :], end_points_sph[1, :, :], flow_height)
+    end_points_array_xv = np.remainder(end_points_array_xv + rotation_flow_u, flow_width)
+    end_points_array_yv = np.remainder(end_points_array_yv + rotation_flow_v, flow_height)
 
     # erp pixles location to flow
     end_points_array_xv -= src_points_array_xv

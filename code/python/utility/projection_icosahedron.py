@@ -8,7 +8,7 @@ import gnomonic_projection as gp
 import spherical_coordinates as sc
 import polygon
 import projection
-import flow_post_proc
+import flow_postproc
 
 from logger import Logger
 
@@ -719,6 +719,6 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         erp_flow_mat[:, :, channel_index][non_zero_weight_list] = erp_flow_mat[:, :, channel_index][non_zero_weight_list] / erp_flow_weight_mat[non_zero_weight_list]
 
     if of_wrap_around:
-        erp_flow_mat = flow_post_proc.erp_of_wraparound(erp_flow_mat)
+        erp_flow_mat = flow_postproc.erp_of_wraparound(erp_flow_mat)
 
     return erp_flow_mat

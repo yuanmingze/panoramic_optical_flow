@@ -371,7 +371,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0):
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.
-        tangent_gnomonic_range = [-1, +1, -1, +1]
+        tangent_gnomonic_range = [-pbc, +pbc, -pbc, +pbc]
         face_x_available, face_y_available = gnomonic_projection.gnomonic2pixel(face_x[inside_list], face_y[inside_list],
                                                        0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 

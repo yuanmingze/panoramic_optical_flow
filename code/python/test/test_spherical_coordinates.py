@@ -72,8 +72,8 @@ def test_rotation2erp_motion_vector(erp_src_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
     image_size = src_image_data.shape[0:2]
     rotation_theta = np.radians(0.0)
-    rotation_phi = np.radians(0.0)
-    erp_motion_vector = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi)
+    rotation_phi = np.radians(90.0)
+    erp_motion_vector, _ = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi)
     # flow_color = flow_vis.flow_to_color(erp_motion_vector)
     # image_io.image_save(flow_color,erp_src_image_filepath + "_flow.jpg" )
     flow_color = flow_vis.flow_value_to_color(erp_motion_vector)
@@ -130,5 +130,5 @@ if __name__ == "__main__":
 
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
     # test_rotate_array_coord(erp_src_image_filepath)
-    test_rotate_erp_array(erp_src_image_filepath)
-    # test_rotation2erp_motion_vector(erp_src_image_filepath)
+    # test_rotate_erp_array(erp_src_image_filepath)
+    test_rotation2erp_motion_vector(erp_src_image_filepath)
