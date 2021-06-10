@@ -284,7 +284,7 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
     return {"tangent_point": tangent_point, "triangle_points_tangent": triangle_points_tangent, "triangle_points_sph": triangle_points_sph, "availied_ERP_area": availied_ERP_area_sph}
 
 
-def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image=False):
+def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image=True):
     """Project the equirectangular image to 20 triangle images.
 
     Project the equirectangular image to level-0 icosahedron.

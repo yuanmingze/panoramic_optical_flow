@@ -347,3 +347,9 @@ def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, r
     motion_vector_y = erp_y_rot.reshape((array_size[0], array_size[1])) - erp_vy
 
     return np.stack((motion_vector_x, motion_vector_y), -1), rotation_matrix
+
+
+def rot_sph2mat(theta, phi):
+    """Convert the spherical rotation to rotation matrix.
+    """
+    return R.from_euler("xyz", [np.degrees(phi), np.degrees(theta), 0], degrees=True).as_matrix()

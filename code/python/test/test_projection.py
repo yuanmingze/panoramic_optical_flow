@@ -66,14 +66,17 @@ def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath
 
 def test_flow2sph_rotation(erp_src_image_filepath, erp_tar_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
+    tar_image_data = image_io.image_read(erp_tar_image_filepath)
+    # flow_array = flow_estimate.of_methdod_DIS(src_image_data, tar_image_data)
+    
     # theta, phi
     rotation_list = [(-20, 10.0), (30.0, -10.0), (30.0, 15.0), (-30.0, 15.0), (-25.0, -13.0)]
     for rotation in rotation_list:
         rotation_theta = np.radians(rotation[0])
         rotation_phi = np.radians(rotation[1])
-        flow_dis, _ = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_theta, rotation_phi)
-        # flow_vis.flow_value_to_color(flow_dis)
-        theta_delta, phi_delta = projection.flow2sph_rotation(flow_dis, False)
+        flow_array, _ = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_theta, rotation_phi)
+        # flow_vis.flow_value_to_color(flow_array)
+        theta_delta, phi_delta = projection.flow2sph_rotation(flow_array, False)
         print("original rotation: {},{}, result is: {}, {}".
               format(np.degrees(rotation_theta), np.degrees(rotation_phi), np.degrees(theta_delta), np.degrees(phi_delta)))
 
@@ -88,4 +91,4 @@ if __name__ == "__main__":
     # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
     # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
     # test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)
-    test_flow2sph_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
+    test_flow2sph_rotation(erp_src_image_filepath, erp_tar_image_filepath)

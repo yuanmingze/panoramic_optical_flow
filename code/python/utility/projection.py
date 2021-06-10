@@ -206,6 +206,7 @@ def flow2sph_rotation(erp_flow_, use_weight=True):
     phi_delta_array = -np.pi * (erp_flow[positive_index, 1] / erp_image_height)
 
     if use_weight:
+        # TODO Check the weight performace
         # weight of the u, width
         stdev = erp_image_height * 0.5 * 0.25
         weight_u_array_index = np.arange(erp_image_height)
@@ -223,7 +224,7 @@ def flow2sph_rotation(erp_flow_, use_weight=True):
     return theta_delta, phi_delta
 
 
-def image_rotate_flow(erp_image, erp_flow):
+def image_rotate_flow(erp_image, erp_flow, src_image=True):
     """
     Rotate the ERP image base on the flow. 
     The flow is from erp_image to another image.
@@ -236,10 +237,12 @@ def image_rotate_flow(erp_image, erp_flow):
     :rtype: numpy
     """
     # compuate the average of optical flow & get the delta theta and phi
-    # TODO check the flow overflow or not
-    theta_delta, phi_delta = flow2sph_rotation(erp_flow)
+    theta_delta, phi_delta = flow2sph_rotation(erp_flow, False)
     # rotate the ERP image
-    erp_image_rot = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
+    if not src_image:
+        theta_delta = -theta_delta
+        phi_delta = -phi_delta
+    erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
     if erp_image.dtype == np.uint8:
         erp_image_rot = erp_image_rot.astype(np.uint8)
     return erp_image_rot, theta_delta, phi_delta

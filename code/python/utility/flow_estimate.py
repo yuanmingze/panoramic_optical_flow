@@ -1,13 +1,14 @@
 import cv2
+import numpy as np
+import flow_vis
 
 import projection
-
+import image_io
 import projection_cubemap as proj_cm
 import projection_icosahedron as proj_ico
 
-import numpy as np
-
 from logger import Logger
+import spherical_coordinates
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -81,11 +82,12 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     # 0) compute flow in ERP image & wrap image, make it align with the source ERP image.
     log.debug("0) compute ERP image flow")
     optical_flow_erp = optical_flow_method(src_erp_image, tar_erp_image)
-    tar_erp_image_rot_erp, image_rotation_erp = projection.image_rotate_flow(tar_erp_image, optical_flow_erp)
+    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_erp, src_image=False)
+    erp_rot_mat = spherical_coordinates.rot_sph2mat(erp_rot_theta, erp_rot_phi)
+    log.debug("ERP optical flow rotation is {}, {}".format(np.degrees(erp_rot_theta), np.degrees(erp_rot_phi)))
 
     if debug_output_dir is not None:
-        # output OF and warped image
-        pass
+        image_io.image_save(tar_erp_image_rot_erp, debug_output_dir + "pano_of_0_erp_rot.jpg")
 
     # 1) compute flow with cubemap projection & warp target image
     log.debug("1) compute cubemap projection image flow")
@@ -99,26 +101,35 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
         cubemap_face_of_list.append(optical_flow_cubemap)
     optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image)
     # 1-2) warp target image
-    tar_erp_image_rot_cubemap, image_rotation_cubemap = projection.image_rotate_flow(tar_erp_image_rot_erp, optical_flow_cubemap)
+    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_erp, optical_flow_cubemap, src_image=False)
+    cubemap_rot_mat = spherical_coordinates.rot_sph2mat(cubemap_rot_theta, cubemap_rot_phi)
+    log.debug("Cubemap optical flow rotation is {}, {}".format(np.degrees(cubemap_rot_theta), np.degrees(cubemap_rot_phi)))
+
+    if debug_output_dir is not None:
+        image_io.image_save(tar_erp_image_rot_cubemap, debug_output_dir + "pano_of_0_cubemap_rot.jpg")
 
     # 2) compute flow with icosahedron projection & warp image
     log.debug("2) compute icosahedron projection image flow")
     # 2-1) erp image to cube map
     padding_size_ico = 0.1
     tangent_image_width = 480
-    icoface_images_src_list = proj_ico.erp2ico_image(src_erp_image, tangent_image_width, padding_size_ico)
-    icoface_images_tar_list = proj_ico.erp2ico_image(tar_erp_image_rot_cubemap, tangent_image_width, padding_size_ico)
+    icoface_images_src_list = proj_ico.erp2ico_image(src_erp_image, tangent_image_width, padding_size_ico, full_face_image=True)
+    icoface_images_tar_list = proj_ico.erp2ico_image(tar_erp_image_rot_cubemap, tangent_image_width, padding_size_ico, full_face_image=True)
     ico_face_of_list = []
     for index in range(0, len(icoface_images_src_list)):
         optical_flow_ico = optical_flow_method(icoface_images_src_list[index], icoface_images_tar_list[index])
         ico_face_of_list.append(optical_flow_ico)
     optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, padding_size_ico, src_erp_image, tar_erp_image)
     # 2-2) warp target image
-    tar_erp_image_rot_ico, image_rotation_ico = projection.image_rotate_flow(tar_erp_image_rot_cubemap, optical_flow_ico)
+    #tar_erp_image_rot_ico, ico_rot_theta, ico_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_cubemap, optical_flow_ico)
+
+    if debug_output_dir is not None:
+        optical_flow_ico_visual = flow_vis.flow_to_color(optical_flow_ico)
+        image_io.image_save(optical_flow_ico_visual, debug_output_dir + "pano_of_0_ico_flow.jpg")
 
     # 3) accumulate all-steps optical flow
-    of_ico2cub = projection.flow_accumulate_endpoint(optical_flow_ico, image_rotation_ico)
-    of_accu = projection.flow_accumulate_endpoint(of_ico2cub, image_rotation_cubemap)
+    of_ico2cub = projection.flow_rotate_endpoint(optical_flow_ico, cubemap_rot_mat.T)
+    of_accu = projection.flow_rotate_endpoint(of_ico2cub, erp_rot_mat.T)
 
     return of_accu
 
