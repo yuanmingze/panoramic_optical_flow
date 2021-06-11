@@ -67,6 +67,14 @@ def make_colorwheel():
     return colorwheel
 
 
+def create_colorwheel_bar(image_size):
+    """Make a color wheel."""
+    x_list = np.linspace(-1.0, 1.0, num=image_size, endpoint=False)
+    y_list = np.linspace(-1.0, 1.0, num=image_size, endpoint=False)
+    xv, yv = np.meshgrid(x_list, y_list)
+    flow_wheel = flow_uv_to_colors(xv, yv)
+    return flow_wheel
+
 def flow_uv_to_colors(u, v, convert_to_bgr=False):
     """
     Applies the flow color wheel to (possibly clipped) flow components u and v.
@@ -74,21 +82,21 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     According to the C++ source code of Daniel Scharstein
     According to the Matlab source code of Deqing Sun
 
-    :param u:  Input horizontal flow of shape [H,W]
+    :param u:  Input normalized horizontal flow, shape [H,W].
     :type u: numpy
-    :param v: Input vertical flow of shape [H,W]
+    :param v: Input normalized vertical flow, shape [H,W].
     :type v: numpy
     :param convert_to_bgr: Convert output image to BGR. Defaults to False.
     :type convert_to_bgr: bool, optional
-    :return:  Flow visualization image of shape [H,W,3]
+    :return: Flow visualization image of shape [H,W,3]
     :rtype: numpy
     """
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
     ncols = colorwheel.shape[0]
     rad = np.sqrt(np.square(u) + np.square(v))
-    a = np.arctan2(-v, -u)/np.pi
-    fk = (a+1) / 2*(ncols-1)
+    angle = np.arctan2(-v, -u) / np.pi
+    fk = (angle + 1) / 2 * (ncols - 1)
     k0 = np.floor(fk).astype(np.int32)
     k1 = k0 + 1
     k1[k1 == ncols] = 0
@@ -107,7 +115,7 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     return flow_image
 
 
-def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0):
+def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = True):
     """ Expects a two dimensional flow image of shape.
 
     :param flow_uv: Flow UV image of shape [H,W,2]
@@ -134,13 +142,40 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
         flow_uv = np.clip(flow_uv, clip_flow[0], clip_flow[1])
     u = flow_uv[:, :, 0]
     v = flow_uv[:, :, 1]
+    # normalize optical flow
     rad = np.sqrt(np.square(u) + np.square(v))
     rad_max = np.max(rad)
     epsilon = 1e-5
-    u = u / (rad_max + epsilon)
-    v = v / (rad_max + epsilon)
-    # TODO add color wheel and range to image.
-    return flow_uv_to_colors(u, v, convert_to_bgr)
+    u_norm = u / (rad_max + epsilon)
+    v_norm = v / (rad_max + epsilon)
+    flow_colored = flow_uv_to_colors(u_norm, v_norm, convert_to_bgr)
+    # add color wheel and range to image
+    if add_bar:
+        fig, ax = plt.subplots()
+        from matplotlib.offsetbox import (TextArea, OffsetImage, AnnotationBbox)
+        # annotate the rad, u and v range
+        raduv_range = "Rad Max: {}\nRad Min: {}\nu_min: {}\nu_max: {}\nv_min: {}\nv_max: {}".format(
+            rad.max(), rad.min(), u.min(), u.max(), v.min(), v.max())
+        annotation_text = TextArea(raduv_range)
+        annotation_ab = AnnotationBbox(annotation_text,
+                                       xycoords='axes fraction',
+                                       pad=0.1,
+                                       xy=(1.01, 0.8),
+                                       box_alignment=(0., 0.5))
+        ax.add_artist(annotation_ab)
+        # add color wheel
+        colorwheel = create_colorwheel_bar(150)
+        imagebox = OffsetImage(colorwheel, zoom=1.0)
+        imagebox.image.axes = ax
+        colorwheel_ab = AnnotationBbox(imagebox,
+                                       xycoords='axes fraction',
+                                       pad=0.1,
+                                       xy=(1.01, 0.3),
+                                       box_alignment=(0., 0.5))
+        ax.add_artist(colorwheel_ab)
+        ax.imshow(flow_colored)
+        plt.show()
+    return flow_colored
 
 
 def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap="RdPu"):

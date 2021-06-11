@@ -93,7 +93,6 @@ def render_panoramic_datasets(render_configs):
         render_args.append("--renderMotionVectorEnable=" + str(render_configs.renderMotionVectorEnable))
 
         # run the render program
-        # render_seq_return = subprocess.check_call(render_args)
         print(render_args)
         render_seq_return = subprocess.check_call(render_args)
 
@@ -159,5 +158,5 @@ def render_panoramic_datasets(render_configs):
 
 if __name__ == "__main__":
     render_config = ReplicaRenderConfig()
-    render_config.render_folder_names = ["room_0_grid"]  # room_0
+    render_config.render_folder_names = ["room_0"]  # room_0
     render_panoramic_datasets(render_config)

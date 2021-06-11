@@ -96,8 +96,7 @@ def warp_forward_padding(image_target, of_forward, padding_x=0, padding_y=0):
 
 
 def warp_forward(image_first, of_forward, wrap_around=False, ignore_transparent=False):
-    """ forward warp with optical flow. 
-    warp image with interpolation, scipy.ndimage.map_coordinates
+    """ forward warp image with optical flow. 
 
     :param image_first: input image, when it's 4 channels image, use the alpha channel to ignore the transparent area [height,width,:].
     :type image_first: numpy

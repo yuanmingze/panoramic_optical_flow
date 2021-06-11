@@ -133,3 +133,15 @@ Use panoramic images optical flow estimation rotation to roughly align the two i
 The image warp, the rotation to warp the image, alignt the 
 
 The optical flow warping, to warp the final optical flow to restore the original images optical flow.
+
+\begin{equation}\label{equ:app:sph2erp}
+\begin{split}
+\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
+\\
+x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
+\\
+\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
+\\
+y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
+\end{split}
+\end{equation}

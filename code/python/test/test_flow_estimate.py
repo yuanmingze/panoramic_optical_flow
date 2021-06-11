@@ -5,7 +5,6 @@ from utility import flow_estimate
 from utility import image_io
 from utility import flow_io
 from utility import flow_vis
-
 from utility import flow_warp
 
 import os
@@ -20,6 +19,7 @@ def test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_out
     flow_io.flow_write(of_forward, erp_of_dif_output_filepath)
     of_forward_vis = flow_vis.flow_to_color(of_forward)
     image_io.image_save(of_forward_vis, erp_of_dif_output_filepath + ".jpg")
+    # flow_vis.flow_value_to_color(of_forward, visual_colormap="jet")
 
 
 def test_multi_step_flow_0(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_debug_dir):
@@ -61,5 +61,15 @@ if __name__ == "__main__":
 
     erp_opticalflow_debug_output_dir = config.TEST_data_root_dir + "replica_360/apartment_0/debug/"
 
-    # test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_output_filepath)
-    test_multi_step_flow_0(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_debug_output_dir)
+    test_list = [0]
+    if 0 in test_list:
+        # test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_output_filepath)
+        test_multi_step_flow_0(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_debug_output_dir)
+
+    if 1 in test_list:
+        # test perspective optical flow wrap-around
+        data_root = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0_0/")
+        erp_src_image_filepath = data_root + "0000_B_rgb.jpg"
+        erp_tar_image_filepath = data_root + "0001_B_rgb.jpg"
+        erp_opticalflow_output_filepath = data_root + "0001_rgb_multisteps.flo"
+        test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_opticalflow_output_filepath)

@@ -9,9 +9,8 @@ from utility import depth_io
 from utility import image_io
 from utility import flow_io
 from utility import flow_vis
-from utility import image_io
-from utility import depth_io
 from utility import flow_warp
+from utility import polygon
 from utility import gnomonic_projection as gp
 
 path = os.getcwd()
@@ -174,12 +173,12 @@ def test_inside_polygon_2d():
     polygon_points_list[3, :] = [-1, -1]
 
     from functools import reduce
-    result = gp.inside_polygon_2d(point_list, polygon_points_list, True, eps=1e-6)
+    result = polygon.inside_polygon_2d(point_list, polygon_points_list, True, eps=1e-6)
     print("Inside include on segment", result)
     result_gt = [True, False,  True,  True,  True, False,  True,  True]
     assert reduce((lambda x, y: x and y), result == result_gt)
 
-    result = gp.inside_polygon_2d(point_list, polygon_points_list, False, eps=1e-15)
+    result = polygon.inside_polygon_2d(point_list, polygon_points_list, False, eps=1e-15)
     print("Inside do not include on segment", result)
     result_gt = [True, False,  False,  False,  False, False,  False,  False]
     assert reduce((lambda x, y: x and y), result == result_gt)
@@ -192,7 +191,7 @@ def test_inside_polygon_2d():
     polygon_points_list[1, :] = [1, 1]
     polygon_points_list[2, :] = [1, -1]
     polygon_points_list[3, :] = [-1, -1]
-    result = gp.inside_polygon_2d(point_list, polygon_points_list, True).reshape(np.shape(point_list_x))
+    result = polygon.inside_polygon_2d(point_list, polygon_points_list, True).reshape(np.shape(point_list_x))
     image_io.image_show(result, verbose=True)
 
     # test 3
@@ -202,7 +201,7 @@ def test_inside_polygon_2d():
     polygon_points_list[0, :] = [0.,  0.76393202]
     polygon_points_list[1, :] = [0.66158454, -0.38196601]
     polygon_points_list[2, :] = [-0.66158454, -0.38196601]
-    result = gp.inside_polygon_2d(point_list, polygon_points_list, True, 2/400).reshape(np.shape(point_list_x))
+    result = polygon.inside_polygon_2d(point_list, polygon_points_list, True, 2/400).reshape(np.shape(point_list_x))
     image_io.image_show(result, verbose=False)
 
     # # test 4
@@ -212,7 +211,7 @@ def test_inside_polygon_2d():
     #     face_erp_x, face_erp_y = np.meshgrid(face_erp_x_grid, face_erp_y_grid)
     # pbc = 1.0
     # gnomonic_bounding_box =  np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])
-    # available_list = gp.inside_polygon_2d(np.stack((face_erp_y_grid.flatten(), face_erp_x_grid.flatten()), axis=1), gnomonic_bounding_box).reshape(np.shape((50,50)))
+    # available_list = polygon.inside_polygon_2d(np.stack((face_erp_y_grid.flatten(), face_erp_x_grid.flatten()), axis=1), gnomonic_bounding_box).reshape(np.shape((50,50)))
     # image_io.image_show(available_list, verbose=False)
 
 if __name__ == "__main__":

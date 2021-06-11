@@ -1,4 +1,5 @@
 
+from typing import overload
 import numpy as np
 
 import spherical_coordinates
@@ -13,67 +14,31 @@ Reference:
 [1]: https://mathworld.wolfram.com/GnomonicProjection.html
 """
 
-
-def inside_polygon_2d(points_list, polygon_points, on_line=False, eps=1e-4):
-    """ Test the points inside the polygon. 
-    Implement 2D PIP (Point Inside a Polygon).
-    
-    :param points_list: The points locations numpy array whose size is [point_numb, 2]. The point storage list is as [[x_1, y_1], [x_2, y_2],...[x_n, y_n]].
-    :type points_list: numpy
-    :param polygon_points: The clock-wise points sequence. The storage is the same as points_list. size is [triangle_points_tangent, 2]
-    :type polygon_points: numpy
-    :param on_line: The inside point including the boundary points, if True. defaults to False
-    :type on_line: bool, optional
-    :param eps: Use the set the polygon's line width. The distance between two pixel. defaults to 1e-4
-    :type eps: float, optional
-    :return: A numpy Boolean array, True is inside the polygon, False is outside.
-    :rtype: numpy
+def tangent3d_projection(theta_, phi_, theta_0, phi_0):
+    """ Project the points on unit sphere to tangent image, to get the 3D points coordinate on tangent plane.
+    :param theta: radian
+    :param phi:
+    :theta_0:
+    :phi_0:
+    :return: the 3d point coordinate in tangent plane.
     """
-    point_inside = np.full(np.shape(points_list)[0], False, dtype=bool)  # the point in the polygon
-    online_index = np.full(np.shape(points_list)[0], False, dtype=bool)  # the point on the polygon lines
-
-    points_x = points_list[:, 0]
-    points_y = points_list[:, 1]
-
-    def GREATER(a, b): return a >= b
-    def LESS(a, b): return a <= b
-
-    # try each line segment
-    for index in range(np.shape(polygon_points)[0]):
-        polygon_1_x = polygon_points[index][0]
-        polygon_1_y = polygon_points[index][1]
-
-        polygon_2_x = polygon_points[(index + 1) % len(polygon_points)][0]
-        polygon_2_y = polygon_points[(index + 1) % len(polygon_points)][1]
-
-        # exist points on the available XY range
-        test_result = np.logical_and(GREATER(points_y, min(polygon_1_y, polygon_2_y)), LESS(points_y, max(polygon_1_y, polygon_2_y)))
-        test_result = np.logical_and(test_result, LESS(points_x, max(polygon_1_x, polygon_2_x)))
-        if not test_result.any():
-            continue
-
-        # get the intersection points
-        if LESS(abs(polygon_1_y - polygon_2_y), eps):
-            test_result = np.logical_and(test_result, GREATER(points_x, min(polygon_1_x, polygon_2_x)))
-            intersect_points_x = points_x[test_result]
-        else:
-            intersect_points_x = (points_y[test_result] - polygon_1_y) * \
-                (polygon_2_x - polygon_1_x) / (polygon_2_y - polygon_1_y) + polygon_1_x
-
-        # the points on the line
-        on_line_list = LESS(abs(points_x[test_result] - intersect_points_x), eps)
-        if on_line_list.any():
-            online_index[test_result] = np.logical_or(online_index[test_result], on_line_list)
-
-        # the point on the left of the line
-        if LESS(points_x[test_result], intersect_points_x).any():
-            test_result[test_result] = np.logical_and(test_result[test_result], LESS(points_x[test_result], intersect_points_x))
-            point_inside[test_result] = np.logical_not(point_inside[test_result])
-
-    if on_line:
-        return np.logical_or(point_inside, online_index).reshape(np.shape(points_list[:, 0]))
+    if theta_0 != 0.0 or phi_0 != 0.0:
+        theta, phi = spherical_coordinates.rotation_sph_coord(theta_, phi_, -theta_0, -phi_0)
     else:
-        return np.logical_and(point_inside, np.logical_not(online_index)).reshape(np.shape(points_list[:, 0]))
+        theta = theta_
+        phi = phi_
+
+    if (theta > np.pi * 0.5).any() or (theta < -np.pi * 0.5).any():
+        log.warn("Theta is not in the [-0.5π, 0.5π]")
+    if (phi > np.pi * 0.5).any() or (phi < -np.pi * 0.5).any():
+        log.warn("Phi is not in the [-0.5π, 0.5π]")
+
+    # TODO when t
+    x = 1.0 * np.tan(theta)
+    # TODO when np.cos(theta) is 0
+    y = (1.0 / np.cos(theta)) * np.tan(phi)
+    z = np.ones_like(x)
+    return x, y, z
 
 
 def gnomonic_projection(theta, phi, theta_0, phi_0):
@@ -106,35 +71,14 @@ def gnomonic_projection(theta, phi, theta_0, phi_0):
         x[zeros_index] = 0
         y[zeros_index] = 0
 
+    # check if the points on the hemisphere of tangent point
+    dist_array = spherical_coordinates.great_circle_distance_uv(theta, phi, theta_0, phi_0)
+    overflow_point = dist_array > (np.pi * 0.5)
+    if overflow_point.any():
+        log.warn("The points overflow the gnomonic projection hemisphere.")
+
     return x, y
 
-
-def tangent3d_projection(theta_, phi_, theta_0, phi_0):
-    """ Project the points on unit sphere to tangent image, to get the 3D points coordinate on tangent plane.
-    :param theta: radian
-    :param phi:
-    :theta_0:
-    :phi_0:
-    :return: the 3d point coordinate in tangent plane.
-    """
-    if theta_0 != 0.0 or phi_0 != 0.0:
-        theta, phi = spherical_coordinates.rotation_sph_coord(theta_, phi_, -theta_0, -phi_0)
-    else:
-        theta = theta_
-        phi = phi_
-
-    if (theta > np.pi * 0.5).any() or (theta < -np.pi * 0.5).any():
-        log.warn("Theta is not in the [-0.5π, 0.5π]")
-    if (phi > np.pi * 0.5).any() or (phi < -np.pi * 0.5).any():
-        log.warn("Phi is not in the [-0.5π, 0.5π]")
-
-    # TODO when t
-    x = 1.0 * np.tan(theta)
-    # TODO when np.cos(theta) is 0
-    y = (1.0 / np.cos(theta)) * np.tan(phi)
-    z = 1.0
-    return x, y, np.ones_like(x)
-    
 
 def reverse_gnomonic_projection(x, y, theta_0, phi_0):
     """ Reverse gnomonic projection.

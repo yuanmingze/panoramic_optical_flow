@@ -34,8 +34,13 @@ def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, point
     :param points_1_theta: theta in radians
     :type points_1_theta : numpy
     :param points_1_phi: phi in radians
+    :type points_1_phi : numpy
     :param points_2_theta: radians
+    :type points_2_theta: float
     :param points_2_phi: radians
+    :type points_2_phi: float
+    :return: The geodestic distance from point ot tangent point.
+    :rtype: numpy
     """
     delta_theta = points_2_theta - points_1_theta
     delta_phi = points_2_phi - points_1_phi
@@ -132,11 +137,15 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     end_points_v = y_array + motion_flow_v
 
     # process the warp around
-    end_points_u[end_points_u >= width] = end_points_u[end_points_u >= width] - width
-    end_points_u[end_points_u < 0] = end_points_u[end_points_u < 0] + width
+    u_index = end_points_u >= width - 0.5
+    end_points_u[u_index] = end_points_u[u_index] - width
+    u_index = end_points_u < -0.5
+    end_points_u[u_index] = end_points_u[u_index] + width
 
-    end_points_v[end_points_v >= height] = end_points_v[end_points_v >= height] - height
-    end_points_v[end_points_v < 0] = end_points_v[end_points_v < 0] + height
+    v_index = end_points_v >= height-0.5
+    end_points_v[v_index] = end_points_v[v_index] - height
+    v_index = end_points_v < -0.5
+    end_points_v[v_index] = end_points_v[v_index] + height
 
     return np.stack((end_points_u, end_points_v))
 
@@ -205,8 +214,8 @@ def sph2erp(theta, phi, image_height, wrap_around=False):
 
     # process the wrap around case
     if wrap_around:
-        x = np.remainder(x, image_width)
-        y = np.remainder(y, image_height)
+        x = np.remainder(x + 0.5, image_width) - 0.5
+        y = np.remainder(y + 0.5, image_height) - 0.5
     return x, y
 
 

@@ -340,7 +340,7 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
         if not full_face_image:
             gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
             pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
-            inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
+            inside_list = polygon.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
             inside_list = inside_list.reshape(gnom_range_xv.shape)
 
         # project to tangent image
@@ -450,7 +450,7 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
         pixel_eps = abs(tangent_xv[0, 0] - tangent_xv[0, 1]) / (2 * tangent_image_width)
 
         if blender_method is None:
-            available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
+            available_pixels_list = polygon.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
                                                          triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
 
             # the tangent available gnomonic coordinate sample the pixel from the tangent image
@@ -465,7 +465,7 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
                                        [gnomonic_x_max, gnomonic_y_max],
                                        [gnomonic_x_max, gnomonic_y_min],
                                        [gnomonic_x_min, gnomonic_y_min]]
-            available_pixels_list = gp.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
+            available_pixels_list = polygon.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
                                                          triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
 
             tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
@@ -476,6 +476,9 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
 
             face_weight_mat = np.ones(erp_face_image.shape, np.float64)
             erp_weight_mat[triangle_yv[available_pixels_list].astype(np.int64), triangle_xv[available_pixels_list].astype(np.int64)] += face_weight_mat
+
+            # import image_io
+            # image_io.image_show(erp_weight_mat)
 
     # compute the final optical flow base on weight
     if blender_method == "mean":
@@ -533,7 +536,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
         if not full_face_image:
             gnom_range_xyv = np.stack((gnom_range_xv.flatten(), gnom_range_yv.flatten()), axis=1)
             pixel_eps = (gnomonic_x_max - gnomonic_x_min) / (tangent_image_width)
-            inside_list = gp.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
+            inside_list = polygon.inside_polygon_2d(gnom_range_xyv, tangent_triangle_vertices, on_line=True, eps=pixel_eps)
             inside_list = inside_list.reshape(np.shape(gnom_range_xv))
 
         # 0) Get the tangent image pixels' ERP location, convert the ERP optical flow's UV to tangent image's UV
@@ -626,9 +629,11 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         triangle_x_range = np.linspace(erp_flow_col_start, erp_flow_col_stop, erp_flow_col_stop - erp_flow_col_start + 1, endpoint=True)
         triangle_y_range = np.linspace(erp_flow_row_start, erp_flow_row_stop, erp_flow_row_stop - erp_flow_row_start + 1, endpoint=True)
 
+        # TODO check it
         face_src_x_erp, face_src_y_erp = np.meshgrid(triangle_x_range, triangle_y_range)
-        face_src_x_erp = np.remainder(face_src_x_erp, erp_flow_width)  # process the wrap around
-        face_src_y_erp = np.remainder(face_src_y_erp, erp_flow_height)
+        # face_src_x_erp = np.remainder(face_src_x_erp, erp_flow_width)  # process the wrap around
+        # face_src_y_erp = np.remainder(face_src_y_erp, erp_flow_height)
+        face_src_x_erp, face_src_y_erp = flow_postproc.erp_pixles_wraparound(face_src_x_erp, face_src_y_erp, erp_flow_width, erp_flow_height)
 
         # 2) get the pixels location in tangent image location
         # ERP image space --> spherical space
@@ -639,7 +644,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
 
         # the available (in the triangle) pixels list
         pixel_eps = abs(face_src_x_gnom[0, 0] - face_src_x_gnom[0, 1]) / (2 * tangent_flow_width)
-        available_list = gp.inside_polygon_2d(np.stack((face_src_x_gnom.flatten(), face_src_y_gnom.flatten()), axis=1), triangle_points_tangent, on_line=True, eps=pixel_eps)
+        available_list = polygon.inside_polygon_2d(np.stack((face_src_x_gnom.flatten(), face_src_y_gnom.flatten()), axis=1), triangle_points_tangent, on_line=True, eps=pixel_eps)
         available_list = available_list.reshape(face_src_x_gnom.shape)
 
         # normailzed tangent image space --> tangent image space
@@ -648,20 +653,19 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         gnomonic_y_min = np.amin(triangle_points_tangent[:, 1], axis=0)
         gnomonic_y_max = np.amax(triangle_points_tangent[:, 1], axis=0)
         face_src_range_gnom = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
-        face_src_x_gnom_pixel, face_src_y_gnom_pixel = gp.gnomonic2pixel(face_src_x_gnom[available_list], face_src_y_gnom[available_list], 0.0, tangent_flow_width, tangent_flow_height, face_src_range_gnom)
+        face_src_x_gnom_pixel, face_src_y_gnom_pixel = gp.gnomonic2pixel(
+            face_src_x_gnom[available_list], face_src_y_gnom[available_list], 0.0, tangent_flow_width, tangent_flow_height, face_src_range_gnom)
 
         # 3) get the value of optical flow end point location
         # 3-0) get the tangent images flow in the tangent image space, ignore the pixels outside the tangent image
         face_flow_u_gnom = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 0], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='constant', cval=255)
         face_tar_x_gnom_pixel_avail = face_src_x_gnom_pixel + face_flow_u_gnom
-
         face_flow_v_gnom = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 1], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='constant', cval=255)
         face_tar_y_gnom_pixel_avail = face_src_y_gnom_pixel + face_flow_v_gnom
 
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
-        face_tar_x_gnom_avail, face_tar_y_gnom_avail = gp.pixel2gnomonic(face_tar_x_gnom_pixel_avail, face_tar_y_gnom_pixel_avail, 0.0,
-                                                                     tangent_flow_width, tangent_flow_height, face_src_range_gnom)
+        face_tar_x_gnom_avail, face_tar_y_gnom_avail = gp.pixel2gnomonic(face_tar_x_gnom_pixel_avail, face_tar_y_gnom_pixel_avail, 0.0, tangent_flow_width, tangent_flow_height, face_src_range_gnom)
         # tangent normailzed space --> spherical space
         face_tar_x_sph_avail, face_tar_y_sph_avail = gp.reverse_gnomonic_projection(face_tar_x_gnom_avail, face_tar_y_gnom_avail, theta_0, phi_0)
 
@@ -674,7 +678,7 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         face_flow_v_erp = face_tar_y_erp - face_src_y_erp[available_list]
 
         # 4-1) compute the all available pixels' weight to blend the optical flow
-        face_weight_mat = np.ones(face_src_y_gnom_pixel.shape, dtype= np.float64)
+        face_weight_mat = np.ones(face_src_y_gnom_pixel.shape, dtype=np.float64)
 
         # weight_type = "straightforward"
         # triangle_points_tangent_weight = get_icosahedron_parameters(triangle_index, 0.0)["triangle_points_tangent"]
@@ -706,6 +710,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
 
         erp_flow_weight_mat[face_src_y_erp[available_list].astype(np.int64), face_src_x_erp[available_list].astype(np.int64)] += face_weight_mat
 
+        # import image_io
+        # image_io.image_show(erp_flow_weight_mat)
     # compute the final optical flow base on weight
     # erp_flow_weight_mat = np.full(erp_flow_weight_mat.shape, erp_flow_weight_mat.max(), np.float)
     # erp_flow_weight_mat = np.where(erp_flow_weight_mat < 1, erp_flow_weight_mat, 0)

@@ -81,7 +81,7 @@ def test_cubemap_flow_stitch(padding_size, cubemap_flow_output, flow_filename_ex
         face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
 
     # 2) test stitch the cubemap flow. Note enable test 3
-    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_flow_height=480, padding_size=padding_size)
+    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_image_height=480, padding_size=padding_size, wrap_around=True)
     if os.path.exists(cubemap_stitch_flo):
         os.remove(cubemap_stitch_flo)
     flow_io.flow_write(erp_flow_stitch, cubemap_stitch_flo)
@@ -108,7 +108,7 @@ def test_cubmap_image_proj(padding_size, erp_image_filepath, cubemap_images_outp
         # image_io.image_show(face_images[0])
 
 
-def test_cubmap_image_stitch(padding_size, erp_image_filepath, cubemap_images_output_folder, face_image_name_expression):
+def test_cubmap_image_stitch(padding_size, erp_image_filepath, cubemap_images_output_folder, face_image_name_expression, erp_image_height):
     """Test stitch the 6 images to an ERP image.
     """
     # 1) load the 6 image to memory.
@@ -118,12 +118,12 @@ def test_cubmap_image_stitch(padding_size, erp_image_filepath, cubemap_images_ou
         face_images_src.append(image_io.image_read(image_path))
 
     # 2) test stitch the cubemap images
-    erp_image_src = proj_cm.cubemap2erp_image(face_images_src, padding_size)
+    erp_image_src = proj_cm.cubemap2erp_image(face_images_src, padding_size, erp_image_height=erp_image_height)
     # image_io.image_show(erp_image_src)
     image_io.image_save(erp_image_src, erp_image_filepath + "_stitch.jpg")
 
 
-def test_cubemap_flow_warp(cubemap_images_output,rgb_src_filename_exp, flo_filename_exp,  flo_src_warp_filename_exp ):
+def test_cubemap_flow_warp(cubemap_images_output, rgb_src_filename_exp, flo_filename_exp,  flo_src_warp_filename_exp):
     """Warp the face image with face flow.
     """
     # 1) warp the cube map image with cube map flow
@@ -169,7 +169,7 @@ def test_cubemap_flow_stitch_dis(padding_size, cubemap_flow_dir, face_flow_name_
     # 2) test stitch the cubemap flow.
     image_erp_src = image_io.image_read(src_erp_image)
     image_erp_tar = image_io.image_read(tar_erp_image)
-    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_flow_height=480, padding_size=padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar)
+    erp_flow_stitch = proj_cm.cubemap2erp_flow(face_flows, erp_image_height=480, padding_size=padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar, wrap_around=True)
     if os.path.exists(cubemap_stitch_flo):
         os.remove(cubemap_stitch_flo)
         log.warn("remove exist flow file {}".format(cubemap_stitch_flo))
@@ -231,31 +231,38 @@ if __name__ == "__main__":
     face_image_flo_warp_name_expression = "cubemap_rgb_src_warp_{}.jpg"
 
     face_image_size = 400
+    erp_image_height = 480
+
+    test_list = [1]
 
     # 0) test rgb image project and stitch
-    test_cubmap_image_proj(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression, face_image_size)
-    test_cubmap_image_stitch(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression)
+    if 0 in test_list:
+        test_cubmap_image_proj(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression, face_image_size)
+        test_cubmap_image_stitch(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression, erp_image_height)
 
     # 1) test on ground truth optical flow
-    test_cubemap_flow_proj(padding_size, erp_flow_gt_filepath, cubemap_src_images_output_folder, face_gt_flow_padding_name_expression, face_image_padding_name_expression, face_image_size)
-    test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)
-    test_cubemap_flow_warp(cubemap_src_images_output_folder,face_image_padding_name_expression, face_gt_flow_padding_name_expression,  face_image_flo_warp_name_expression)
+    if 1 in test_list:
+        # test_cubemap_flow_proj(padding_size, erp_flow_gt_filepath, cubemap_src_images_output_folder, face_gt_flow_padding_name_expression, face_image_padding_name_expression, face_image_size)
+        test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)
+        # test_cubemap_flow_warp(cubemap_src_images_output_folder, face_image_padding_name_expression, face_gt_flow_padding_name_expression,  face_image_flo_warp_name_expression)
 
     # 2) test on DIS estimated optical flow with padding
-    # project the source image to 6 face
-    log.info("project the source image to 6 face")
-    test_cubmap_image_proj(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression,face_image_size)
-    # project the target image to 6 face
-    log.info("project the target image to 6 face")
-    test_cubmap_image_proj(padding_size, erp_tar_image_filepath, cubemap_tar_images_output_folder, face_image_padding_name_expression,face_image_size)
-    # compute the forward flow
-    log.info("compute the forward flow")
-    generate_face_forward_flow(cubemap_src_images_output_folder, cubemap_tar_images_output_folder, face_image_padding_name_expression, face_dis_flow_padding_name_expression)
-    # stitch all faces
-    log.info("stitch all faces")
-    test_cubemap_flow_stitch_dis(padding_size, cubemap_src_images_output_folder, face_dis_flow_padding_name_expression, cubemap_stitch_flo_filename, erp_src_image_filepath, erp_tar_image_filepath)
-    log.info("use stitched dis optical flow to wrap the src image")
-    test_erp_flow_warp(erp_src_image_filepath, cubemap_stitch_flo_filename, erp_image_warped_filepath)
+    if 2 in test_list:
+        # project the source image to 6 face
+        log.info("project the source image to 6 face")
+        test_cubmap_image_proj(padding_size, erp_src_image_filepath, cubemap_src_images_output_folder, face_image_padding_name_expression, face_image_size)
+        # project the target image to 6 face
+        log.info("project the target image to 6 face")
+        test_cubmap_image_proj(padding_size, erp_tar_image_filepath, cubemap_tar_images_output_folder, face_image_padding_name_expression, face_image_size)
+        # compute the forward flow
+        log.info("compute the forward flow")
+        generate_face_forward_flow(cubemap_src_images_output_folder, cubemap_tar_images_output_folder, face_image_padding_name_expression, face_dis_flow_padding_name_expression)
+        # stitch all faces
+        log.info("stitch all faces")
+        test_cubemap_flow_stitch_dis(padding_size, cubemap_src_images_output_folder, face_dis_flow_padding_name_expression, cubemap_stitch_flo_filename, erp_src_image_filepath, erp_tar_image_filepath)
+        log.info("use stitched dis optical flow to wrap the src image")
+        test_erp_flow_warp(erp_src_image_filepath, cubemap_stitch_flo_filename, erp_image_warped_filepath)
 
     # 3) test ERP DIS
-    # compute_erp_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_flow_path)
+    if 3 in test_list:
+        compute_erp_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_flow_path)

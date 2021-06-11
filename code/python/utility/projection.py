@@ -4,7 +4,7 @@ from scipy.spatial.transform import rotation
 from scipy.stats import norm
 import flow_postproc
 
-import gnomonic_projection
+import polygon
 import spherical_coordinates as sc
 
 from logger import Logger
@@ -39,7 +39,7 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
     weight_map = np.zeros(face_x_src_gnomonic.shape[0], dtype=np.float)
 
     if weight_type == "straightforward":
-        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=False, eps=1e-7)
+        available_list = polygon.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=False, eps=1e-7)
         weight_map[available_list] = 1.0
     elif weight_type == "cartesian_distance_log":
         radius = np.linalg.norm(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), axis=1)
@@ -119,7 +119,7 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
         if gnomonic_bounding_box is None:
             pbc = 1
             gnomonic_bounding_box = np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]])
-        available_list = gnomonic_projection.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=True, eps=1e-7)
+        available_list = polygon.inside_polygon_2d(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), gnomonic_bounding_box, on_line=True, eps=1e-7)
         weight_map[available_list] = 1.0
     elif weight_type == "cartesian_distance_log":
         radius = np.linalg.norm(np.stack((face_x_src_gnomonic, face_y_src_gnomonic), axis=1), axis=1)
@@ -206,7 +206,7 @@ def flow2sph_rotation(erp_flow_, use_weight=True):
     phi_delta_array = -np.pi * (erp_flow[positive_index, 1] / erp_image_height)
 
     if use_weight:
-        # TODO Check the weight performace
+        # TODO Check the weight performance
         # weight of the u, width
         stdev = erp_image_height * 0.5 * 0.25
         weight_u_array_index = np.arange(erp_image_height)

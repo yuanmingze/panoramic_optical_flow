@@ -204,11 +204,11 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
 
 
 if __name__ == "__main__":
-    padding_size = 0.0
+    padding_size = 0.1
     ico_face_number = 20
 
     tangent_image_size = 480
-    erp_image_height = 960
+    erp_image_height = 480
     erp_image_width = erp_image_height * 2
 
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     tangent_image_filename_expression = "ico_rgb_src_{}.png"
     tangent_padding_image_filename_expression = "ico_rgb_src_padding_{}.png"
 
-    test_list = [4]
+    test_list = [2]
 
     if 1 in test_list:
         # 1) test padding size
@@ -238,6 +238,9 @@ if __name__ == "__main__":
         test_ico_image_proj(erp_src_image_filepath, tangent_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
         test_ico_image_stitch(ico_src_image_output_dir, tangent_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
         test_ico_image_proj(erp_tar_image_filepath, tangent_image_filename_expression, ico_tar_image_output_dir, tangent_image_size, padding_size)
+        # for index in range(4):
+        #     test_ico_image_proj(erp_src_image_stitch_filepath, tangent_image_filename_expression, ico_src_image_output_dir, tangent_image_size, padding_size)
+        #     test_ico_image_stitch(ico_src_image_output_dir, tangent_image_filename_expression, erp_src_image_stitch_filepath, erp_image_height, padding_size)
 
     if 3 in test_list:
         # 3) test the image projection and stitch with padding

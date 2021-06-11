@@ -6,6 +6,14 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
+def erp_pixles_wraparound(x_arrray, y_array, image_width, image_height):
+    """ Make x,y and ERP pixels coordinate system range.
+    """
+    x_arrray_new = np.remainder(x_arrray + 0.5, image_width) - 0.5
+    y_array_new = np.remainder(y_array + 0.5, image_height) - 0.5
+    return x_arrray_new, y_array_new
+
+
 def erp_of_wraparound(erp_flow, of_u_threshold=None, of_v_threshold=None):
     """
     Convert un-wrap-around (do not overflow) to ERP optical flow to the wrap-around (overflow) ERP optical flow.
