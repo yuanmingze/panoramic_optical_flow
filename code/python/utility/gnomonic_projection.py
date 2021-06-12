@@ -41,7 +41,7 @@ def tangent3d_projection(theta_, phi_, theta_0, phi_0):
     return x, y, z
 
 
-def gnomonic_projection(theta, phi, theta_0, phi_0):
+def gnomonic_projection(theta, phi, theta_0, phi_0, label_outrange_pixel = False):
     """ Gnomonic projection.
     Convet point form the spherical coordinate to tangent image's coordinate.
         https://mathworld.wolfram.com/GnomonicProjection.html
@@ -54,6 +54,8 @@ def gnomonic_projection(theta, phi, theta_0, phi_0):
     :type theta_0: float
     :param phi_0: the tangent point's latitude of gnomonic projection.
     :type phi_0: float
+    :param label_outrange_pixel: If True set the outrange to Nan, if False do nothing.
+    :type label_outrange_pixel: bool, optional
     :return: The gnomonic coordinate normalized coordinate.
     :rtype: numpy
     """
@@ -72,10 +74,13 @@ def gnomonic_projection(theta, phi, theta_0, phi_0):
         y[zeros_index] = 0
 
     # check if the points on the hemisphere of tangent point
-    dist_array = spherical_coordinates.great_circle_distance_uv(theta, phi, theta_0, phi_0)
-    overflow_point = dist_array > (np.pi * 0.5)
-    if overflow_point.any():
-        log.warn("The points overflow the gnomonic projection hemisphere.")
+    if label_outrange_pixel:
+        dist_array = spherical_coordinates.great_circle_distance_uv(theta, phi, theta_0, phi_0)
+        overflow_point = dist_array >= (np.pi * 0.5)
+        # if overflow_point.any():
+        #     log.warn("The points overflow the gnomonic projection hemisphere.")
+        x[overflow_point] = np.NaN
+        y[overflow_point] = np.NaN
 
     return x, y
 

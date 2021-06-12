@@ -115,7 +115,7 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     return flow_image
 
 
-def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = True):
+def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = False):
     """ Expects a two dimensional flow image of shape.
 
     :param flow_uv: Flow UV image of shape [H,W,2]
@@ -178,11 +178,12 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     return flow_colored
 
 
-def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap="RdPu"):
+def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0, visual_colormap="jet"):
     """ Visualize U,V and show the bar.
 
     :param flow_uv: optical flow. [height, width, 2]
     :type flow_uv: numpy
+    :param visual_colormap: RdPu
     """
     # get vmin and vmax
     vmin_, vmax_ = image_evaluate.get_min_max(flow_uv, min_ratio, max_ratio)

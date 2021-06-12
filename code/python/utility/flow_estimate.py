@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import flow_postproc
 import flow_vis
+import flow_io
 
 import projection
 import image_io
@@ -61,17 +62,20 @@ def of_methdod_DIS(image_src_original, image_tar_original):
 
 def debug_save_of(of_data, output_filepath):
     """Visualize optical flow both warp-around and un-warp-around."""
+    flow_vis.flow_value_to_color(of_data)
+
     of_data_visual = flow_vis.flow_to_color(of_data)
-    image_io.image_save(of_data_visual, output_filepath + "_flow_unwraparound.jpg")
-    of_data_warparound = flow_postproc.erp_of_wraparound(of_data)
+    image_io.image_save(of_data_visual, output_filepath + "_flow_wraparound.jpg")
+    of_data_warparound = flow_postproc.erp_of_unwraparound(of_data)
     of_data_warparound_visual = flow_vis.flow_to_color(of_data_warparound)
-    image_io.image_save(of_data_warparound_visual, output_filepath + "_flow_wraparound.jpg")
+    image_io.image_save(of_data_warparound_visual, output_filepath + "_flow_unwraparound.jpg")
 
 
 def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None):
     """Compute the optical flow with multi-step and icosahedron projection.
 
     The multi-steps method, just transfer the ERP image rotation to next step.
+    The process use warp-around (overflowed) optical flow.
 
     :param src_erp_image: the source ERP image data.
     :type src_erp_image: numpy
@@ -112,7 +116,7 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     for index in range(0, len(cubeface_images_src_list)):
         optical_flow_cubemap = optical_flow_method(cubeface_images_src_list[index], cubeface_images_tar_list[index])
         cubemap_face_of_list.append(optical_flow_cubemap)
-    optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image)
+    optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
     # 1-2) warp target image
     tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_erp, optical_flow_cubemap, src_image=False)
     cubemap_rot_mat = spherical_coordinates.rot_sph2mat(cubemap_rot_theta, cubemap_rot_phi)
@@ -121,6 +125,10 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     if debug_output_dir is not None:
         debug_save_of(optical_flow_cubemap, debug_output_dir + "pano_of_0_of_cubemap")
         image_io.image_save(tar_erp_image_rot_cubemap, debug_output_dir + "pano_of_0_cubemap_rot.jpg")
+        # for index in range(len(cubemap_face_of_list)):
+        #     flow_io.flow_write(cubemap_face_of_list[index], debug_output_dir + "cubemap_flow_padding_{}.flo".format(index))
+        #     of_data_visual = flow_vis.flow_to_color(cubemap_face_of_list[index])
+        #     image_io.image_save(of_data_visual,  debug_output_dir + "cubemap_flow_padding_{}.jpg".format(index))
 
     # 2) compute flow with icosahedron projection & warp image
     log.debug("2) compute icosahedron projection image flow")
@@ -131,7 +139,9 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     for index in range(0, len(icoface_images_src_list)):
         optical_flow_ico = optical_flow_method(icoface_images_src_list[index], icoface_images_tar_list[index])
         ico_face_of_list.append(optical_flow_ico)
-    optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, padding_size_ico, src_erp_image, tar_erp_image)
+    optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, padding_size_ico, src_erp_image, tar_erp_image, wrap_around=True)
+
+    # optical_flow_ico = flow_postproc.erp_of_wraparound(optical_flow_ico)
     # 2-2) warp target image
     #tar_erp_image_rot_ico, ico_rot_theta, ico_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_cubemap, optical_flow_ico)
 

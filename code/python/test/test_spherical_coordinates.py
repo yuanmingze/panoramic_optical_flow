@@ -71,11 +71,14 @@ def test_great_circle_distance_uv():
 def test_rotation2erp_motion_vector(erp_src_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
     image_size = src_image_data.shape[0:2]
-    rotation_theta = np.radians(0.0)
-    rotation_phi = np.radians(90.0)
+    rotation_theta = np.radians(10.0)
+    rotation_phi = np.radians(00.0)
     erp_motion_vector, _ = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi)
-    # flow_color = flow_vis.flow_to_color(erp_motion_vector)
-    # image_io.image_save(flow_color,erp_src_image_filepath + "_flow.jpg" )
+    flow_color = flow_vis.flow_to_color(erp_motion_vector)
+    image_io.image_save(flow_color, erp_src_image_filepath + "_flow.jpg")
+    flow_color = flow_vis.flow_value_to_color(erp_motion_vector)
+
+    erp_motion_vector, _ = sc.rotation2erp_motion_vector(image_size, rotation_theta, rotation_phi,  wraparound=True)
     flow_color = flow_vis.flow_value_to_color(erp_motion_vector)
 
 

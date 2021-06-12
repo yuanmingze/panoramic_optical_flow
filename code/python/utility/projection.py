@@ -2,8 +2,9 @@ import numpy as np
 from scipy import ndimage
 from scipy.spatial.transform import rotation
 from scipy.stats import norm
-import flow_postproc
 
+import flow_postproc
+import flow_vis
 import polygon
 import spherical_coordinates as sc
 
@@ -248,7 +249,7 @@ def image_rotate_flow(erp_image, erp_flow, src_image=True):
     return erp_image_rot, theta_delta, phi_delta
 
 
-def flow_rotate_endpoint(optical_flow, rotation):
+def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
     """ Add the rotation offset to the end points of optical flow.
 
     :param optical_flow: the original optical flow, [height, width, 2]
@@ -265,23 +266,30 @@ def flow_rotate_endpoint(optical_flow, rotation):
     src_points_array_xv, src_points_array_yv = np.meshgrid(end_points_array_x, end_points_array_y)
 
     # get end point location in ERP coordinate
-    end_points_array_xv = np.remainder(src_points_array_xv + optical_flow[:, :, 0], flow_width)
-    end_points_array_yv = np.remainder(src_points_array_yv + optical_flow[:, :, 1], flow_height)
+    # end_points_array_xv = np.remainder(src_points_array_xv + optical_flow[:, :, 0], flow_width)
+    # end_points_array_yv = np.remainder(src_points_array_yv + optical_flow[:, :, 1], flow_height)
+    end_points_array_xv, end_points_array_yv = flow_postproc.erp_pixles_modulo(src_points_array_xv + optical_flow[:, :, 0], src_points_array_yv + optical_flow[:, :, 1], flow_width, flow_height)
+
     end_points_array = None
     if isinstance(rotation, (list, tuple)):
-        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation[0],  rotation[1])
+        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation[0], rotation[1],wraparound=True)
     elif isinstance(rotation, np.ndarray):
-        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation_matrix=rotation)
+        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation_matrix=rotation,wraparound=True)
     else:
         log.error("Do not support rotation data type {}.".format(type(rotation)))
 
+    flow_vis.flow_value_to_color(end_points_array)
     rotation_flow_u = ndimage.map_coordinates(end_points_array[:, :, 0], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
     rotation_flow_v = ndimage.map_coordinates(end_points_array[:, :, 1], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
 
-    end_points_array_xv = np.remainder(end_points_array_xv + rotation_flow_u, flow_width)
-    end_points_array_yv = np.remainder(end_points_array_yv + rotation_flow_v, flow_height)
+    # end_points_array_xv = np.remainder(end_points_array_xv + rotation_flow_u, flow_width)
+    # end_points_array_yv = np.remainder(end_points_array_yv + rotation_flow_v, flow_height)
+    end_points_array_xv, end_points_array_yv = flow_postproc.erp_pixles_modulo(end_points_array_xv + rotation_flow_u, end_points_array_yv + rotation_flow_v, flow_width, flow_height)
 
     # erp pixles location to flow
     end_points_array_xv -= src_points_array_xv
     end_points_array_yv -= src_points_array_yv
-    return np.stack((end_points_array_xv, end_points_array_yv), axis=-1)
+    flow_rotated = np.stack((end_points_array_xv, end_points_array_yv), axis=-1)
+    if wraparound:
+        flow_rotated = flow_postproc.erp_of_wraparound(flow_rotated)
+    return  flow_rotated

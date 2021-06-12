@@ -90,10 +90,11 @@ def visual_data(data_dir):
             # depth_io.create_depth_mask(depth_data, data_dir + filename + "_mask.png", 0.0)
         elif filename.endswith(".flo"):  # and filename == "0002_R_motionvector_forward.flo":
             of_data = flow_io.read_flow_flo(data_dir + filename)
-            of_data_vis = flow_vis.flow_to_color(of_data,  min_ratio=0.3, max_ratio=0.97)
-            # of_data_vis_uv = flow_vis.flow_value_to_color(of_data)
+            # of_data_vis = flow_vis.flow_to_color(of_data)#,  min_ratio=0.3, max_ratio=0.97)
+            # image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
+            print("visual optical flow {}".format(filename))
+            flow_vis.flow_value_to_color(of_data, min_ratio=0.2, max_ratio=0.8)
             # of_data_vis_uv = flow_vis.flow_max_min_visual(of_data, None)#"D:/1.jpg")
-            image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
 
 
 def create_mask(data_dir, output_dir, frame_number, pano_depthmap_filename_exp, pano_mask_filename_exp):
@@ -163,10 +164,10 @@ def stitch_opticalflow(data_dir, output_dir, frame_number, cubemap_opticalflow_f
             face_flo_list.append(flow_io.read_flow_flo(image_path))
 
         # 2) test stitch the cubemap images
-        erp_of_data = proj_cm.cubemap2erp_flow(face_flo_list, padding_size=0.0)
+        erp_of_data = proj_cm.cubemap2erp_flow(face_flo_list, padding_size=0.0, wrap_around=True)
         erp_of_filepath = output_dir + pano_opticalflow_filename_exp.format(image_index)
         flow_io.flow_write(erp_of_data, erp_of_filepath)
-        erp_of_vis = flow_vis.flow_to_color(erp_of_data)
+        erp_of_vis = flow_vis.flow_to_color(erp_of_data, min_ratio=0.1, max_ratio=0.9)
         erp_of_visual_filepath = output_dir + pano_opticalflow_visual_filename_exp.format(image_index)
 
         # TODO  one pixel at left side is wrong, larger the image size, how to deal with the point in the boundary
@@ -196,33 +197,33 @@ if __name__ == "__main__":
     # pano_rgb_froward_of_forwardwarp_filename_exp = "{:04d}_motionvector_forward_rgb_forwardwarp.jpg"
     # pano_rgb_backward_of_forwardwarp_filename_exp = "{:04d}_motionvector_backward_rgb_forwardwarp.jpg"
 
-    # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/"
+    dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/apartment_0_0/cubemap/"
     # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/office_0/cubemap/"
     # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/room_0/cubemap/"
 
     # stitch_depthmap(dataroot_dir, cubemap_depthmap_filename_exp, pano_depthmap_filename_exp)
     # stitch_rgb(dataroot_dir, output_dir,frame_number,cubemap_rgb_image_filename_exp, pano_rgb_image_filename_exp)
-    # visual_data(dataroot_dir)
+    visual_data(dataroot_dir)
     # stitch_opticalflow(dataroot_dir, output_dir,frame_number,cubemap_opticalflow_forward_filename_exp, pano_opticalflow_forward_filename_exp, pano_opticalflow_visual_filename_exp)
     # stitch_opticalflow(dataroot_dir, cubemap_opticalflow_backward_filename_exp, pano_opticalflow_backward_filename_exp)
     # cubemap_flow_warp(dataroot_dir, cubemap_rgb_image_filename_exp, cubemap_opticalflow_forward_filename_exp,  cubemap_rgb_forward_warp_filename_exp )
     # erp_depth2pointcloud(dataroot_dir, pano_depthmap_filename_exp, pano_pointcloud_filename_exp)
 
-    rconf = configuration.ReplicaConfig()
-    frame_number = 5
-    dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/room_0/pano/"
-    output_dir = "D:/workdata/opticalflow_data/replic_cubemap/room_0/pano/"
+    # rconf = configuration.ReplicaConfig()
+    # frame_number = 5
+    # dataroot_dir = "D:/workdata/opticalflow_data/replic_cubemap/room_0/pano/"
+    # output_dir = "D:/workdata/opticalflow_data/replic_cubemap/room_0/pano/"
 
-    pano_flow_warp(dataroot_dir,
-                   output_dir,
-                   frame_number,
-                   rconf.replica_pano_rgb_image_filename_exp,
-                   rconf.replica_pano_opticalflow_forward_filename_exp,
-                   rconf.replica_pano_rgb_froward_of_forwardwarp_filename_exp)
+    # pano_flow_warp(dataroot_dir,
+    #                output_dir,
+    #                frame_number,
+    #                rconf.replica_pano_rgb_image_filename_exp,
+    #                rconf.replica_pano_opticalflow_forward_filename_exp,
+    #                rconf.replica_pano_rgb_froward_of_forwardwarp_filename_exp)
 
-    pano_flow_warp(dataroot_dir,
-                   output_dir,
-                   frame_number,
-                   rconf.replica_pano_rgb_image_filename_exp,
-                   rconf.replica_pano_opticalflow_backward_filename_exp,
-                   rconf.replica_pano_rgb_backward_of_forwardwarp_filename_exp)
+    # pano_flow_warp(dataroot_dir,
+    #                output_dir,
+    #                frame_number,
+    #                rconf.replica_pano_rgb_image_filename_exp,
+    #                rconf.replica_pano_opticalflow_backward_filename_exp,
+    #                rconf.replica_pano_rgb_backward_of_forwardwarp_filename_exp)

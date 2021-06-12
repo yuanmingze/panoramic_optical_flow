@@ -233,7 +233,7 @@ if __name__ == "__main__":
     face_image_size = 400
     erp_image_height = 480
 
-    test_list = [1]
+    test_list = [4]
 
     # 0) test rgb image project and stitch
     if 0 in test_list:
@@ -266,3 +266,12 @@ if __name__ == "__main__":
     # 3) test ERP DIS
     if 3 in test_list:
         compute_erp_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_flow_path)
+
+    if 4 in test_list:
+        # estimate optical flow
+
+        # stitch to cubemap
+        cubemap_src_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/debug/")
+        face_gt_flow_padding_name_expression = "cubemap_flow_padding_{}.flo"
+        cubemap_stitch_gt_flo_filename = cubemap_src_images_output_folder + "cubemap_flow_padding_stitch.flo"
+        test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)

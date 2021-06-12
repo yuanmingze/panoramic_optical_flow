@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+import flow_postproc
 
 import spherical_coordinates as sc
 import flow_warp
@@ -150,7 +151,7 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
     return np.stack((end_points_u, end_points_v))
 
 
-def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
+def erp2sph(erp_points, erp_image_height=None, erp_modulo=False):
     """
     convert the point from erp image pixel location to spherical coordinate.
     The image center is spherical coordinate origin.
@@ -177,9 +178,10 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
 
     erp_points_x = erp_points[0]
     erp_points_y = erp_points[1]
-    if wrap_around:
-        erp_points_x = np.remainder(erp_points_x, width)
-        erp_points_y = np.remainder(erp_points_y, height)
+    if erp_modulo:
+        # erp_points_x = np.remainder(erp_points_x, width)
+        # erp_points_y = np.remainder(erp_points_y, height)
+        erp_points_x, erp_points_y = flow_postproc.erp_pixles_modulo(erp_points_x, erp_points_y, width, height)
 
     # 1) point location to theta and phi
     # points_theta = (erp_points_x - (width - 1) * 0.5) * (2 * np.pi / width)
@@ -189,7 +191,7 @@ def erp2sph(erp_points, erp_image_height=None, wrap_around=False):
     return np.stack((points_theta, points_phi))
 
 
-def sph2erp(theta, phi, image_height, wrap_around=False):
+def sph2erp(theta, phi, image_height, erp_modulo=False):
     """ 
     Transform the spherical coordinate location to ERP image pixel location.
 
@@ -213,9 +215,10 @@ def sph2erp(theta, phi, image_height, wrap_around=False):
     y = -(phi - 0.5 * np.pi + (np.pi / image_height * 0.5)) / (np.pi / image_height)
 
     # process the wrap around case
-    if wrap_around:
-        x = np.remainder(x + 0.5, image_width) - 0.5
-        y = np.remainder(y + 0.5, image_height) - 0.5
+    if erp_modulo:
+        # x = np.remainder(x + 0.5, image_width) - 0.5
+        # y = np.remainder(y + 0.5, image_height) - 0.5
+        x, y = flow_postproc.erp_pixles_modulo(x, y, image_width, image_height)
     return x, y
 
 
@@ -324,7 +327,7 @@ def rotate_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
     return array_xy_rot[0, :], array_xy_rot[1, :]
 
 
-def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None):
+def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None, wraparound = False):
     """
     Convert the spherical coordinate rotation to ERP coordinate motion flow.
     With rotate the image's mesh grid.
@@ -342,18 +345,24 @@ def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, r
     erp_vx, erp_vy = np.meshgrid(erp_x, erp_y)
 
     # 1) spherical system to Cartesian system and rotate the points
-    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], wrap_around=False)
-    # erp_x_rot, erp_y_rot = sph2erp(sph_xy[0, :], sph_xy[1, :], array_size[0], wrap_around=False)
+    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], erp_modulo=False)
+    # erp_x_rot, erp_y_rot = sph2erp(sph_xy[0, :], sph_xy[1, :], array_size[0], erp_modulo=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
     if rotation_matrix is None:
         rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
-    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], wrap_around=False)
+    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], erp_modulo=False)
 
     # get motion vector
     motion_vector_x = erp_x_rot.reshape((array_size[0], array_size[1])) - erp_vx
     motion_vector_y = erp_y_rot.reshape((array_size[0], array_size[1])) - erp_vy
+
+    # to wraparound optical flow
+    if wraparound:
+        cross_minus2pi, cross_plus2pi = sph_wraparound(sph_xy[0], array_xy_rot[0, :].reshape((array_size[0], array_size[1])))
+        motion_vector_x[cross_minus2pi] = motion_vector_x[cross_minus2pi] - array_size[1]
+        motion_vector_x[cross_plus2pi] = motion_vector_x[cross_plus2pi] + array_size[1]
 
     return np.stack((motion_vector_x, motion_vector_y), -1), rotation_matrix
 
@@ -362,3 +371,36 @@ def rot_sph2mat(theta, phi):
     """Convert the spherical rotation to rotation matrix.
     """
     return R.from_euler("xyz", [np.degrees(phi), np.degrees(theta), 0], degrees=True).as_matrix()
+
+
+def sph_coord_modulo(theta, phi):
+    """Modulo the spherical coordinate.
+    """
+    theta_new = np.remainder(theta + np.pi, np.pi * 2.0) - np.pi
+    phi_new = np.remainder(phi + 0.5 * np.pi, np.pi) - 0.5 * np.pi
+    return theta_new, phi_new
+
+
+def sph_wraparound(src_theta, tar_theta):
+    """ Get the line index cross the ERP image boundary.
+
+    :param src_theta: The source point theta.
+    :type src_theta: numpy
+    :param tar_theta: The target point theta.
+    :type tar_theta: numpy
+    :return: Pixel index of line wrap around.
+    :rtype: numpy
+    """    
+    # face_src_x_sph_avail = face_src_xy_sph[0, :, :][available_list]
+    # face_src_y_sph_avail = face_src_xy_sph[1, :, :][available_list]
+    # face_src_x_sph_avail, face_src_y_sph_avail = sc.sph_coord_modulo(face_src_x_sph_avail, face_src_y_sph_avail)
+
+    long_line = np.abs(tar_theta - src_theta) > np.pi
+    cross_minus2pi = np.logical_and(src_theta < 0, tar_theta > 0)
+    cross_minus2pi = np.logical_and(long_line, cross_minus2pi)
+    cross_plus2pi = np.logical_and(src_theta > 0, tar_theta < 0)
+    cross_plus2pi = np.logical_and(long_line, cross_plus2pi)
+    # face_tar_x_erp[cross_x_axis_minus2pi] = face_tar_x_erp[cross_x_axis_minus2pi] - erp_flow_width
+    # face_tar_x_erp[cross_x_axis_plus2pi] = face_tar_x_erp[cross_x_axis_plus2pi] + erp_flow_width
+
+    return cross_minus2pi, cross_plus2pi

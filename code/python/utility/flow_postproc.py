@@ -6,7 +6,7 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def erp_pixles_wraparound(x_arrray, y_array, image_width, image_height):
+def erp_pixles_modulo(x_arrray, y_array, image_width, image_height):
     """ Make x,y and ERP pixels coordinate system range.
     """
     x_arrray_new = np.remainder(x_arrray + 0.5, image_width) - 0.5
@@ -14,7 +14,7 @@ def erp_pixles_wraparound(x_arrray, y_array, image_width, image_height):
     return x_arrray_new, y_array_new
 
 
-def erp_of_wraparound(erp_flow, of_u_threshold=None, of_v_threshold=None):
+def erp_of_wraparound(erp_flow, of_u_threshold=None):
     """
     Convert un-wrap-around (do not overflow) to ERP optical flow to the wrap-around (overflow) ERP optical flow.
     The optical flow larger than threshold need to be wrap-around.
@@ -33,10 +33,16 @@ def erp_of_wraparound(erp_flow, of_u_threshold=None, of_v_threshold=None):
         of_u_threshold = image_width / 2.0
 
     flow_u = erp_flow[:, :, 0]
-    index_u = flow_u > of_u_threshold
-    flow_u[index_u] = flow_u[index_u] - image_width
-    index_u = flow_u < -of_u_threshold
-    flow_u[index_u] = flow_u[index_u] + image_width
+    # minus width
+    index_minus_src_point_range = np.full(flow_u.shape[0:2], False)
+    index_minus_src_point_range[:, 0: int(image_width - 1 - of_u_threshold)] = True
+    index_minus_src_point = np.logical_and(index_minus_src_point_range, flow_u > of_u_threshold)
+    flow_u[index_minus_src_point] = flow_u[index_minus_src_point] - image_width
+    # plus width
+    index_plus_src_point_range = np.full(flow_u.shape, False)
+    index_plus_src_point_range[:, int(image_width - 1 - of_u_threshold): image_width - 1] = True
+    index_plus_src_point = np.logical_and(index_plus_src_point_range, flow_u < -of_u_threshold)
+    flow_u[index_plus_src_point] = flow_u[index_plus_src_point] + image_width
 
     # image_height = np.shape(erp_flow)[0]
     # if of_v_threshold is None:
@@ -63,7 +69,7 @@ def erp_of_unwraparound(optical_flow):
 
     image_height = np.shape(optical_flow)[0]
     image_width = np.shape(optical_flow)[1]
-    optical_flow_new = np.zeros_list(optical_flow, dtype=optical_flow.dtype)
+    optical_flow_new = np.zeros_like(optical_flow, dtype=optical_flow.dtype)
     optical_flow_new[:] = optical_flow
 
     # 0) comput new location

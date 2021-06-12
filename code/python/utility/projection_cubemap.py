@@ -559,8 +559,8 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
                 # cross_x_axis = polygon.detect_intersection_segments_array([0, -gnomonic_max], [0, +gnomonic_max], p3, p4)
                 # cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
                 # cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
-                cross_x_axis_plus2pi = np.logical_and(face_x_src_gnomonic_available < 0, face_x_tar_gnomonic_available > 0)
-                cross_x_axis_minus2pi = np.logical_and(face_x_src_gnomonic_available >= 0, face_x_tar_gnomonic_available < 0)
+                cross_x_axis_plus2pi = np.logical_and(face_x_src_gnomonic_available < 0, face_x_tar_gnomonic_available >= 0)
+                cross_x_axis_minus2pi = np.logical_and(face_x_src_gnomonic_available > 0, face_x_tar_gnomonic_available < 0)
             elif face_index == 2:
                 cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, -gnomonic_max], p3, p4)
                 cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
@@ -580,6 +580,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
         # 4-1) blend the optical flow
         # comput the all available pixels' weight
         if image_erp_src is not None and image_erp_tar is not None:
+            log.debug("cubemap flow blender with weight.")
             weight_type = "normal_distribution_flowcenter"
             face_weight_mat_1 = projection.get_blend_weight_cubemap(face_x_src_gnomonic[available_list].flatten(
             ), face_y_src_gnomonic[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1))
