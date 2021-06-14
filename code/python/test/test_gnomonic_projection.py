@@ -104,7 +104,7 @@ def test_gnomonic_unit():
     x_t, y_t, z_t = gp.tangent3d_projection(theta, phi, theta_0, phi_0)
     print("2) Tangent 3D Projection\nx: {} \ny: {}".format(x_t, y_t))
 
-    # TODO error is large
+    # error is large
     assert np.allclose(x_g, x_t) and np.allclose(y_g, y_t)
 
 

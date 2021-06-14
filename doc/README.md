@@ -9,6 +9,10 @@
 ├── README.md
 ```
 
+**Convert SVG to PDF**
+`inkscape --export-text-to-path --export-type=pdf method_pipeline_0.svg`
+
+
 # 2. Methods 
 
 There are two steps:

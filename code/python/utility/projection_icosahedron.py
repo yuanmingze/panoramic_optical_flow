@@ -381,8 +381,6 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
         - None: just sample the triangle area;
         - Mean: the mean value on the overlap area.
 
-    TODO there are seam on the stitched erp image.
-
     :param tangent_images: 20 tangent images in order.
     :type tangent_images: a list of numpy
     :param erp_image_height: the output erp image's height.
@@ -506,7 +504,6 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
     :return: a list ontain 20 triangle images
     :rtype: list 
     """
-    # TODO Test padding
     # get the ERP flow map parameters
     erp_image_height = np.shape(erp_flow_mat)[0]
     erp_flow_channel = np.shape(erp_flow_mat)[2]
@@ -543,7 +540,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
         # flow start point from gnomonic --> spherical coordinate --> pixel location
         tangent_point = triangle_param["tangent_point"]  # tangent center project point
         tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_point[0], tangent_point[1])
-        # TODO check the wrap around implement
+        # spherical coordinate --> ERP 
         face_erp_pixel_x, face_erp_pixel_y = sc.sph2erp(tangent_triangle_theta_, tangent_triangle_phi_, erp_image_height, erp_modulo=False)
 
         # 1) comput the end point location in the tangent image

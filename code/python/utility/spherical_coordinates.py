@@ -306,22 +306,27 @@ def rotate_erp_array_skylib(data_array, rotate_theta, rotate_phi):
     return data_array_rot
 
 
-def rotate_sph_coord(sph_theta, sph_phi, rotate_theta, rotate_phi):
+def rotate_sph_coord(sph_theta, sph_phi, rotate_theta=None, rotate_phi=None, rotation_matrix_=None):
     """ Rotate the sph spherical coordinate with the rotation (theta, phi).
 
     :param sph_theta: The spherical coordinate's theta array.
     :type sph_theta: numpy
     :param sph_phi: The spherical coordinate's phi array.
     :type sph_phi: numpy
-    :param rotate_theta: The rotation along the theta
+    :param rotate_theta: The rotation along the theta, radians
     :type rotate_theta: float
-    :param rotate_phi: [description]
+    :param rotate_phi: The rotation along the phi, radians
     :type rotate_phi: float
     :return: Target points theta and phi array.
     :rtype: tuple
     """
     xyz = sph2car(sph_theta, sph_phi, radius=1.0)
-    rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
+    if rotation_matrix_ is None and rotate_theta is not None and rotate_phi is not None:
+        rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
+    elif rotation_matrix_ is not None and rotate_theta is None and rotate_phi is None:
+        rotation_matrix = rotation_matrix_
+    else:
+        log.error("Do not specify the rotation both matrix and (theta, phi).")
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
     return array_xy_rot[0, :], array_xy_rot[1, :]

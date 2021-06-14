@@ -1,6 +1,5 @@
-
-from typing import overload
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 import spherical_coordinates
 
@@ -14,34 +13,41 @@ Reference:
 [1]: https://mathworld.wolfram.com/GnomonicProjection.html
 """
 
-def tangent3d_projection(theta_, phi_, theta_0, phi_0):
-    """ Project the points on unit sphere to tangent image, to get the 3D points coordinate on tangent plane.
-    :param theta: radian
-    :param phi:
-    :theta_0:
-    :phi_0:
-    :return: the 3d point coordinate in tangent plane.
-    """
-    if theta_0 != 0.0 or phi_0 != 0.0:
-        theta, phi = spherical_coordinates.rotation_sph_coord(theta_, phi_, -theta_0, -phi_0)
-    else:
-        theta = theta_
-        phi = phi_
 
-    if (theta > np.pi * 0.5).any() or (theta < -np.pi * 0.5).any():
+def tangent3d_projection(theta_, phi_, theta_0=0, phi_0=0):
+    """Project the points on unit sphere to tangent image, to get the 3D points coordinate on tangent plane.
+
+    :param theta_: The points theta.
+    :type theta_: numpy
+    :param phi_: The points phi.
+    :type phi_: numpy
+    :param theta_0: Tangent points, defaults to 0
+    :type theta_0: int, optional
+    :param phi_0:  Tangent points, defaults to 0
+    :type phi_0: int, optional
+    :return: the 3d point coordinate in tangent plane.
+    :rtype: numpy
+    """
+    theta = theta_
+    phi = phi_
+    if theta_0 != 0.0 or phi_0 != 0.0:
+        rotation_matrix = R.from_euler("xyz", [phi_0, theta_0, 0], degrees=False).as_matrix()
+        theta, phi = spherical_coordinates.rotate_sph_coord(theta_, phi_, rotation_matrix_=rotation_matrix.T)
+
+    # check the in the front hemisphere
+    if (theta >= np.pi * 0.5).any() or (theta <= -np.pi * 0.5).any():
         log.warn("Theta is not in the [-0.5π, 0.5π]")
-    if (phi > np.pi * 0.5).any() or (phi < -np.pi * 0.5).any():
+    if (phi >= np.pi * 0.5).any() or (phi <= -np.pi * 0.5).any():
         log.warn("Phi is not in the [-0.5π, 0.5π]")
 
-    # TODO when t
+    # get the point in tangent image
     x = 1.0 * np.tan(theta)
-    # TODO when np.cos(theta) is 0
     y = (1.0 / np.cos(theta)) * np.tan(phi)
     z = np.ones_like(x)
     return x, y, z
 
 
-def gnomonic_projection(theta, phi, theta_0, phi_0, label_outrange_pixel = False):
+def gnomonic_projection(theta, phi, theta_0, phi_0, label_outrange_pixel=False):
     """ Gnomonic projection.
     Convet point form the spherical coordinate to tangent image's coordinate.
         https://mathworld.wolfram.com/GnomonicProjection.html

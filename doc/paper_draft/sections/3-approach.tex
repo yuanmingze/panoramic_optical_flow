@@ -3,9 +3,13 @@
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[width=0.95\linewidth]{images/method_pipeline_0.pdf}
-	\caption{method pipeline. \todolist{Refine.}}
-\label{fig:approach:pipeline}
+	\caption{Method pipeline. \todolist{Refine.}}
+	\label{fig:approach:pipeline}
 \end{figure}
+
+
+
+
 
 \todolist{Why use ERP Image representation the panoramic image?}
 
@@ -19,6 +23,8 @@ As shown in Fig.~\ref{fig:approach:pipeline}, the method compose with 3 steps:
 	\item Porject the CubeMap aligned target ERP image with Icosahdron, ;
 	\item Accumulate all step optical flow together.
 \end{enumerate}
+
+
 
 Two Technical pipeline:
 \todolist{Rough align the images, with roation.}
@@ -135,13 +141,13 @@ The image warp, the rotation to warp the image, alignt the
 The optical flow warping, to warp the final optical flow to restore the original images optical flow.
 
 \begin{equation}\label{equ:app:sph2erp}
-\begin{split}
-\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
-\\
-x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
-\\
-\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
-\\
-y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
-\end{split}
+	\begin{split}
+		\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
+		\\
+		x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
+		\\
+		\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
+		\\
+		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
+	\end{split}
 \end{equation}
