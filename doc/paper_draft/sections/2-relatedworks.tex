@@ -5,11 +5,11 @@
 
 Energy Minimization:
 
-The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{DIS, HS, BA}. Furthermore, 
+The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{KroegTDV2016, HornS1981, BA}. Furthermore, 
 
-\cite{Borx} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image.
+\citet{BroxBPW2004} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image.
 
-\cite{sun} use midian filer in pose-processing step sharper objection boundary's the optical flow.
+\cite{sun} use median filter in pose-processing step sharper objection boundary's the optical flow.
 
 Supervised Learning:
 
@@ -17,11 +17,11 @@ Supervised Learning:
 
 - PWCNet proposes the 4D volume to function the 
 
-\cite{teed2020raft} use the recurrent network to update optical flow from the 4D correlation volume, 
+\citet{TeedD2020a} use the recurrent network to update optical flow from the 4D correlation volume, 
 
 Unsupervised Learning:
 
-\cite{aleotti2021learning} propose a training data generateion method, 
+\citet{AleotPM2021} propose a training data generation method, 
 which use estimated depth to generate new view point image and optical flow from single still image, to train the off-the-shelf optical flow method.
 This method propose for self-supervised learn pathway.
 
@@ -35,14 +35,14 @@ How to git ride of the distortion is key point of panoramic image processing met
 The methods use gnomonic projection project part of sphere to tangent plane, which preserve geodesics and have little distortion near the central point.
 So the tangent plane is hired to mitigate the influence of the panoramic image  distortion on the perspective image processing methods.
 
-\cite{coors2018spherenet} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
+\cite{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
 
 \textbf{Tangent Images}
 \textbf{Icosahedron}
 
 Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
 
-\cite{eder2019mapped}
+\cite{EderPVBF2019}
 
 
 %\subsection{Undistortion}
@@ -54,13 +54,13 @@ With the
 Equirectangular Image format is most popular panoramic image format which have been part of 
 
 
-\cite{sun2020hohonet} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
+\citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
 
 - Layout:
 - \cite{xxxx}
 
 - Depth:
-- \cite{wang2020bifuse} 
+- \cite{WangYSCT2020}
 - 
 - Semantic segmentation:
 
@@ -68,26 +68,26 @@ Equirectangular Image format is most popular panoramic image format which have b
 \subsection{Panoramic Dataset}
 
 
-The real word data rich and colorful, but it is very hard to estimate or measure the accurate segmentation, motion flow, e.t.c form the real word scene.
-So the synthetic dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as ~\cite{habitat19iccv}.
+The real word data rich and colourful, but it is very hard to estimate or measure the accurate segmentation, motion flow, e.t.c form the real word scene.
+So the synthetic dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as Habitat \cite{SavvaKMZWJSLKMPB2019}.
 
 Meanwhile, the real word photo image is hard to estimate accurate optical flow.
-Although KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{Butler:ECCV:2012} pinhole image optical flow, e.t.c currently don't have any public panoramic optical flow dataset is available.
+Although KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{ButleWSB2012} pinhole image optical flow, e.t.c currently don't have any public panoramic optical flow dataset is available.
 
 The rasterization render method OpenGL used to synthesize the ground truth optical flow.
-The equirectangular optical flow generation algorithm introduction in Section. \ref{sec:app:panoof}.
+The equirectangular optical flow generation algorithm introduction in \cref{sec:app:panoof}.
 Few public indoor 3D datasets are hired to render the ground truth data.
 
-- Replica ~\cite{replica19arxiv}
+- Replica ~\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}
 
 SUMO
 
 
 %Realworld
 3D Mesh dataset:
-- Stanford2D3D \cite{armeni2017joint}
-- Matterport3D ~\cite{Matterport3D}
-- Replica
+- Stanford2D3D \cite{ArmenSZS2017}
+- Matterport3D ~\cite{ChangDFHNSSZZ2017}
+- Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}
 - iGibson (Gibson)
 
 

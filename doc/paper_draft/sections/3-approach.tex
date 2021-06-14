@@ -15,12 +15,12 @@
 
 \todolist{Overview our method, including steps.}
 
-As shown in Fig.~\ref{fig:approach:pipeline}, the method compose with 3 steps:
+As shown in \cref{fig:approach:pipeline}, the method compose with 3 steps:
 
 \begin{enumerate}
-	\item Estimate ERP images optial flow to align the target ERP images to srouce image with the estimated rotation;
+	\item Estimate ERP images optical flow to align the target ERP images to source image with the estimated rotation;
 	\item Project the ERP aligned target ERP image to with CubeMap images, and estimate optical flow for each face, then stich them. And ;
-	\item Porject the CubeMap aligned target ERP image with Icosahdron, ;
+	\item Project the CubeMap aligned target ERP image with Icosahedron, ;
 	\item Accumulate all step optical flow together.
 \end{enumerate}
 
@@ -29,7 +29,7 @@ As shown in Fig.~\ref{fig:approach:pipeline}, the method compose with 3 steps:
 Two Technical pipeline:
 \todolist{Rough align the images, with roation.}
 
-\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumualte all optical flow together.}
+\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumulate all optical flow together.}
 
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
@@ -130,7 +130,7 @@ project the panoramic image to perspective images.
 
 \subsection{Image \& Optical Flow Alignment}
 
-Inspired by the warp base optical flow \cite{?}, and coarst to fine 
+Inspired by the warp base optical flow \cite{?}, and coarse to fine 
 
 Use panoramic images optical flow estimation rotation to roughly align the two images.
 

@@ -16,13 +16,13 @@ The dataset will be released for open access.
 
 The synthetic panoramic optical flow rendered with on-the-shelf OpenGL render pipeline and store in the ERP image.
 The input are textured 3D mesh and OpenGL's camera pose.
-The process shown as the Fig.~\ref{fig:approach:panoof:pipline} composing with the following 3 steps:
+The process shown as the \cref{fig:approach:panoof:pipline} composing with the following 3 steps:
 
 \begin{enumerate}
-	\item Camera Model: OpenGl render with Equirectangular projection (ERP);
-	\item Warp Around: Processing the warp around at the boundary of image; When project the sphere to ERP, the point along the plane x=0,y,-z are split to two side of ERP image, so the continued . It happend on theta (longitude), but in ERP image the phi (latitude) is continued, mean do not to consider/process the phi's warp around. \ref{fig:result:wraparound} (to warp a rainbow image to explain the wrap-around case.). So we use geodisic metric to replace the cartesian distrance.
-	\item Occlusion: estimate the occlusion of optical flow (Do not talk it in this paper becasue the GT otpical flow do not have perfact occlusion yet.);
-	\item The panoramic motion ambiguity; In 360 scnen, because the wrap-around we the pixel have two stright line path from source postion to target position, e.g. from left or right. In the paper we use the shortest path as the pixels optical flow path by default.
+	\item Camera Model: OpenGL render with Equirectangular projection (ERP);
+	\item Warp Around: Processing the warp around at the boundary of image; When project the sphere to ERP, the point along the plane x=0,y,-z are split to two side of ERP image, so the continued . It happend on theta (longitude), but in ERP image the phi (latitude) is continued, mean do not to consider/process the phi's warp around. \cref{fig:result:wraparound} (to warp a rainbow image to explain the wrap-around case.). So we use geodesic metric to replace the Cartesian distance.
+	\item Occlusion: estimate the occlusion of optical flow (Do not talk it in this paper because the GT optical flow do not have perfect occlusion yet.);
+	\item The panoramic motion ambiguity; In 360 scene, because the wrap-around we the pixel have two stright line path from source postion to target position, e.g. from left or right. In the paper we use the shortest path as the pixels optical flow path by default.
 \end{enumerate}
 
 The traditional OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
@@ -34,7 +34,7 @@ We also test our method on the real world dataset with warped image sequence.
 It's very hard to measure the real word optical flow information, especially the equirectangular image. 
 And currently do not have any public optical flow equirectangular image dataset.
 So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
-Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
+Meanwhile to analysis the performance we use SSIM etc. metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
 
 
 \todolist{
@@ -51,12 +51,12 @@ Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the 
 It's very hard to measure the real word optical flow information, especially the equirectangular image. 
 And currently do not have any public optical flow equirectangular image dataset.
 So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
-Meanwhile to analysis the performance we use SSIM e.t.c metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
+Meanwhile to analysis the performance we use SSIM etc. metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
 
 The metrics AAE, EPE and RMS is used for the quantity analysis.
 $n$ is the number of pixels, meanwhile set the unavailable pixels optical flow to 0 both ground truth and estimated optical flow.
 
-The average endpoint error (\textbf{EPE}):  ~\cite{FlowEvalIJCV2011}
+The average endpoint error (\textbf{EPE}):  ~\cite{BakerSLRBS2011}
 EPE is the absolute error of all the pixels.
 
 Use the shortest path on unit sphere to compute the EPE.
@@ -96,22 +96,22 @@ The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{c
 
 \subsection{Comparison}
 
-We compare our method with following state of the art methods, FlowNet2~\cite{ilg2017flownet}, Dense Inverse Search (DIS) optical flow~\cite{kroeger2016fast} and PWC-Net~\cite{sun2018pwc}. 
-The FlowNet2~\cite{ilg2017flownet} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
-The PWC-Net~\cite{sun2018pwc}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
+We compare our method with following state of the art methods, FlowNet2~\cite{IlgMSKDB2017}, Dense Inverse Search (DIS) optical flow~\cite{KroegTDV2016} and PWC-Net~\cite{SunYLK2018}. 
+The FlowNet2~\cite{IlgMSKDB2017} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
+The PWC-Net~\cite{SunYLK2018}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
 
 
-\textbf{Quantitative  Evaluation.}
+\textbf{Quantitative Evaluation.}
 
 
-The error in spherical coordinate shown as Tab. ~\ref{fig:exp:quality}.
+The error in spherical coordinate shown as \cref{fig:exp:quality}.
 
 \todolist{Test on and a table to list them:
 \begin{enumerate}
 \item whole dataset;
 \item different kinds of camera motion and different magnitude motion;
 \item different image resolution 0.5K, 1K, 2K.
-\item Generalization: Compare the different opticalflow backbone result, to prove the generalizion of our method.
+\item Generalization: Compare the different opticalflow backbone result, to prove the generalisation of our method.
 \end{enumerate}
 }
 

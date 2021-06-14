@@ -78,3 +78,5 @@ venv.bak/
 /doc/draft/*.bbl
 /doc/draft/*.blg
 /doc/draft/*.synctex.gz
+doc/paper_draft/360flow-raw.bib
+doc/paper_draft/clean_bibtex.py
