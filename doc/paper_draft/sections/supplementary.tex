@@ -1,0 +1,70 @@
+\section{supplementary}
+
+\TODO{move the notation to Fig.1 and remove the table.}
+
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ c | c } 
+			\hline
+			Notice & Meaning  \\ 
+			\hline\hline
+			$I_t$          & The equirectangular RGB image at time $t$. \\
+			\hline
+			$\hat{I}_{t,i}$ & The CubeMap's $i$th sub-image.\\
+			\hline
+			$\tilde{I}_{t,i}$ & The Ico's $i$th sub-image.\\
+			\hline
+			$\mathcal{F}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\bar{\mathcal{F}}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\hat{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\tilde{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\mathcal{R}$   & The rotation matrix estimated from ptical flow. \\
+			\hline
+			$P$            & The pixel position in ERP image plane, $(u,v)$.   \\
+			\hline
+			$\hat{P}$      & The pixel location in spherical coordinate system, $(\theta, \phi)$ \\
+			\hline
+			$T$            & The pixel location in tangent image's gnomonic normalized coordinate system, $(x,y)$ \\
+			\hline
+			$\hat{T}$      & The pixel location in tangent image's gnomonic image coordinate system, $({u}',{v}')$ \\
+			\hline
+			$\hat{P}'_i$ & The gnomonic projection's tangent point $\hat{P}$. \\
+			\hline
+		\end{tabular}
+	\end{center}
+	\caption{The Notations.}
+	\label{tab:approach:notation}
+\end{table}
+
+
+\begin{equation}\label{equ:app:sph2erp}
+	\begin{split}
+		\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
+		\\
+		x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
+		\\
+		\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
+		\\
+		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
+	\end{split}
+\end{equation}
+
+%Azimuthal equidistant projection:
+%- https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection
+%- https://fr.maplesoft.com/applications/view.aspx?SID=3583&view=html
+%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html
+%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html#SECTION00021100000000000000
+%- http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Perspective.htm
+
+%Reference:
+%\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
+%\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
+%\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
+%\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
+%
+%\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
+%\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}

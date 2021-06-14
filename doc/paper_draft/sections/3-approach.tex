@@ -10,65 +10,24 @@
 The method proposes a tangent image global warping optical flow method to mitigate the equirectangular distortion and large motion between two images, meanwhile, the backbone optical flow method hired off-the-shelf and general optical flow method $M_{\mathcal{F}}$.
 
 As shown in the overview diagram Fig.~\ref{fig:approach:pipeline}, our method compose with 3 steps:
-1) Estimate the optical flow $\mathcal{F}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $R_{ERP}$ esitmation form $\mathcal{F}_t$ to generate ${I'}_{t+1}$;
-2) 
-
-Project the ERP aligned target ERP image to with CubeMap images, and estimate optical flow for each face, then stich them. And ;
-3) Porject the CubeMap aligned target ERP image with Icosahdron, ;
- Accumulate all step optical flow together.
-
- using gnomoinic projection to undistrot the , with uniform sample the ERP image,
- to align the source and target images beore
-\todolist{Overview our method, including steps.}
-
-As shown in \cref{fig:approach:pipeline}, the method compose with 3 steps:
-
-\begin{enumerate}
-	\item Estimate ERP images optical flow to align the target ERP images to source image with the estimated rotation;
-	\item Project the ERP aligned target ERP image to with CubeMap images, and estimate optical flow for each face, then stich them. And ;
-	\item Project the CubeMap aligned target ERP image with Icosahedron, ;
-	\item Accumulate all step optical flow together.
-\end{enumerate}
-
-\begin{table}
-	\begin{center}
-		\begin{tabular}{ c | c } 
-			\hline
-			Notice & Meaning  \\ 
-			\hline\hline
-			$I_t$          & The equirectangular RGB image at time $t$. \\
-			\hline
-			$\hat{I}_{t,i}$ & The CubeMap's $i$th sub-image.\\
-			\hline
-			$\tilde{I}_{t,i}$ & The Ico's $i$th sub-image.\\
-			\hline
-			$\mathcal{F}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\hat{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\mathcal{R}$   & The rotation matrix estimated from ptical flow. \\
-			\hline
-			$P$            & The pixel position in ERP image plane, $(u,v)$.   \\
-			\hline
-			$\hat{P}$      & The pixel location in spherical coordinate system, $(\theta, \phi)$ \\
-			\hline
-			$T$            & The pixel location in tangent image's gnomonic normalized coordinate system, $(x,y)$ \\
-			\hline
-			$\hat{T}$      & The pixel location in tangent image's gnomonic image coordinate system, $({u}',{v}')$ \\
-			\hline
-		\end{tabular}
-	\end{center}
-	\caption{The Notations.}
-	\label{tab:approach:notation}
-\end{table}
+1) Estimate the optical flow $\bar{\mathcal{F}}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $\bar{R}$ esitmation form $\mathcal{F}_t$ to generate ${\bar{I}}_{t+1}$;
+2) Estimate the optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ with CubeMap projection method $f??$, then rotate the  ${\bar{I}}_{t+1}$ toward to $I_t$ with the $\hat{R}$ esitmated from ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$;
+3) Estimate the optical flow $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ with icoshedron porject, then warp  the $\tilde{\mathcal{F}}_t$ with invert of $\bar{R}$ and $\hat{R}$ to generate finnally optical flow $\mathcal{F}_t$.
 
 
-Two Technical pipeline:
-\todolist{Rough align the images, with roation.}
 
-\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumualte all optical flow together.}
+
+The optical flow method 
+
+%\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumualte all optical flow together.}
+
+the Icosahedron  aligned target ERP image with Icosahdron, ;
+Accumulate all step optical flow together.
+using gnomoinic projection to undistrot the , with uniform sample the ERP image,
+to align the source and target images beore
 
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
+
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
 Optical flow 
 
@@ -104,9 +63,7 @@ So the range of optical flow is
 Another's target image range is $[- n * image_width, + n * image_width]$
 
 
-
-
-\subsection{Image \& Optical Flow Alignment}
+\subsection{Optical Flow Warping}
 
 The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on ~\cite{eldercvpr2020}
 
@@ -122,55 +79,61 @@ The image warp, the rotation to warp the image, alignt the
 
 The optical flow warping, to warp the final optical flow to restore the original images optical flow.
 
-\begin{equation}\label{equ:app:sph2erp}
-	\begin{split}
-		\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
-		\\
-		x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
-		\\
-		\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
-		\\
-		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
-	\end{split}
-\end{equation}
 
 \subsection{Projection \& Stitching}
 
-\textbf{Genometic Projection.}
 
-How the gnomomic projection project the 
+The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosehedron face image (tangent image) optical flow.
+
+The methed composes with 3 steps:
+ equirectangular image projection project part of the images pair to perspective images, e.g. tangent images, respectively to get ride of distortation;
+ perspective image optical flow estimation to calcuate each tangent image optical flow;
+ and optical flow sitching to blend each faces' optical flow back to equirectangular format. 
+ 
+ The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
+
+The RGB image projection project the point from sphere surface to tangent plan to generate perspective image.~\cite{??}
+The optical flow stitching 
+
+\textbf{Equirectangular Image Projection}
+
+% why 
+
+The equirectangular RGB image projection use gnomonic projection to generate the tangent images ~\cite{??}, which is perspective image doesn't have distortation.
+
+When hire the gnomonic porject to project the sphere surfce to know the 
+
+To make the tangent images uniform sample the sphere surface, the tangent points should uniformly distribute on the surface of the unit sphere.~\cite{??}
+For cover differen we select the 
+The regular polygon ~\cite{??} 
+
+% how to select the samplin points?
 
 Set the tangent point $S$ as the centre point of the projection, who longitude and latitude is $(\theta_0, \phi_0)$,
 The sphercial points is $(\theta, \phi)$
 
-%Azimuthal equidistant projection:
-%- https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection
-%- https://fr.maplesoft.com/applications/view.aspx?SID=3583&view=html
-%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html
-%- https://casa.nrao.edu/aips2_docs/memos/107/node2.html#SECTION00021100000000000000
-%- http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Perspective.htm
-
-
-\textbf{Tangent/Center points selection.}
-Use cubemap or Regular icosahedron, which is a convex polyhedron with 20 faces, 30 edges and 12 vertices.
-
-%Reference:
-%\href{https://en.wikipedia.org/wiki/Regular_icosahedron}{wiki}
-%\href{https://mathworld.wolfram.com/GnomonicProjection.html}{Gnomonic Projection}
-%\href{https://mathworld.wolfram.com/RegularIcosahedron.html}{Weisstein, Eric W}
-%\href{https://math.wikia.org/wiki/Icosahedron}{Weisstein, Eric W}
-%
-%\href{https://en.wikipedia.org/wiki/Gnomonic_projection}{Weisstein, Eric W}
-%\href{https://www.imo.net/observations/methods/visual-observation/minor/gnomonic/}{Weisstein, Eric W}
-
-
-\textbf{Panoramic image Projection}
-
 project the panoramic image to perspective images.
 
+%Tangent/Center points selection.
+Use cubemap or Regular icosahedron, which is a convex polyhedron with 20 faces, 30 edges and 12 vertices.
 
-\textbf{Perspective Image Stitch}
+For the perspective image to cover different field of view (FoV)  to estimate the different scale motion, the sampling point selection regular cubemap and regular icosahedron's inscribe sphere points, which are the most common regular polygon and have different FoV. ~\cite{xxx}
 
-\todolist{How to compute the weight and blending? Euqation.}
-\todolist{Visualized different weight and blend result.}
+The cubemap's face has wider FoV than the icosahedron's face, which can estimate a larger span motion vector from the tangent image, but Its PPI is smaller than the icosahedron's when they are in the same resolution.
+
+\TODO{CubeMap and ICO's face FOV range. And diagram to show the .}
+
+\textbf{Perspective optical flow stitching}
+
+Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
+So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images. 
+
+\begin{equation}
+W_{face} =
+\end{equation}
+
+
+The weight compose with 
+
+\TODO{How to compute the weight and blending? Euqation, and Visualized different weight and blend result, and show each face's optical flow.}
 

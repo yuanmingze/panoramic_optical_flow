@@ -706,11 +706,11 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         #     image_erp_src = resize(image_erp_src, (erp_flow_height, erp_flow_width)) * 255.0
         # if image_erp_tar.shape[:2] != [erp_flow_height, erp_flow_width]:
         #     image_erp_tar = resize(image_erp_tar, (erp_flow_height, erp_flow_width)) * 255.0
-        # face_weight_mat_1 = projection.get_blend_weight_ico(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(),
-        #                                                     "normal_distribution_flowcenter", np.stack((face_flow_x, face_flow_y), axis=1),
+        # face_weight_mat_1 = projection.get_blend_weight_ico(face_src_x_gnom[available_list].flatten(), face_src_y_gnom[available_list].flatten(),
+        #                                                     "normal_distribution_flowcenter", np.stack((face_flow_u_erp, face_flow_v_erp), axis=1),
         #                                                     gnomonic_bounding_box=triangle_points_tangent)
-        # face_weight_mat_2 = projection.get_blend_weight_ico(triangle_xv[available_list], triangle_yv[available_list],
-        #                                                     "image_warp_error", np.stack((tangent_xv_tar_pixel, tangent_yv_tar_pixel), axis=1),
+        # face_weight_mat_2 = projection.get_blend_weight_ico(face_src_x_gnom[available_list], face_src_y_gnom[available_list],
+        #                                                     "image_warp_error", np.stack((face_tar_x_erp, face_tar_y_erp), axis=1),
         #                                                     image_erp_src, image_erp_tar)
         # face_weight_mat = face_weight_mat_1 * face_weight_mat_2
 
