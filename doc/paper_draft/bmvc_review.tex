@@ -1,7 +1,7 @@
 \documentclass{bmvc2k}
 
 %% Enter your paper number here for the review copy
-\bmvcreviewcopy{??}
+\bmvcreviewcopy{298}
 
 \title{Panoramic Optical Flow With Icosahedron Sampling and Gnomonic Projection}
 
@@ -31,13 +31,31 @@
 % with \bmva, so they might conflict with the user's own macros.
 % The \bmvaOneDot macro adds a full stop unless there is one in the
 % text already.
-\def\eg{\emph{e.g}\bmvaOneDot}
-\def\Eg{\emph{E.g}\bmvaOneDot}
-\def\etal{\emph{et al}\bmvaOneDot}
+%\def\eg{\emph{e.g}\bmvaOneDot}
+%\def\Eg{\emph{E.g}\bmvaOneDot}
+%\def\etal{\emph{et al}\bmvaOneDot}
 
 \usepackage{xcolor}
+\definecolor{skyblue}{rgb}{0.2,0.6,0.9}
+\newcommand{\placeholder}[1]{\textcolor{skyblue}{\rule{\linewidth}{#1}}}
+\newcommand{\TODO}[1]{\textcolor{red}{{[TODO: #1]}}}
 \newcommand\todolist[1]{\textcolor{red}{#1}}
-\newcommand\MZY[1]{\textcolor{green}{#1}}
+\newcommand{\IGNORE}[1]{}
+\newcommand{\new}[1]{\textcolor{orange}{#1}}
+\newcommand\MZY[1]{\textcolor{green}{{[Mingze: #1]}}}
+\newcommand{\CR}[1]{\textcolor{cyan}{{[Christian: #1]}}}
+
+\usepackage{microtype}
+%\usepackage{amsfonts}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{booktabs}
+%\usepackage{multirow}
+%\usepackage{url}
+%\usepackage{doi}
+\usepackage[nameinlink,capitalise,noabbrev]{cleveref}
+\crefformat{equation}{#2Equation~#1#3}
+\frenchspacing
 
 %-------------------------------------------------------------------------
 % Document starts here
