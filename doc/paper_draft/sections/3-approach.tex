@@ -2,17 +2,23 @@
 
 \begin{figure}[hbt!]
 	\centering
-	\includegraphics[width=0.95\linewidth]{images/method_pipeline_0.pdf}
-	\caption{Method pipeline. \todolist{Refine.}}
+	\includegraphics[width=0.95\linewidth]{images/method_pipeline_1.jpg}
+	\caption{Method overview. The input is a pair of equrictangular images $I_t$ and $I_{t+1}$, output is the optical flow $\mathcal{F}_t$ from  $I_t$ and $I_{t+1}$. It compused with 3 steps: (1) ? (2) ?}
 	\label{fig:approach:pipeline}
 \end{figure}
 
+The method proposes a tangent image global warping optical flow method to mitigate the equirectangular distortion and large motion between two images, meanwhile, the backbone optical flow method hired off-the-shelf and general optical flow method $M_{\mathcal{F}}$.
 
+As shown in the overview diagram Fig.~\ref{fig:approach:pipeline}, our method compose with 3 steps:
+1) Estimate the optical flow $\mathcal{F}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $R_{ERP}$ esitmation form $\mathcal{F}_t$ to generate ${I'}_{t+1}$;
+2) 
 
+Project the ERP aligned target ERP image to with CubeMap images, and estimate optical flow for each face, then stich them. And ;
+3) Porject the CubeMap aligned target ERP image with Icosahdron, ;
+ Accumulate all step optical flow together.
 
-
-\todolist{Why use ERP Image representation the panoramic image?}
-
+ using gnomoinic projection to undistrot the , with uniform sample the ERP image,
+ to align the source and target images beore
 \todolist{Overview our method, including steps.}
 
 As shown in \cref{fig:approach:pipeline}, the method compose with 3 steps:
@@ -24,12 +30,43 @@ As shown in \cref{fig:approach:pipeline}, the method compose with 3 steps:
 	\item Accumulate all step optical flow together.
 \end{enumerate}
 
+\begin{table}
+	\begin{center}
+		\begin{tabular}{ c | c } 
+			\hline
+			Notice & Meaning  \\ 
+			\hline\hline
+			$I_t$          & The equirectangular RGB image at time $t$. \\
+			\hline
+			$\hat{I}_{t,i}$ & The CubeMap's $i$th sub-image.\\
+			\hline
+			$\tilde{I}_{t,i}$ & The Ico's $i$th sub-image.\\
+			\hline
+			$\mathcal{F}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\hat{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
+			\hline
+			$\mathcal{R}$   & The rotation matrix estimated from ptical flow. \\
+			\hline
+			$P$            & The pixel position in ERP image plane, $(u,v)$.   \\
+			\hline
+			$\hat{P}$      & The pixel location in spherical coordinate system, $(\theta, \phi)$ \\
+			\hline
+			$T$            & The pixel location in tangent image's gnomonic normalized coordinate system, $(x,y)$ \\
+			\hline
+			$\hat{T}$      & The pixel location in tangent image's gnomonic image coordinate system, $({u}',{v}')$ \\
+			\hline
+		\end{tabular}
+	\end{center}
+	\caption{The Notations.}
+	\label{tab:approach:notation}
+\end{table}
 
 
 Two Technical pipeline:
 \todolist{Rough align the images, with roation.}
 
-\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumulate all optical flow together.}
+\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumualte all optical flow together.}
 
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
@@ -67,25 +104,35 @@ So the range of optical flow is
 Another's target image range is $[- n * image_width, + n * image_width]$
 
 
-\begin{table}
-	\begin{center}
-		\begin{tabular}{ c | c } 
-			\hline
-			Notice & Meaning  \\ [0.5ex] 
-			\hline\hline
-			$\textbf{f}$ & optical flow  \\ 
-			\hline
-			$(u,v)$ & the position of pixel   \\
-			\hline
-			$f(u,v)$ & the pixel's optical flow of image $I_{src}$ \\
-			\hline
-			$\textbf{I}$ & the RGB image  \\ [1ex] 
-			\hline
-		\end{tabular}
-	\end{center}
-	\caption{Method pipeline. \todolist{Notations.}}
-	\label{tab:approach:notation}
-\end{table}
+
+
+\subsection{Image \& Optical Flow Alignment}
+
+The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on ~\cite{eldercvpr2020}
+
+But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in CubeMap projection.
+
+Inspired by the warp base optical flow \cite{?}, and coarst to fine 
+
+Use panoramic images optical flow estimation rotation to roughly align the two images.
+
+\todolist{How to convert the rough optical flow to rotation?}
+
+The image warp, the rotation to warp the image, alignt the 
+
+The optical flow warping, to warp the final optical flow to restore the original images optical flow.
+
+\begin{equation}\label{equ:app:sph2erp}
+	\begin{split}
+		\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
+		\\
+		x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
+		\\
+		\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
+		\\
+		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
+	\end{split}
+\end{equation}
 
 \subsection{Projection \& Stitching}
 
@@ -127,27 +174,3 @@ project the panoramic image to perspective images.
 \todolist{How to compute the weight and blending? Euqation.}
 \todolist{Visualized different weight and blend result.}
 
-
-\subsection{Image \& Optical Flow Alignment}
-
-Inspired by the warp base optical flow \cite{?}, and coarse to fine 
-
-Use panoramic images optical flow estimation rotation to roughly align the two images.
-
-\todolist{How to convert the rough optical flow to rotation?}
-
-The image warp, the rotation to warp the image, alignt the 
-
-The optical flow warping, to warp the final optical flow to restore the original images optical flow.
-
-\begin{equation}\label{equ:app:sph2erp}
-	\begin{split}
-		\theta &= (x+0.5) \cdot\frac{2 \pi}{W_{idth}}- \pi
-		\\
-		x &= \frac{\theta + \pi}{\frac{2\pi}{W_{idth}}} - 0.5
-		\\
-		\phi&=-(y+0.5) \cdot \frac{\pi}{H_{eight}} + \frac{\pi}{2}
-		\\
-		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
-	\end{split}
-\end{equation}

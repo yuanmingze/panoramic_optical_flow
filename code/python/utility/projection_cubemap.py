@@ -464,7 +464,8 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
     :type padding_size: float, optional
     :param wrap_around: True, the optical flow is as perspective optical flow, False, it's warp around.
     :type wrap_around: bool
-    #TODO
+    :param synthetic_data: If the input data is Rendering from Replica is True, or False. TODO: Process the rendering optical flow gnomonic overflow.
+    :type synthetic_data: bool, optional
     :return: the ERP flow image the image size 
     :rtype: numpy
     """
