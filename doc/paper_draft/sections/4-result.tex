@@ -1,50 +1,27 @@
 \section{Experiments}\label{sec:exp}
 
-\textbf{Time} 
+To evaluate the performation
+\TODO{Time} 
+\TODO{How much time it will take for .}
+\TODO{How to select the weight blending weight.}
 
-\todolist{How much time it will take for .}
+\subsection{Dataset \& Error Metric}
 
-\todolist{How to select the weight blending weight.}
-
-\subsection{Dataset \& Metric}
-
+The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
 
 \textbf{Dataset}
 
-The dataset will be released for open access.
+% synthetic dataset
+%And currently do not have any public optical flow equirectangular image dataset.
+To quantitive evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
+OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
+So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
+The dataset's 3D data is from Replica ~\cite{??}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
 
-
-The synthetic panoramic optical flow rendered with on-the-shelf OpenGL render pipeline and store in the ERP image.
-The input are textured 3D mesh and OpenGL's camera pose.
-The process shown as the \cref{fig:approach:panoof:pipline} composing with the following 3 steps:
-
-\begin{enumerate}
-	\item Camera Model: OpenGL render with Equirectangular projection (ERP);
-	\item Warp Around: Processing the warp around at the boundary of image; When project the sphere to ERP, the point along the plane x=0,y,-z are split to two side of ERP image, so the continued . It happend on theta (longitude), but in ERP image the phi (latitude) is continued, mean do not to consider/process the phi's warp around. \cref{fig:result:wraparound} (to warp a rainbow image to explain the wrap-around case.). So we use geodesic metric to replace the Cartesian distance.
-	\item Occlusion: estimate the occlusion of optical flow (Do not talk it in this paper because the GT optical flow do not have perfect occlusion yet.);
-	\item The panoramic motion ambiguity; In 360 scene, because the wrap-around we the pixel have two stright line path from source postion to target position, e.g. from left or right. In the paper we use the shortest path as the pixels optical flow path by default.
-\end{enumerate}
-
-The traditional OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
-For synthesising ground truth panoramic RGB images and optical flow, we implement and hire equirectangular perspective camera model.
-The equirectangular perspective panoramic camera model render the 3D mesh to equirectangular images.
-To achieve the camera model the OpenGL geometry shaders transform the 3D mesh from Cartesian coordinate system to spherical coordinate system. 
-
-We also test our method on the real world dataset with warped image sequence.
-It's very hard to measure the real word optical flow information, especially the equirectangular image. 
-And currently do not have any public optical flow equirectangular image dataset.
-So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
-Meanwhile to analysis the performance we use SSIM etc. metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
-
-
-\todolist{
-\begin{enumerate}
-	\item How much frame;
-	\item What is the resolution;
-	\item What kinds of motion it has?
-\end{enumerate}
-}
-
+% real word dataset
+The real-world data is more challenging, has complex lighting and motion etc. 
+For further explorer our method performance,  we also test the method on the real-world dataset OmniPhoto ~\cite{??}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
+Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
 \textbf{Error Metric}
 

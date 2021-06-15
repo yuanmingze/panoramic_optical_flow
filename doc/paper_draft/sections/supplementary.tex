@@ -14,6 +14,8 @@
 			\hline
 			$\tilde{I}_{t,i}$ & The Ico's $i$th sub-image.\\
 			\hline
+			$M_{\mathcal{F}}$ & The backbone optical flow method. \\
+			\hline
 			$\mathcal{F}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
 			\hline
 			$\bar{\mathcal{F}}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
@@ -40,6 +42,15 @@
 	\label{tab:approach:notation}
 \end{table}
 
+\subsection{Coordinate system}
+
+\textbf{ERP image pixel coordinate system}
+
+The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the pixel coordinate 0 exceed the range of image pixel $([0, image\_width), [0, image\_height))$. 
+
+
+\textbf{Conversion between spherical coordinate system and ERP image pixel coordinate system}
+
 
 \begin{equation}\label{equ:app:sph2erp}
 	\begin{split}
@@ -52,6 +63,22 @@
 		y &=\frac{-\phi+\frac{\pi}{2}}{\frac{\pi}{H_{eight}}}-0.5
 	\end{split}
 \end{equation}
+
+\subsection{Synthetic Dataset Generation}
+
+The synthetic panoramic optical flow rendered with off-the-shelf OpenGL render pipeline and store in the ERP image.
+The input are textured 3D mesh and OpenGL's camera pose.
+The process shown as the \cref{fig:approach:panoof:pipline} composing with the following 3 steps:
+
+\begin{enumerate}
+	\item Camera Model: OpenGL render with Equirectangular projection (ERP);
+	\item Warp Around: Processing the warp around at the boundary of image; When project the sphere to ERP, the point along the plane x=0,y,-z are split to two side of ERP image, so the continued . It happend on theta (longitude), but in ERP image the phi (latitude) is continued, mean do not to consider/process the phi's warp around. \cref{fig:result:wraparound} (to warp a rainbow image to explain the wrap-around case.). So we use geodesic metric to replace the Cartesian distance.
+	\item Occlusion: estimate the occlusion of optical flow (Do not talk it in this paper because the GT optical flow do not have perfect occlusion yet.);
+	\item The panoramic motion ambiguity; In 360 scene, because the wrap-around we the pixel have two stright line path from source postion to target position, e.g. from left or right. In the paper we use the shortest path as the pixels optical flow path by default.
+\end{enumerate}
+
+%The dataset will be released for open access.
+
 
 %Azimuthal equidistant projection:
 %- https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection
