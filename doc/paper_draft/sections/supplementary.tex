@@ -1,45 +1,35 @@
+\appendix
 \section{supplementary}
 
 \TODO{move the notation to Fig.1 and remove the table.}
 
 \begin{table}[h!]
-	\begin{center}
-		\begin{tabular}{ c | c } 
-			\hline
-			Notice & Meaning  \\ 
-			\hline\hline
-			$I_t$          & The equirectangular RGB image at time $t$. \\
-			\hline
-			$\hat{I}_{t,i}$ & The CubeMap's $i$th sub-image.\\
-			\hline
-			$\tilde{I}_{t,i}$ & The Ico's $i$th sub-image.\\
-			\hline
-			$M_{\mathcal{F}}$ & The backbone optical flow method. \\
-			\hline
-			$\mathcal{F}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\bar{\mathcal{F}}_t$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\hat{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\tilde{\mathcal{F}}_{t,i}$ & Optical flow from $I_t$ to $I_{t+1}$. \\
-			\hline
-			$\mathcal{R}$   & The rotation matrix estimated from ptical flow. \\
-			\hline
-			$P$            & The pixel position in ERP image plane, $(u,v)$.   \\
-			\hline
-			$\hat{P}$      & The pixel location in spherical coordinate system, $(\theta, \phi)$ \\
-			\hline
-			$T$            & The pixel location in tangent image's gnomonic normalized coordinate system, $(x,y)$ \\
-			\hline
-			$\hat{T}$      & The pixel location in tangent image's gnomonic image coordinate system, $({u}',{v}')$ \\
-			\hline
-			$\hat{P}'_i$ & The gnomonic projection's tangent point $\hat{P}$. \\
-			\hline
-		\end{tabular}
-	\end{center}
-	\caption{The Notations.}
-	\label{tab:approach:notation}
+	\centering
+	\caption{\label{tab:approach:notation}%
+		Table of notation.
+	}
+	\resizebox{\linewidth}{!}{%
+	%    \setlength{\tabcolsep}{3pt}%
+	\begin{tabular}{ c l } 
+		\toprule
+		\textbf{Notation} & \textbf{Meaning}  \\ 
+		\midrule
+		$I_t$                       & The equirectangular RGB image at time $t$. \\
+		$\hat{I}_{t,i}$             & The $i$th sub-image of the cube map at time $t$.\\
+		$\tilde{I}_{t,i}$           & The $i$th sub-image of the icosahedron at time $t$.\\
+		$M_{\mathcal{F}}$           & The backbone optical flow method. \\
+		$\mathcal{F}_t$             & Optical flow from $I_t$ to $I_{t+1}$ (equirect). \\
+		$\bar{\mathcal{F}}_t$       & Optical flow from $I_t$ to $I_{t+1}$. \TODO{???} \\
+		$\hat{\mathcal{F}}_{t,i}$   & Optical flow from $\hat{I}_{t,i}$ to $\hat{I}_{t+1,i}$ (cubemap). \\
+		$\tilde{\mathcal{F}}_{t,i}$ & Optical flow from $\tilde{I}_{t,i}$ to $\tilde{I}_{t+1,i}$ (icosahedron). \\
+		$\mathcal{R}$               & The rotation matrix estimated from optical flow. \\
+		$P$                         & Pixel position $(u,v)$ in ERP image plane.   \\
+		$\hat{P}$                   & Pixel location $(\theta, \phi)$ in spherical coordinate system. \\
+		$T$                         & Pixel location $(x,y)$ in tangent image's gnomonic normalized coordinate system. \CR{shorten description?} \\
+		$\hat{T}$                   & Pixel location $({u}',{v}')$ in tangent image's gnomonic image coordinate system. \\
+		$\hat{P}'_i$                & The gnomonic projection's tangent point $\hat{P}$. \\
+		\bottomrule
+	\end{tabular}}%
 \end{table}
 
 \subsection{Coordinate system}
@@ -64,11 +54,12 @@ The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the 
 	\end{split}
 \end{equation}
 
+
 \subsection{Synthetic Dataset Generation}
 
 The synthetic panoramic optical flow rendered with off-the-shelf OpenGL render pipeline and store in the ERP image.
 The input are textured 3D mesh and OpenGL's camera pose.
-The process shown as the \cref{fig:approach:panoof:pipline} composing with the following 3 steps:
+The process shown as the \cref{fig:approach:panoof:pipeline} comprising the following 3 steps:
 
 \begin{enumerate}
 	\item Camera Model: OpenGL render with Equirectangular projection (ERP);
