@@ -3,36 +3,35 @@
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[width=0.95\linewidth]{images/method_pipeline_1.pdf}
-	\caption{Method overview. The input is a pair of equrictangular images $I_t$ and $I_{t+1}$, output is the optical flow $\mathcal{F}_t$ from  $I_t$ and $I_{t+1}$. It compused with 3 steps: (1) ? (2) ?}
+	\caption{Method overview. The input is a pair of equirectangular images sequence $I_t$ and $I_{t+1}$, output is the optical flow $\mathcal{F}_t$. The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively. The green box estimate the rotation from optical flow motion vector.}
 	\label{fig:approach:pipeline}
 \end{figure}
 
-The method proposes a tangent image global warping optical flow method to mitigate the equirectangular distortion and large motion between two images, meanwhile, the backbone optical flow method hired off-the-shelf and general optical flow method $M_{\mathcal{F}}$.
-The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
+The method proposes a global rotation warping and tangent image based panoramic optical flow method to mitigate the equirectangular image's distortion and pixel's long span motion, meanwhile, the backbone perspective optical flow method can generalize to any  off-the-shelf optical flow method.
 
-As shown in the overview diagram ~\cref{fig:approach:pipeline} our method compose with 3 steps:
-1) Estimate the optical flow $\bar{\mathcal{F}}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $\bar{R}$ esitmation form $\mathcal{F}_t$ to generate ${\bar{I}}_{t+1}$;
-2) Estimate the optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ with CubeMap projection method $f??$, then rotate the  ${\bar{I}}_{t+1}$ toward to $I_t$ with the $\hat{R}$ esitmated from ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$;
-3) Estimate the optical flow $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ with icoshedron porject, then warp  the $\tilde{\mathcal{F}}_t$ with invert of $\bar{R}$ and $\hat{R}$ to generate finnally optical flow $\mathcal{F}_t$.
+% overview method
+As shown in the overview diagram ~\cref{fig:approach:pipeline} our method compose of 3 steps:
+1) Estimate strightly the panoramic optical flow $\bar{\mathcal{F}}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $\bar{R}$ esitmation form $\mathcal{F}_t$ to generate ${\bar{I}}_{t+1}$~\cref{sec:approach:warping};
+2) Estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ with cubemap optical flow method ~\cref{sec:approach:projstit}, then rotate the  ${\bar{I}}_{t+1}$ with the $\hat{R}$ esitmated from ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$;
+3) Estimate $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ with icoshedron optical flow mathod~\cref{sec:approach:warping}, then backward rotate warp the $\tilde{\mathcal{F}}_t$ with $\bar{R}$ and $\hat{R}$ to generate the panoramic optical flow $\mathcal{F}_t$.
 
-% why do that
-Comparing to the perspective image the equirectangular image has distortion especially at the top and bottom. We using gnomoinic projection to undistrot the image, and  use cubemap and icosahedron project to uniform sample the ERP image ~\cref{sec:approach:projstit}
 
-Because the tangent image 
-Use optical flow warping method to align the source and target images before
-Finaaly Accumulate all step optical flow together with the ~\cref{sec:approach:warping}
-
-%The optical flow method 
-%\todolist{Rough and warp based method. Why not warp base method? CubeMap warp the target image, and Ico compute the cubemap warpped image. Finally, accumualte all optical flow together.}
+% 
+Comparing to the perspective image the equirectangular image is continuous in all direction, in ~\cref{sec:approach:definition} we analyze and define the panoramic optical flow.
+%
+To solve the equrictangular image is distortion distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
+%
+At the same time, to compensate the tangent images narrow field of view, the global rotation operation is used on target image $I_{t+1}$ align to $I_t$ ~\cref{sec:approach:warping}
 
 \subsection{Panoramic Optical Flow Definition}\label{sec:approach:definition}
 
-Different from the perspective image, the panoramic image is enclosed in any direction on the image,  and the coordinate is continuous.
-So the panoramic optical flow is continuous, even the pixel's motion vector is overflowed the image size.
-It's different from perspective image optical which ~\cite{??}. 
-This is one reason the perspective image optical flow method can not track well the pixel moving out the equirectangular image boundary.
-
-But the continuous optical flow will introduce ambiguity, 
+The panoramic image is enclosed in any direction on the image and the coordinate is continuous, e.g. the pixel location is overflowed the image width will wrap around to another side of the image.
+The panoramic optical flow succeeds the features, the pixel's motion vector can overflow the image size.
+%It's different from perspective image optical which ~\cite{??}. 
+This is one reason the perspective image optical flow method can not track well the pixel moving out the equirectangular image boundary, because it does not suppose the coordinate is wrap-around, ~\cref{?}
+\TODO{Add image two show the warp-around optical flow and un-warp-around optical flow.}
+%
+But it will introduce ambiguity to the panoramic optical flow, 
 %the stright line in the 3D space will project to a segement on one great circle.
 there are two paths from the source point to the target point along the great-circle on the sphere ~\cite{??}.
 To define the panoramic optical flow on equirectangular image format, we propose the following assumes:
@@ -62,7 +61,7 @@ close the spherical coordinate expression
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
 Optical flow 
 $I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
-
+The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
 
 The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on ~\cite{eldercvpr2020}
 

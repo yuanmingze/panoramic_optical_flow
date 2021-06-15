@@ -1,9 +1,7 @@
 \section{Experiments}\label{sec:exp}
 
 To evaluate the performation
-\TODO{Time} 
-\TODO{How much time it will take for .}
-\TODO{How to select the weight blending weight.}
+\TODO{How much time it will take for; How to select the weight blending weight.}
 
 \subsection{Dataset \& Error Metric}
 
@@ -25,29 +23,30 @@ Meanwhile, to evaluate on the read-word dataset without the ground truth optical
 
 \textbf{Error Metric}
 
-It's very hard to measure the real word optical flow information, especially the equirectangular image. 
-And currently do not have any public optical flow equirectangular image dataset.
-So we evaluate our method estimated optical flow quantity in the synthetic equirectangular optical flow dataset.
-Meanwhile to analysis the performance we use SSIM etc. metrics to evaluate the optical flow warped the equirectangular image sequence in both real world dataset and synthetic dataset.
+The AAE, The average endpoint error (EPE) and RMS  ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
+But the equirectangular image has distortion because closer top and bottom of image less space to corresponding one pixel.~\cite{??},
+so we map the equirectangular pixel coordinate to a unit sphere and convert it to spherical coordinates, its surface uniform correspond to the real-world 3D space.~\cite{??}
+Then use the geodesic distance which is the shortest path between two points on the sphere,  to replace the error metric methods' Euclidean distance, 
 
-The metrics AAE, EPE and RMS is used for the quantity analysis.
+\TODO{Spherical version SSIM, which multiply a ERP weight, https://brilliant.org/wiki/surface-area-sphere/:Archimedes' Hat-Box Theorem}
+On the real-world dataset to metric the optical flow error,  use SSIM to calculate the error between the optical flow backwards warped target image $I_t$ and the target image $I_t$.
+Meanwhile, to alleviate the equirectangular image distortion metric each pixel error based on the pixel area in the unit sphere.
+So scale the equirectangular each pixels SSIM with a normalized area weight.
+% both real world dataset and synthetic dataset.
+
 $n$ is the number of pixels, meanwhile set the unavailable pixels optical flow to 0 both ground truth and estimated optical flow.
-
-The average endpoint error (\textbf{EPE}):  ~\cite{BakerSLRBS2011}
 EPE is the absolute error of all the pixels.
-
 Use the shortest path on unit sphere to compute the EPE.
-\todolist{The greate circle equation.}
 
-\begin{equation}\label{equ_exp_epe}
-	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
+%\begin{equation}\label{equ_exp_epe}
+%	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
+%\end{equation}
+
+\begin{equation}\label{equ:sec:exp:epe}
+	\hat{E}_{EPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right) 
 \end{equation}
 
-\begin{equation}\label{equ_exp_epe_sp}
-	E_{EPEs} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
-\end{equation}
-
-The average angular error (\textbf{AAE}):~\cite{??}
+The average angular error (\textbf{AAE}):~\cite{??} 
 AAE is a metric to measure the deviation of angle:
 
 \begin{equation}\label{equ_exp_aae}
