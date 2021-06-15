@@ -17,13 +17,15 @@ As shown in the overview diagram ~\cref{fig:approach:pipeline} our method compos
 
 
 % 
-Comparing to the perspective image the equirectangular image is continuous in all direction, in ~\cref{sec:approach:definition} we analyze and define the panoramic optical flow.
+Comparing to the perspective image, the equirectangular image is continuous in all direction, in ~\cref{sec:approach:definition} we analyze and define the panoramic optical flow.
 %
-To solve the equrictangular image is distortion distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
+To solve the equrictangular image distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
 %
 At the same time, to compensate the tangent images narrow field of view, the global rotation operation is used on target image $I_{t+1}$ align to $I_t$ ~\cref{sec:approach:warping}
 
-\subsection{Panoramic Optical Flow Definition}\label{sec:approach:definition}
+
+\subsection{Panoramic Optical Flow Definition}
+\label{sec:approach:definition}
 
 The panoramic image is enclosed in any direction on the image and the coordinate is continuous, e.g. the pixel location is overflowed the image width will wrap around to another side of the image.
 The panoramic optical flow succeeds the features, the pixel's motion vector can overflow the image size.
@@ -44,7 +46,7 @@ the pixel motion is always along , which is not larger than 0.5$\pi$.
 
 \TODO{Summarize the benefit of this expression? Why use the warp-around optical flow?}
 Sample is continue 
-visuzalizion friendly
+visualisation friendly
 close the spherical coordinate expression
 
 \begin{figure}[hbt!]
@@ -55,19 +57,19 @@ close the spherical coordinate expression
 \end{figure}
 
 
-\subsection{Optical Flow Warping}\label{sec:approach:warping}
-
+\subsection{Optical Flow Warping}
+\label{sec:approach:warping}
 
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
 Optical flow 
 $I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
 The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
 
-The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on ~\cite{eldercvpr2020}
+The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}
 
-But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in CubeMap projection.
+But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
 
-Inspired by the warp base optical flow \cite{?}, and coarst to fine 
+Inspired by the warp base optical flow \cite{?}, and coarse to fine 
 
 Use panoramic images optical flow estimation rotation to roughly align the two images.
 
@@ -78,15 +80,15 @@ The image warp, the rotation to warp the image, alignt the
 The optical flow warping, to warp the final optical flow to restore the original images optical flow.
 
 
-\subsection{Projection \& Stitching}\label{sec:approach:projstit}
-
+\subsection{Projection \& Stitching}
+\label{sec:approach:projstit}
 
 The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosehedron face image (tangent image) optical flow.
 
-The methed composes with 3 steps:
- equirectangular image projection project part of the images pair to perspective images, e.g. tangent images, respectively to get ride of distortation;
- perspective image optical flow estimation to calcuate each tangent image optical flow;
- and optical flow sitching to blend each faces' optical flow back to equirectangular format. 
+The meth0d composes with 3 steps:
+ equirectangular image projection project part of the images pair to perspective images, e.g. tangent images, respectively to get ride of distortion;
+ perspective image optical flow estimation to calculate each tangent image optical flow;
+ and optical flow stitching to blend each faces' optical flow back to equirectangular format. 
  
  The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
 
@@ -97,12 +99,12 @@ The optical flow stitching
 
 % why 
 
-The equirectangular RGB image projection use gnomonic projection to generate the tangent images ~\cite{??}, which is perspective image doesn't have distortation.
+The equirectangular RGB image projection use gnomonic projection to generate the tangent images ~\cite{??}, which is perspective image doesn't have distortion.
 
-When hire the gnomonic porject to project the sphere surfce to know the 
+When hire the gnomonic porject to project the sphere surface to know the 
 
 To make the tangent images uniform sample the sphere surface, the tangent points should uniformly distribute on the surface of the unit sphere.~\cite{??}
-For cover differen we select the 
+For cover different we select the 
 The regular polygon ~\cite{??} 
 
 % how to select the samplin points?
@@ -133,5 +135,5 @@ W_{face} =
 
 The weight compose with 
 
-\TODO{How to compute the weight and blending? Euqation, and Visualized different weight and blend result, and show each face's optical flow.}
+\TODO{How to compute the weight and blending? Equation, and Visualized different weight and blend result, and show each face's optical flow.}
 

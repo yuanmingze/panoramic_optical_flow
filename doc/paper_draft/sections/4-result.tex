@@ -1,7 +1,9 @@
-\section{Experiments}\label{sec:exp}
+\section{Experiments}
+\label{sec:exp}
 
 To evaluate the performation
 \TODO{How much time it will take for; How to select the weight blending weight.}
+
 
 \subsection{Dataset \& Error Metric}
 
@@ -11,14 +13,14 @@ The method performance evaluated on both synthetic and real-world dataset by pan
 
 % synthetic dataset
 %And currently do not have any public optical flow equirectangular image dataset.
-To quantitive evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
+To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
 OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
 So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
-The dataset's 3D data is from Replica ~\cite{??}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
+The dataset's 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
 
 % real word dataset
 The real-world data is more challenging, has complex lighting and motion etc. 
-For further explorer our method performance,  we also test the method on the real-world dataset OmniPhoto ~\cite{??}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
+For further explorer our method performance,  we also test the method on the real-world dataset OmniPhotos \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
 Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
 \textbf{Error Metric}
@@ -66,7 +68,7 @@ The root mean square error (\textbf{RMSE}):~\cite{??}
 \end{equation}
 
 The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
-To evaluate the error with same metric on the whole images, we extend EPE, AAE adn RMS to the spherical coordinate. 
+To evaluate the error with same metric on the whole images, we extend EPE, AAE and RMS to the spherical coordinate. 
 Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
 The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
 
@@ -87,13 +89,15 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 \item whole dataset;
 \item different kinds of camera motion and different magnitude motion;
 \item different image resolution 0.5K, 1K, 2K.
-\item Generalization: Compare the different opticalflow backbone result, to prove the generalisation of our method.
+\item Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
 \end{enumerate}
 }
 
 
 \begin{table}[h!]
 	\centering
+	\caption{\label{fig:exp:quality}%
+		Error of Replica dataset}
 	\begin{tabular}{ c | c | c | c | c | c | c }
 		\hline
 		& \multicolumn{6}{c}{DIS}  \\
@@ -113,8 +117,6 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 		room\_1 & - & - & -  & - & - & -  \\ 
 		\hline\hline
 	\end{tabular}
-	\caption{Error of Replica dataset}
-	\label{fig:exp:quality}
 \end{table}
 
 
@@ -123,7 +125,7 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 
 \textbf{Qualitative Evaluation.}
 
-\TODO{Compare on real-world dataset, OmniPhoto. The synthetic dataset just egomotion, the real-word dataset is including non-rigid and objects motion.}
+\TODO{Compare on real-world dataset, OmniPhotos. The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.}
 
 \MZY{Our method can process the ego-motion very well, but maybe not good at other motion.}
 
