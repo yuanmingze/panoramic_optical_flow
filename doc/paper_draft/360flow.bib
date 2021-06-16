@@ -319,6 +319,17 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://cfernandezlab.github.io/CFL/},
 }
 
+@InProceedings{GkitsZAZD2020,
+  author    = {Vasileios Gkitsas and Nikolaos Zioulis and Federico Alvarez and Dimitrios Zarpalas and Petros Daras},
+  title     = {Deep Lighting Environment Map Estimation from Spherical Panoramas},
+  booktitle = CVPR,
+  year      = {2020},
+  abstract  = {Estimating a scene's lighting is a very important task when compositing synthetic content within real environments, with applications in mixed reality and post-production. In this work we present a data-driven model that estimates an HDR lighting environment map from a single LDR monocular spherical panorama. In addition to being a challenging and ill-posed problem, the lighting estimation task also suffers from a lack of facile illumination ground truth data, a fact that hinders the applicability of data-driven methods. We approach this problem differently, exploiting the availability of surface geometry to employ image-based relighting as a data generator and supervision mechanism. This relies on a global Lambertian assumption that helps us overcome issues related to pre-baked lighting. We relight our training data and complement the model's supervision with a photometric loss, enabled by a differentiable image-based relighting technique. Finally, since we predict spherical spectral coefficients, we show that by imposing a distribution prior on the predicted coefficients, we can greatly boost performance. Code and models available at https://vcl3d.github.io/DeepPanoramaLighting
+.},
+  arxiv     = {2005.08000},
+  _url       = {https://vcl3d.github.io/DeepPanoramaLighting/},
+}
+
 @Article{HornS1981,
   author    = {Berthold K. P. Horn and Brian G. Schunck},
   title     = {Determining optical flow},
@@ -343,6 +354,16 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://lmb.informatik.uni-freiburg.de/Publications/2017/IMKDB17/},
 }
 
+@InProceedings{JiangHKPMN2019,
+  author    = {Chiyu "Max" Jiang and Jingwei Huang and Karthik Kashinath and Prabhat and Philip Marcus and Matthias Niessner},
+  title     = {Spherical {CNNs} on Unstructured Grids},
+  booktitle = ICLR,
+  year      = {2019},
+  abstract  = {We present an efficient convolution kernel for Convolutional Neural Networks (CNNs) on unstructured grids using parameterized differential operators while focusing on spherical signals such as panorama images or planetary signals. To this end, we replace conventional convolution kernels with linear combinations of differential operators that are weighted by learnable parameters. Differential operators can be efficiently estimated on unstructured grids using one-ring neighbors, and learnable parameters can be optimized through standard back-propagation. As a result, we obtain extremely efficient neural networks that match or outperform state-of-the-art network architectures in terms of performance but with a significantly lower number of network parameters. We evaluate our algorithm in an extensive series of experiments on a variety of computer vision and climate science tasks, including shape classification, climate pattern segmentation, and omnidirectional image semantic segmentation. Overall, we present (1) a novel CNN approach on unstructured grids using parameterized differential operators for spherical signals, and (2) we show that our unique kernel parameterization allows our model to achieve the same or higher accuracy with significantly fewer network parameters.},
+  arxiv     = {1901.02039},
+  _url       = {https://arxiv.org/abs/1901.02039},
+}
+
 @InProceedings{KroegTDV2016,
   author    = {Till Kroeger and Radu Timofte and Dengxin Dai and Van Gool, Luc},
   title     = {Fast Optical Flow Using Dense Inverse Search},
@@ -354,6 +375,46 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   arxiv     = {1603.03590},
   doi       = {10.1007/978-3-319-46493-0_29},
   _isbn      = {978-3-319-46493-0},
+}
+
+@InProceedings{LeeJYJY2019,
+  author    = {Yeon Kun Lee and Jaeseok Jeong and Jong Seob Yun and Cho Won June and Kuk-Jin Yoon},
+  title     = {{SpherePHD}: Applying {CNNs} on a Spherical {PolyHeDron} Representation of 360° Images},
+  booktitle = CVPR,
+  year      = {2019},
+  pages     = {9173--9181},
+  _month     = jun,
+  abstract  = {Omni-directional cameras have many advantages over conventional cameras in that they have a much wider field-of-view (FOV). Several approaches have been recently proposed to apply convolutional neural networks (CNNs) to omni-directional images to solve classification and detection problems. However, most of them use image representations in the Euclidean space defined by transforming the omni-directional views originally in the non-Euclidean space. This transformation leads to shape distortion due to nonuniform spatial resolving power and loss of continuity. These effects make existing convolution kernels have difficulties in extracting meaningful information. This paper proposes a novel method to resolve the aforementioned problems of applying CNNs to omni-directional images. The proposed method utilizes a spherical polyhedron to represent omni-directional views. This method minimizes the variance of spatial resolving power on the sphere surface, and includes new convolution and pooling methods for the proposed representation. The proposed approach can also be adopted by existing CNN-based methods. The feasibility and efficacy of the proposed method is demonstrated through both classification and detection tasks.},
+  arxiv     = {1811.08196},
+  doi       = {10.1109/CVPR.2019.00940},
+  _issn      = {1063-6919},
+  _url       = {https://arxiv.org/abs/1811.08196},
+}
+
+@Article{LuoZSX2019,
+  author    = {Junren Luo and Wanpeng Zhang and Jiongming Su and Fengtao Xiang},
+  title     = {Hexagonal Convolutional Neural Networks for Hexagonal Grids},
+  journal   = {IEEE Access},
+  year      = {2019},
+  volume    = {7},
+  pages     = {142738--142749},
+  _issn      = {2169-3536},
+  abstract  = {Hexagonal grids use a hierarchical subdivision tessellation to cover the entire plane or sphere. Due to the 6-fold rotational symmetry, hexagonal grids have some advantages (e.g. isoperimetry, equidistant neighbors, and uniform connectivity) over quadrangular and triangular girds, which makes them suitable to tackle tasks of geospatial information processing and intelligent decision-making. In this paper, we first introduce some applications based on the hexagonal grids. Then, we introduce the planer and spherical hexagonal grids and analyze the group representations for them, we review geometric deep learning, some Convolutional Neural Networks (CNNs) for hexagonal grids, and group-based equivariant convolution. Next in importance, we propose the HexagonNet for hexagonal grids, and define a new convolution operator and pooling operator. Finally, in order to evaluate the effectiveness of the proposed HexagonNet, we perform experiments on two tasks: aerial scene classification on the aerial image dataset (AID), and 3D shape classification on the ModelNet40 dataset. The experimental results verify the practical applicability of the HexagonNet given some fixed parameter budgets.},
+  doi       = {10.1109/ACCESS.2019.2944766},
+}
+
+@Article{MenzeHG2018,
+  author    = {Moritz Menze and Christian Heipke and Andreas Geiger},
+  title     = {Object Scene Flow},
+  journal   = {ISPRS Journal of Photogrammetry and Remote Sensing},
+  year      = {2018},
+  volume    = {140},
+  pages     = {60--76},
+  _month     = jun,
+  _issn      = {0924-2716},
+  abstract  = {This work investigates the estimation of dense three-dimensional motion fields, commonly referred to as scene flow. While great progress has been made in recent years, large displacements and adverse imaging conditions as observed in natural outdoor environments are still very challenging for current approaches to reconstruction and motion estimation. In this paper, we propose a unified random field model which reasons jointly about 3D scene flow as well as the location, shape and motion of vehicles in the observed scene. We formulate the problem as the task of decomposing the scene into a small number of rigidly moving objects sharing the same motion parameters. Thus, our formulation effectively introduces long-range spatial dependencies which commonly employed local rigidity priors are lacking. Our inference algorithm then estimates the association of image segments and object hypotheses together with their three-dimensional shape and motion. We demonstrate the potential of the proposed approach by introducing a novel challenging scene flow benchmark which allows for a thorough comparison of the proposed scene flow approach with respect to various baseline models. In contrast to previous benchmarks, our evaluation is the first to provide stereo and optical flow ground truth for dynamic real-world urban scenes at large scale. Our experiments reveal that rigid motion segmentation can be utilized as an effective regularizer for the scene flow problem, improving upon existing two-frame scene flow methods. At the same time, our method yields plausible object segmentations without requiring an explicitly trained recognition model for a specific object class.},
+  doi       = {10.1016/j.isprsjprs.2017.09.013},
+  keywords  = {Scene flow, Motion estimation, Motion segmentation, 3D reconstruction, Active Shape Model, Object detection},
 }
 
 @InProceedings{SavvaKMZWJSLKMPB2019,
@@ -491,6 +552,16 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://github.com/princeton-vl/RAFT},
 }
 
+@InProceedings{Tran2021,
+  author    = {Phi Vu Tran},
+  title     = {{SSLayout360}: Semi-Supervised Indoor Layout Estimation from 360-Degree Panorama},
+  booktitle = CVPR,
+  year      = {2021},
+  abstract  = {Recent years have seen flourishing research on both semi-supervised learning and 3D room layout reconstruction. In this work, we explore the intersection of these two fields to advance the research objective of enabling more accurate 3D indoor scene modeling with less labeled data. We propose the first approach to learn representations of room corners and boundaries by using a combination of labeled and unlabeled data for improved layout estimation in a 360-degree panoramic scene. Through extensive comparative experiments, we demonstrate that our approach can advance layout estimation of complex indoor scenes using as few as 20 labeled examples. When coupled with a layout predictor pre-trained on synthetic data, our semi-supervised method matches the fully supervised counterpart using only 12% of the labels. Our work takes an important first step towards robust semi-supervised layout estimation that can enable many applications in 3D perception with limited labeled data.},
+  arxiv     = {2103.13696},
+  _url       = {https://github.com/FlyreelAI/sslayout360},
+}
+
 @Article{Tsai1987,
   author    = {Roger Y. Tsai},
   title     = {A versatile camera calibration technique for high-accuracy {3D} machine vision metrology using off-the-shelf {TV} cameras and lenses},
@@ -505,6 +576,16 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/JRA.1987.1087109},
 }
 
+@InProceedings{WangYSCT2021,
+  author    = {Fu-En Wang and Yu-Hsuan Yeh and Min Sun and Wei-Chen Chiu and Yi-Hsuan Tsai},
+  title     = {{LED$^2$}-Net: Monocular 360 Layout Estimation via Differentiable Depth Rendering},
+  booktitle = CVPR,
+  year      = {2021},
+  abstract  = {Although significant progress has been made in room layout estimation, most methods aim to reduce the loss in the 2D pixel coordinate rather than exploiting the room structure in the 3D space. Towards reconstructing the room layout in 3D, we formulate the task of 360 layout estimation as a problem of predicting depth on the horizon line of a panorama. Specifically, we propose the Differentiable Depth Rendering procedure to make the conversion from layout to depth prediction differentiable, thus making our proposed model end-to-end trainable while leveraging the 3D geometric information, without the need of providing the ground truth depth. Our method achieves state-of-the-art performance on numerous 360 layout benchmark datasets. Moreover, our formulation enables a pre-training step on the depth dataset, which further improves the generalizability of our layout estimation model.},
+  arxiv     = {2104.00568},
+  _url       = {https://fuenwang.ml/project/led2net/},
+}
+
 @InProceedings{WangYSCT2020,
   author    = {Fu-En Wang and Yu-Hsuan Yeh and Min Sun and Wei-Chen Chiu and Yi-Hsuan Tsai},
   title     = {{BiFuse}: Monocular 360 Depth Estimation via Bi-Projection Fusion},
@@ -515,6 +596,19 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   abstract  = {Depth estimation from a monocular 360 image is an emerging problem that gains popularity due to the availability of consumer-level 360 cameras and the complete surrounding sensing capability. While the standard of 360 imaging is under rapid development, we propose to predict the depth map of a monocular 360 image by mimicking both peripheral and foveal vision of the human eye. To this end, we adopt a two-branch neural network leveraging two common projections: equirectangular and cubemap projections. In particular, equirectangular projection incorporates a complete field-of-view but introduces distortion, whereas cubemap projection avoids distortion but introduces discontinuity at the boundary of the cube. Thus we propose a bi-projection fusion scheme along with learnable masks to balance the feature map from the two projections. Moreover, for the cubemap projection, we propose a spherical padding procedure which mitigates discontinuity at the boundary of each face. We apply our method to four panorama datasets and show favorable results against the existing state-of-the-art methods.},
   doi       = {10.1109/CVPR42600.2020.00054},
   _url       = {https://fuenwang.ml/project/bifuse/},
+}
+
+@InProceedings{WangSTCS2020,
+  author    = {Ning-Hsu Wang and Bolivar Solarte and Yi-Hsuan Tsai and Wei-Chen Chiu and Min Sun},
+  title     = {{360SD}-Net: 360° Stereo Depth Estimation with Learnable Cost Volume},
+  booktitle = ICRA,
+  year      = {2020},
+  pages     = {582--588},
+  abstract  = {Recently, end-to-end trainable deep neural networks have significantly improved stereo depth estimation for perspective images. However, 360° images captured under equirectangular projection cannot benefit from directly adopting existing methods due to distortion introduced (i.e., lines in 3D are not projected onto lines in 2D). To tackle this issue, we present a novel architecture specifically designed for spherical disparity using the setting of top-bottom 360° camera pairs. Moreover, we propose to mitigate the distortion issue by (1) an additional input branch capturing the position and relation of each pixel in the spherical coordinate, and (2) a cost volume built upon a learnable shifting filter. Due to the lack of 360° stereo data, we collect two 360° stereo datasets from Matterport3D and Stanford3D for training and evaluation. Extensive experiments and ablation study are provided to validate our method against existing algorithms. Finally, we show promising results on real-world environments capturing images with two consumer-level cameras. Our project page is at https://albert100121.github.io/360SD-Net-Project-Page.},
+  arxiv     = {1911.04460},
+  doi       = {10.1109/ICRA40945.2020.9196975},
+  _issn      = {2577-087X},
+  _url       = {https://albert100121.github.io/360SD-Net-Project-Page/},
 }
 
 @Article{WangBSS2004,
@@ -565,6 +659,28 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/ICRA40945.2020.9196695},
 }
 
+@InProceedings{XuZXTG2021,
+  author    = {Jiale Xu and Jia Zheng and Yanyu Xu and Rui Tang and Shenghua Gao},
+  title     = {Layout-Guided Novel View Synthesis from a Single Indoor Panorama},
+  booktitle = CVPR,
+  year      = {2021},
+  abstract  = {Existing view synthesis methods mainly focus on the perspective images and have shown promising results. However, due to the limited field-of-view of the pinhole camera, the performance quickly degrades when large camera movements are adopted. In this paper, we make the first attempt to generate novel views from a single indoor panorama and take the large camera translations into consideration. To tackle this challenging problem, we first use Convolutional Neural Networks (CNNs) to extract the deep features and estimate the depth map from the source-view image. Then, we leverage the room layout prior, a strong structural constraint of the indoor scene, to guide the generation of target views. More concretely, we estimate the room layout in the source view and transform it into the target viewpoint as guidance. Meanwhile, we also constrain the room layout of the generated target-view images to enforce geometric consistency. To validate the effectiveness of our method, we further build a large-scale photo-realistic dataset containing both small and large camera translations. The experimental results on our challenging dataset demonstrate that our method achieves state-of-the-art performance. The project page is at https://github.com/bluestyle97/PNVS
+
+.},
+  arxiv     = {2103.17022},
+  _url       = {https://arxiv.org/abs/2103.17022},
+}
+
+@InProceedings{YangZRHS2021,
+  author    = {Kailun Yang and Jiaming Zhang and Simon Reiß and Xinxin Hu and Rainer Stiefelhagen},
+  title     = {Capturing Omni-Range Context for Omnidirectional Segmentation},
+  booktitle = CVPR,
+  year      = {2021},
+  abstract  = {Convolutional Networks (ConvNets) excel at semantic segmentation and have become a vital component for perception in autonomous driving. Enabling an all-encompassing view of street-scenes, omnidirectional cameras present themselves as a perfect fit in such systems. Most segmentation models for parsing urban environments operate on common, narrow Field of View (FoV) images. Transferring these models from the domain they were designed for to 360-degree perception, their performance drops dramatically, e.g., by an absolute 30.0% (mIoU) on established test-beds. To bridge the gap in terms of FoV and structural distribution between the imaging domains, we introduce Efficient Concurrent Attention Networks (ECANets), directly capturing the inherent long-range dependencies in omnidirectional imagery. In addition to the learned attention-based contextual priors that can stretch across 360-degree images, we upgrade model training by leveraging multi-source and omni-supervised learning, taking advantage of both: Densely labeled and unlabeled data originating from multiple datasets. To foster progress in panoramic image segmentation, we put forward and extensively evaluate models on Wild PAnoramic Semantic Segmentation (WildPASS), a dataset designed to capture diverse scenes from all around the globe. Our novel model, training regimen and multi-source prediction fusion elevate the performance (mIoU) to new state-of-the-art results on the public PASS (60.2%) and the fresh WildPASS (69.0%) benchmarks.},
+  arxiv     = {2103.05687},
+  _url       = {https://arxiv.org/abs/2103.05687},
+}
+
 @InProceedings{ZhangLSC2019,
   author    = {Chao Zhang and Stephan Liwicki and William Smith and Roberto Cipolla},
   title     = {Orientation-Aware Semantic Segmentation on Icosahedron Spheres},
@@ -592,8 +708,6 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   issue     = {3},
   keyword   = {Computer Science},
 }
-
-
 
 @Comment{jabref-meta: databaseType:bibtex;}
 
