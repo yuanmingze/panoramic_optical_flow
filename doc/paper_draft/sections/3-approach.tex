@@ -51,33 +51,10 @@ close the spherical coordinate expression
 
 \begin{figure}[hbt!]
 	\centering
-	\includegraphics[width=0.45\linewidth]{images/wrap-around-0.jpg}
+	\includegraphics[width=0.80\linewidth]{images/wrap-around-0.jpg}
 	\caption{Panoramic Optical Flow.}
 	\label{fig:app:warparound}
 \end{figure}
-
-
-\subsection{Optical Flow Warping}
-\label{sec:approach:warping}
-
-The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
-Optical flow 
-$I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
-The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
-
-The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}
-
-But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
-
-Inspired by the warp base optical flow \cite{?}, and coarse to fine 
-
-Use panoramic images optical flow estimation rotation to roughly align the two images.
-
-\todolist{How to convert the rough optical flow to rotation?}
-
-The image warp, the rotation to warp the image, alignt the 
-
-The optical flow warping, to warp the final optical flow to restore the original images optical flow.
 
 
 \subsection{Projection \& Stitching}
@@ -117,7 +94,7 @@ project the panoramic image to perspective images.
 %Tangent/Center points selection.
 Use cubemap or Regular icosahedron, which is a convex polyhedron with 20 faces, 30 edges and 12 vertices.
 
-For the perspective image to cover different field of view (FoV)  to estimate the different scale motion, the sampling point selection regular cubemap and regular icosahedron's inscribe sphere points, which are the most common regular polygon and have different FoV. ~\cite{xxx}
+For the perspective image to cover different field of view (FoV)  to estimate the different scale motion, the sampling point selection regular cubemap and regular icosahedron's inscribe sphere points, which are the most common regular polygon and have different FoV. ~\cite{?}
 
 The cubemap's face has wider FoV than the icosahedron's face, which can estimate a larger span motion vector from the tangent image, but Its PPI is smaller than the icosahedron's when they are in the same resolution.
 
@@ -137,3 +114,25 @@ The weight compose with
 
 \TODO{How to compute the weight and blending? Equation, and Visualized different weight and blend result, and show each face's optical flow.}
 
+
+\subsection{Global Rotation Warping}
+\label{sec:approach:warping}
+
+The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
+Optical flow 
+$I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
+The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
+
+The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}
+
+But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
+
+Inspired by the warp base optical flow \cite{?}, and coarse to fine 
+
+Use panoramic images optical flow estimation rotation to roughly align the two images.
+
+\todolist{How to convert the rough optical flow to rotation?}
+
+The image warp, the rotation to warp the image, alignt the 
+
+The optical flow warping, to warp the final optical flow to restore the original images optical flow.
