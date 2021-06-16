@@ -182,6 +182,30 @@
   _url       = {https://arxiv.org/abs/2010.08045},
 }
 
+@Article{BlackA1996,
+  author    = {Michael J. Black and P. Anandan},
+  title     = {The robust estimation of multiple motions: parametric and piecewise-smooth flow fields},
+  journal   = CVIU,
+  year      = {1996},
+  volume    = {63},
+  number    = {1},
+  pages     = {75--104},
+  _issn      = {1077-3142},
+  abstract  = {Most approaches for estimating optical flow assume that, within a finite image region, only a single motion is present. This single motion assumption is violated in common situations involving transparency, depth discontinuities, independently moving objects, shadows, and specular reflections. To robustly estimate optical flow, the single motion assumption must be relaxed. This paper presents a framework based on robust estimation that addresses violations of the brightness constancy and spatial smoothness assumptions caused by multiple motions. We show how the robust estimation framework can be applied to standard formulations of the optical flow problem thus reducing their sensitivity to violations of their underlying assumptions. The approach has been applied to three standard techniques for recovering optical flow: area-based regression, correlation, and regularization with motion discontinuities. This paper focuses on the recovery of multiple parametric motion models within a region, as well as the recovery of piecewise-smooth flow fields, and provides examples with natural and synthetic image sequences.},
+  doi       = {10.1006/cviu.1996.0006},
+}
+
+@InProceedings{BlackA1991,
+  author      = {M. J. Black and P. Anandan},
+  title       = {Robust dynamic motion estimation over time},
+  booktitle   = CVPR,
+  year        = {1991},
+  pages       = {296--302},
+  abstract    = {A novel approach to incrementally estimating visual motion over a sequence of images is presented. The authors start by formulating constraints on image motion to account for the possibility of multiple motions. This is achieved by exploiting the notions of weak continuity and robust statistics in the formulation of a minimization problem. The resulting objective function is non-convex. Traditional stochastic relaxation techniques for minimizing such functions prove inappropriate for the task. A highly parallel incremental stochastic minimization algorithm is presented which has a number of advantages over previous approaches. The incremental nature of the scheme makes it dynamic and permits the detection of occlusion and disocclusion boundaries.},
+  citeseerurl = {http://citeseer.ist.psu.edu/black91robust.html},
+  doi         = {10.1109/CVPR.1991.139705},
+}
+
 @InProceedings{BroxBPW2004,
   author    = {Thomas Brox and Andrés Bruhn and Nils Papenberg and Joachim Weickert},
   title     = {High Accuracy Optical Flow Estimation Based on a Theory for Warping},
@@ -266,8 +290,8 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   title     = {{FlowNet}: Learning Optical Flow With Convolutional Networks},
   booktitle = ICCV,
   year      = {2015},
-  _month     = dec,
   abstract  = {Convolutional neural networks (CNNs) have recently been very successful in a variety of computer vision tasks, especially on those linked to recognition. Optical flow estimation has not been among the tasks CNNs succeeded at. In this paper we construct CNNs which are capable of solving the optical flow estimation problem as a supervised learning task. We propose and compare two architectures: a generic architecture and another one including a layer that correlates feature vectors at different image locations. Since existing ground truth data sets are not sufficiently large to train a CNN, we generate a large synthetic Flying Chairs dataset. We show that networks trained on this unrealistic data still generalize very well to existing datasets such as Sintel and KITTI, achieving competitive accuracy at frame rates of 5 to 10 fps.},
+  doi       = {10.1109/ICCV.2015.316},
 }
 
 @InProceedings{EderMG2019,
@@ -343,6 +367,17 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1016/0004-3702(81)90024-2},
 }
 
+@InProceedings{HuiTC2018,
+  author    = {Tak-Wai Hui and Xiaoou Tang and Change Loy, Chen},
+  title     = {{LiteFlowNet}: A Lightweight Convolutional Neural Network for Optical Flow Estimation},
+  booktitle = CVPR,
+  year      = {2018},
+  pages     = {8981--8989},
+  _month     = jun,
+  abstract  = {FlowNet2, the state-of-the-art convolutional neural network (CNN) for optical flow estimation, requires over 160M parameters to achieve accurate flow estimation. In this paper we present an alternative network that attains performance on par with FlowNet2 on the challenging Sintel final pass and KITTI benchmarks, while being 30 times smaller in the model size and 1.36 times faster in the running speed. This is made possible by drilling down to architectural details that might have been missed in the current frameworks: (1) We present a more effective flow inference approach at each pyramid level through a lightweight cascaded network. It not only improves flow estimation accuracy through early correction, but also permits seamless incorporation of descriptor matching in our network. (2) We present a novel flow regularization layer to ameliorate the issue of outliers and vague flow boundaries by using a feature-driven local convolution. (3) Our network owns an effective structure for pyramidal feature extraction and embraces feature warping rather than image warping as practiced in FlowNet2. Our code and trained models are available at https://github.com/twhui/LiteFlowNet.},
+  _url       = {http://mmlab.ie.cuhk.edu.hk/projects/LiteFlowNet/},
+}
+
 @InProceedings{IlgMSKDB2017,
   author    = {Eddy Ilg and Nikolaus Mayer and Tonmoy Saikia and Margret Keuper and Alexey Dosovitskiy and Thomas Brox},
   title     = {{FlowNet} 2.0: Evolution of Optical Flow Estimation with Deep Networks},
@@ -391,6 +426,14 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://arxiv.org/abs/1811.08196},
 }
 
+@InProceedings{LucasK1981,
+  author    = {Bruce D. Lucas and Takeo Kanade},
+  title     = {An iterative image registration technique with an application to stereo vision},
+  booktitle = {Proceedings of the International Joint Conference on Artificial Intelligence},
+  year      = {1981},
+  abstract  = {Image registration finds a variety of applications in computer vision. Unfortunately, traditional image registration techniques tend to be costly. We present a new image registration technique that makes use of the spatial intensity gradient of the images to find a good match using a type of Newton-Raphson iteration. Our technique is faster because it examines far fewer potential matches between the images than existing techniques. Furthermore, this registration technique can be generalized to handle rotation, scaling and shearing. We show show our technique can be adapted for use in a stereo vision system.},
+}
+
 @Article{LuoZSX2019,
   author    = {Junren Luo and Wanpeng Zhang and Jiongming Su and Fengtao Xiang},
   title     = {Hexagonal Convolutional Neural Networks for Hexagonal Grids},
@@ -414,7 +457,7 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _issn      = {0924-2716},
   abstract  = {This work investigates the estimation of dense three-dimensional motion fields, commonly referred to as scene flow. While great progress has been made in recent years, large displacements and adverse imaging conditions as observed in natural outdoor environments are still very challenging for current approaches to reconstruction and motion estimation. In this paper, we propose a unified random field model which reasons jointly about 3D scene flow as well as the location, shape and motion of vehicles in the observed scene. We formulate the problem as the task of decomposing the scene into a small number of rigidly moving objects sharing the same motion parameters. Thus, our formulation effectively introduces long-range spatial dependencies which commonly employed local rigidity priors are lacking. Our inference algorithm then estimates the association of image segments and object hypotheses together with their three-dimensional shape and motion. We demonstrate the potential of the proposed approach by introducing a novel challenging scene flow benchmark which allows for a thorough comparison of the proposed scene flow approach with respect to various baseline models. In contrast to previous benchmarks, our evaluation is the first to provide stereo and optical flow ground truth for dynamic real-world urban scenes at large scale. Our experiments reveal that rigid motion segmentation can be utilized as an effective regularizer for the scene flow problem, improving upon existing two-frame scene flow methods. At the same time, our method yields plausible object segmentations without requiring an explicitly trained recognition model for a specific object class.},
   doi       = {10.1016/j.isprsjprs.2017.09.013},
-  keywords  = {Scene flow, Motion estimation, Motion segmentation, 3D reconstruction, Active Shape Model, Object detection},
+  keywords  = {scene flow, motion estimation, motion segmentation, 3D reconstruction, active shape model, object detection},
 }
 
 @InProceedings{SavvaKMZWJSLKMPB2019,

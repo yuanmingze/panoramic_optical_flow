@@ -1,36 +1,52 @@
 \section{Related Work}
 
-\subsection{Optical Flow}
+%\subsection{Optical Flow}
+\paragraph{Optical Flow}
 
-%Energy Minimization:
-The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{KroegTDV2016, HornS1981, BA}. 
-Furthermore, \citet{BroxBPW2004} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image. 
-And \cite{SunRB2010} use median filter in pose-processing step sharper objection boundary's the optical flow.
+has been a fundamental computer vision technique for decades, as it estimates dense correspondences between two input images \cite{BakerSLRBS2011,MenzeHG2018}.
+These correspondences can be used to identify object or camera ego-motion, and optical flow thus finds many applications in robotics, scene understanding, geometry reconstruction etc.
+%
+Traditional optical flow methods are formulated using energy minimization based on photoconsistency and regularisation with a smoothness term \cite{KroegTDV2016, HornS1981, LucasK1981, BlackA1991}.
+%
+\citet{BroxBPW2004} proposed a warping-based method that refines optical flow estimations in a coarse-to-fine fashion.
+% with multi-iteration from previous iteration optical flow warped image.
+%
+\citet{SunRB2014} uses a median filter post-processing step to produce sharper object boundaries in the optical flow fields.
 
+
+In recent years, learning-based methods have defined a new state of the art in optical flow estimation.
+%
 %Supervised Learning:
-Leveraged by the machine learning method, the supervised learning optical flow methods were proposed.
-FlowNet\cite{DosovFIHHGSCB2015} lift the correlation operation and multi-scale help the CNN effectively find the corresponding relationship from two RGB images. And the FlowNet2 \cite{IlgMSKDB2017} import warp operation between the cascaded FlowNet agents to increase the perception of large pixel motion.
+%Leveraged by the machine learning method, the supervised learning optical flow methods were proposed.
 %
-\citet{SunYLK2020}  proposes the 4D volume to function the 
+The first methods were based on supervised learning, generally on synthetic training data.
 %
-\citet{TeedD2020a} use the recurrent network to update optical flow from the 4D correlation volume, 
+FlowNet \cite{DosovFIHHGSCB2015} lifts the correlation operation into feature space, and uses a multi-scale architecture to effectively predict optical flow from two input images.
+%
+FlowNet2 \cite{IlgMSKDB2017} introduces image warping between multiple cascaded FlowNets to increase the accuracy of large pixel motion.
+%
+PWC-Net \cite{SunYLK2020} incorporates the best practices of traditional optical flow methods into a neural network: pyramid processing, image warping, and cost volume processing.
+%
+RAFT \cite{TeedD2020a} employs a recurrent network to iteratively estimate optical flow from the 4D correlation volume between all pairs of pixels. %, with significant improvements over the state of the art.
+%
+%%Unsupervised Learning:
+\citet{AleotPM2021} propose a data generation method using monocular depth estimation to synthesise a second view from a single input image.
+This enables self-supervised training of existing optical flow methods.
 
-%Unsupervised Learning:
-
-\citet{AleotPM2021} propose a training data generation method, 
-which use estimated depth to generate new view point image and optical flow from single still image, to train the off-the-shelf optical flow method.
-This method propose for self-supervised learn pathway.
 
 % 360 optical flow
-The CNN based panoramic optical methods
-\citet{ArtizZAD2021} and \citet{BhandZY2021}
+Virtually all optical flow methods focus on perspective input images, although spherical images have recently received more attention.
+%
+%The CNN based panoramic optical methods \citet{ArtizZAD2021} and \citet{BhandZY2021}
+To this end, recent approaches by \citet{ArtizZAD2021} and \citet{BhandZY2021}
+transfer the architecture and weights of pre-trained networks \cite{DosovFIHHGSCB2015,HuiTC2018} to spherical images in the equirectangular projection (ERP) format.
 
 
 \subsection{Panoramic Image Processing}
 
 % applications
 Panoramic image have been used on 
-depth esitmation\cite{WangSTCS2020}, room layout etimation \cite{WangYSCT2021, Tran2021}, Semantic segmentation \cite{YangZRHS2021}, render \cite{XuZXTG2021}, etc.
+depth esitmation\cite{WangSTCS2020}, room layout estimation \cite{WangYSCT2021, Tran2021}, Semantic segmentation \cite{YangZRHS2021}, render \cite{XuZXTG2021}, etc.
 % problem
 The panoramic image format converts the 3D scene to a 2D image with the non-linear project, but it introduces distortion in the 2D image, e.g. the equirectangular image format has larger distortion especially on the top and bottom of the image.
 
