@@ -2,99 +2,83 @@
 
 \subsection{Optical Flow}
 
-Energy Minimization:
+%Energy Minimization:
+The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{KroegTDV2016, HornS1981, BA}. 
+Furthermore, \citet{BroxBPW2004} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image. 
+And \cite{SunRB2010} use median filter in pose-processing step sharper objection boundary's the optical flow.
 
-The optical flow is formulated as energy minimization problem to find the most similiary pixel corresponding and regularization with local or global smooth term \cite{KroegTDV2016, HornS1981, BA}. Furthermore, 
-
-\citet{BroxBPW2004} propose warp base method, to update the optical flow with multi-iteration from previous iteration optical flow warped image.
-
-\cite{sun} use median filter in pose-processing step sharper objection boundary's the optical flow.
-
-Supervised Learning:
-
-- FlowNet 1,2,3,lite, lift the correlation operation and multi-scale method, which help the CNN effectly find the corresponding relationship from two RGB images. 
-
-- PWCNet proposes the 4D volume to function the 
-
+%Supervised Learning:
+Leveraged by the machine learning method, the supervised learning optical flow methods were proposed.
+FlowNet\cite{DosovFIHHGSCB2015} lift the correlation operation and multi-scale help the CNN effectively find the corresponding relationship from two RGB images. And the FlowNet2 \cite{IlgMSKDB2017} import warp operation between the cascaded FlowNet agents to increase the perception of large pixel motion.
+%
+\citet{SunYLK2020}  proposes the 4D volume to function the 
+%
 \citet{TeedD2020a} use the recurrent network to update optical flow from the 4D correlation volume, 
 
-Unsupervised Learning:
+%Unsupervised Learning:
 
 \citet{AleotPM2021} propose a training data generation method, 
 which use estimated depth to generate new view point image and optical flow from single still image, to train the off-the-shelf optical flow method.
 This method propose for self-supervised learn pathway.
 
+% 360 optical flow
+The CNN based panoramic optical methods
+\citet{artizzu2021omniflownet} and \citet{bhandari2020revisiting}
+
 
 \subsection{Panoramic Image Processing}
 
-Because of non-linear project between the scene and image, there is distortion in the image, especially in the poles of panoramic image.
-How to git ride of the distortion is key point of panoramic image processing method. 
+% applications
+Panoramic image have been used on 
+depth esitmation\cite{wang2020360sd}, room layout etimation \cite{wang2021led2, tran2021sslayout360}, Semantic segmentation \cite{yang2021capturing}, render \cite{xu2021layout}, etc.
+% problem
+The panoramic image format converts the 3D scene to a 2D image with the non-linear project, but it introduces distortion in the 2D image, e.g. the equirectangular image format has larger distortion especially on the top and bottom of the image.
 
-\textbf{Gnomonic Projection} ~\cite{gnomonicprojection}
-
-The methods use gnomonic projection project part of sphere to tangent plane, which preserve geodesics and have little distortion near the central point.
-So the tangent plane is hired to mitigate the influence of the panoramic image  distortion on the perspective image processing methods.
+% sovle with projection method
+%% cube map projection
+\citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
+\cite{WangYSCT2020}
 
 \cite{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
+% icosahedron
+\cite{EderPVBF2019}\citet{EderSLF2020} Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
+\citet{luo2019hexagonal}
+\citet{zhang2019orientation}
+\citet{lee2019spherephd}
 
-\textbf{Tangent Images}
-\textbf{Icosahedron}
-
-Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
-
-\cite{EderPVBF2019}
-
-
-%\subsection{Undistortion}
-
-
-\textbf{Cube Map}
-
-With the
-Equirectangular Image format is most popular panoramic image format which have been part of 
-
-
-\citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
-
-- Layout:
-- \cite{xxxx}
-
-- Depth:
-- \cite{WangYSCT2020}
-- 
-- Semantic segmentation:
-
+% sovle with on CNN area
+\citet{gkitsas2020deep}
+%% kernel transfrom 
+\citet{su2019kernel}
+%% rotation invariance 
+\citet{cohen2018spherical}
+\citet{jiang2018spherical}
 
 \subsection{Panoramic Datasets}
 
-
-The real word data rich and colourful, but it is very hard to estimate or measure the accurate segmentation, motion flow, etc. form the real word scene.
-So the synthetic dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as Habitat \cite{SavvaKMZWJSLKMPB2019}.
-
-Meanwhile, the real word photo image is hard to estimate accurate optical flow.
-Although KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{ButleWSB2012} pinhole image optical flow, etc. currently don't have any public panoramic optical flow dataset is available.
-
-The rasterization render method OpenGL used to synthesize the ground truth optical flow.
-The equirectangular optical flow generation algorithm introduction in \cref{sec:app:panoof}.
-Few public indoor 3D datasets are hired to render the ground truth data.
-
-- Replica ~\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}
-
-SUMO
-
-
-%Realworld
-3D Mesh dataset:
-- Stanford2D3D \cite{ArmenSZS2017}
-- Matterport3D ~\cite{ChangDFHNSSZZ2017}
-- Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}
-- iGibson (Gibson)
-
-
-360 Image dataset:
+% 360 Image dataset:
+%% Real-world
 - MatterportLayout dataset: https://github.com/ericsujw/Matterport3DLayoutAnnotation, labeled scene
+
+%% synthetic dataset (CAD dataset)
+The real word data rich and colourful, but it is very hard to estimate or measure the accurate segmentation, motion flow, etc. form the real word scene.
+
 - 360D dataset:
 - Structured3D: https://structured3d-dataset.org/, synthetic dataset,room layout estimation
 - Omnidirectional Stereo Dataset: http://cvlab.hanyang.ac.kr/project/omnistereo/
 - Realtor360: 
+- SUMO
 
+% 3D Mesh dataset:
+So the 3D dataset is commonly haired to generate the ground truth data for training or performance evaluation, such as Habitat \cite{SavvaKMZWJSLKMPB2019}.
+
+%% laser scanned
+- Stanford2D3D \cite{ArmenSZS2017}
+- Matterport3D ~\cite{ChangDFHNSSZZ2017}
+- Replica ~\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}
+- iGibson (Gibson)
+
+%% CAD dataset
+
+Meanwhile, the real word photo image is hard to estimate accurate optical flow.
+ currently don't have any public panoramic optical flow dataset is available.

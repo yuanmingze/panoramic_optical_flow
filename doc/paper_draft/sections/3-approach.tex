@@ -22,7 +22,7 @@ Comparing to the perspective image, the equirectangular image is continuous in a
 To solve the equrictangular image distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
 %
 At the same time, to compensate the tangent images narrow field of view, the global rotation operation is used on target image $I_{t+1}$ align to $I_t$ ~\cref{sec:approach:warping}
-
+But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
 
 \subsection{Panoramic Optical Flow Definition}
 \label{sec:approach:definition}
@@ -118,21 +118,29 @@ The weight compose with
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
+Inspired by the warping base optical flow \cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FoV and reduce the large pixel motion spane.
+The global rotation $R$ compose of horizontal and vertical rotation extracted from the panoramic optical flow to rotate all pixels in the equirectangular image.
+The horizontal rotation extract from the optcal flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixle number and $W$ is image width in pixel.
+The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the euqation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
+% it's the noly 20% middle column of the $\mathcal{F}_v$
+
+\textbf{Image global rotation warping.}
+The image warp, the rotation to warp the image, alignt the 
+
+
+%% How to convert the rough optical flow to rotation?
+Use panoramic images optical flow estimation rotation to roughly align the two images.
+Extract global rotation from panoramic optical flow.
+
+
+\textbf{Panoramic Optical Flow rotation.}
+The optical flow warping, to warp the final optical flow to restore the original images optical flow.
+
 The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
 Optical flow 
 $I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
-The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.
+The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.s
 
-The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}
 
-But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
-
-Inspired by the warp base optical flow \cite{?}, and coarse to fine 
-
-Use panoramic images optical flow estimation rotation to roughly align the two images.
-
-\todolist{How to convert the rough optical flow to rotation?}
-
-The image warp, the rotation to warp the image, alignt the 
-
-The optical flow warping, to warp the final optical flow to restore the original images optical flow.
+%
+%The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}

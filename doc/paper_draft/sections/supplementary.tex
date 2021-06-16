@@ -34,6 +34,7 @@
 \subsection{Coordinate system}
 
 
+
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1.0\linewidth]{images/coordinate_system.pdf}
@@ -63,6 +64,12 @@ The panoramic image's $x$ and $y$ is continual, in this way it's reasonable the 
 
 
 \subsection{Synthetic Dataset Generation}
+
+The rasterization render method OpenGL used to synthesize the ground truth optical flow.
+The equirectangular optical flow generation algorithm introduction in \cref{sec:app:panoof}.
+Few public indoor 3D datasets are hired to render the ground truth data.
+
+Although KITTI~\cite{Menze2018JPRS} or MPI Sintel~\cite{ButleWSB2012} pinhole image optical flow, etc.
 
 The synthetic panoramic optical flow rendered with off-the-shelf OpenGL render pipeline and store in the ERP image.
 The input are textured 3D mesh and OpenGL's camera pose.
