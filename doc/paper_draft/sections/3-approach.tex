@@ -83,21 +83,21 @@ To increase the tangent images FOV and improve the optical flow near the image b
 
 \begin{figure}[hbt!]
 	\centering
-	\includegraphics[width=0.35\linewidth]{example-image}
+	\includegraphics[width=0.75\linewidth]{images/projection_00.jpg}
 	\caption{Image Cubemap and Ico projection with padding. \TODO{Image show the cubemap and ico projection result and sampling points \& padding area with padding size.}}
 	\label{fig:approach:projection}
 \end{figure}
 
 \textbf{Perspective optical flow stitching}.
 % how to stitch
-%The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosehedron face image (tangent image) optical flow.
+%The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosahedron face image (tangent image) optical flow.
 Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
 So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
 % blending 
 The weight compose with 
 The padding area need blending
 % blending method
-\TODO{Visualized different weight and blend result, and show each face's optical flow.}
+
 \begin{equation}
 W_{face} =
 \end{equation}
@@ -105,14 +105,14 @@ W_{face} =
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[width=0.35\linewidth]{example-image}
-	\caption{Optical flow stitching blending weight visualization.}
+	\caption{Optical flow stitching blending weight visualization.\TODO{Visualized different weight and blend result, and show each face's optical flow.}}
 	\label{fig:approach:blendweight}
 \end{figure}
 
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-Inspired by the warping base optical flow~\cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FoV and reduce the large pixel motion span.
+Inspired by the warping base optical flow~\cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FOV and reduce the large pixel motion span.
 The global rotation $R$ compose of horizontal and vertical rotation extracted from the panoramic optical flow to rotate all pixels in the equirectangular image.
 The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
 The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
