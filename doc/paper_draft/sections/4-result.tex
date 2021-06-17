@@ -1,7 +1,7 @@
 \section{Experiments}
 \label{sec:exp}
 
-To evaluate the performation
+To evaluate the performance.
 \TODO{How much time it will take for; How to select the weight blending weight.}
 
 
@@ -9,68 +9,70 @@ To evaluate the performation
 
 The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
 
-\textbf{Dataset}
-
+\textbf{Dataset}.
+%
 % synthetic dataset
 %And currently do not have any public optical flow equirectangular image dataset.
 To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
 OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
 So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
-The dataset's 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
+The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
 
 % real word dataset
 The real-world data is more challenging, has complex lighting and motion etc. 
 For further explorer our method performance,  we also test the method on the real-world dataset OmniPhotos \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
 Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
-\textbf{Error Metric}
-
-The AAE, The average endpoint error (EPE) and RMS  ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
-But the equirectangular image has distortion because closer top and bottom of image less space to corresponding one pixel.~\cite{??},
-so we map the equirectangular pixel coordinate to a unit sphere and convert it to spherical coordinates, its surface uniform correspond to the real-world 3D space.~\cite{??}
-Then use the geodesic distance which is the shortest path between two points on the sphere,  to replace the error metric methods' Euclidean distance, 
-
-\TODO{Spherical version SSIM, which multiply a ERP weight, https://brilliant.org/wiki/surface-area-sphere/:Archimedes' Hat-Box Theorem}
-On the real-world dataset to metric the optical flow error,  use SSIM to calculate the error between the optical flow backwards warped target image $I_t$ and the target image $I_t$.
-Meanwhile, to alleviate the equirectangular image distortion metric each pixel error based on the pixel area in the unit sphere.
-So scale the equirectangular each pixels SSIM with a normalized area weight.
-% both real world dataset and synthetic dataset.
-
-$n$ is the number of pixels, meanwhile set the unavailable pixels optical flow to 0 both ground truth and estimated optical flow.
-EPE is the absolute error of all the pixels.
-Use the shortest path on unit sphere to compute the EPE.
+\textbf{Error Metric}.
+%
+The AAE, the average endpoint error (EPE) and RMS  ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
+%But the equirectangular image has distortion because closer top and bottom of image less space to corresponding one pixel.~\cite{??},
+To identically metric each pixel's equirectangular optical flow error, and neglect the equirectangular image distortion, when evaluate the ERP optical flow we map the equirectangular pixel coordinate to the spherical coordinates on the unit sphere~\cite{??}, and use the geodesic distance to replace the Euclidean distance of metric. 
+s%The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
+%To evaluate the error with same metric on the whole images, we extend EPE, AAE and RMS to the spherical coordinate. 
+%Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
+%The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
+%
+\cref{equ:exp:epesph} and \cref{equ:exp:aaesph} is the ERP optical flow metric.
+%, which metric on the spherical coordinate system. 
+In $\hat{E}_{EPE}$, $d$ is the geodesic distance distance between to end point on unit sphere and the $n$ is the number of pixels.
+We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
 
 %\begin{equation}\label{equ_exp_epe}
 %	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
 %\end{equation}
-
-\begin{equation}\label{equ:sec:exp:epe}
+\begin{equation}\label{equ:exp:epesph}
 	\hat{E}_{EPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right) 
 \end{equation}
 
-The average angular error (\textbf{AAE}):~\cite{??} 
-AAE is a metric to measure the deviation of angle:
-
-\begin{equation}\label{equ_exp_aae}
-	E_{AAE} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+The $\hat{E}_{AAE}$ is metric to measure the deviation of spherical triangle, \cref{equ:exp:aaesph}, the 
+% \begin{equation}\label{equ_exp_aae}
+% 	E_{AAE} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+% \end{equation}
+\begin{equation}\label{equ:exp:aaesph}
+	\hat{E}_{AAEs} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
 \end{equation}
 
-\begin{equation}\label{equ_exp_aae_sp}
-	E_{AAEs} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+\TODO{Spherical version SSIM, which multiply a ERP weight, https://brilliant.org/wiki/surface-area-sphere/:Archimedes' Hat-Box Theorem}
+To metric the optical flow error of the real-world dataset use SSIM and The root mean square error (RMS) to calculate the error between the optical flow backwards warped target image $I_{t+1}$ and the source image $I_t$.~\cite{??}
+Meanwhile, to alleviate the equirectangular image distortion metric each pixel error based on the pixel area in the unit sphere.
+So scale the equirectangular each pixel SSIM with a normalized area weight.
+% both real world dataset and synthetic dataset.
+
+\TODO{The equation to compute the weight.}
+% \begin{equation}\label{equ:exp:rmse}
+% 	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
+% \end{equation}
+\begin{equation}\label{equ:exp:rmsesph}
+	E_{RMSE} = w_{} \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
 \end{equation}
 
-The root mean square error (\textbf{RMSE}):~\cite{??}
-
-\todolist{A diagram to show what the sphere version EPE and AAE like.}
-
-\begin{equation}\label{equ_exp_rmse}
-	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
-\end{equation}
-
-The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
-To evaluate the error with same metric on the whole images, we extend EPE, AAE and RMS to the spherical coordinate. 
-Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
-The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.35\linewidth]{example-image}
+	\caption{A diagram to show what the sphere version EPE and AAE like. And the failure case of perspective image AAE and EPE. And the weight of RMSE and SSIM.}
+	\label{fig:exp:errormetric}
+\end{figure}
 
 \subsection{Comparison}
 
@@ -78,9 +80,7 @@ We compare our method with following state of the art methods, FlowNet2~\cite{Il
 The FlowNet2~\cite{IlgMSKDB2017} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
 The PWC-Net~\cite{SunYLK2018}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
 
-
 \textbf{Quantitative Evaluation.}
-
 
 The error in spherical coordinate shown as \cref{fig:exp:quality}.
 
