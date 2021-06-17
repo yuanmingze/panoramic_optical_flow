@@ -11,15 +11,15 @@ The method proposes a global rotation warping and tangent image based panoramic 
 
 % overview method
 As shown in the overview diagram ~\cref{fig:approach:pipeline} our method compose of 3 steps:
-1) Estimate strightly the panoramic optical flow $\bar{\mathcal{F}}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $\bar{R}$ esitmation form $\mathcal{F}_t$ to generate ${\bar{I}}_{t+1}$~\cref{sec:approach:warping};
-2) Estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ with cubemap optical flow method ~\cref{sec:approach:projstit}, then rotate the  ${\bar{I}}_{t+1}$ with the $\hat{R}$ esitmated from ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$;
-3) Estimate $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ with icoshedron optical flow mathod~\cref{sec:approach:warping}, then backward rotate warp the $\tilde{\mathcal{F}}_t$ with $\bar{R}$ and $\hat{R}$ to generate the panoramic optical flow $\mathcal{F}_t$.
+1) Estimate the panoramic optical flow $\bar{\mathcal{F}}_t$ from $I_{t}$ to ${I_{t+1}}$, then rotate the $I_{t+1}$ toward to $I_{t}$ with the $\bar{R}$ estimation form $\mathcal{F}_t$ to generate ${\bar{I}}_{t+1}$~\cref{sec:approach:warping};
+2) Estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ with cubemap optical flow method ~\cref{sec:approach:projstit}, then rotate the  ${\bar{I}}_{t+1}$ with the $\hat{R}$ estimated from ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$;
+3) Estimate $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ with icosahedron optical flow method~\cref{sec:approach:warping}, then backward rotate warp the $\tilde{\mathcal{F}}_t$ with $\bar{R}$ and $\hat{R}$ to generate the panoramic optical flow $\mathcal{F}_t$.
 
 
 % 
 Comparing to the perspective image, the equirectangular image is continuous in all direction, in ~\cref{sec:approach:definition} we analyze and define the panoramic optical flow.
 %
-To solve the equrictangular image distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
+To solve the equirectangular image distortion especially at the top and bottom, this method hires gnomonic projection~\cite{?} to project the equirectangular image to tangent image~\cite{?}, and base on cubemap and regular icosahedron vertex distribution to uniform sample the equirectangular image ~\cref{sec:approach:projstit} to solve the problem~\cref{sec:approach:projstit}.
 %
 At the same time, to compensate the tangent images narrow field of view, the global rotation operation is used on target image $I_{t+1}$ align to $I_t$ ~\cref{sec:approach:warping}
 But comparing to a panoramic image the tangent image's available viewport is small, not larger than $\pi$ and just $\frac{\pi}{2}$ in cubemap projection.
@@ -27,27 +27,27 @@ But comparing to a panoramic image the tangent image's available viewport is sma
 \subsection{Panoramic Optical Flow Definition}
 \label{sec:approach:definition}
 
-The panoramic image is enclosed in any direction on the image and the coordinate is continuous, e.g. the pixel location is overflowed the image width will wrap around to another side of the image.
+The panoramic image coordinate is enclosed and continuous in any direction on the image, e.g. the pixel location is overflowed the image width will wrap around to another side of the image.
 The panoramic optical flow succeeds the features, the pixel's motion vector can overflow the image size.
 %It's different from perspective image optical which ~\cite{??}. 
 This is one reason the perspective image optical flow method can not track well the pixel moving out the equirectangular image boundary, because it does not suppose the coordinate is wrap-around, ~\cref{?}
 \TODO{Add image two show the warp-around optical flow and un-warp-around optical flow.}
 %
 But it will introduce ambiguity to the panoramic optical flow, 
-%the stright line in the 3D space will project to a segement on one great circle.
+%the straight line in the 3D space will project to a segment line on one great circle.
 there are two paths from the source point to the target point along the great-circle on the sphere ~\cite{??}.
 To define the panoramic optical flow on equirectangular image format, we propose the following assumes:
-the pixel motion is always moving along the the shortest path of great circle;
+the pixel motion is always moving along the shortest path of great circle;
 
 % in the ERP image range ?
-The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position si beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
+The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position is beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
 But the pixel along the y-axis is continuous.
-the pixel motion is always along , which is not larger than 0.5$\pi$.
-
+The pixel motion is always along, which is not larger than 0.5$\pi$.
+% the benefits of ERP optical flow
 \TODO{Summarize the benefit of this expression? Why use the warp-around optical flow?}
-Sample is continue 
-visualisation friendly
-close the spherical coordinate expression
+%Sample is continue 
+%visualisations friendly
+%close the spherical coordinate expression
 
 \begin{figure}[hbt!]
 	\centering
@@ -56,91 +56,84 @@ close the spherical coordinate expression
 	\label{fig:app:warparound}
 \end{figure}
 
-
 \subsection{Projection \& Stitching}
 \label{sec:approach:projstit}
 
-The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosehedron face image (tangent image) optical flow.
+% why need projection and stitch?
+To mitigate the ERP image distortion, we hire the perspective image optical flow methods with gnomonic projection to un-distort the ERP image in both cubemap and icosahedron sampling.
+% how to do it 
+The cubemap and icosahedron optical flow methods composes with 3 steps:
+project the ERP image with gnomonic projection \cite{?} to generate perspective image i.e. tangent images, with cubemap and icosahedron sampling respectively \cite{?}\cite{?};
+use perspective image optical flow method to estimate each tangent image optical flow;
+stitch each tangent images optical flow back to ERP format.
+% more detail
+The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
 
-The meth0d composes with 3 steps:
- equirectangular image projection project part of the images pair to perspective images, e.g. tangent images, respectively to get ride of distortion;
- perspective image optical flow estimation to calculate each tangent image optical flow;
- and optical flow stitching to blend each faces' optical flow back to equirectangular format. 
- 
- The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
+\textbf{Equirectangular Image Projection}.
+% tangent image generation
+As \cite{zhao2020spherical} the gnomonic projection is used to generate the tangent images ~\cite{??}, which is a perspective image projected from the sphere surface at tangent point on the united sphere surface.
+% sampling points selection (Tangent/Center points selection.)
+With different tangent point selection, the tangent images cover the different spherical surface area and image field of view (FOV).
+%
+For estimating the multi-scale motion and uniform sample the sphere surface, the tangent points selected with inscribe sphere points of regular cubemap and regular icosahedron, which are the most common convex regular polyhedron and have different FOV~\cite{?}.
+%
+The tangent image of cubemap has wider FOV than the tangent image of icosahedron, so cubemap can estimate a larger span motion vector from the tangent image, but its PPI is smaller than the icosahedron's when they are in the same tangent image resolution.
+% tangent images padding
+To increase the tangent images FOV and improve the optical flow near the image boundary ~\cite{?}, we use tangent image padding to increase more area and extend the tangent image boundary, shown as \cref{fig:approach:projection}.
 
-The RGB image projection project the point from sphere surface to tangent plan to generate perspective image.~\cite{??}
-The optical flow stitching 
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.35\linewidth]{example-image}
+	\caption{Image Cubemap and Ico projection with padding. \TODO{Image show the cubemap and ico projection result and sampling points \& padding area with padding size.}}
+	\label{fig:approach:projection}
+\end{figure}
 
-\textbf{Equirectangular Image Projection}
-
-% why 
-
-The equirectangular RGB image projection use gnomonic projection to generate the tangent images ~\cite{??}, which is perspective image doesn't have distortion.
-
-When hire the gnomonic porject to project the sphere surface to know the 
-
-To make the tangent images uniform sample the sphere surface, the tangent points should uniformly distribute on the surface of the unit sphere.~\cite{??}
-For cover different we select the 
-The regular polygon ~\cite{??} 
-
-% how to select the samplin points?
-
-Set the tangent point $S$ as the centre point of the projection, who longitude and latitude is $(\theta_0, \phi_0)$,
-The sphercial points is $(\theta, \phi)$
-
-project the panoramic image to perspective images.
-
-%Tangent/Center points selection.
-Use cubemap or Regular icosahedron, which is a convex polyhedron with 20 faces, 30 edges and 12 vertices.
-
-For the perspective image to cover different field of view (FoV)  to estimate the different scale motion, the sampling point selection regular cubemap and regular icosahedron's inscribe sphere points, which are the most common regular polygon and have different FoV. ~\cite{?}
-
-The cubemap's face has wider FoV than the icosahedron's face, which can estimate a larger span motion vector from the tangent image, but Its PPI is smaller than the icosahedron's when they are in the same resolution.
-
-\TODO{CubeMap and ICO's face FOV range. And diagram to show the .}
-
-\textbf{Perspective optical flow stitching}
-
+\textbf{Perspective optical flow stitching}.
+% how to stitch
+%The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosehedron face image (tangent image) optical flow.
 Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
-So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images. 
-
+So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
+% blending 
+The weight compose with 
+The padding area need blending
+% blending method
+\TODO{Visualized different weight and blend result, and show each face's optical flow.}
 \begin{equation}
 W_{face} =
 \end{equation}
 
-
-The weight compose with 
-
-\TODO{How to compute the weight and blending? Equation, and Visualized different weight and blend result, and show each face's optical flow.}
-
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=0.35\linewidth]{example-image}
+	\caption{Optical flow stitching blending weight visualization.}
+	\label{fig:approach:blendweight}
+\end{figure}
 
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-Inspired by the warping base optical flow \cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FoV and reduce the large pixel motion spane.
+Inspired by the warping base optical flow~\cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FoV and reduce the large pixel motion span.
 The global rotation $R$ compose of horizontal and vertical rotation extracted from the panoramic optical flow to rotate all pixels in the equirectangular image.
-The horizontal rotation extract from the optcal flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixle number and $W$ is image width in pixel.
-The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the euqation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
+The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
+The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
-\textbf{Image global rotation warping.}
-The image warp, the rotation to warp the image, alignt the 
-
-
-%% How to convert the rough optical flow to rotation?
-Use panoramic images optical flow estimation rotation to roughly align the two images.
-Extract global rotation from panoramic optical flow.
-
-
-\textbf{Panoramic Optical Flow rotation.}
-The optical flow warping, to warp the final optical flow to restore the original images optical flow.
-
-The $f(u,v)$ compose with $f_1(u,v)$ and $f_2(u,v)$, which is the displacement in image's horizontal direction $x$ and vertical direction $y$ respectively.
-Optical flow 
-$I_{tar}(u',v')$ is corresponding the pixel $I_{src}(u + f_1(u,v), v + f_2(u,v))$.
-The optical flow $\textbf{f}$ is estimated pixel displacement vector $f(u,v)$ for each pixel $(u,v)$ in a sequence image pair from source image $I_{src}$ to target image $I_{tar}$.s
-
-
+\textbf{Image Global Rotation Warping.}
+After extract the global rotation $R$ from optical flow, rotate the target image $I_{t+1}$ with $R$ from alignment to the source image $I_{t}$ with the equirectangular image rotation in 3D space. ~\cite{zioulis2019spherical}.
 %
-%The tangent image which projected from a distorted image to a plain image have been proposed image segmentation and on \cite{eldercvpr2020} \CR{Do you mean \cite{EderSLF2020}?}
+The global rotation warping based on the coarse to fine principle, 
+Firstly, use panoramic images optical flow estimated $\bar{R}$ to roughly align the $I_{t+1}$ for getting rid of the ego-motion, then use the cubemap optical flow to fine-tune the alignment.
+
+\textbf{Panoramic Optical Flow Global Rotation Warping.}
+To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.
+% 
+When estimating the optical flow only the target image $I_{t+1}$ is warped, so just need to rotate the end point of $\tilde{\mathcal{F}}_t$, i.e $\tilde{\mathcal{F}}^{EP}_t$. 
+%
+To rotate the panoramic image, first transform it to 3D space with $\mathcal{P}$, and back to equirectangular image with $\mathcal{P}^{-1}$.
+
+\begin{equation}\label{equ:approach:globalwarp}
+\begin{split}
+	\mathcal{F}_{(i,j)} &= \mathcal{F}^{EP}_{(i,j)} - (i,j)  \\
+				&= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
+\end{split}
+\end{equation}
