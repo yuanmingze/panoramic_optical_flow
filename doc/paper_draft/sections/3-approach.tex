@@ -112,7 +112,7 @@ W_{face} =
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-Inspired by the warping base optical flow~\cite{?} we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FOV and reduce the large pixel motion span.
+Inspired by the warping-based optical flow~\cite{BroxBPW2004}, we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FOV and reduce the large pixel motion span.
 The global rotation $R$ compose of horizontal and vertical rotation extracted from the panoramic optical flow to rotate all pixels in the equirectangular image.
 The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
 The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
