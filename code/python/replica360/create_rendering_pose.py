@@ -142,7 +142,7 @@ def gen_circle_path(scene_name, steps, radius, path_csv_file, center_csv_file,
         if lock_direction_enable:
             camera_rotation_x = initial_rotation[0]
             camera_rotation_y = initial_rotation[1]
-            camera_rotation_z = rad / math.pi * 180
+            camera_rotation_z =  np.degrees(rad)# rad / math.pi * 180
             spot += [camera_rotation_x, camera_rotation_y, camera_rotation_z]
         else:
             spot += [0, 0, 0]
@@ -161,13 +161,58 @@ def gen_circle_path(scene_name, steps, radius, path_csv_file, center_csv_file,
     print("output path 3D model file {}".format(path_obj_file))
 
 
+def generate_line_path(scene_name, line_segment_size, line_length, path_csv_file, center_csv_file,
+                              center_point, center_point_rotation):
+    """
+    The line is parallel to x-axis.
+    """
+    cx = center_point[0]
+    cy = center_point[1]
+    cz = center_point[2]
+
+    segment_length = float(line_length) / line_segment_size 
+    x_start = cx - line_length / 2.0
+    navigable_positions = []
+    counter = 0
+    for segments_index in range(0, line_segment_size):
+        # skip the position out the circle
+        spot = [counter]
+        counter = counter + 1
+        # camera position
+        position_x = x_start + segment_length * segments_index
+        position_y = cy 
+        position_z = cz
+        spot += [position_x, position_y, position_z]
+
+        # camera orientation (outward)
+        spot += center_point_rotation
+
+        navigable_positions.append(spot)
+
+    # output camera pose file for render
+    with open(path_csv_file, 'w') as f:
+        f.writelines(' '.join(str(j) for j in i) + '\n' for i in navigable_positions)
+    print("output path file {}".format(path_csv_file))
+
+    # output the camera centre csv file
+    with open(center_csv_file, 'w') as f:
+        f.writelines("0 {} {} {} {} {} {} \n".format(cx, cy, cz, 0.0, 0.0, 0.0))
+    print("output centre file {}".format(center_csv_file))
+
+    # output camera position obj file
+    path_obj_file = path_csv_file + ".obj"
+    create_camera_obj([cx, cy, cz + 0.07], navigable_positions, path_obj_file)
+    print("output path 3D model file {}".format(path_obj_file))
+
+    return counter
+
 def generate_path(root_dir, config):
     """
     @return: path_csv_file, center_csv_file
     """
     # root_dir = pathlib.Path(root_dir_)
     scene_name = config["scene_name"]
-    nsteps = config["camera_traj"]["circle_step_number"]
+
     radius = config["camera_traj"]["radius"]
     center_point_position = [
         config["camera_traj"]["center_position"]["x"],
@@ -181,7 +226,6 @@ def generate_path(root_dir, config):
     lock_direction_enable = config["camera_traj"]["lock_direction"]
     path_type = config["camera_traj"]["type"]
 
-    print("generate camera path for {}, view number is {}, radius is {}.".format(scene_name, nsteps, radius))
     print("center position is {}, rotation is {}.".format(center_point_position, center_point_rotation))
 
     path_csv_file = None
@@ -211,6 +255,9 @@ def generate_path(root_dir, config):
         path_csv_file = root_dir + output_filename
         center_csv_file = root_dir + output_center_filename
 
+        nsteps = config["camera_traj"]["circle_step_number"]
+        print("generate camera path for {}, view number is {}, radius is {}.".format(scene_name, nsteps, radius))
+
         gen_circle_path(scene_name, nsteps, radius,
                         path_csv_file, center_csv_file, center_point=center_point_position,
                         initial_rotation=center_point_rotation,
@@ -228,6 +275,15 @@ def generate_path(root_dir, config):
         grid_size = config["camera_traj"]["grid_size"]
         frame_number = generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, center_csv_file,
                                   center_point=center_point_position, lock_direction_enable=lock_direction_enable)
+
+    elif path_type == "line":
+        output_filename = "line.csv"
+        output_center_filename = "line_center.csv"
+        path_csv_file = root_dir + "/" + output_filename
+        center_csv_file = root_dir + "/" + output_center_filename
+        grid_size = config["camera_traj"]["grid_size"]
+        frame_number =  generate_line_path(scene_name, grid_size, radius, path_csv_file, center_csv_file,
+                                  center_point=center_point_position, center_point_rotation = center_point_rotation)
 
     else:
         raise RuntimeError("Do not support {} camera path".format(path_type))

@@ -366,7 +366,7 @@ def face_meshgrid(face_erp_range_sphere_list, erp_image_height):
 
     # 1) get ERP image's pix
     # els corresponding tangent image location
-    print(f"{face_erp_x_min} {face_erp_x_max} {face_erp_y_min} {face_erp_y_max}")
+    # print(f"{face_erp_x_min} {face_erp_x_max} {face_erp_y_min} {face_erp_y_max}")
     face_erp_x_grid = np.linspace(face_erp_x_min, face_erp_x_max, face_erp_x_max - face_erp_x_min + 1)
     face_erp_y_grid = np.linspace(face_erp_y_min, face_erp_y_max, face_erp_y_max - face_erp_y_min + 1)
     face_erp_x, face_erp_y = np.meshgrid(face_erp_x_grid, face_erp_y_grid)

@@ -50,11 +50,16 @@ The pixel motion is always along, which is not larger than 0.5$\pi$.
 %close the spherical coordinate expression
 
 \begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=0.80\linewidth]{images/wrap-around-0.jpg}
-	\caption{Panoramic Optical Flow.}
-	\label{fig:app:warparound}
+	\begin{center}
+		\subfigure[Source Image]{\includegraphics[width=0.23\linewidth]{images/wraparound/src_image.png}}
+		\subfigure[Target Image]{\includegraphics[width=0.23\linewidth]{images/wraparound/tar_image.png}} 
+		\subfigure[Perspecitve Optical Flow]{\includegraphics[width=0.23\linewidth]{images/wraparound/src2tar.png}}
+		\subfigure[Warp around]{\includegraphics[width=0.17\linewidth]{images/wraparound/wraparound.png}}
+	\end{center}
+	\caption{\label{fig:app:warparound}
+		Panoramic Optical Flow.}
 \end{figure}
+
 
 \subsection{Projection \& Stitching}
 \label{sec:approach:projstit}
@@ -82,10 +87,12 @@ The tangent image of cubemap has wider FOV than the tangent image of icosahedron
 To increase the tangent images FOV and improve the optical flow near the image boundary ~\cite{?}, we use tangent image padding to increase more area and extend the tangent image boundary, shown as \cref{fig:approach:projection}.
 
 \begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=0.75\linewidth]{images/projection_00.jpg}
-	\caption{Image Cubemap and Ico projection with padding. \TODO{Image show the cubemap and ico projection result and sampling points \& padding area with padding size.}}
-	\label{fig:approach:projection}
+	\begin{center}
+		\subfigure[Gnomonic Projection]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image_6.png}}
+		\subfigure[Target Image Padding]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image.pdf}} 
+	\end{center}
+	\caption{\label{fig:approach:projection}
+		Image Cubemap and Ico projection with padding. \TODO{Image show the cubemap and ico projection result and sampling points \& padding area with padding size.}}
 \end{figure}
 
 \textbf{Perspective optical flow stitching}.

@@ -1,4 +1,5 @@
 import configuration
+from configuration import ReplicaConfig
 
 import json
 import os
@@ -14,11 +15,11 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-class ReplicaRenderConfig(configuration.ReplicaConfig):
+class ReplicaRenderConfig(ReplicaConfig):
     """Replica dataset rendering configuration.
     """
     # 1) the output root folder
-    output_root_dir = "D:/workdata/opticalflow_data/replic_cubemap/"
+    output_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
     output_cubemap_dir = "cubemap/"
     output_pano_dir = "pano/"
     config_json_filename = "config.json"
@@ -157,6 +158,10 @@ def render_panoramic_datasets(render_configs):
 
 
 if __name__ == "__main__":
+    folder_list = [
+        "office_3_line_1k_0"
+    ]
+
     render_config = ReplicaRenderConfig()
-    render_config.render_folder_names = ["room_0"]  # room_0
+    render_config.render_folder_names = folder_list
     render_panoramic_datasets(render_config)
