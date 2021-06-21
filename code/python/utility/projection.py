@@ -278,7 +278,7 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
     else:
         log.error("Do not support rotation data type {}.".format(type(rotation)))
 
-    flow_vis.flow_value_to_color(end_points_array)
+    # flow_vis.flow_value_to_color(end_points_array)
     rotation_flow_u = ndimage.map_coordinates(end_points_array[:, :, 0], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
     rotation_flow_v = ndimage.map_coordinates(end_points_array[:, :, 1], [end_points_array_yv, end_points_array_xv], order=1, mode='wrap')
 

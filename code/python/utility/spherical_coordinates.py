@@ -82,38 +82,65 @@ def get_angle_uv(points_A_theta, points_A_phi,
                  points_B_theta, points_B_phi,
                  points_C_theta, points_C_phi):
     """
-    # TODO test this function
     @see get_angle
-    
-    https://en.wikipedia.org/wiki/Spherical_trigonometry 
-    Half-angle and half-side formulae
-
     :return: the angle between AB and AC
     """
     length_AB = great_circle_distance_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, radius=1)
     length_AC = great_circle_distance_uv(points_A_theta, points_A_phi, points_C_theta, points_C_phi, radius=1)
     length_BC = great_circle_distance_uv(points_B_theta, points_B_phi, points_C_theta, points_C_phi, radius=1)
+    get_angle_from_length(length_AB, length_AC,  length_BC)
 
+
+def get_angle_from_length(length_AB, length_AC,  length_BC):
+    """
+    return the angle in radians between length_AB and length_AC.
+    
+    https://en.wikipedia.org/wiki/Spherical_trigonometry 
+     Half-angle and half-side formulae
+
+    https://en.wikipedia.org/wiki/Solution_of_triangles#Solving_spherical_triangles
+   
+    :param length_AB: the side length of AB
+    :type length_AB: numpy 
+    :param length_AC: the side length of AC
+    :type length_AC: numpy
+    :param length_BC: the side length of BC
+    :type length_BC: numpy
+    :return: the angle between length_AB and length_AC.
+    :rtype: numpy
+    """
     # # with the arccos
     # data = (np.cos(length_BC) - np.cos(length_AC) * np.cos(length_AB)) / (np.sin(length_AC) * np.sin(length_AB))
     # # remove the float error
     # if (np.abs(data) > (1.0 + np.finfo(float).eps * 100)).any():
     #     raise RuntimeError("the angle_A is not in range [-1,1]")
     # else:
-    #     data[data > 1.0] = 1.0
-    #     data[data < -1.0] = -1.0
-    # angle_A = np.arccos(data) - np.pi
+    #     # data[data > 1.0] = 1.0
+    #     if data > 1.0:
+    #         data = 1.0
+    #     # data[data < -1.0] = -1.0
+    #     if data < -1.0:
+    #         data = -1.0
+    # angle_A = np.arccos(data) 
 
     # with tangent two avoid the error of Float
     s = 0.5 * (length_BC + length_AC + length_AB)
     numerator = np.sin(s-length_AC) * np.sin(s-length_AB)
     denominator = np.sin(s) * np.sin(s-length_BC)
-    if denominator[denominator == 0].any():
+    if (denominator == 0).any():
         # log.warn("The angle_A contain NAN")
         denominator[denominator == 0] = pow(0.1, 10)
     temp_data = numerator / denominator
-    # angle_sign = np.sign(temp_data)
     angle_A = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
+    # angle_A = 2*np.pi - angle_A # second solution
+
+    # check constraints
+    indices_1 = (np.abs(np.pi - length_AB) - np.abs(np.pi-length_AC)) > np.abs(np.pi-length_BC)
+    indices_2 = (np.abs(np.pi-length_BC) > (np.abs(np.pi-length_AB) + np.abs(np.pi-length_AC)))
+    indices = np.logical_or(indices_1, indices_2)
+    if indices.any():
+        log.warn("side length check constraints wrong.")
+        angle_A[indices] = np.NaN
     return angle_A
 
 

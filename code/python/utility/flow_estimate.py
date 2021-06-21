@@ -16,6 +16,12 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
+def raft():
+    pass
+
+def pwcnet():
+    pass
+
 def of_methdod_DIS(image_src_original, image_tar_original):
     """Compute the DIS flow.
 
@@ -62,8 +68,7 @@ def of_methdod_DIS(image_src_original, image_tar_original):
 
 def debug_save_of(of_data, output_filepath):
     """Visualize optical flow both warp-around and un-warp-around."""
-    flow_vis.flow_value_to_color(of_data)
-
+    # flow_vis.flow_value_to_color(of_data)
     of_data_visual = flow_vis.flow_to_color(of_data)
     image_io.image_save(of_data_visual, output_filepath + "_flow_wraparound.jpg")
     of_data_warparound = flow_postproc.erp_of_unwraparound(of_data)

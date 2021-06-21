@@ -6,18 +6,30 @@ from utility import image_io
 from utility import flow_warp
 from utility import flow_vis
 
-from utility.logger import Logger
-
 import numpy as np
 import os
-from logger import Logger
+import math
+
+
+from utility.logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
 
 
-log = Logger(__name__)
-log.logger.propagate = False
+def test_get_angle_uv():
+    # 0) from http://128.192.17.191/EMAT6680Fa08/Broderick/unit/day2.html
+    # print(sc.get_angle_from_length([0.136 * np.pi], [0.303 * np.pi],  [0.226 * np.pi]) / np.pi)  # 0.261
+    # print(sc.get_angle_from_length([0.226 * np.pi], [0.303 * np.pi],  [0.136 * np.pi]) / np.pi)  # 0.153
+    # print(sc.get_angle_from_length([0.226 * np.pi], [0.136 * np.pi],  [0.303 * np.pi]) / np.pi)  # 0.633
+
+    length_AB_arr = np.array([0.136 * np.pi, 0.226 * np.pi, 0.226 * np.pi])
+    length_AC_arr = np.array([0.303 * np.pi, 0.303 * np.pi, 0.136 * np.pi])
+    length_BC_arr = np.array([0.226 * np.pi, 0.136 * np.pi, 0.303 * np.pi])
+    angle_A_arr = sc.get_angle_from_length(length_AB_arr, length_AC_arr, length_BC_arr)
+    print(angle_A_arr)
+
+    print(math.degrees((sc.get_angle_from_length(math.radians(76.4111), math.radians(58.31),  math.radians(105.74295)))))  # 118.50778
 
 
 def test_great_circle_distance_uv():
@@ -134,4 +146,5 @@ if __name__ == "__main__":
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
     # test_rotate_array_coord(erp_src_image_filepath)
     # test_rotate_erp_array(erp_src_image_filepath)
-    test_rotation2erp_motion_vector(erp_src_image_filepath)
+    # test_rotation2erp_motion_vector(erp_src_image_filepath)
+    test_get_angle_uv()
