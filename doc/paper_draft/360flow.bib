@@ -103,6 +103,17 @@
 @String{WSBIM          = {Proceedings of the Workshop on Sketch-Based Interfaces and Modeling (SBIM)}}
 @String{WSCG           = {Proceedings of the International Conference in Central Europe on Computer Graphics, Visualisation and Computer Vision (WSCG)}}
 
+@InProceedings{AlbanZDGSAZD2021,
+  author        = {Georgios Albanis and Nikolaos Zioulis and Petros Drakoulis and Vasileios Gkitsas and Vladimiros Sterzentsenko and Federico Alvarez and Dimitrios Zarpalas and Petros Daras},
+  title         = {{Pano3D}: A Holistic Benchmark and a Solid Baseline for 360° Depth Estimation},
+  booktitle     = CVPRW,
+  year          = {2021},
+  pages         = {3727--3737},
+  _month         = jun,
+  abstract      = {Pano3D is a new benchmark for depth estimation from spherical panoramas. It aims to assess performance across all depth estimation traits, the primary direct depth estimation performance targeting precision and accuracy, and also the secondary traits, boundary preservation, and smoothness. Moreover, Pano3D moves beyond typical intro-dataset evaluation to inter-dataset performance assessment. By disentangling the capacity to generalize in unseen data into different test splits, Pano3D represents a holistic benchmark for 360 depth estimation. We use it as a basis for an extended analysis seeking to offer insights into classical choices for depth estimation. This results in a solid baseline for panoramic depth that follow-up works can build upon to steer future progress},
+  _url           = {https://vcl3d.github.io/Pano3D/},
+}
+
 @InProceedings{AleotPM2021,
   author    = {Filippo Aleotti and Matteo Poggi and Stefano Mattoccia},
   title     = {Learning optical flow from still images},
@@ -260,6 +271,19 @@
   doi       = {10.1109/LSP.2021.3050712},
 }
 
+@InProceedings{ChengCDWLS2018,
+  author    = {Hsien-Tzu Cheng and Chun-Hung Chao and Jin-Dong Dong and Hao-Kai Wen and Tyng-Luh Liu and Min Sun},
+  title     = {Cube Padding for Weakly-Supervised Saliency Prediction in 360° Videos},
+  booktitle = CVPR,
+  year      = {2018},
+  pages     = {1420--1429},
+  _month     = jun,
+  abstract  = {Automatic saliency prediction in 360° videos is critical for viewpoint guidance applications (e.g., Facebook 360 Guide). We propose a spatial-temporal network which is (1) unsupervisedly trained and (2) tailor-made for 360° viewing sphere. Note that most existing methods are less scalable since they rely on annotated saliency map for training. Most importantly, they convert 360° sphere to 2D images (e.g., a single equirectangular image or multiple separate Normal Field-of-View (NFoV) images) which introduces distortion and image boundaries. In contrast, we propose a simple and effective Cube Padding (CP) technique as follows. Firstly, we render the 360° view on six faces of a cube using perspective projection. Thus, it introduces very little distortion. Then, we concatenate all six faces while utilizing the connectivity between faces on the cube for image padding (i.e., Cube Padding) in convolution, pooling, convolutional LSTM layers. In this way, PC introduces no image boundary while being applicable to almost all Convolutional Neural Network (CNN) structures. To evaluate our method, we propose Wild-360, a new 360° video saliency dataset, containing challenging videos with saliency heatmap annotations. In experiments, our method outperforms all baseline methods in both speed and quality.},
+  doi       = {10.1109/CVPR.2018.00154},
+  _issn      = {1063-6919},
+  _url       = {http://openaccess.thecvf.com/content_cvpr_2018/html/Cheng_Cube_Padding_for_CVPR_2018_paper.html},
+}
+
 @InProceedings{CohenGKW2018,
   author    = {Taco S. Cohen and Mario Geiger and Jonas Koehler and Max Welling},
   title     = {Spherical {CNNs}},
@@ -327,6 +351,20 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://github.com/meder411/Tangent-Images},
 }
 
+@InProceedings{EstevAMD2018,
+  author    = {Carlos Esteves and Christine Allen-Blanchette and Ameesh Makadia and Kostas Daniilidis},
+  title     = {Learning {SO(3)} Equivariant Representations with Spherical {CNNs}},
+  booktitle = ECCV,
+  year      = {2018},
+  pages     = {52--68},
+  _month     = sep,
+  abstract  = {We address the problem of 3D rotation equivariance in convolutional neural networks. 3D rotations have been a challenging nuisance in 3D classification tasks requiring higher capacity and extended data augmentation in order to tackle it. We model 3D data with multi-valued spherical functions and we propose a novel spherical convolutional network that implements exact convolutions on the sphere by realizing them in the spherical harmonic domain. Resulting filters have local symmetry and are localized by enforcing smooth spectra. We apply a novel pooling on the spectral domain and our operations are independent of the underlying spherical resolution throughout the network. We show that networks with much lower capacity and without requiring data augmentation can exhibit performance comparable to the state of the art in standard retrieval and classification benchmarks.},
+  arxiv     = {1711.06721},
+  doi       = {10.1007/978-3-030-01261-8_4},
+  _isbn      = {978-3-030-01261-8},
+  _url       = {https://github.com/daniilidis-group/spherical-cnn},
+}
+
 @Article{FernaFPDCG2020,
   author    = {Clara Fernandez-Labrador and Jose M. Facil and Alejandro Perez-Yus and Cédric Demonceaux and Javier Civera and Jose J. Guerrero},
   title     = {Corners for Layout: End-to-End Layout Recovery from 360 Images},
@@ -354,6 +392,22 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://vcl3d.github.io/DeepPanoramaLighting/},
 }
 
+@InProceedings{GodarAB2017,
+  author    = {Clément Godard and Oisin Mac Aodha and Gabriel J. Brostow},
+  title     = {Unsupervised Monocular Depth Estimation with Left-Right Consistency},
+  booktitle = CVPR,
+  year      = {2017},
+  pages     = {6602--6611},
+  _month     = jul,
+  abstract  = {Learning based methods have shown very promising results for the task of depth estimation in single images. However, most existing approaches treat depth prediction as a supervised regression problem and as a result, require vast quantities of corresponding ground truth depth data for training. Just recording quality depth data in a range of environments is a challenging problem. In this paper, we innovate beyond existing approaches, replacing the use of explicit depth data during training with easier-to-obtain binocular stereo footage.
+
+We propose a novel training objective that enables our convolutional neural network to learn to perform single image depth estimation, despite the absence of ground truth depth data. Exploiting epipolar geometry constraints, we generate disparity images by training our network with an image reconstruction loss. We show that solving for image reconstruction alone results in poor quality depth images. To overcome this problem, we propose a novel training loss that enforces consistency between the disparities produced relative to both the left and right images, leading to improved performance and robustness compared to existing approaches. Our method produces state of the art results for monocular depth estimation on the KITTI driving dataset, even outperforming supervised methods that have been trained with ground truth depth.},
+  arxiv     = {1609.03677},
+  doi       = {10.1109/CVPR.2017.699},
+  _issn      = {1063-6919},
+  _url       = {http://visual.cs.ucl.ac.uk/pubs/monoDepth/},
+}
+
 @Article{HornS1981,
   author    = {Berthold K. P. Horn and Brian G. Schunck},
   title     = {Determining optical flow},
@@ -365,6 +419,17 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _issn      = {0004-3702},
   abstract  = {Optical flow cannot be computed locally, since only one independent measurement is available from the image sequence at a point, while the flow velocity has two components. A second constraint is needed. A method for finding the optical flow pattern is presented which assumes that the apparent velocity of the brightness pattern varies smoothly almost everywhere in the image. An iterative implementation is shown which successfully computes the optical flow for a number of synthetic image sequences. The algorithm is robust in that it can handle image sequences that are quantized rather coarsely in space and time. It is also insensitive to quantization of brightness levels and additive noise. Examples are included where the assumption of smoothness is violated at singular points or along lines in the image.},
   doi       = {10.1016/0004-3702(81)90024-2},
+}
+
+@InProceedings{HuangCCJ2017,
+  author    = {Jingwei Huang and Zhili Chen and Duygu Ceylan and Hailin Jin},
+  title     = {6-{DOF VR} videos with a single 360-camera},
+  booktitle = VR,
+  year      = {2017},
+  pages     = {37--44},
+  _month     = mar,
+  abstract  = {Recent breakthroughs in consumer level virtual reality (VR) headsets are creating a growing user-base in demand for immersive, full 3D VR experiences. While monoscopic 360-videos are perhaps the most prevalent type of content for VR headsets, they lack 3D information and thus cannot be viewed with full 6 degree-of-freedom (DOF). We present an approach that addresses this limitation via a novel warping algorithm that can synthesize new views both with rotational and translational motion of the viewpoint. This enables the ability to perform VR playback of input monoscopic 360-videos files in full stereo with full 6-DOF of head motion. Our method synthesizes novel views for each eye in accordance with the 6-DOF motion of the headset. Our solution tailors standard structure-from-motion and dense reconstruction algorithms to work accurately for 360-videos and is optimized for GPUs to achieve VR frame rates (>120 fps). We demonstrate the effectiveness our approach on a variety of videos with interesting content.},
+  doi       = {10.1109/VR.2017.7892229},
 }
 
 @InProceedings{HuiTC2018,
@@ -389,6 +454,16 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://lmb.informatik.uni-freiburg.de/Publications/2017/IMKDB17/},
 }
 
+@InProceedings{ImHRJCK2016,
+  author    = {Sunghoon Im and Hyowon Ha and François Rameau and Hae-Gon Jeon and Gyeongmin Choe and In So Kweon},
+  title     = {All-around Depth from Small Motion with A Spherical Panoramic Camera},
+  booktitle = ECCV,
+  year      = {2016},
+  _editor    = {Bastian Leibe and Jiri Matas and Nicu Sebe and Max Welling},
+  abstract  = {With the growing use of head-mounted displays for virtual reality (VR), generating 3D contents for these devices becomes an important topic in computer vision. For capturing full 360 degree panoramas in a single shot, the Spherical Panoramic Camera (SPC) are gaining in popularity. However, estimating depth from a SPC remains a challenging problem. In this paper, we propose a practical method that generates all-around dense depth map using a narrow-baseline video clip captured by a SPC. While existing methods for depth from small motion rely on perspective cameras, we introduce a new bundle adjustment approach tailored for SPC that minimizes the re-projection error directly on the unit sphere. It enables to estimate approximate metric camera poses and 3D points. Additionally, we present a novel dense matching method called sphere sweeping algorithm. This allows us to take advantage of the overlapping regions between the cameras. To validate the effectiveness of the proposed method, we evaluate our approach on both synthetic and real-world data. As an example of the applications, we also present stereoscopic panorama images generated from our depth results.},
+  doi       = {10.1007/978-3-319-46487-9_10},
+}
+
 @InProceedings{JiangHKPMN2019,
   author    = {Chiyu "Max" Jiang and Jingwei Huang and Karthik Kashinath and Prabhat and Philip Marcus and Matthias Niessner},
   title     = {Spherical {CNNs} on Unstructured Grids},
@@ -397,6 +472,32 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   abstract  = {We present an efficient convolution kernel for Convolutional Neural Networks (CNNs) on unstructured grids using parameterized differential operators while focusing on spherical signals such as panorama images or planetary signals. To this end, we replace conventional convolution kernels with linear combinations of differential operators that are weighted by learnable parameters. Differential operators can be efficiently estimated on unstructured grids using one-ring neighbors, and learnable parameters can be optimized through standard back-propagation. As a result, we obtain extremely efficient neural networks that match or outperform state-of-the-art network architectures in terms of performance but with a significantly lower number of network parameters. We evaluate our algorithm in an extensive series of experiments on a variety of computer vision and climate science tasks, including shape classification, climate pattern segmentation, and omnidirectional image semantic segmentation. Overall, we present (1) a novel CNN approach on unstructured grids using parameterized differential operators for spherical signals, and (2) we show that our unique kernel parameterization allows our model to achieve the same or higher accuracy with significantly fewer network parameters.},
   arxiv     = {1901.02039},
   _url       = {https://arxiv.org/abs/1901.02039},
+}
+
+@Article{JiangSZDH2021,
+  author    = {Hualie Jiang and Zhe Sheng and Siyu Zhu and Zilong Dong and Rui Huang},
+  title     = {{UniFuse}: Unidirectional Fusion for 360° Panorama Depth Estimation},
+  journal   = {IEEE Robotics and Automation Letters},
+  year      = {2021},
+  volume    = {6},
+  number    = {2},
+  pages     = {1519--1526},
+  _month     = apr,
+  _issn      = {2377-3766},
+  abstract  = {Learning depth from spherical panoramas is becoming a popular research topic because a panorama has a full field-of-view of the environment and provides a relatively complete description of a scene. However, applying well-studied CNNs for perspective images to the standard representation of spherical panoramas, i.e., the equirectangular projection, is suboptimal, as it becomes distorted towards the poles. Another representation is the cubemap projection, which is distortion-free but discontinued on edges and limited in the field-of-view. This letter introduces a new framework to fuse features from the two projections, unidirectionally feeding the cubemap features to the equirectangular features only at the decoding stage. Unlike the recent bidirectional fusion approach operating at both the encoding and decoding stages, our fusion scheme is much more efficient. Besides, we also designed a more effective fusion module for our fusion scheme. Experiments verify the effectiveness of our proposed fusion strategy and module, and our model achieves state-of-the-art performance on four popular datasets. Additional experiments show that our model also has the advantages of model complexity and generalization capability.},
+  doi       = {10.1109/LRA.2021.3058957},
+}
+
+@InProceedings{JinXZZTXYG2020,
+  author    = {Lei Jin and Yanyu Xu and Jia Zheng and Junfei Zhang and Rui Tang and Shugong Xu and Jingyi Yu and Shenghua Gao},
+  title     = {Geometric Structure Based and Regularized Depth Estimation From 360 Indoor Imagery},
+  booktitle = CVPR,
+  year      = {2020},
+  pages     = {886--895},
+  _month     = jun,
+  abstract  = {Motivated by the correlation between the depth and the geometric structure of a 360 indoor image, we propose a novel learning-based depth estimation framework that leverages the geometric structure of a scene to conduct depth estimation. Specifically, we represent the geometric structure of an indoor scene as a collection of corners, boundaries and planes. On the one hand, once a depth map is estimated, this geometric structure can be inferred from the estimated depth map; thus, the geometric structure functions as a regularizer for depth estimation. On the other hand, this estimation also benefits from the geometric structure of a scene estimated from an image where the structure functions as a prior. However, furniture in indoor scenes makes it challenging to infer geometric structure from depth or image data. An attention map is inferred to facilitate both depth estimation from features of the geometric structure and also geometric inferences from the estimated depth map. To validate the effectiveness of each component in our framework under controlled conditions, we render a synthetic dataset, Shanghaitech-Kujiale Indoor 360 dataset with 3550 360 indoor images. Extensive experiments on popular datasets validate the effectiveness of our solution. We also demonstrate that our method can also be applied to counterfactual depth.},
+  doi       = {10.1109/CVPR42600.2020.00097},
+  _url       = {https://svip-lab.github.io/dataset/indoor_360.html},
 }
 
 @InProceedings{KroegTDV2016,
@@ -412,6 +513,19 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _isbn      = {978-3-319-46493-0},
 }
 
+@InProceedings{LaiXLL2019,
+  author    = {Po Kong Lai and Shuang Xie and Jochen Lang and Robert Laganière},
+  title     = {Real-time panoramic depth maps from omni-directional stereo images for 6 {DoF} videos in virtual reality},
+  booktitle = VR,
+  year      = {2019},
+  pages     = {405--412},
+  _month     = mar,
+  abstract  = {In this paper we present an approach for 6 DoF panoramic videos from omni-directional stereo (ODS) images using convolutional neural networks (CNNs). More specifically, we use CNNs to generate panoramic depth maps from ODS images in real-time. These depth maps would then allow for re-projection of panoramic images thus providing 6 DoF to a viewer in virtual reality (VR). As the boundaries of a panoramic image must touch in order to envelope a viewer, we introduce a border weighted loss function as well as new error metrics specifically tailored for panoramic images. We show experimentally that training with our border weighted loss function improves performance by benchmarking a baseline skip-connected encoder-decoder style network as well as other state-of-the-art methods in depth map estimation from mono and stereo images. Finally, a practical application for VR using real world data is also demonstrated.},
+  doi       = {10.1109/VR.2019.8798016},
+  _issn      = {2642-5254},
+  _url       = {https://github.com/pokonglai/ods-net},
+}
+
 @InProceedings{LeeJYJY2019,
   author    = {Yeon Kun Lee and Jaeseok Jeong and Jong Seob Yun and Cho Won June and Kuk-Jin Yoon},
   title     = {{SpherePHD}: Applying {CNNs} on a Spherical {PolyHeDron} Representation of 360° Images},
@@ -424,6 +538,32 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/CVPR.2019.00940},
   _issn      = {1063-6919},
   _url       = {https://arxiv.org/abs/1811.08196},
+}
+
+@Article{Li2008,
+  author    = {Shigang Li},
+  title     = {Binocular Spherical Stereo},
+  journal   = {IEEE Transactions on Intelligent Transportation Systems},
+  year      = {2008},
+  volume    = {9},
+  number    = {4},
+  pages     = {589--600},
+  _month     = dec,
+  _issn      = {1524-9050},
+  abstract  = {A fish-eye camera has a wide field of view (FOV), and the realization of a binocular fish-eye stereo for sensing the surrounding 3-D information of the environment around a vehicle is useful for safe driving. However, since a fish-eye camera may have a wider-than-hemispherical FOV, the conventional stereo approach of obtaining a perspective image based on the pinhole camera model cannot directly be applied. However, using a spherical camera model and defining the disparity of a spherical stereo, the conventional binocular stereo problem is reformulated as a binocular spherical stereo problem. A binocular spherical stereo is a generalized paradigm that can cope with cameras having any FOV, including conventional cameras and fish-eye cameras. Moreover, by transforming the rectified spherical images to latitude-longitude representation, the feature point matching of the spherical stereo images can be sped up by using the processing used for perspective stereo images. The effectiveness of this approach is demonstrated by realizing a binocular spherical stereo using a pair of fish-eye cameras. Finally, the application of the proposed approach to vehicles in the future is considered.},
+  doi       = {10.1109/TITS.2008.2006736},
+  keywords  = {3-D information, driving assistance, fish-eye camera, stereo vision},
+}
+
+@Article{LiDCTSLF2021,
+  author    = {Zhengqi Li and Tali Dekel and Forrester Cole and Richard Tucker and Noah Snavely and Ce Liu and William T. Freeman},
+  title     = {{MannequinChallenge}: Learning the Depths of Moving People by Watching Frozen People},
+  journal   = PAMI,
+  year      = {2021},
+  _issn      = {1939-3539},
+  abstract  = {We present a method for predicting dense depth in scenarios where both a monocular camera and people in the scene are freely moving. Existing methods for recovering depth for dynamic, non-rigid objects from monocular video impose strong assumptions on the objects' motion and may only recover sparse depth. In this paper, we take a data-driven approach and learn human depth priors from a new source of data: thousands of Internet videos of people imitating mannequins, i.e., freezing in diverse, natural poses, while a hand-held camera tours the scene. Because people are stationary, training data can be generated using multi-view stereo reconstruction. At inference time, our method uses motion parallax cues from the static areas of the scenes to guide the depth prediction. We demonstrate our method on real-world sequences of complex human actions captured by a moving hand-held camera, show improvement over state-of-the-art monocular depth prediction methods, and show various 3D effects produced using our predicted depth.},
+  doi       = {10.1109/TPAMI.2020.2974454},
+  _url       = {https://mannequin-depth.github.io/},
 }
 
 @InProceedings{LucasK1981,
@@ -446,6 +586,21 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/ACCESS.2019.2944766},
 }
 
+@Article{MatzeCEKS2017,
+  author    = {Kevin Matzen and Michael F. Cohen and Bryce Evans and Johannes Kopf and Richard Szeliski},
+  title     = {Low-cost 360 Stereo Photography and Video Capture},
+  journal   = ProcSIGGRAPH,
+  year      = {2017},
+  volume    = {36},
+  number    = {4},
+  pages     = {148:1--12},
+  _month     = jul,
+  _issn      = {0730-0301},
+  abstract  = {A number of consumer-grade spherical cameras have recently appeared, enabling affordable monoscopic VR content creation in the form of full 360° X 180° spherical panoramic photos and videos. While monoscopic content is certainly engaging, it fails to leverage a main aspect of VR HMDs, namely stereoscopic display. Recent stereoscopic capture rigs involve placing many cameras in a ring and synthesizing an omni-directional stereo panorama enabling a user to look around to explore the scene in stereo. In this work, we describe a method that takes images from two 360° spherical cameras and synthesizes an omni-directional stereo panorama with stereo in all directions. Our proposed method has a lower equipment cost than camera-ring alternatives, can be assembled with currently available off-the-shelf equipment, and is relatively small and light-weight compared to the alternatives. We validate our method by generating both stills and videos. We have conducted a user study to better understand what kinds of geometric processing are necessary for a pleasant viewing experience. We also discuss several algorithmic variations, each with their own time and quality trade-offs.},
+  doi       = {10.1145/3072959.3073645},
+  keywords  = {image stitching, panoramas, stereo, virtual reality},
+}
+
 @Article{MenzeHG2018,
   author    = {Moritz Menze and Christian Heipke and Andreas Geiger},
   title     = {Object Scene Flow},
@@ -458,6 +613,40 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   abstract  = {This work investigates the estimation of dense three-dimensional motion fields, commonly referred to as scene flow. While great progress has been made in recent years, large displacements and adverse imaging conditions as observed in natural outdoor environments are still very challenging for current approaches to reconstruction and motion estimation. In this paper, we propose a unified random field model which reasons jointly about 3D scene flow as well as the location, shape and motion of vehicles in the observed scene. We formulate the problem as the task of decomposing the scene into a small number of rigidly moving objects sharing the same motion parameters. Thus, our formulation effectively introduces long-range spatial dependencies which commonly employed local rigidity priors are lacking. Our inference algorithm then estimates the association of image segments and object hypotheses together with their three-dimensional shape and motion. We demonstrate the potential of the proposed approach by introducing a novel challenging scene flow benchmark which allows for a thorough comparison of the proposed scene flow approach with respect to various baseline models. In contrast to previous benchmarks, our evaluation is the first to provide stereo and optical flow ground truth for dynamic real-world urban scenes at large scale. Our experiments reveal that rigid motion segmentation can be utilized as an effective regularizer for the scene flow problem, improving upon existing two-frame scene flow methods. At the same time, our method yields plausible object segmentations without requiring an explicitly trained recognition model for a specific object class.},
   doi       = {10.1016/j.isprsjprs.2017.09.013},
   keywords  = {scene flow, motion estimation, motion segmentation, 3D reconstruction, active shape model, object detection},
+}
+
+@InProceedings{PintoAASG2021,
+  author    = {Giovanni Pintore and Marco Agus and Eva Almansa and Jens Schneider and Enrico Gobbetti},
+  title     = {{SliceNet}: Deep Dense Depth Estimation From a Single Indoor Panorama Using a Slice-Based Representation},
+  booktitle = CVPR,
+  year      = {2021},
+  pages     = {11536--11545},
+  abstract  = {We introduce a novel deep neural network to estimate a depth map from a single monocular indoor panorama. The network directly works on the equirectangular projection, exploiting the properties of indoor 360 images. Starting from the fact that gravity plays an important role in the design and construction of man-made indoor scenes, we propose a compact representation of the scene into vertical slices of the sphere, and we exploit long- and short-term relationships among slices to recover the equirectangular depth map. Our design makes it possible to maintain high-resolution information in the extracted features even with a deep network. The experimental results demonstrate that our method outperforms current state-of-the-art solutions in prediction accuracy, particularly for real-world data.},
+  _url       = {https://openaccess.thecvf.com/content/CVPR2021/html/Pintore_SliceNet_Deep_Dense_Depth_Estimation_From_a_Single_Indoor_Panorama_CVPR_2021_paper.html},
+}
+
+@Article{RanftLHSK2021,
+  author    = {René Ranftl and Katrin Lasinger and David Hafner and Konrad Schindler and Vladlen Koltun},
+  title     = {Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer},
+  journal   = PAMI,
+  year      = {2021},
+  _issn      = {1939-3539},
+  abstract  = {The success of monocular depth estimation relies on large and diverse training sets. Due to the challenges associated with acquiring dense ground-truth depth across different environments at scale, a number of datasets with distinct characteristics and biases have emerged. We develop tools that enable mixing multiple datasets during training, even if their annotations are incompatible. In particular, we propose a robust training objective that is invariant to changes in depth range and scale, advocate the use of principled multi-objective learning to combine data from different sources, and highlight the importance of pretraining encoders on auxiliary tasks. Armed with these tools, we experiment with five diverse training datasets, including a new, massive data source: 3D films. To demonstrate the generalization power of our approach we use zero-shot cross-dataset transfer, i.e. we evaluate on datasets that were not seen during training. The experiments confirm that mixing data from complementary sources greatly improves monocular depth estimation. Our approach clearly outperforms competing methods across diverse datasets, setting a new state of the art for monocular depth estimation. Some results are shown in the supplementary video at https://youtu.be/D46FzVyL9I8},
+  arxiv     = {1907.01341},
+  doi       = {10.1109/TPAMI.2020.3019967},
+  _url       = {https://github.com/intel-isl/MiDaS},
+}
+
+@InProceedings{SaikiMZHB2019,
+  author    = {Tonmoy Saikia and Yassine Marrakchi and Arber Zela and Frank Hutter and Thomas Brox},
+  title     = {{AutoDispNet}: Improving Disparity Estimation With {AutoML}},
+  booktitle = ICCV,
+  year      = {2019},
+  pages     = {1812--1823},
+  _month     = oct,
+  abstract  = {Much research work in computer vision is being spent on optimizing existing network architectures to obtain a few more percentage points on benchmarks. Recent AutoML approaches promise to relieve us from this effort. However, they are mainly designed for comparatively small-scale classification tasks. In this work, we show how to use and extend existing AutoML techniques to efficiently optimize large-scale U-Net-like encoder-decoder architectures. In particular, we leverage gradient-based neural architecture search and Bayesian optimization for hyperparameter search. The resulting optimization does not require a large-scale compute cluster. We show results on disparity estimation that clearly outperform the manually optimized baseline and reach state-of-the-art performance.},
+  doi       = {10.1109/ICCV.2019.00190},
+  _url       = {https://github.com/lmb-freiburg/autodispnet},
 }
 
 @InProceedings{SavvaKMZWJSLKMPB2019,
@@ -495,6 +684,16 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/CVPR.2019.00967},
   _issn      = {1063-6919},
   _url       = {https://github.com/sammy-su/KernelTransformerNetwork},
+}
+
+@InProceedings{SuG2017a,
+  author    = {Yu-Chuan Su and Kristen Grauman},
+  title     = {Learning Spherical Convolution for Fast Features from 360° Imagery},
+  booktitle = NIPS,
+  year      = {2017},
+  abstract  = {While 360° cameras offer tremendous new possibilities in vision, graphics, and augmented reality, the spherical images they produce make core feature extraction non-trivial. Convolutional neural networks (CNNs) trained on images from perspective cameras yield "flat" filters, yet 360° images cannot be projected to a single plane without significant distortion. A naive solution that repeatedly projects the viewing sphere to all tangent planes is accurate, but much too computationally intensive for real problems. We propose to learn a spherical convolutional network that translates a planar CNN to process 360° imagery directly in its equirectangular projection. Our approach learns to reproduce the flat filter outputs on 360° data, sensitive to the varying distortion effects across the viewing sphere. The key benefits are 1) efficient feature extraction for 360° images and video, and 2) the ability to leverage powerful pre-trained networks researchers have carefully honed (together with massive labeled image training sets) for perspective images. We validate our approach compared to several alternative methods in terms of both raw CNN output accuracy as well as applying a state-of-the-art "flat" object detector to 360° data. Our method yields the most accurate results while saving orders of magnitude in computation versus the existing exact reprojection solution.},
+  arxiv     = {1708.00919},
+  _url       = {https://arxiv.org/abs/1708.00919},
 }
 
 @InProceedings{SunSC2021,
@@ -584,6 +783,19 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {http://openaccess.thecvf.com/content_cvpr_2018/html/Sun_PWC-Net_CNNs_for_CVPR_2018_paper.html},
 }
 
+@InProceedings{TatenNT2018,
+  author    = {Keisuke Tateno and Nassir Navab and Federico Tombari},
+  title     = {Distortion-Aware Convolutional Filters for Dense Prediction in Panoramic Images},
+  booktitle = ECCV,
+  year      = {2018},
+  _editor    = {Ferrari, Vittorio and Hebert, Martial and Sminchisescu, Cristian and Weiss, Yair},
+  pages     = {732--750},
+  abstract  = {There is a high demand of 3D data for 360° panoramic images and videos, pushed by the growing availability on the market of specialized hardware for both capturing (e.g., omnidirectional cameras) as well as visualizing in 3D (e.g., head mounted displays) panoramic images and videos. At the same time, 3D sensors able to capture 3D panoramic data are expensive and/or hardly available. To fill this gap, we propose a learning approach for panoramic depth map estimation from a single image. Thanks to a specifically developed distortion-aware deformable convolution filter, our method can be trained by means of conventional perspective images, then used to regress depth for panoramic images, thus bypassing the effort needed to create annotated panoramic training dataset. We also demonstrate our approach for emerging tasks such as panoramic monocular SLAM, panoramic semantic segmentation and panoramic style transfer.},
+  doi       = {10.1007/978-3-030-01270-0_43},
+  _isbn      = {978-3-030-01270-0},
+  _url       = {http://openaccess.thecvf.com/content_ECCV_2018/html/Keisuke_Tateno_Distortion-Aware_Convolutional_Filters_ECCV_2018_paper.html},
+}
+
 @InProceedings{TeedD2020a,
   author    = {Zachary Teed and Jia Deng},
   title     = {{RAFT}: Recurrent All-Pairs Field Transforms for Optical Flow},
@@ -617,6 +829,19 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _issn      = {2374-8710},
   abstract  = {A new technique for three-dimensional (3D) camera calibration for machine vision metrology using off-the-shelf TV cameras and lenses is described. The two-stage technique is aimed at efficient computation of camera external position and orientation relative to object reference coordinate system as well as the effective focal length, radial lens distortion, and image scanning parameters. The two-stage technique has advantage in terms of accuracy, speed, and versatility over existing state of the art. A critical review of the state of the art is given in the beginning. A theoretical framework is established, supported by comprehensive proof in five appendixes, and may pave the way for future research on 3D robotics vision. Test results using real data are described. Both accuracy and speed are reported. The experimental results are analyzed and compared with theoretical prediction. Recent effort indicates that with slight modification, the two-stage calibration can be done in real time.},
   doi       = {10.1109/JRA.1987.1087109},
+}
+
+@InProceedings{WangHCLYSCS2018,
+  author    = {Fu-En Wang and Hou-Ning Hu and Hsien-Tzu Cheng and Juan-Ting Lin and Shang-Ta Yang and Meng-Li Shih and Hung-Kuo Chu and Min Sun},
+  title     = {Self-Supervised Learning of Depth and Camera Motion from 360° Videos},
+  booktitle = ACCV,
+  year      = {2018},
+  pages     = {53--68},
+  abstract  = {As 360° cameras become prevalent in many autonomous systems (e.g., self-driving cars and drones), efficient 360° perception becomes more and more important. We propose a novel self-supervised learning approach for predicting the omnidirectional depth and camera motion from a 360° video. In particular, starting from the SfMLearner, which is designed for cameras with normal field-of-view, we introduce three key features to process 360° images efficiently. Firstly, we convert each image from equirectangular projection to cubic projection in order to avoid image distortion. In each network layer, we use Cube Padding (CP), which pads intermediate features from adjacent faces, to avoid image boundaries. Secondly, we propose a novel "spherical" photometric consistency constraint on the whole viewing sphere. In this way, no pixel will be projected outside the image boundary which typically happens in images with normal field-of-view. Finally, rather than naively estimating six independent camera motions (i.e., naively applying SfM-Learner to each face on a cube), we propose a novel camera pose consistency loss to ensure the estimated camera motions reaching consensus. To train and evaluate our approach, we collect a new PanoSUNCG dataset containing a large amount of 360° videos with groundtruth depth and camera motion. Our approach achieves state-of-the-art depth prediction and camera motion estimation on PanoSUNCG with faster inference speed comparing to equirectangular. In real-world indoor videos, our approach can also achieve qualitatively reasonable depth prediction by acquiring model pre-trained on PanoSUNCG.},
+  arxiv     = {1811.05304},
+  doi       = {10.1007/978-3-030-20873-8_4},
+  _isbn      = {978-3-030-20873-8},
+  _url       = {http://aliensunmin.github.io/project/360-depth/},
 }
 
 @InProceedings{WangYSCT2021,
@@ -724,6 +949,15 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   _url       = {https://arxiv.org/abs/2103.05687},
 }
 
+@InProceedings{ZengKG2020,
+  author    = {Wei Zeng and Sezer Karaoglu and Theo Gevers},
+  title     = {Joint {3D} Layout and Depth Prediction from a Single Indoor Panorama Image},
+  booktitle = ECCV,
+  year      = {2020},
+  abstract  = {In this paper, we propose a method which jointly learns the layout prediction and depth estimation from a single indoor panorama image. Previous methods have considered layout prediction and depth estimation from a single panorama image separately. However, these two tasks are tightly intertwined. Leveraging the layout depth map as an intermediate representation, our proposed method outperforms existing methods for both panorama layout prediction and depth estimation. Experiments on the challenging real-world dataset of Stanford 2D-3D demonstrate that our approach obtains superior performance for both the layout prediction tasks (3D IoU: 85.81% v.s. 79.79%) and the depth estimation (Abs Rel: 0.068 v.s. 0.079).},
+  doi       = {10.1007/978-3-030-58517-4_39},
+}
+
 @InProceedings{ZhangLSC2019,
   author    = {Chao Zhang and Stephan Liwicki and William Smith and Roberto Cipolla},
   title     = {Orientation-Aware Semantic Segmentation on Icosahedron Spheres},
@@ -735,6 +969,17 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   doi       = {10.1109/ICCV.2019.00363},
   _issn      = {1550-5499},
   _url       = {http://openaccess.thecvf.com/content_ICCV_2019/html/Zhang_Orientation-Aware_Semantic_Segmentation_on_Icosahedron_Spheres_ICCV_2019_paper.html},
+}
+
+@InProceedings{ZhaoYZLBT2020,
+  author    = {Zhao, Pengyu and You, Ansheng and Zhang, Yuanxing and Liu, Jiaying and Bian, Kaigui and Tong, Yunhai},
+  title     = {Spherical Criteria for Fast and Accurate 360° Object Detection},
+  booktitle = AAAI,
+  year      = {2020},
+  volume    = {34},
+  pages     = {12959-12966},
+  abstract  = {With the advance of omnidirectional panoramic technology, 360° imagery has become increasingly popular in the past few years. To better understand the 360° content, many works resort to the 360° object detection and various criteria have been proposed to bound the objects and compute the intersection-over-union (IoU) between bounding boxes based on the common equirectangular projection (ERP) or perspective projection (PSP). However, the existing 360° criteria are either inaccurate or inefficient for real-world scenarios. In this paper, we introduce a novel spherical criteria for fast and accurate 360° object detection, including both spherical bounding boxes and spherical IoU (SphIoU). Based on the spherical criteria, we propose a novel two-stage 360◦ detector, i.e., Reprojection R-CNN, by combining the advantages of both ERP and PSP, yielding efficient and accurate 360° object detection. To validate the design of spherical criteria and Reprojection R-CNN, we construct two unbiased synthetic datasets for training and evaluation. Experimental results reveal that compared with the existing criteria, the two-stage detector with spherical criteria achieves the best mAP results under the same inference speed, demonstrating that the spherical criteria can be more suitable for 360◦ object detection. Moreover, Reprojection R-CNN outperforms the previous state-of-the-art methods by over 30% on mAP with competitive speed, which confirms the efficiency and accuracy of the design.},
+  doi       = {10.1609/aaai.v34i07.6995},
 }
 
 @Article{ZimmeBW2011a,
@@ -752,22 +997,31 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   keyword   = {Computer Science},
 }
 
-
-@InProceedings{zhao2020spherical,
-	author    = {Zhao, Pengyu and You, Ansheng and Zhang, Yuanxing and Liu, Jiaying and Bian, Kaigui and Tong, Yunhai},
-	booktitle = {AAAI},
-	title     = {Spherical Criteria for Fast and Accurate 360° Object Detection.},
-	year      = {2020},
-	pages     = {12959--12966},
+@InProceedings{ZioulKZAD2019,
+  author    = {Nikolaos Zioulis and Antonis Karakottas and Dimitrios Zarpalas and Federico Alvarez and Petros Daras},
+  title     = {Spherical View Synthesis for Self-Supervised 360° Depth Estimation},
+  booktitle = Proc3DV,
+  year      = {2019},
+  pages     = {690--699},
+  _month     = sep,
+  abstract  = {Learning based approaches for depth perception are limited by the availability of clean training data. This has led to the utilization of view synthesis as an indirect objective for learning depth estimation using efficient data acquisition procedures. Nonetheless, most research focuses on pinhole based monocular vision, with scarce works presenting results for omnidirectional input. In this work, we explore spherical view synthesis for learning monocular 360 depth in a self-supervised manner and demonstrate its feasibility. Under a purely geometrically derived formulation we present results for horizontal and vertical baselines, as well as for the trinocular case. Further, we show how to better exploit the expressiveness of traditional CNNs when applied to the equirectangular domain in an efficient manner. Finally, given the availability of ground truth depth data, our work is uniquely positioned to compare view synthesis against direct supervision in a consistent and fair manner. The results indicate that alternative research directions might be better suited to enable higher quality depth perception. Our data, models and code are publicly available at https://vcl3d.github.io/SphericalViewSynthesis/
+},
+  arxiv     = {1909.08112},
+  doi       = {10.1109/3DV.2019.00081},
+  _issn      = {2378-3826},
+  _url       = {https://arxiv.org/abs/1909.08112},
 }
 
-@InProceedings{zioulis2019spherical,
-	author       = {Zioulis, Nikolaos and Karakottas, Antonis and Zarpalas, Dimitrios and Alvarez, Federico and Daras, Petros},
-	booktitle    = {2019 International Conference on 3D Vision (3DV)},
-	title        = {Spherical view synthesis for self-supervised 360 depth estimation},
-	year         = {2019},
-	organization = {IEEE},
-	pages        = {690--699}
+@InProceedings{ZioulKZD2018,
+  author    = {Nikolaos Zioulis and Antonis Karakottas and Dimitrios Zarpalas and Petros Daras},
+  title     = {{OmniDepth}: Dense Depth Estimation for Indoors Spherical Panoramas},
+  booktitle = ECCV,
+  year      = {2018},
+  pages     = {448--465},
+  _month     = sep,
+  abstract  = {Recent work on depth estimation up to now has only focused on projective images ignoring 360 content which is now increasingly and more easily produced. We show that monocular depth estimation models trained on traditional images produce sub-optimal results on omnidirectional images, showcasing the need for training directly on 360 datasets, which however, are hard to acquire. In this work, we circumvent the challenges associated with acquiring high quality 360 datasets with ground truth depth annotations, by re-using recently released large scale 3D datasets and re-purposing them to 360 via rendering. This dataset, which is considerably larger than similar projective datasets, is publicly offered to the community to enable future research in this direction. We use this dataset to learn in an end-to-end fashion the task of depth estimation from 360 images. We show promising results in our synthesized data as well as in unseen realistic images.},
+  doi       = {10.1007/978-3-030-01231-1_28},
+  _url       = {http://openaccess.thecvf.com/content_ECCV_2018/html/NIKOLAOS_ZIOULIS_OmniDepth_Dense_Depth_ECCV_2018_paper.html},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

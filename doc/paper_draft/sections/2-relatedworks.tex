@@ -44,20 +44,36 @@ transfer the architecture and weights of pre-trained networks \cite{DosovFIHHGSC
 
 \subsection{Panoramic Image Processing}
 
-% applications
-Panoramic image have been used on 
-depth esitmation\cite{WangSTCS2020}, room layout estimation \cite{WangYSCT2021, Tran2021}, Semantic segmentation \cite{YangZRHS2021}, render \cite{XuZXTG2021}, etc.
-% problem
-The panoramic image format converts the 3D scene to a 2D image with the non-linear project, but it introduces distortion in the 2D image, e.g. the equirectangular image format has larger distortion especially on the top and bottom of the image.
+%% Application areas.
+Panoramic (aka 360° or \emph{spherical}) images have been used in a wide variety of application areas, including
+depth estimation \cite{ImHRJCK2016, JiangSZDH2021, LaiXLL2019, SunSC2021, WangHCLYSCS2018, WangSTCS2020, WangYSCT2020, ZioulKZD2018, ZioulKZAD2019},
+room layout estimation \cite{WangYSCT2021, Tran2021, EderMG2019, FernaFPDCG2020, JinXZZTXYG2020, SunSC2021, ZengKG2020},
+semantic segmentation \cite{LeeJYJY2019, SunSC2021, YangZRHS2021, ZhangLSC2019},
+novel-view synthesis \cite{BerteYLR2020, HuangCCJ2017, MatzeCEKS2017, XuZXTG2021} and so on.
+%
+%% Problems.
+%The panoramic image format converts the 3D scene to a 2D image with the non-linear project, but it introduces distortion in the 2D image, e.g. the equirectangular image format has larger distortion especially on the top and bottom of the image.
+The key problem when working with spherical images is to project them onto a regular 2D pixel grid for easy processing, as any projection introduces some kind of distortion – similar to maps of the world.
+%
+For example, spherical images in ERP format show significant distortions near the top/bottom image edges, which represent the two poles.
+
 
 % sovle with projection method
-%% cube map projection
+%% cubemap projection
 \citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
-\cite{WangYSCT2020}
+\citet{WangYSCT2020}
+\citet{WangHCLYSCS2018}
+\citet{ChengCDWLS2018}
 
+
+%% gnomonic projection
 \cite{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
-% icosahedron
-\cite{EderPVBF2019}\citet{EderSLF2020} Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
+
+
+%% Icosahedron
+\citet{EderPVBF2019}
+\citet{EderSLF2020}
+Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
 \citet{LuoZSX2019}
 \citet{ZhangLSC2019}
 \citet{LeeJYJY2019}
