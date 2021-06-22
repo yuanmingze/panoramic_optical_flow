@@ -143,13 +143,13 @@
   abstract  = {In this paper, we propose a method for semantic parsing the 3D point cloud of an entire building using a hierarchical approach: first, the raw data is parsed into semantically meaningful spaces (e.g. rooms, etc) that are aligned into a canonical reference coordinate system. Second, the spaces are parsed into their structural and building elements (e.g. walls, columns, etc). Performing these with a strong notation of global 3D space is the backbone of our method. The alignment in the first step injects strong 3D priors from the canonical coordinate system into the second step for dis- covering elements. This allows diverse challenging scenarios as man-made indoor spaces often show recurrent geo- metric patterns while the appearance features can change drastically. We also argue that identification of structural elements in indoor spaces is essentially a detection problem, rather than segmentation which is commonly used. We evaluated our method on a new dataset of several buildings with a covered area of over 6,000 m2 and over 215 million points, demonstrating robust results readily useful for practical applications.},
 }
 
-@InProceedings{ArtizZAD2021,
+@InProceedings{ArtizZAD2020,
   author    = {Charles-Olivier Artizzu and Haozhou Zhang and Guillaume Allibert and Cédric Demonceaux},
   title     = {{OmniFlowNet}: a Perspective Neural Network Adaptation for Optical Flow Estimation in Omnidirectional Images},
   booktitle = ICPR,
-  year      = {2021},
-  _month     = jan,
+  year      = {2020},
   abstract  = {Spherical cameras and the latest image processing techniques open up new horizons. In particular, methods based on Convolutional Neural Networks (CNNs) now give excellent results for optical flow estimation on perspective images. However, these approaches are highly dependent on their architectures and training datasets. This paper proposes to benefit from years of improvement in perspective images optical flow estimation and to apply it to omnidirectional ones without training on new datasets. Our network, OmniFlowNet, is built on a CNN specialized in perspective images. Its convolution operation is adapted to be consistent with the equirectangular projection. Tested on spherical datasets created with Blender 1 and several equirectangular videos realized from real indoor and outdoor scenes, OmniFlowNet shows better performance than its original network without extra training.},
+  doi       = {10.1109/ICPR48806.2021.9412745},
   _url       = {https://hal.archives-ouvertes.fr/hal-02968191},
 }
 
@@ -183,13 +183,14 @@
   _url       = {https://richardt.name/omniphotos/},
 }
 
-@InProceedings{BhandZY2021,
+@InProceedings{BhandZY2020,
   author    = {Keshav Bhandari and Ziliang Zong and Yan Yan},
   title     = {Revisiting Optical Flow Estimation in 360 Videos},
   booktitle = ICPR,
-  year      = {2021},
+  year      = {2020},
   abstract  = {Nowadays 360 video analysis has become a significant research topic in the field since the appearance of high-quality and low-cost 360 wearable devices. In this paper, we propose a novel LiteFlowNet360 architecture for 360 videos optical flow estimation. We design LiteFlowNet360 as a domain adaptation framework from perspective video domain to 360 video domain. We adapt it from simple kernel transformation techniques inspired by Kernel Transformer Network (KTN) to cope with inherent distortion in 360 videos caused by the sphere-to-plane projection. First, we apply an incremental transformation of convolution layers in feature pyramid network and show that further transformation in inference and regularization layers are not important, hence reducing the network growth in terms of size and computation cost. Second, we refine the network by training with augmented data in a supervised manner. We perform data augmentation by projecting the images in a sphere and re-projecting to a plane. Third, we train LiteFlowNet360 in a self-supervised manner using target domain 360 videos. Experimental results show the promising results of 360 video optical flow estimation using the proposed novel architecture.},
   arxiv     = {2010.08045},
+  doi       = {10.1109/ICPR48806.2021.9412035},
   _url       = {https://arxiv.org/abs/2010.08045},
 }
 
@@ -284,6 +285,16 @@
   _url       = {http://openaccess.thecvf.com/content_cvpr_2018/html/Cheng_Cube_Padding_for_CVPR_2018_paper.html},
 }
 
+@InProceedings{CobbWMMPdM2020,
+  author    = {Oliver J. Cobb and Christopher G. R. Wallis and Augustine N. Mavor-Parker and Augustin Marignier and Matthew A. Price and Mayeul d'Avezac and Jason D. McEwen},
+  title     = {Efficient Generalized Spherical {CNNs}},
+  booktitle = ICLR,
+  year      = {2020},
+  abstract  = {Many problems across computer vision and the natural sciences require the analysis of spherical data, for which representations may be learned efficiently by encoding equivariance to rotational symmetries. We present a generalized spherical CNN framework that encompasses various existing approaches and allows them to be leveraged alongside each other. The only existing non-linear spherical CNN layer that is strictly equivariant has complexity $\mathcalO(C^2L^5)$, where $C$ is a measure of representational capacity and $L$ the spherical harmonic bandlimit. Such a high computational cost often prohibits the use of strictly equivariant spherical CNNs. We develop two new strictly equivariant layers with reduced complexity $\mathcalO(CL^4)$ and $\mathcalO(CL^3 \log L)$, making larger, more expressive models computationally feasible. Moreover, we adopt efficient sampling theory to achieve further computational savings. We show that these developments allow the construction of more expressive hybrid models that achieve state-of-the-art accuracy and parameter efficiency on spherical benchmark problems.},
+  arxiv     = {2010.11661},
+  _url       = {https://arxiv.org/abs/2010.11661},
+}
+
 @InProceedings{CohenGKW2018,
   author    = {Taco S. Cohen and Mario Geiger and Jonas Koehler and Max Welling},
   title     = {Spherical {CNNs}},
@@ -348,6 +359,7 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
   year      = {2020},
   abstract  = {In this work, we propose "tangent images," a spherical image representation that facilitates transferable and scalable 360° computer vision. Inspired by techniques in cartography and computer graphics, we render a spherical image to a set of distortion-mitigated, locally-planar image grids tangent to a subdivided icosahedron. By varying the resolution of these grids independently of the subdivision level, we can effectively represent high resolution spherical images while still benefiting from the low-distortion icosahedral spherical approximation. We show that training standard convolutional neural networks on tangent images compares favorably to the many specialized spherical convolutional kernels that have been developed, while also allowing us to scale training to significantly higher spherical resolutions. Furthermore, because we do not require specialized kernels, we show that we can transfer networks trained on perspective images to spherical data without fine-tuning and with limited performance drop-off. Finally, we demonstrate that tangent images can be used to improve the quality of sparse feature detection on spherical images, illustrating its usefulness for traditional computer vision tasks like structure-from-motion and SLAM.},
   arxiv     = {1912.09390},
+  doi       = {10.1109/CVPR42600.2020.01244},
   _url       = {https://github.com/meder411/Tangent-Images},
 }
 
@@ -384,11 +396,12 @@ In this paper we introduce the building blocks for constructing spherical CNNs. 
 @InProceedings{GkitsZAZD2020,
   author    = {Vasileios Gkitsas and Nikolaos Zioulis and Federico Alvarez and Dimitrios Zarpalas and Petros Daras},
   title     = {Deep Lighting Environment Map Estimation from Spherical Panoramas},
-  booktitle = CVPR,
+  booktitle = CVPRW,
   year      = {2020},
   abstract  = {Estimating a scene's lighting is a very important task when compositing synthetic content within real environments, with applications in mixed reality and post-production. In this work we present a data-driven model that estimates an HDR lighting environment map from a single LDR monocular spherical panorama. In addition to being a challenging and ill-posed problem, the lighting estimation task also suffers from a lack of facile illumination ground truth data, a fact that hinders the applicability of data-driven methods. We approach this problem differently, exploiting the availability of surface geometry to employ image-based relighting as a data generator and supervision mechanism. This relies on a global Lambertian assumption that helps us overcome issues related to pre-baked lighting. We relight our training data and complement the model's supervision with a photometric loss, enabled by a differentiable image-based relighting technique. Finally, since we predict spherical spectral coefficients, we show that by imposing a distribution prior on the predicted coefficients, we can greatly boost performance. Code and models available at https://vcl3d.github.io/DeepPanoramaLighting
 .},
   arxiv     = {2005.08000},
+  doi       = {10.1109/CVPRW50498.2020.00328},
   _url       = {https://vcl3d.github.io/DeepPanoramaLighting/},
 }
 
@@ -440,7 +453,19 @@ We propose a novel training objective that enables our convolutional neural netw
   pages     = {8981--8989},
   _month     = jun,
   abstract  = {FlowNet2, the state-of-the-art convolutional neural network (CNN) for optical flow estimation, requires over 160M parameters to achieve accurate flow estimation. In this paper we present an alternative network that attains performance on par with FlowNet2 on the challenging Sintel final pass and KITTI benchmarks, while being 30 times smaller in the model size and 1.36 times faster in the running speed. This is made possible by drilling down to architectural details that might have been missed in the current frameworks: (1) We present a more effective flow inference approach at each pyramid level through a lightweight cascaded network. It not only improves flow estimation accuracy through early correction, but also permits seamless incorporation of descriptor matching in our network. (2) We present a novel flow regularization layer to ameliorate the issue of outliers and vague flow boundaries by using a feature-driven local convolution. (3) Our network owns an effective structure for pyramidal feature extraction and embraces feature warping rather than image warping as practiced in FlowNet2. Our code and trained models are available at https://github.com/twhui/LiteFlowNet.},
+  doi       = {10.1109/CVPR.2018.00936},
   _url       = {http://mmlab.ie.cuhk.edu.hk/projects/LiteFlowNet/},
+}
+
+@Article{HuiTL2021,
+  author    = {Tak-Wai Hui and Xiaoou Tang and Chen Change Loy},
+  title     = {A Lightweight Optical Flow {CNN} - Revisiting Data Fidelity and Regularization},
+  journal   = PAMI,
+  year      = {2021},
+  volume    = {preprints},
+  _issn      = {1939-3539},
+  abstract  = {Over four decades, the majority addresses the problem of optical flow estimation using variational methods. With the advance of machine learning, some recent works have attempted to address the problem using convolutional neural network (CNN) and have showed promising results. FlowNet2 [1], the state-of-the-art CNN, requires over 160M parameters to achieve accurate flow estimation. Our LiteFlowNet2 outperforms FlowNet2 on Sintel and KITTI benchmarks, while being 25.3 times smaller in the model size and 3.1 times faster in the running speed. LiteFlowNet2 is built on the foundation laid by conventional methods and resembles the corresponding roles as data fidelity and regularization in variational methods. We compute optical flow in a spatial-pyramid formulation as SPyNet [2] but through a novel lightweight cascaded flow inference. It provides high flow estimation accuracy through early correction with seamless incorporation of descriptor matching. Flow regularization is used to ameliorate the issue of outliers and vague flow boundaries through feature-driven local convolutions. Our network also owns an effective structure for pyramidal feature extraction and embraces feature warping rather than image warping as practiced in FlowNet2 and SPyNet. Comparing to LiteFlowNet [3], LiteFlowNet2 improves the optical flow accuracy on Sintel Clean by 23.3%, Sintel Final by 12.8%, KITTI 2012 by 19.6%, and KITTI 2015 by 18.8%, while being 2.2 times faster. Our network protocol and trained models are made publicly available on https://github.com/twhui/LiteFlowNet2.},
+  doi       = {10.1109/TPAMI.2020.2976928},
 }
 
 @InProceedings{IlgMSKDB2017,
@@ -972,12 +997,12 @@ We propose a novel training objective that enables our convolutional neural netw
 }
 
 @InProceedings{ZhaoYZLBT2020,
-  author    = {Zhao, Pengyu and You, Ansheng and Zhang, Yuanxing and Liu, Jiaying and Bian, Kaigui and Tong, Yunhai},
+  author    = {Pengyu Zhao and Ansheng You and Yuanxing Zhang and Jiaying Liu and Kaigui Bian and Yunhai Tong},
   title     = {Spherical Criteria for Fast and Accurate 360° Object Detection},
   booktitle = AAAI,
   year      = {2020},
   volume    = {34},
-  pages     = {12959-12966},
+  pages     = {12959--12966},
   abstract  = {With the advance of omnidirectional panoramic technology, 360° imagery has become increasingly popular in the past few years. To better understand the 360° content, many works resort to the 360° object detection and various criteria have been proposed to bound the objects and compute the intersection-over-union (IoU) between bounding boxes based on the common equirectangular projection (ERP) or perspective projection (PSP). However, the existing 360° criteria are either inaccurate or inefficient for real-world scenarios. In this paper, we introduce a novel spherical criteria for fast and accurate 360° object detection, including both spherical bounding boxes and spherical IoU (SphIoU). Based on the spherical criteria, we propose a novel two-stage 360◦ detector, i.e., Reprojection R-CNN, by combining the advantages of both ERP and PSP, yielding efficient and accurate 360° object detection. To validate the design of spherical criteria and Reprojection R-CNN, we construct two unbiased synthetic datasets for training and evaluation. Experimental results reveal that compared with the existing criteria, the two-stage detector with spherical criteria achieves the best mAP results under the same inference speed, demonstrating that the spherical criteria can be more suitable for 360◦ object detection. Moreover, Reprojection R-CNN outperforms the previous state-of-the-art methods by over 30% on mAP with competitive speed, which confirms the efficiency and accuracy of the design.},
   doi       = {10.1609/aaai.v34i07.6995},
 }

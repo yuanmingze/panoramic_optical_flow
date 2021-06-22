@@ -76,7 +76,7 @@ The perspective image optical flow method is off-the-shelf method which is gener
 
 \textbf{Equirectangular Image Projection}.
 % tangent image generation
-As \cite{zhao2020spherical} the gnomonic projection is used to generate the tangent images ~\cite{??}, which is a perspective image projected from the sphere surface at tangent point on the united sphere surface.
+As \cite{ZhaoYZLBT2020} the gnomonic projection is used to generate the tangent images ~\cite{??}, which is a perspective image projected from the sphere surface at tangent point on the united sphere surface.
 % sampling points selection (Tangent/Center points selection.)
 With different tangent point selection, the tangent images cover the different spherical surface area and image field of view (FOV).
 %
@@ -126,7 +126,7 @@ The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with t
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
 \textbf{Image Global Rotation Warping.}
-After extract the global rotation $R$ from optical flow, rotate the target image $I_{t+1}$ with $R$ from alignment to the source image $I_{t}$ with the equirectangular image rotation in 3D space. ~\cite{zioulis2019spherical}.
+After extract the global rotation $R$ from optical flow, rotate the target image $I_{t+1}$ with $R$ from alignment to the source image $I_{t}$ with the equirectangular image rotation in 3D space. ~\cite{ZioulKZAD2019}.
 %
 The global rotation warping based on the coarse to fine principle, 
 Firstly, use panoramic images optical flow estimated $\bar{R}$ to roughly align the $I_{t+1}$ for getting rid of the ego-motion, then use the cubemap optical flow to fine-tune the alignment.

@@ -38,11 +38,12 @@ This enables self-supervised training of existing optical flow methods.
 Virtually all optical flow methods focus on perspective input images, although spherical images have recently received more attention.
 %
 %The CNN based panoramic optical methods \citet{ArtizZAD2021} and \citet{BhandZY2021}
-To this end, recent approaches by \citet{ArtizZAD2021} and \citet{BhandZY2021}
+To this end, recent approaches by \citet{ArtizZAD2020} and \citet{BhandZY2020}
 transfer the architecture and weights of pre-trained networks \cite{DosovFIHHGSCB2015,HuiTC2018} to spherical images in the equirectangular projection (ERP) format.
 
 
-\subsection{Panoramic Image Processing}
+%\subsection{Panoramic Image Processing}
+\paragraph{Panoramic Image Processing.}
 
 %% Application areas.
 Panoramic (aka 360° or \emph{spherical}) images have been used in a wide variety of application areas, including
@@ -51,40 +52,42 @@ room layout estimation \cite{WangYSCT2021, Tran2021, EderMG2019, FernaFPDCG2020,
 semantic segmentation \cite{LeeJYJY2019, SunSC2021, YangZRHS2021, ZhangLSC2019},
 novel-view synthesis \cite{BerteYLR2020, HuangCCJ2017, MatzeCEKS2017, XuZXTG2021} and so on.
 %
-%% Problems.
+%% Problem: distortions.
 %The panoramic image format converts the 3D scene to a 2D image with the non-linear project, but it introduces distortion in the 2D image, e.g. the equirectangular image format has larger distortion especially on the top and bottom of the image.
 The key problem when working with spherical images is to project them onto a regular 2D pixel grid for easy processing, as any projection introduces some kind of distortion – similar to maps of the world.
+\looseness-1 % squeezing single word onto previous line
+
+
+%% Cubemap projection.
+%One approach is to project spherical images to a cubemap,
+Spherical images are sometimes projected to a cubemap,
+i.e. the six sides of a cube, potentially with overlap between sides \cite{ChengCDWLS2018, WangHCLYSCS2018, WangYSCT2020}.
+However, the resulting perspective images have large angles of view of $\geq$90°, which introduces significant perspective distortion.
 %
-For example, spherical images in ERP format show significant distortions near the top/bottom image edges, which represent the two poles.
+%% Icosahedron projection.
+%\citet{EderPVBF2019}
+%Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
+A smaller field of view can be achieved using icosahedron projection, producing 20 triangular faces, or in fact any subdivision of the icosahedron \citep{LuoZSX2019, ZhangLSC2019, LeeJYJY2019}.
+In the limit, perspective tangent images can be obtained anywhere on the sphere using gnomonic projection \citep{CoorsCG2018, EderSLF2020}.
+%
+%% Adaptive kernels ...
+%\citet{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
+To overcome the significant distortions near the poles at the top/bottom image edges in ERP images, distortion-aware convolutions adapt kernels using gnomonic projection \cite{TatenNT2018, CoorsCG2018, SuG2019}, which enable training on perspective images and testing on ERP images.
 
 
-% sovle with projection method
-%% cubemap projection
-\citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
-\citet{WangYSCT2020}
-\citet{WangHCLYSCS2018}
-\citet{ChengCDWLS2018}
+Our method combines ERP, cubemap and icosahedron projections to incrementally estimate global rotation and to refine spherical optical flow estimates to achieve higher accuracy.
 
 
-%% gnomonic projection
-\cite{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
+%\citet{SunSC2021} proposed HoHoNet is a versatile method, their LHFeat is squeezed per-column feature, used to predict whole image information (depth map, semantic segmentation and layout reconstruction) with IDCT. 
 
+%%% rotation invariance
+%\citet{CohenGKW2018}
+%\citet{JiangHKPMN2019}
 
-%% Icosahedron
-\citet{EderPVBF2019}
-\citet{EderSLF2020}
-Icosahedron is used to averagely sampling from the panoramic image, to make less overlap area between each sampling area.
-\citet{LuoZSX2019}
-\citet{ZhangLSC2019}
-\citet{LeeJYJY2019}
+%%% From MatryODShka:
+%%Full rotation-equi\-variance can also be achieved using spherical convolutions \cite{CohenGKW2018,EstevAMD2018}, but this is not necessarily desirable as the gravity vector is usually given and fixed in captured video.
+%Full rotation-equi\-variance can be achieved with spherical convolutions \cite{CohenGKW2018,EstevAMD2018}, but this is not necessarily desirable as videos can exploit the fixed gravity vector.
 
-% sovle with on CNN area
-\citet{GkitsZAZD2020}
-%% kernel transfrom 
-\citet{SuG2019}
-%% rotation invariance 
-\citet{CohenGKW2018}
-\citet{JiangHKPMN2019}
 
 \subsection{Panoramic Datasets}
 
