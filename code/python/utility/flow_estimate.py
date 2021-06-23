@@ -16,12 +16,6 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def raft():
-    pass
-
-def pwcnet():
-    pass
-
 def of_methdod_DIS(image_src_original, image_tar_original):
     """Compute the DIS flow.
 

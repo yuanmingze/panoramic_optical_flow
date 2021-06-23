@@ -89,7 +89,10 @@ def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.
         buf.shape = (w, h, 3)
         image = Image.frombytes("RGB", (w, h), buf.tostring())
         result_image = np.asarray(image)
-    plt.close(fig)
+    # plt.close(fig)
+    plt.clf()
+    plt.cla()
+    plt.close("all")
     return result_image
 
 

@@ -1,4 +1,3 @@
-# from skimage.measure import structural_similarity as ssim
 from skimage.metrics import structural_similarity
 import numpy as np
 
@@ -6,6 +5,11 @@ from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
+
+def sphercial_error_weight():
+    # a cos weight
+    # TODO
+    pass
 
 
 def ssim(image_0, image_1):

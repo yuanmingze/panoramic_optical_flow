@@ -1,5 +1,8 @@
 
 import pathlib
+import os
+
+import ipdb
 
 from logger import Logger
 
@@ -26,3 +29,19 @@ def dir_make(directory):
         directory_path.mkdir()
     else:
         log.info("Directory {} exist".format(directory))
+
+
+def dir_grep(dir_path, postfix):
+    """Find all files in a directory with extension.
+
+    :param dir_path: folder path.
+    :type dir_path: str
+    :param postfix: extension, e.g. ".txt"
+    :type postfix: str
+    """
+    file_list = []
+    for file in os.listdir(dir_path):
+        if file.endswith(postfix):
+            file_list.append(file)
+    file_list.sort()
+    return file_list

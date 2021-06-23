@@ -88,7 +88,7 @@ def get_angle_uv(points_A_theta, points_A_phi,
     length_AB = great_circle_distance_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, radius=1)
     length_AC = great_circle_distance_uv(points_A_theta, points_A_phi, points_C_theta, points_C_phi, radius=1)
     length_BC = great_circle_distance_uv(points_B_theta, points_B_phi, points_C_theta, points_C_phi, radius=1)
-    get_angle_from_length(length_AB, length_AC,  length_BC)
+    return get_angle_from_length(length_AB, length_AC,  length_BC)
 
 
 def get_angle_from_length(length_AB, length_AC,  length_BC):
@@ -140,7 +140,7 @@ def get_angle_from_length(length_AB, length_AC,  length_BC):
     indices = np.logical_or(indices_1, indices_2)
     if indices.any():
         log.warn("side length check constraints wrong.")
-        angle_A[indices] = np.NaN
+        angle_A[indices] = 2*np.pi - angle_A[indices]
     return angle_A
 
 

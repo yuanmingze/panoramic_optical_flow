@@ -98,7 +98,7 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 	\centering
 	\caption{\label{fig:exp:oferrorquality}%
 		Result of optical flow error on Replica dataset.}
-	\begin{tabular}{c c c c c c c c}
+	\begin{tabular}{p{2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
 		\hline
 		 Dataset &  Method & ${EPE}$ & $AAE$ & $RMS$ & $SEPE$ & ${SAAE}$ & ${SRMS}$ \\
 		\hline
@@ -110,9 +110,10 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 		& RAFT & - & -  & - & - & -& - \\ 
 		& Our & - & -  & - & - & -& - \\ 
 		\hline
-		\multirow{3}{*}{Replica(All)} & PWCNet & - & -  & - & - & -& - \\ 
-		& RAFT & - & -  & - & - & -& - \\ 
-		& Our & - & -  & - & - & -& - \\ 
+		\multirow{4}{*}{Replica(All)} & PWCNet & - & -  & - & - & - & - \\
+		& RAFT & 20.204 & 0.2807  & 72.53  & 0.05648 & 0.1509  & 0.3517 \\
+		& DIS  & 25.74  & 0.3045  & 79.94  & 0.08347 & 0.1797  & 0.4127 \\
+		& Our  & 7.524  & 0.2129  &  42.94 & 0.01161 & 0.06967 & 0.02741 \\
 		\hline
 	\end{tabular}
 \end{table}

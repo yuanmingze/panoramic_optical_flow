@@ -19,13 +19,16 @@ The code at `code/python/utility/flow_estimate.py`
 
 Code is [official released code](https://github.com/NVlabs/PWC-Net).
 
-Run time environment at: 
-- Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
-
+1. Caffe Code:
 With the PWC-Net office Caffe Code. And use the python code `python/compare_pwc-net.py` to generate the `img1.txt`, `img2.txt` and `out.txt` for the `proc_images.py` file.
-- virtual env: `/mnt/sda1/workenv_linux/python_2_7_pwcnet/`
+- Virtual env: `/mnt/sda1/workenv_linux/python_2_7_pwcnet/`
+- Caffe code `/mnt/sda1/workspace_linux/PWC-Net-flownet2`
+- The `compare_pwc_net.py` generate the img1.txt, img2.txt and out.txt files.
 - Run the script `source set-env.sh` than `proc_images.py` python script as `./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
 - PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/Caffe/`
+
+2. PyTorch Code (Slow, don't know why):
+Run time environment at: Python virtual environment: `/mnt/sda1/workenv_linux/python_2_7_pytorch/`
 
 ### 1.2.3. FlowNet2
 
@@ -110,7 +113,7 @@ Synthetic Datasets:
 
 This data is rendered by replica 360 OpenGL code.
 
-Scene List:s
+Scene List:
 - Apartment_0:
 - hotel_0: [Download](https://drive.google.com/file/d/16KheF7FRAMM3yotJXeL9V2-a46yvUbxX/view)
 - office_0:

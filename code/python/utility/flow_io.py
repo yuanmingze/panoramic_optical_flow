@@ -70,7 +70,7 @@ def read_flow_flo(file_name):
     try:
         fid = open(file_name, 'rb')
     except IOError:
-        print('readFlowFile: could not open %s', file_name)
+        log.error('readFlowFile: could not open %s', file_name)
 
     tag = unpack('f', fid.read(4))[0]
     width = unpack('i', fid.read(4))[0]
