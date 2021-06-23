@@ -72,7 +72,7 @@ In the limit, perspective tangent images can be obtained anywhere on the sphere 
 %
 %% Adaptive kernels ...
 %\citet{CoorsCG2018} use Gnomonic Projection to directly sample data from panoramic image, in this way they transform the omnidirectional sampling to perspective's.
-To overcome the significant distortions near the poles at the top/bottom image edges in ERP images, distortion-aware convolutions adapt kernels using gnomonic projection \cite{TatenNT2018, CoorsCG2018, SuG2019}, which enable training on perspective images and testing on ERP images.
+To overcome the significant distortions near the poles at the top/bottom image edges in ERP images, distortion-aware convolutions adapt kernels using gnomonic projection \cite{CoorsCG2018, SuG2019, TatenNT2018}, which enable training on perspective images and testing on ERP images.
 
 
 Our method combines ERP, cubemap and icosahedron projections to incrementally estimate global rotation and to refine spherical optical flow estimates to achieve higher accuracy.
@@ -90,6 +90,8 @@ Our method combines ERP, cubemap and icosahedron projections to incrementally es
 
 
 \subsection{Panoramic Datasets}
+
+\CR{I would skip this here. We can discuss relevant datasets later on, in the experiment section.}
 
 % 360 Image dataset:
 %% Real-world

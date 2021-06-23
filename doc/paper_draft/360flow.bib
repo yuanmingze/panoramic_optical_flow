@@ -421,6 +421,17 @@ We propose a novel training objective that enables our convolutional neural netw
   _url       = {http://visual.cs.ucl.ac.uk/pubs/monoDepth/},
 }
 
+@InProceedings{HannuWH2019,
+  author    = {Hannuksela, Miska M. and Wang, Ye-Kui and Hourunranta, Ari},
+  title     = {An Overview of the OMAF Standard for 360° Video},
+  booktitle = {Data Compression Conference (DCC)},
+  year      = {2019},
+  pages     = {418--427},
+  abstract  = {Omnidirectional MediA Format (OMAF) is arguably the first virtual reality (VR) system standard, recently developed by the Moving Picture Experts Group (MPEG). OMAF defines a media format that enables omnidirectional media applications, focusing on 360° video, images, and audio, as well as the associated timed text, supporting three degrees of freedom (3DOF). This paper gives an overview of the first edition of the OMAF standard.},
+  doi       = {10.1109/DCC.2019.00050},
+  _issn      = {2375-0359},
+}
+
 @Article{HornS1981,
   author    = {Berthold K. P. Horn and Brian G. Schunck},
   title     = {Determining optical flow},
@@ -523,6 +534,21 @@ We propose a novel training objective that enables our convolutional neural netw
   abstract  = {Motivated by the correlation between the depth and the geometric structure of a 360 indoor image, we propose a novel learning-based depth estimation framework that leverages the geometric structure of a scene to conduct depth estimation. Specifically, we represent the geometric structure of an indoor scene as a collection of corners, boundaries and planes. On the one hand, once a depth map is estimated, this geometric structure can be inferred from the estimated depth map; thus, the geometric structure functions as a regularizer for depth estimation. On the other hand, this estimation also benefits from the geometric structure of a scene estimated from an image where the structure functions as a prior. However, furniture in indoor scenes makes it challenging to infer geometric structure from depth or image data. An attention map is inferred to facilitate both depth estimation from features of the geometric structure and also geometric inferences from the estimated depth map. To validate the effectiveness of each component in our framework under controlled conditions, we render a synthetic dataset, Shanghaitech-Kujiale Indoor 360 dataset with 3550 360 indoor images. Extensive experiments on popular datasets validate the effectiveness of our solution. We also demonstrate that our method can also be applied to counterfactual depth.},
   doi       = {10.1109/CVPR42600.2020.00097},
   _url       = {https://svip-lab.github.io/dataset/indoor_360.html},
+}
+
+@Article{Kopf2016,
+  author    = {Johannes Kopf},
+  title     = {360° Video Stabilization},
+  journal   = ProcSIGASIA,
+  year      = {2016},
+  volume    = {35},
+  number    = {6},
+  pages     = {195:1--9},
+  _month     = nov,
+  _issn      = {0730-0301},
+  abstract  = {We present a hybrid 3D-2D algorithm for stabilizing 360° video using a deformable rotation motion model. Our algorithm uses 3D analysis to estimate the rotation between key frames that are appropriately spaced such that the right amount of motion has occurred to make that operation reliable. For the remaining frames, it uses 2D optimization to maximize the visual smoothness of feature point trajectories. A new low-dimensional flexible deformed rotation motion model enables handling small translational jitter, parallax, lens deformation, and rolling shutter wobble. Our 3D-2D architecture achieves better robustness, speed, and smoothing ability than either pure 2D or 3D methods can provide. Stabilizing a video with our method takes less time than playing it at normal speed. The results are sufficiently smooth to be played back at high speed-up factors; for this purpose we present a simple 360° hyperlapse algorithm that remaps the video frame time stamps to balance the apparent camera velocity.},
+  doi       = {10.1145/2980179.2982405},
+  keywords  = {360 video, video stabilization},
 }
 
 @InProceedings{KroegTDV2016,
