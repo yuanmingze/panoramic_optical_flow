@@ -8,6 +8,7 @@ from utility import flow_vis
 from utility import flow_evaluate
 from utility import flow_postproc
 from utility import fs_utility
+from utility import image_evaluate
 
 import csv
 
@@ -97,9 +98,9 @@ def of_estimate_omniphoto(omniphoto_dataset, opticalflow_mathod="our"):
 
                 # test and resize input image
                 if src_erp_image.shape[0] * 2 != src_erp_image.shape[1]:
-                    log.error("{} image size is {}".fromat(src_erp_image_filepath, src_erp_image.shape))
+                    log.error("{} image size is {}".format(src_erp_image_filepath, src_erp_image.shape))
                 if tar_erp_image.shape[0] * 2 != tar_erp_image.shape[1]:
-                    log.error("{} image size is {}".fromat(tar_erp_image, src_erp_image.shape))
+                    log.error("{} image size is {}".format(tar_erp_image, src_erp_image.shape))
                 if src_erp_image.shape[0] != omniphoto_dataset.pano_image_height:
                     src_erp_image = ski_resize(src_erp_image, (omniphoto_dataset.pano_image_height, omniphoto_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
                     tar_erp_image = ski_resize(tar_erp_image, (omniphoto_dataset.pano_image_height, omniphoto_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
@@ -239,16 +240,54 @@ def summary_error_scene_replica(replica_dataset, opticalflow_mathod="our"):
         flow_evaluate.opticalflow_metric_folder(of_eva_dir, of_gt_dir, mask_filename_exp=replica_dataset.replica_pano_mask_filename_exp,
                                                 result_csv_filename=replica_dataset.pano_output_csv,  visual_of_error=False)
 
-def visualize_of_error_multi(flow_filepath_list):
+def visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, output_dir):
     """Visualize optical flows error with same scale."""
-    # load file form flo
+    # load file from flo
+    flow_data_list = []
+    for method in method_list:
+        flow_data_list.append(flow_io.flow_read(flow_filepath_exp.format(scene_name, method, flo_filename)))
+    flow_data_gt = flow_io.flow_read(flow_gt_filepath.format(scene_name, flo_filename))
+
+    # 0) visualize the optical flow
+    flow_min_ratio = 0.03
+    flow_max_ratio = 0.85
+    counter = 0 
+    for flow_data in flow_data_list:
+        flow_vis_image = flow_vis.flow_to_color(flow_data, min_ratio =flow_min_ratio, max_ratio= flow_max_ratio)
+        image_io.image_save(flow_vis_image, output_dir + "{}_{}_{}_flow_vis.jpg".format(scene_name, method_list[counter], flo_filename))
+        counter += 1
+
+    flow_vis_image = flow_vis.flow_to_color(flow_data_gt, min_ratio =flow_min_ratio, max_ratio= flow_max_ratio)
+    image_io.image_save(flow_vis_image, output_dir + "{}_{}_{}_flow_vis.jpg".format(scene_name, "gt", flo_filename))
 
     # 1) get the visualization error range
+    flow_error_list = []
+    error_min_ratio = 0.1
+    error_max_ratio = 0.9
+    min_error = 9999999
+    max_error = -1
+    for flow_data in flow_data_list:
+        flow_error_data, _ = flow_evaluate.EPE_mat(flow_data_gt, flow_data, spherical=True)
+        flow_error_list.append(flow_error_data)
+        # max & min
+        vmin_, vmax_ = image_evaluate.get_min_max(flow_error_data, error_min_ratio, error_max_ratio)
+        if vmin_ < min_error:
+            min_error = vmin_
+        if vmax_ > max_error:
+            max_error = vmax_
 
     # 2) visualize the error  and output
-    pass
+    counter = 0 
+    for flow_error in flow_error_list:
+        epe_mat_vis = flow_evaluate.error_visual(flow_error, max_error, min_error, bar_enable=False)
+        # image_io.image_show(epe_mat_vis)
+        image_io.image_save(epe_mat_vis, output_dir + "{}_{}_{}_error_vis.jpg".format(scene_name, method_list[counter], flo_filename))
+        counter += 1
 
-
+    # create the bar
+    epe_mat_vis = flow_evaluate.error_visual(flow_error_list[0], max_error, min_error, bar_enable=True)
+    # image_io.image_show(epe_mat_vis)
+    image_io.image_save(epe_mat_vis, output_dir + "{}_{}_{}_error_vis_bar.jpg".format(scene_name, method_list[0], flo_filename))
 
 def visualize_of_dataset_replica(replica_dataset):
     """ Summary the error on replica for each scene."""
@@ -356,9 +395,17 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
 
 if __name__ == "__main__":
     opticalflow_mathod = "our_weight"  # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight)
-    of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
-    of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
+    # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
+
+    # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
     # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
     # summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
     # visualize_of_dataset_replica(ReplicaPanoDataset)
     # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
+
+    scene_name = "room_0_circ_1k_0"
+    method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
+    flo_filename = "0002_opticalflow_backward_pano.flo"
+    flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
+    flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
+    visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, output_dir = "d:/")

@@ -49,11 +49,11 @@ def image_diff(image_generated, image_gt, output_path=""):
         plt.savefig(output_path)
 
 
-def visual_data(data_array, min_ratio=0.1, max_ratio=0.9):
+def visual_data(data_array):
     """
     visualize the single channel boolean or float etc. data to heatmap.
     """
-    return depth_io.depth_visual_save(data_array, min_ratio=min_ratio, max_ratio=max_ratio)
+    return depth_io.depth_visual_save(data_array)
     # max = None
     # min = None
     # visualized_data = None
@@ -85,6 +85,7 @@ def visual_data(data_array, min_ratio=0.1, max_ratio=0.9):
     # image = Image.frombytes("RGBA", (w, h), buf.tostring())
     # image = np.asarray(image)
     # return image[:, :, 0:3]
+
 
 
 def image_show(image, title=" "):

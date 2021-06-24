@@ -2,13 +2,16 @@
 
 from logging import FileHandler
 from warnings import filterwarnings
+import ipdb
 import numpy as np
 import os
 import csv
 
+from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
+import flow_postproc
 
 import spherical_coordinates
 import image_io
@@ -27,7 +30,7 @@ SMALLFLOW = 0.0
 # LARGEFLOW = 1e8
 
 
-def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap="RdPu"):
+def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap="RdPu", bar_enable = True):
     """
     visualize the error data, and return colored error image.
 
@@ -40,11 +43,52 @@ def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap=
         min = np.min(error_data)
     if verbose:
         log.info("error_visual(): max error {}, min error {}".format(max, min))
-    norm = mpl.colors.Normalize(vmin=min, vmax=max)
-    cmap = plt.get_cmap(visual_colormap)
 
-    m = cm.ScalarMappable(norm=norm, cmap=cmap)
-    return (m.to_rgba(error_data)[:, :, :3] * 255).astype(np.uint8)
+    # if bar_enable:
+    #     norm = mpl.colors.Normalize(vmin=min, vmax=max)
+    #     cmap = plt.get_cmap(visual_colormap)
+
+    #     m = cm.ScalarMappable(norm=norm, cmap=cmap)
+    #     return (m.to_rgba(error_data)[:, :, :3] * 255).astype(np.uint8)
+    # else:
+    data_temp = error_data.astype(np.float64)
+    # draw image
+    # fig = plt.figure()
+    # plt.subplots_adjust(left=0, bottom=0, right=0.1, top=0.1, wspace=None, hspace=None)
+    # ax = fig.add_subplot(111)
+    if not bar_enable:
+        fig_width = 8.  # inches
+        fig_height = fig_width * data_temp.shape[0] / data_temp.shape[1]
+        fig, ax = plt.subplots(1, figsize=(fig_width, fig_height))
+        fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
+        ax.patch.set_visible(False)
+    else:
+        fig, ax = plt.subplots(1)
+    # ax.axis('tight')
+    ax.axis('off')
+    # ax.get_xaxis().set_visible(False)
+    # ax.get_yaxis().set_visible(False)
+    # fig.tight_layout()
+    im = ax.imshow(data_temp, cmap=cm.get_cmap(visual_colormap), vmin=min, vmax=max)
+    # ax.axis('off')
+    if bar_enable:
+        cbar = ax.figure.colorbar(im, ax=ax)
+
+    #im = ax.imshow(disparity_data, cmap=cm.coolwarm)
+    result_image = None
+    fig.canvas.draw()  # draw the renderer
+    w, h = fig.canvas.get_width_height()  # Get the RGBA buffer from the figure
+    buf = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    buf.shape = (w, h, 3)
+    image = Image.frombytes("RGB", (w, h), buf.tostring())
+    result_image = np.asarray(image)
+    # plt.close(fig)
+    # fig.savefig('d:\sp_xyz.png', dpi=300)
+    # import ipdb; ipdb.set_trace()
+    plt.clf()
+    plt.cla()
+    plt.close("all")
+    return result_image
 
 
 def available_pixel(flow, of_mask=None, unknown_value=UNKNOWN_FLOW_THRESH):
@@ -306,7 +350,7 @@ def opticalflow_metric(flo_gt, flo_eva, erp_flo_error_filename_prefix=None, flo_
     return aae, epe, rms, aae_sph, epe_sph, rms_sph
 
 
-def opticalflow_metric_folder(of_dir, of_gt_dir, mask_filename_exp=None, result_csv_filename=None, visual_of_error=False):
+def opticalflow_metric_folder(of_dir, of_gt_dir, mask_filename_exp=None, result_csv_filename=None, visual_of_error=False, of_wraparound = True):
     """
     1) "AAE", 'EPE', 'RMS', "SAAE", "SEPE", "SRMS" error to csv 
     2) output optical flow error visualized image
@@ -321,6 +365,8 @@ def opticalflow_metric_folder(of_dir, of_gt_dir, mask_filename_exp=None, result_
     :type result_csv_filename: str, optional
     :param visual_of_error: Whether outout the error map to image, defaults to False,
     :type visual_of_error: bool, optional
+    :param of_wraparound: process the wrap around before metric the optical flow.
+    :type of_wraparound: bool
     """
     if result_csv_filename is None:
         result_csv_filepath = of_dir + "result.csv"
@@ -337,6 +383,9 @@ def opticalflow_metric_folder(of_dir, of_gt_dir, mask_filename_exp=None, result_
         # load of and gt of
         optical_flow = flow_io.read_flow_flo(of_dir + filename)
         optical_flow_gt = flow_io.read_flow_flo(of_gt_dir + filename)
+        if of_wraparound:
+            optical_flow = flow_postproc.erp_of_wraparound(optical_flow)
+            optical_flow_gt = flow_postproc.erp_of_wraparound(optical_flow_gt)
         mask_erp_image = None
         if mask_filename_exp is not None:
             image_index = filename[0:4]
