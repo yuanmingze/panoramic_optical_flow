@@ -1,9 +1,16 @@
-\section{Approach}\label{sec:approach}
+\section{Approach}
+\label{sec:approach}
 
-\begin{figure}[hbt!]
+\begin{figure}%[hbt!]
 	\centering
 	\includegraphics[width=0.95\linewidth]{images/method_pipeline_1.pdf}
-	\caption{Method overview. The input is a pair of equirectangular images sequence $I_t$ and $I_{t+1}$, output is the optical flow $\mathcal{F}_t$. The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively. The green box estimate the rotation from optical flow motion vector.}
+	\caption{Method overview.
+		The input is a pair of equirectangular images, $I_t$ and $I_{t+1}$, and the output is the optical flow $\mathcal{F}_t$.
+%		The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively.
+		The operators `$\oplus$' and `$\ominus$' rotate images forward and optical flow fields backward, respectively, using image warping (see \cref{sec:approach:warping}).
+		The green box estimates a rotation from an optical flow field.
+		\CR{show cubemap and icosahedron images layout in the figure?}
+	}
 	\label{fig:approach:pipeline}
 \end{figure}
 
@@ -21,7 +28,7 @@ As shown in \cref{fig:approach:pipeline}, our method comprises three steps:
 (3)~We estimate the fine-scale flow $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ using icosahedron projection optical flow (see \cref{sec:approach:warping}), then backward-rotate the fine-sacle flow $\tilde{\mathcal{F}}_t$ by rotations $\bar{R}$ and $\hat{R}$ to generate the final 360° optical flow $\mathcal{F}_t$.
 \looseness-1
 
-% 
+
 Compared to perspective images, equirectangular images are continuous in all direction.
 In \cref{sec:approach:definition}, we analyse and define the panoramic optical flow.
 %
@@ -32,7 +39,7 @@ However, compared to a panoramic image, a tangent image has a smaller field of v
 To compensate for the tangent images' narrow field of view, the global rotation operation is used on the target image $I_{t+1}$ to align it with the source image $I_t$ (\cref{sec:approach:warping}).
 
 
-\subsection{Panoramic Optical Flow Definition}
+\subsection{Definition of 360° Optical Flow}
 \label{sec:approach:definition}
 
 Spherical image coordinates are continuous in any direction on the image, e.g. pixel locations overflowing the image width will wrap around to the other side of the image.
@@ -51,6 +58,7 @@ To uniquely define 360° optical flow in the equirectangular image format, we de
 %propose the following assumes: the pixel motion is always moving along the shortest path of great circle;
 %
 This naturally limits the maximum flow magnitude to $\leq$180°.
+
 
 \CR{I don't understand this paragraph. What information does it add on top of the previous paragraph?}
 % in the ERP image range ?
