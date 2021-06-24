@@ -35,18 +35,24 @@ To compensate for the tangent images' narrow field of view, the global rotation 
 \subsection{Panoramic Optical Flow Definition}
 \label{sec:approach:definition}
 
-The panoramic image coordinate is enclosed and continuous in any direction on the image, e.g. the pixel location is overflowed the image width will wrap around to another side of the image.
-The panoramic optical flow succeeds the features, the pixel's motion vector can overflow the image size.
-%It's different from perspective image optical which ~\cite{??}. 
-This is one reason the perspective image optical flow method can not track well the pixel moving out the equirectangular image boundary, because it does not suppose the coordinate is wrap-around, ~\cref{?}
-\TODO{Add image two show the warp-around optical flow and un-warp-around optical flow.}
+Spherical image coordinates are continuous in any direction on the image, e.g. pixel locations overflowing the image width will wrap around to the other side of the image.
 %
-But it will introduce ambiguity to the panoramic optical flow, 
+If panoramic optical flow follows an object, a pixel's motion vector can fall outside the image boundary.
+%It's different from perspective image optical which ~\cite{??}. 
+This is one reason that perspective optical flow methods cannot track pixels moving outside the equirectangular image boundary, because they do not support the horizontal coordinate wrap-around, as illustrated in \cref{fig:app:warparound}.
+%\TODO{Add image two show the warp-around optical flow and un-warp-around optical flow.}
+%
+However, this introduces an ambiguity into 360° optical flow estimation, 
 %the straight line in the 3D space will project to a segment line on one great circle.
-there are two paths from the source point to the target point along the great-circle on the sphere ~\cite{??}.
-To define the panoramic optical flow on equirectangular image format, we propose the following assumes:
-the pixel motion is always moving along the shortest path of great circle;
+as there is more than one path from the source point to the target point along a great-circle on the sphere:
+usually there is one shorter and one longer path.\footnote{One could also travel along the great circle a few more times, but these paths are getting longer and longer.}
+%
+To uniquely define 360° optical flow in the equirectangular image format, we define the optical flow to follow the shortest path from source to target along the great circle between them.
+%propose the following assumes: the pixel motion is always moving along the shortest path of great circle;
+%
+This naturally limits the maximum flow magnitude to $\leq$180°.
 
+\CR{I don't understand this paragraph. What information does it add on top of the previous paragraph?}
 % in the ERP image range ?
 The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position is beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
 But the pixel along the y-axis is continuous.
@@ -57,15 +63,21 @@ The pixel motion is always along, which is not larger than 0.5$\pi$.
 %visualisations friendly
 %close the spherical coordinate expression
 
-\begin{figure}[hbt!]
-	\begin{center}
-		\subfigure[Source Image]{\includegraphics[width=0.23\linewidth]{images/wraparound/src_image.png}}
-		\subfigure[Target Image]{\includegraphics[width=0.23\linewidth]{images/wraparound/tar_image.png}} 
-		\subfigure[Perspecitve Optical Flow]{\includegraphics[width=0.23\linewidth]{images/wraparound/src2tar.png}}
-		\subfigure[Warp around]{\includegraphics[width=0.17\linewidth]{images/wraparound/wraparound.png}}
-	\end{center}
-	\caption{\label{fig:app:warparound}
-		Panoramic Optical Flow.}
+
+\begin{figure}%[hbt!]
+	\centering
+%	\begin{center}
+	\subfigure[Source Image]{\includegraphics[width=0.26\linewidth]{images/wraparound/src_image.png}}
+	\subfigure[Target Image]{\includegraphics[width=0.26\linewidth]{images/wraparound/tar_image.png}} 
+	\subfigure[Perspective Optical Flow]{\includegraphics[width=0.26\linewidth]{images/wraparound/src2tar.png}}
+	\subfigure[Warp Around]{\includegraphics[width=0.19\linewidth]{images/wraparound/wraparound.png}}
+%	\end{center}
+	\caption{\label{fig:app:warparound}%
+		360° optical flow illustrated:
+		A bunny moves from (a) to (b) within an ERP image.
+		(c) Perspective optical flow methods estimate the bunny's motion from the right to the left via the front.
+		(d) However, the shortest path for the bunny to move is along the back wrap-around.		
+	}
 \end{figure}
 
 
