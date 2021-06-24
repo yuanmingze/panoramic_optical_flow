@@ -37,6 +37,11 @@ def mse(image_0, image_1):
     # the two images are
     return err
 
+def diff_mat(image_0, image_1):
+     diff_mat = np.abs(image_0.astype("float") - image_1.astype("float"))
+     diff_mat = np.mean(diff_mat, axis= 2)
+     return diff_mat
+
 
 def get_min_max(data, min_ratio=0.0, max_ratio=1.0):
     """Get the max and min based on the ratio. 

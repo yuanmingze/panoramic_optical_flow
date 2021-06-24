@@ -240,6 +240,60 @@ def summary_error_scene_replica(replica_dataset, opticalflow_mathod="our"):
         flow_evaluate.opticalflow_metric_folder(of_eva_dir, of_gt_dir, mask_filename_exp=replica_dataset.replica_pano_mask_filename_exp,
                                                 result_csv_filename=replica_dataset.pano_output_csv,  visual_of_error=False)
 
+
+def warp_of_multi(flow_filepath_exp, scene_name, method_list, flo_filename, rgb_filename, rgb_gt_filename,  output_dir):
+    """Visualize optical flows error with same scale."""
+    # load file from flo
+    flow_data_list = []
+    for method in method_list:
+        flow_data_list.append(flow_io.flow_read(flow_filepath_exp.format(scene_name, method, flo_filename)))
+
+    rgb_image_data = image_io.image_read(flow_gt_filepath.format(scene_name, rgb_filename))
+    rgb_gt_image_data = image_io.image_read(flow_gt_filepath.format(scene_name, rgb_gt_filename))
+
+    # 0) warp sour imave with  the optical flow
+    counter = 0 
+    rgb_image_warp_data_list = []
+    for flow_data in flow_data_list:
+        warped_image_data = flow_warp.warp_backward(rgb_image_data, flow_data)
+        rgb_image_warp_data_list.append(warped_image_data)
+        image_io.image_save(warped_image_data, output_dir + "{}_{}_{}_wrap.jpg".format(scene_name, method_list[counter], flo_filename))
+        counter += 1
+
+    # 0) visualize the optical flow
+    flow_min_ratio = 0.03
+    flow_max_ratio = 0.85
+    counter = 0 
+    for flow_data in flow_data_list:
+        flow_vis_image = flow_vis.flow_to_color(flow_data, min_ratio =flow_min_ratio, max_ratio= flow_max_ratio)
+        image_io.image_save(flow_vis_image, output_dir + "{}_{}_{}_flow_vis.jpg".format(scene_name, method_list[counter], flo_filename))
+        counter += 1
+
+    # 1) get the visualization error range
+    image_warp_error_list = []
+    error_min_ratio = 0.1
+    error_max_ratio = 0.9
+    min_error = 9999999
+    max_error = -1
+    for rgb_image_warp_data in rgb_image_warp_data_list:
+        image_warp_error_data = image_evaluate.diff_mat(rgb_gt_image_data, rgb_image_warp_data)
+        image_warp_error_list.append(image_warp_error_data)
+        # max & min
+        vmin_, vmax_ = image_evaluate.get_min_max(image_warp_error_data, error_min_ratio, error_max_ratio)
+        if vmin_ < min_error:
+            min_error = vmin_
+        if vmax_ > max_error:
+            max_error = vmax_
+
+    # 2) visualize the error  and output
+    counter = 0 
+    for flow_error in image_warp_error_list:
+        epe_mat_vis = flow_evaluate.error_visual(flow_error, max_error, min_error, bar_enable=False)
+        # image_io.image_show(epe_mat_vis)
+        image_io.image_save(epe_mat_vis, output_dir + "{}_{}_{}_warp_error_vis.jpg".format(scene_name, method_list[counter], flo_filename))
+        counter += 1
+
+
 def visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, output_dir):
     """Visualize optical flows error with same scale."""
     # load file from flo
@@ -394,18 +448,34 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
 
 
 if __name__ == "__main__":
-    opticalflow_mathod = "our_weight"  # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight)
-    # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
+    test_list = [2]
 
-    # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
-    # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
-    # summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
-    # visualize_of_dataset_replica(ReplicaPanoDataset)
-    # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
+    if 0 in test_list:
+        opticalflow_mathod = "our_weight"  # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight)
+        # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
 
-    scene_name = "room_0_circ_1k_0"
-    method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
-    flo_filename = "0002_opticalflow_backward_pano.flo"
-    flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
-    flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
-    visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, output_dir = "d:/")
+        # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
+        # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
+        # summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
+        # visualize_of_dataset_replica(ReplicaPanoDataset)
+        # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
+
+    if 1 in test_list:
+        ## generate the error map and visualized optical flow for comparison
+        scene_name = "room_0_circ_1k_0"
+        method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
+        flo_filename = "0002_opticalflow_backward_pano.flo"
+        flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
+        flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
+        visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, output_dir = "d:/")
+
+    if 2 in test_list:
+        ## generate the warped rgb image for comparision
+        scene_name = "room_1_circ_1k_0"
+        method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
+        rgb_filename = "0001_rgb_pano.jpg"
+        rgb_gt_filename = "0002_rgb_pano.jpg"
+        flo_filename = "0002_opticalflow_backward_pano.flo"
+        flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
+        flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
+        warp_of_multi(flow_filepath_exp, scene_name, method_list, flo_filename, rgb_filename, rgb_gt_filename, output_dir = "d:/")
