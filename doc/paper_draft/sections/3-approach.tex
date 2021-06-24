@@ -9,7 +9,6 @@
 %		The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively.
 		The operators `$\oplus$' and `$\ominus$' rotate images forward and optical flow fields backward, respectively, using image warping (see \cref{sec:approach:warping}).
 		The green box estimates a rotation from an optical flow field.
-		\CR{show cubemap and icosahedron images layout in the figure?}
 	}
 	\label{fig:approach:pipeline}
 \end{figure}
@@ -60,16 +59,16 @@ To uniquely define 360° optical flow in the equirectangular image format, we de
 This naturally limits the maximum flow magnitude to $\leq$180°.
 
 
-\CR{I don't understand this paragraph. What information does it add on top of the previous paragraph?}
-% in the ERP image range ?
-The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position is beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
-But the pixel along the y-axis is continuous.
-The pixel motion is always along, which is not larger than 0.5$\pi$.
-% the benefits of ERP optical flow
-\TODO{Summarize the benefit of this expression? Why use the warp-around optical flow?}
-%Sample is continue 
-%visualisations friendly
-%close the spherical coordinate expression
+%\CR{I don't understand this paragraph. What information does it add on top of the previous paragraph?}
+%% in the ERP image range ?
+%The panoramic image projection to equirectangular image, the pixel along the x-axis is not continuous, but along the y-axis is still continuous. When the pixel position is beyond the  ${Imagewidth -1}$, the pixel position will convert to left again.
+%But the pixel along the y-axis is continuous.
+%The pixel motion is always along, which is not larger than 0.5$\pi$.
+%% the benefits of ERP optical flow
+%\TODO{Summarize the benefit of this expression? Why use the warp-around optical flow?}
+%%Sample is continue 
+%%visualisations friendly
+%%close the spherical coordinate expression
 
 
 \begin{figure}%[hbt!]
