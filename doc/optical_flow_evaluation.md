@@ -19,12 +19,12 @@ The code at `code/python/utility/flow_estimate.py`
 
 Code is [official released code](https://github.com/NVlabs/PWC-Net).
 
-1. Caffe Code:
+1. Caffe Code (Linux):
 With the PWC-Net office Caffe Code. And use the python code `python/compare_pwc-net.py` to generate the `img1.txt`, `img2.txt` and `out.txt` for the `proc_images.py` file.
 - Virtual env: `/mnt/sda1/workenv_linux/python_2_7_pwcnet/`
 - Caffe code `/mnt/sda1/workspace_linux/PWC-Net-flownet2`
 - The `compare_pwc_net.py` generate the img1.txt, img2.txt and out.txt files.
-- Run the script `source set-env.sh` than `proc_images.py` python script as `./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
+- Run the script `source set-env.sh` than `proc_images.py` python script as `python ./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
 - PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/Caffe/`
 
 2. PyTorch Code (Slow, don't know why):
@@ -45,10 +45,14 @@ Code is [flownet2](https://github.com/lmb-freiburg/flownet2)
 
 Get the code from [GitHub](https://github.com/princeton-vl/RAFT)
 
-Setup env:
-- Conda install in: `/home/mingze/anaconda3` run int Ubuntu 18.04.5
+- Windows:
+Conda venv: `D:\workenv_windows\conda_raft`
+Run script: `D:\source_code\RAFT\bmvc2021.py`
+
+- Linux:
+Conda install in: `/home/mingze/anaconda3` run int Ubuntu 18.04.5
  1. `conda create -p /mnt/sda1/workenv_linux/conda_raft_py3.6 python=3.6`
- 1. `conda install -c menpo opencv3`
+ 2. `conda install -c menpo opencv3`
 
 Inference:
 - Conda virtual environment: `/mnt/sda1/workenv_linux/conda_raft_py3.6/`
@@ -58,6 +62,9 @@ Inference:
  1. `python compare_raft.py --model=models/raft-things.pth --path=/mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/replica_seq_data/`
 
 - RAFT model: `/mnt/sda1/workspace_linux/RAFT`
+
+
+
 
 ### 1.2.5. Sun IJCV
 

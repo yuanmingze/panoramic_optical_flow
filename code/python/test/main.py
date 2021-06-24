@@ -25,8 +25,8 @@ log.logger.propagate = False
 
 class OmniPhotoDataset():
 
-    pano_dataset_root_dir = "D:/workdata/omniphoto_bmvc_2021/"
-    # pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
+    # pano_dataset_root_dir = "D:/workdata/omniphoto_bmvc_2021/"
+    pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
     pano_data_dir = "pano/"
 
     pano_output_dir = "result/"
@@ -43,15 +43,15 @@ class OmniPhotoDataset():
 
     # circle data
     dataset_circ_dirlist = [
-        # "Ballintoy",
-        # "BathAbbey2",
-        # "BathParadeGardens",
-        # "BeihaiPark",
-        # "Coast",
-        # "DublinShip1",
+        "Ballintoy",
+        "BathAbbey2",
+        "BathParadeGardens",
+        "BeihaiPark",
+        "Coast",
+        "DublinShip1",
         "OsakaTemple6",
-        # "SecretGarden1",
-        # "Wulongting",
+        "SecretGarden1",
+        "Wulongting",
     ]
 
 
@@ -65,7 +65,7 @@ def of_estimate_omniphoto(omniphoto_dataset, opticalflow_mathod="our"):
         # input dir
         input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
         # input index
-        inputfile_list = fs_utility.dir_grep(input_filepath, ".jpg")
+        inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
         pano_start_idx = 1
         pano_end_idx = len(inputfile_list) - 1
 
@@ -124,8 +124,8 @@ def of_estimate_omniphoto(omniphoto_dataset, opticalflow_mathod="our"):
 
 class ReplicaPanoDataset(ReplicaConfig):
 
-    # pano_dataset_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
-    pano_dataset_root_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/"
+    pano_dataset_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
+    # pano_dataset_root_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/"
     pano_data_dir = "pano/"
 
     pano_output_dir = "result/"
@@ -152,8 +152,8 @@ class ReplicaPanoDataset(ReplicaConfig):
         "room_1_circ_1k_0",
         # "room_2_circ_1k_0",
     ]
-    circle_start_idx = 1
-    circle_end_idx = 35
+    circle_start_idx = 2
+    circle_end_idx = 5
 
     # line data
     dataset_line_dirlist = [
@@ -178,6 +178,8 @@ class ReplicaPanoDataset(ReplicaConfig):
     ]
     line_start_idx = 2
     line_end_idx = 8
+
+
 
 
 def summary_error_dataset_replica(replica_dataset, opticalflow_mathod="our"):
@@ -237,6 +239,56 @@ def summary_error_scene_replica(replica_dataset, opticalflow_mathod="our"):
         flow_evaluate.opticalflow_metric_folder(of_eva_dir, of_gt_dir, mask_filename_exp=replica_dataset.replica_pano_mask_filename_exp,
                                                 result_csv_filename=replica_dataset.pano_output_csv,  visual_of_error=False)
 
+def visualize_of_error_multi(flow_filepath_list):
+    """Visualize optical flows error with same scale."""
+    # load file form flo
+
+    # 1) get the visualization error range
+
+    # 2) visualize the error  and output
+    pass
+
+
+
+def visualize_of_dataset_replica(replica_dataset):
+    """ Summary the error on replica for each scene."""
+    dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    min_ratio = 0.1
+    max_ratio = 0.6
+
+    error_map = False
+    # 1) iterate each scene's data
+    for pano_image_folder in dataset_dirlist:
+        opticalflow_mathod_list = \
+            fs_utility.dir_ls(replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir, None)
+        for opticalflow_mathod in opticalflow_mathod_list:
+            print("{} method {}".format(pano_image_folder, opticalflow_mathod))
+            # input dir
+            of_gt_dir = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_data_dir
+            of_eva_dir = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir + opticalflow_mathod + "/"
+
+            # output visualized optical flow
+            opticalflow_filename_list = fs_utility.dir_ls(of_eva_dir, ".flo")
+            for optical_flow_filename in opticalflow_filename_list:
+                result_opticalflow_filepath = of_eva_dir + optical_flow_filename
+                optical_flow = flow_io.flow_read(result_opticalflow_filepath)
+                optical_flow_vis = flow_vis.flow_to_color(optical_flow, min_ratio=min_ratio, max_ratio=max_ratio)
+                result_opticalflow_vis_filepath = of_eva_dir + optical_flow_filename[:-4] +"_visual.jpg"
+                image_io.image_save(optical_flow_vis, result_opticalflow_vis_filepath)
+
+            # output error image
+            if error_map:
+                flow_evaluate.opticalflow_metric_folder(of_eva_dir, of_gt_dir, mask_filename_exp=replica_dataset.replica_pano_mask_filename_exp, result_csv_filename=replica_dataset.pano_output_csv, visual_of_error=False)
+
+
+def of_estimate_replica_clean(replica_dataset, opticalflow_mathod="our"):
+    """Remove all method result."""
+    dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    for pano_image_folder in dataset_dirlist:
+        output_pano_filepath = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir
+        output_dir = output_pano_filepath + "/" + opticalflow_mathod + "/"
+        fs_utility.dir_rm(output_dir)
+        
 
 def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
     """Get the our and DIS's result in replica. """
@@ -267,17 +319,15 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
             for forward_of in [True, False]:
                 # 0) load image to CPU memory
                 if forward_of:
-                    src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
                     tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx + 1)
                     optical_flow_filepath = replica_dataset.replica_pano_opticalflow_forward_filename_exp.format(pano_image_idx)
                     optical_flow_vis_filepath = replica_dataset.replica_pano_opticalflow_forward_visual_filename_exp.format(pano_image_idx)
                 else:
-                    src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
                     tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx - 1)
                     optical_flow_filepath = replica_dataset.replica_pano_opticalflow_backward_filename_exp.format(pano_image_idx)
                     optical_flow_vis_filepath = replica_dataset.replica_pano_opticalflow_backward_visual_filename_exp.format(pano_image_idx)
 
-                mask_erp_image_filepath = replica_dataset.replica_pano_mask_filename_exp.format(pano_image_idx)
+                src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
 
                 if pano_image_idx % 2 == 0:
                     print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
@@ -287,6 +337,8 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                 # 1) estimate optical flow
                 if opticalflow_mathod == "our":
                     optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None)
+                if opticalflow_mathod == "our_weight":
+                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 elif opticalflow_mathod == "dis":
                     optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
                 else:
@@ -297,14 +349,16 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                 # output optical flow image
                 result_opticalflow_filepath = output_dir + optical_flow_filepath
                 flow_io.flow_write(optical_flow, result_opticalflow_filepath)
-                optical_flow_vis = flow_vis.flow_to_color(optical_flow)
+                optical_flow_vis = flow_vis.flow_to_color(optical_flow, min_ratio=0.2, max_ratio=0.8)
                 result_opticalflow_vis_filepath = output_dir + optical_flow_vis_filepath
                 image_io.image_save(optical_flow_vis, result_opticalflow_vis_filepath)
 
 
 if __name__ == "__main__":
-    opticalflow_mathod = "our"  # our, dis, raft, pwcnet
-    # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
+    opticalflow_mathod = "our_weight"  # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight)
+    of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
+    of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
     # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
     # summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
-    of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
+    # visualize_of_dataset_replica(ReplicaPanoDataset)
+    # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)

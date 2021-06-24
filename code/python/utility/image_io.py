@@ -130,7 +130,7 @@ def image_save_rgba(image, image_file_path):
     # 0) check the file's extension
     _, file_extension = os.path.splitext(image_file_path)
     if file_extension.lower() != ".png":
-        log.error("You are saving RGBA image to {}. The RGBA image store in *.png file.".format(image_file_path))
+        log.error("Saving RGBA image to {}. The RGBA image store in *.png file.".format(image_file_path))
         return
 
     # 1) save to png file
@@ -175,3 +175,20 @@ def image_save(image_data, image_file_path):
         im.save(image_file_path)
     else:
         log.error("The image channel number is {}".format(image_channels_number))
+
+
+def image_resize(image_data, image_size=None, image_ratio=None):
+    """ Resize image
+
+    :param image_data: [description]
+    :type image_data: [type]
+    :param image_size: [description], defaults to None
+    :type image_size: [type], optional
+    :param image_ratio: [description], defaults to None
+    :type image_ratio: [type], optional
+    :return: [description]
+    :rtype: [type]
+    """    
+    from skimage.transform import resize
+    image_rescaled = resize(image_data, image_size, anti_aliasing=True, preserve_range=True)
+    return image_rescaled

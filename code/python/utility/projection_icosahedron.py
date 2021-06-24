@@ -575,7 +575,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
     return ico_tangent_flows
 
 
-def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False):
+def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False, face_blending_method="straightforward"):
     """Stitch all 20 tangent flows to a ERP flow.
 
     :param tangent_flows_list: The list of 20 tangnet flow data.
@@ -660,10 +660,10 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
 
         # 3) get the value of optical flow end point location
         # 3-0) get the tangent images flow in the tangent image space, ignore the pixels outside the tangent image
-        face_flow_u_gnom = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 0], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1,  mode='nearest')#mode='constant', cval=255)
-        face_tar_x_gnom_pixel_avail = face_src_x_gnom_pixel + face_flow_u_gnom
-        face_flow_v_gnom = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 1], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='nearest')#mode='constant', cval=255)
-        face_tar_y_gnom_pixel_avail = face_src_y_gnom_pixel + face_flow_v_gnom
+        face_flow_u_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 0], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1,  mode='nearest')#mode='constant', cval=255)
+        face_tar_x_gnom_pixel_avail = face_src_x_gnom_pixel + face_flow_u_gnom_pixel
+        face_flow_v_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 1], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='nearest')#mode='constant', cval=255)
+        face_tar_y_gnom_pixel_avail = face_src_y_gnom_pixel + face_flow_v_gnom_pixel
 
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
@@ -695,31 +695,33 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         face_flow_v_erp = face_tar_y_erp - face_src_y_erp[available_list]
 
         # 4-1) compute the all available pixels' weight to blend the optical flow
-        face_weight_mat = np.ones(face_src_y_gnom_pixel.shape, dtype=np.float64)
-
-        # weight_type = "straightforward"
-        # triangle_points_tangent_weight = get_icosahedron_parameters(triangle_index, 0.0)["triangle_points_tangent"]
-        # face_weight_mat = projection.get_blend_weight(tangent_xv_gnom[available_list].flatten(), tangent_yv_gnom[available_list].flatten(), weight_type, np.stack((face_flow_x, face_flow_y), axis=1), gnomonic_bounding_box = triangle_points_tangent_weight)
-
-        # # resize the erp image
-        # if image_erp_src.shape[:2] != [erp_flow_height, erp_flow_width]:
-        #     image_erp_src = resize(image_erp_src, (erp_flow_height, erp_flow_width)) * 255.0
-        # if image_erp_tar.shape[:2] != [erp_flow_height, erp_flow_width]:
-        #     image_erp_tar = resize(image_erp_tar, (erp_flow_height, erp_flow_width)) * 255.0
-        # face_weight_mat_1 = projection.get_blend_weight_ico(face_src_x_gnom[available_list].flatten(), face_src_y_gnom[available_list].flatten(),
-        #                                                     "normal_distribution_flowcenter", np.stack((face_flow_u_erp, face_flow_v_erp), axis=1),
-        #                                                     gnomonic_bounding_box=triangle_points_tangent)
-        # face_weight_mat_2 = projection.get_blend_weight_ico(face_src_x_gnom[available_list], face_src_y_gnom[available_list],
-        #                                                     "image_warp_error", np.stack((face_tar_x_erp, face_tar_y_erp), axis=1),
-        #                                                     image_erp_src, image_erp_tar)
-        # face_weight_mat = face_weight_mat_1 * face_weight_mat_2
+        if face_blending_method == "straightforward":
+            face_weight_mat = np.ones(face_src_y_gnom_pixel.shape, dtype=np.float64)
+            # weight_type = "straightforward"
+            # triangle_points_tangent_weight = get_icosahedron_parameters(face_index, 0.0)["triangle_points_tangent"]
+            # face_weight_mat = projection.get_blend_weight(face_src_x_gnom[available_list].flatten(), face_src_y_gnom[available_list].flatten(), weight_type, np.stack((face_flow_u_erp, face_flow_v_erp), axis=1), gnomonic_bounding_box = triangle_points_tangent_weight)
+        elif face_blending_method == "normwarp":
+            # resize the erp image
+            if image_erp_src.shape[:2] != [erp_flow_height, erp_flow_width]:
+                image_erp_src = resize(image_erp_src, (erp_flow_height, erp_flow_width), preserve_range=True)
+            if image_erp_tar.shape[:2] != [erp_flow_height, erp_flow_width]:
+                image_erp_tar = resize(image_erp_tar, (erp_flow_height, erp_flow_width), preserve_range=True)
+            face_weight_mat_1 = projection.get_blend_weight_ico(face_src_x_gnom[available_list].flatten(), face_src_y_gnom[available_list].flatten(),
+                                                                "normal_distribution_flowcenter", np.stack((face_flow_u_gnom_pixel, face_flow_v_gnom_pixel), axis=1),
+                                                                gnomonic_bounding_box=triangle_points_tangent)
+            face_weight_mat_2 = projection.get_blend_weight_ico(face_src_x_erp[available_list], face_src_y_erp[available_list],
+                                                                "image_warp_error", np.stack((face_tar_x_erp, face_tar_y_erp), axis=1),
+                                                                image_erp_src, image_erp_tar)
+            face_weight_mat = face_weight_mat_1 * face_weight_mat_2
+            # face_weight_mat = face_weight_mat_2
 
         # # for debug weight
         # if triangle_index == -1:
-        #     from . import image_io
-        #     temp = np.zeros(tangent_xv_gnom.shape, np.float)
-        #     temp[available_list] = face_weight_mat
-        #     image_io.image_show(temp)
+        # from . import image_io
+        # temp = np.zeros(face_src_x_gnom.shape, np.float)
+        # temp[available_list] = face_weight_mat
+        # import image_io
+        # image_io.image_show(temp)
 
         # blender ERP flow and weight
         erp_flow_mat[face_src_y_erp[available_list].astype(np.int64), face_src_x_erp[available_list].astype(np.int64), 0] += face_flow_u_erp * face_weight_mat

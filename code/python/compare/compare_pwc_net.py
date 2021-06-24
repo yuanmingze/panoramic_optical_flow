@@ -12,7 +12,7 @@ from utility import replica_util
 from utility import fs_utility
 
 import configuration 
-from main import ReplicaPanoDataset
+from main import OmniPhotoDataset, ReplicaPanoDataset
 
 """
 The code to generate the img1.txt, img2.txt and out.txt for PWC-Net (caffe).
@@ -57,42 +57,59 @@ def generate_input_txt(root_dir, txt_output_dir, flo_output_dir):
     print("generate img1.txt, img2.txt and out.txt files")
 
 
-def generate_input_txt_bmvc_omniphoto(root_dir, txt_output_dir, flo_output_dir):
-
-    datascene_list= 
-
-    if not os.path.exists(flo_output_dir) or not os.path.isdir(flo_output_dir):
-        os.mkdir(flo_output_dir)
-
+def generate_input_txt_bmvc_omniphoto(omniphoto_dataset, txt_output_dir):
+    """Get the our and DIS's result in omniphoto. """
     img1_txt_path = txt_output_dir + "img1.txt"
     img2_txt_path = txt_output_dir + "img2.txt"
     out_txt_path = txt_output_dir + "out.txt"
 
-    min_index, max_index, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(root_dir)
+    img1_txt_file =  open(img1_txt_path, "w") 
+    img2_txt_file = open(img2_txt_path, "w") 
+    out_txt_file = open(out_txt_path, "w")
 
-    with open(img1_txt_path, "w") as img1_txt_file, \
-            open(img2_txt_path, "w") as img2_txt_file,\
-            open(out_txt_path, "w") as out_txt_file:
+    opticalflow_mathod = "pwcnet"
 
-        for index in range(min_index, max_index + 1):
-            index_next = index + 1
-            if index_next > max_index:
-                index_next = min_index + max_index - index
-            index_previous = index - 1
-            if index_previous < min_index:
-                index_previous = max_index + min_index - index
+    dataset_dirlist = omniphoto_dataset.dataset_circ_dirlist
+    
+    # 1) iterate each 360 image dataset
+    for pano_image_folder in dataset_dirlist:
+        print("processing the data folder {}".format(pano_image_folder))
+        # input dir
+        input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
+        # input index
+        inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
+        pano_start_idx = 1
+        pano_end_idx = len(inputfile_list) - 1
 
-            # forward optical flow
-            img1_txt_file.write(root_dir + "/" + image_list[index] + "\n")
-            img2_txt_file.write(root_dir + "/" + image_list[index_next] + "\n")
-            out_txt_file.write(flo_output_dir + "/" + of_forward_list[index] + "\n")
+        # output folder
+        output_pano_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_output_dir
+        output_dir = output_pano_filepath + "/" + opticalflow_mathod + "/"
+        fs_utility.dir_make(output_pano_filepath)
+        fs_utility.dir_make(output_dir)
 
-            # backward optical flow
-            img1_txt_file.write(root_dir + "/" + image_list[index] + "\n")
-            img2_txt_file.write(root_dir + "/" + image_list[index_previous] + "\n")
-            out_txt_file.write(flo_output_dir + "/" + of_backward_list[index] + "\n")
+        for pano_image_idx in range(pano_start_idx, pano_end_idx):
+            for forward_of in [True, False]:
+                pano_image_file_idx = int(inputfile_list[pano_image_idx][-8:-4])
+                # 0) load image to CPU memory
+                if forward_of:
+                    tar_erp_image_filepath = inputfile_list[pano_image_idx + 1]
+                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
+                else:
+                    tar_erp_image_filepath = inputfile_list[pano_image_idx - 1]
+                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
 
-    print("generate img1.txt, img2.txt and out.txt files")
+                src_erp_image_filepath = inputfile_list[pano_image_idx]
+                if pano_image_idx % 2 == 0:
+                    print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
+
+                # output file path
+                img1_txt_file.write(input_filepath + src_erp_image_filepath + "\n")
+                img2_txt_file.write(input_filepath + tar_erp_image_filepath + "\n")
+                out_txt_file.write(output_dir + optical_flow_filepath + "\n")
+
+    img1_txt_file.close()
+    img2_txt_file.close()
+    out_txt_file.close()
 
 
 def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
@@ -137,7 +154,6 @@ def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
                     src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
                     tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx + 1)
                     optical_flow_filepath = replica_dataset.replica_pano_opticalflow_forward_filename_exp.format(pano_image_idx)
-
                 else:
                     src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
                     tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx - 1)
@@ -147,11 +163,10 @@ def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
                 if pano_image_idx % 2 == 0:
                     print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
 
-
-            # output file path
-            img1_txt_file.write(input_filepath + src_erp_image_filepath + "\n")
-            img2_txt_file.write(input_filepath + tar_erp_image_filepath + "\n")
-            out_txt_file.write( output_dir + optical_flow_filepath + "\n")
+                # output file path
+                img1_txt_file.write(input_filepath + src_erp_image_filepath + "\n")
+                img2_txt_file.write(input_filepath + tar_erp_image_filepath + "\n")
+                out_txt_file.write( output_dir + optical_flow_filepath + "\n")
 
 
     img1_txt_file.close()
@@ -175,5 +190,7 @@ if __name__ == "__main__":
     #     generate_input_txt(root_dir, txt_output_dir, flo_output_dir)
     #     visual_of(flo_output_dir)
 
-    txt_output_dir = "/mnt/sda1/"
+    # txt_output_dir = "/mnt/sda1/"
+    txt_output_dir = "d:/"
     generate_input_txt_bmvc_replica(ReplicaPanoDataset, txt_output_dir)
+    # generate_input_txt_bmvc_omniphoto(OmniPhotoDataset, txt_output_dir)

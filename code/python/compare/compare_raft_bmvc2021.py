@@ -1,21 +1,20 @@
-import sys
-sys.path.append('core')
-
-import argparse
-import os
-from struct import pack, unpack
-
-import pathlib
-import cv2
 import glob
+import pathlib
+from struct import pack, unpack
+import os
+import argparse
+import sys
+
 import numpy as np
-import torch
 from PIL import Image
+import cv2
+from skimage.transform import resize as ski_resize
 
-from raft import RAFT
-from utils import flow_viz
+sys.path.append('core')
 from utils.utils import InputPadder
-
+from utils import flow_viz
+from raft import RAFT
+import torch
 
 
 # dir_scripts = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,10 +25,13 @@ sys.path.append(dir_scripts)
 sys.path.append(os.path.join(dir_scripts, "test"))
 sys.path.append(os.path.join(dir_scripts, "utility"))
 
+from utility import flow_postproc
 from utility import fs_utility
+from main import OmniPhotoDataset
 from main import ReplicaPanoDataset
 
 DEVICE = 'cuda'
+
 
 def write_flow_flo(img, fname):
     """
@@ -71,16 +73,24 @@ def write_flow_flo(img, fname):
     fid.close()
 
 
-def load_image(imfile):
+def load_image(imfile, image_height=None,):
     img = np.array(Image.open(imfile)).astype(np.uint8)
+    # resize the ERP image
+    if image_height is not None:
+        # test and resize input image
+        if img.shape[0] * 2 != img.shape[1]:
+            print("{} image size is {}".format(imfile, img.shape))
+        if img.shape[0] != image_height:
+            img = ski_resize(img, (image_height, image_height * 2), anti_aliasing=True, preserve_range=True)
+    # to gpu
     img = torch.from_numpy(img).permute(2, 0, 1).float()
     return img[None].to(DEVICE)
 
 
 def viz(img, flo):
-    img = img[0].permute(1,2,0).cpu().numpy()
-    flo = flo[0].permute(1,2,0).cpu().numpy()
-    
+    img = img[0].permute(1, 2, 0).cpu().numpy()
+    flo = flo[0].permute(1, 2, 0).cpu().numpy()
+
     # map flow to rgb image
     flo = flow_viz.flow_to_image(flo)
     #img_flo = np.concatenate([img, flo], axis=0)
@@ -90,7 +100,7 @@ def viz(img, flo):
     # plt.imshow(img_flo / 255.0)
     # plt.show()
 
-    cv2.imshow('image', img_flo[:, :, [2,1,0]]/255.0)
+    cv2.imshow('image', img_flo[:, :, [2, 1, 0]]/255.0)
     cv2.waitKey()
 
 
@@ -104,8 +114,8 @@ def demo(args):
 
     with torch.no_grad():
         images = glob.glob(os.path.join(args.path, '*.png')) + \
-                 glob.glob(os.path.join(args.path, '*.jpg'))
-        
+            glob.glob(os.path.join(args.path, '*.jpg'))
+
         images = sorted(images)
         for imfile1, imfile2 in zip(images[:-1], images[1:]):
             image1 = load_image(imfile1)
@@ -117,6 +127,67 @@ def demo(args):
             flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
             viz(image1, flow_up)
 
+
+def omniphoto_test(omniphoto_dataset, args):
+    """Get the our and optical flow result in replica. """
+    opticalflow_mathod = "raft"
+    dataset_dirlist = omniphoto_dataset.dataset_circ_dirlist
+
+    # initial RAFT
+    model = torch.nn.DataParallel(RAFT(args))
+    model.load_state_dict(torch.load(args.model))
+
+    model = model.module
+    model.to(DEVICE)
+    model.eval()
+
+    # 1) iterate each 360 image dataset
+    for pano_image_folder in dataset_dirlist:
+        print("processing the data folder {}".format(pano_image_folder))
+        # input dir
+        input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
+        # input index
+        inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
+        pano_start_idx = 1
+        pano_end_idx = len(inputfile_list) - 1
+
+        # output folder
+        output_pano_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_output_dir
+        output_dir = output_pano_filepath + "/" + opticalflow_mathod + "/"
+        fs_utility.dir_make(output_pano_filepath)
+        fs_utility.dir_make(output_dir)
+
+        with torch.no_grad():
+            for pano_image_idx in range(pano_start_idx, pano_end_idx):
+                pano_image_file_idx = int(inputfile_list[pano_image_idx][-8:-4])
+                for forward_of in [True, False]:
+                    # 0) load image to CPU memory
+                    if forward_of:
+                        tar_erp_image_filepath = inputfile_list[pano_image_idx + 1]
+                        optical_flow_filepath = omniphoto_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
+                    else:
+                        tar_erp_image_filepath = inputfile_list[pano_image_idx - 1]
+                        optical_flow_filepath = omniphoto_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
+
+                    src_erp_image_filepath = inputfile_list[pano_image_idx]
+
+                    if pano_image_idx % 2 == 0:
+                        print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
+                    # 1) estimate optical flow
+                    src_erp_image = load_image(input_filepath + src_erp_image_filepath, omniphoto_dataset.pano_image_height)
+                    tar_erp_image = load_image(input_filepath + tar_erp_image_filepath, omniphoto_dataset.pano_image_height)
+
+                    padder = InputPadder(src_erp_image.shape)
+                    src_erp_image, tar_erp_image = padder.pad(src_erp_image, tar_erp_image)
+
+                    flow_low, flow_up = model(src_erp_image, tar_erp_image, iters=20, test_mode=True)
+
+                    optical_flow = flow_up[0].permute(1, 2, 0).cpu().numpy()
+                    optical_flow = flow_postproc.erp_of_wraparound(optical_flow)
+                    # 2) evaluate the optical flow and output result
+                    # output optical flow image
+                    result_opticalflow_filepath = output_dir + optical_flow_filepath
+                    write_flow_flo(optical_flow, result_opticalflow_filepath)
 
 
 def replica_test(replica_dataset, args):
@@ -169,7 +240,6 @@ def replica_test(replica_dataset, args):
                         tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx - 1)
                         optical_flow_filepath = replica_dataset.replica_pano_opticalflow_backward_filename_exp.format(pano_image_idx)
 
-
                     if pano_image_idx % 2 == 0:
                         print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
                     # 1) estimate optical flow
@@ -183,7 +253,7 @@ def replica_test(replica_dataset, args):
 
                     # output optical flow image
                     result_opticalflow_filepath = output_dir + optical_flow_filepath
-                    write_flow_flo(flow_up[0].permute(1,2,0).cpu().numpy(), result_opticalflow_filepath)
+                    write_flow_flo(flow_up[0].permute(1, 2, 0).cpu().numpy(), result_opticalflow_filepath)
 
 
 if __name__ == '__main__':
@@ -195,7 +265,7 @@ if __name__ == '__main__':
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
     args = parser.parse_args()
 
-    # python bmvc2021.py --model=models/raft-things.pth 
+    # python compare_raft_bmvc2021.py --model=models/raft-things.pth
 
     replica_test(ReplicaPanoDataset, args)
-    
+    # omniphoto_test(OmniPhotoDataset, args)

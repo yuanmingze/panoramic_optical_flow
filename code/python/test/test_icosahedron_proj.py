@@ -40,7 +40,7 @@ def compute_ico_faces_DIS(src_folder_path, src_file_expression,
 
     # 2) estimate them DIS optical flow
     for index in range(0, face_number):
-        face_flow = flow_estimate.DIS(src_image_list[index], tar_image_list[index])
+        face_flow = flow_estimate.of_methdod_DIS(src_image_list[index], tar_image_list[index])
 
         face_flow_path = os.path.join(flow_dis_output_path, flow_dis_expression.format(index))
         flow_io.flow_write(face_flow, face_flow_path)
@@ -178,7 +178,7 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
     image_erp_tar = image_io.image_read(tar_erp_image_path)
 
     log.info("stitch face optical flow to ERP optical flow.")
-    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar, wrap_around=True)
+    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar, wrap_around=True, face_blending_method = "normwarp")
     flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
     face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, min_ratio=0.1, max_ratio=0.9)
@@ -193,7 +193,7 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
         image_src = Image.fromarray(obj=image_src, mode='RGB').resize((erp_flow_stitch.shape[1], erp_flow_stitch.shape[0]))
         image_src = np.array(image_src)
 
-    image_src_warpped = flow_warp.warp_forward(image_src, erp_flow_stitch)
+    image_src_warpped = flow_warp.warp_forward(image_src, erp_flow_stitch, wrap_around=True)
     image_src_warpped_path = erp_src_image_stitch_filepath + "_ico_stitch_warp.png"
     image_io.image_save(image_src_warpped, image_src_warpped_path)
 
@@ -227,7 +227,8 @@ if __name__ == "__main__":
     tangent_image_filename_expression = "ico_rgb_src_{}.png"
     tangent_padding_image_filename_expression = "ico_rgb_src_padding_{}.png"
 
-    test_list = [4]
+    tangent_DIS_flow_filename_expression = "ico_flow_dis_src_{}.flo"
+    test_list = [6]
 
     if 1 in test_list:
         # 1) test padding size
@@ -263,7 +264,6 @@ if __name__ == "__main__":
 
     if 5 in test_list:
         # 5) compute the each face's optical flow with DIS
-        tangent_DIS_flow_filename_expression = "ico_flow_dis_src_{}.flo"
         compute_ico_faces_DIS(ico_src_image_output_dir, tangent_image_filename_expression,
                               ico_tar_image_output_dir, tangent_image_filename_expression,
                               ico_src_image_output_dir, tangent_DIS_flow_filename_expression)

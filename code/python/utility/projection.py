@@ -60,7 +60,7 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
         radius = np.linalg.norm(np.stack((face_x_src_gnomonic - center_point_x, face_y_src_gnomonic - center_point_y), axis=1), axis=1)
         weight_map = (1.0 / (stdev * np.sqrt(2*np.pi))) * np.exp(-0.5*((radius - mean) / stdev) ** 2)
     elif weight_type == "normal_distribution_flowcenter":
-        # TODO use the optical flow average to compute the center point
+        # use the optical flow average to compute the center point
         center_point_x = flow_uv[:, 0].mean() / (0.5 * np.sqrt(face_x_src_gnomonic.shape[0]))  # form pixel to gnomonic
         center_point_y = flow_uv[:, 1].mean() / (0.5 * np.sqrt(face_x_src_gnomonic.shape[0]))
         mean = 0.0
@@ -72,18 +72,22 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
         # flow_uv: target image's pixels coordinate corresponding the warpped pixels
         pixels_number = face_x_src_gnomonic.shape[0]
         channel_number = image_erp_src.shape[2]
-        image_erp_tar_flow = np.zeros((pixels_number, channel_number), np.float)
-        image_erp_src_flow = np.zeros((pixels_number, channel_number), np.float)
+        image_erp_tar_image_flow = np.zeros((pixels_number, channel_number), np.float)
+        image_erp_src_image_flow = np.zeros((pixels_number, channel_number), np.float)
         image_erp_warp_diff = np.zeros((pixels_number, channel_number), np.float)
         for channel in range(0, channel_number):
-            image_erp_tar_flow[:, channel] = ndimage.map_coordinates(image_erp_tar[:, :, channel], [flow_uv[:, 1], flow_uv[:, 0]], order=1, mode='constant', cval=255)
-            image_erp_src_flow[:, channel] = ndimage.map_coordinates(image_erp_src[:, :, channel], [face_y_src_gnomonic, face_x_src_gnomonic], order=1, mode='constant', cval=255)
-            image_erp_warp_diff[:, channel] = np.absolute(image_erp_tar_flow[:, channel] - image_erp_src_flow[:, channel])
+            image_erp_tar_image_flow[:, channel] = ndimage.map_coordinates(image_erp_tar[:, :, channel], [flow_uv[:, 1], flow_uv[:, 0]], order=1, mode='constant', cval=255)
+            image_erp_src_image_flow[:, channel] = ndimage.map_coordinates(image_erp_src[:, :, channel], [face_y_src_gnomonic, face_x_src_gnomonic], order=1, mode='constant', cval=255)
+            image_erp_warp_diff[:, channel] = np.absolute(image_erp_tar_image_flow[:, channel] - image_erp_src_image_flow[:, channel])
 
-        rgb_diff = np.linalg.norm(image_erp_warp_diff, axis=1)
-        non_zeros_index = rgb_diff != 0.0
-        weight_map = np.ones(face_x_src_gnomonic.shape[0], dtype=np.float)
-        weight_map[non_zeros_index] = 0.95 / rgb_diff[non_zeros_index]
+        image_erp_warp_diff = np.mean(image_erp_warp_diff, axis=1) / np.mean(image_erp_warp_diff) #255.0
+        weight_map = np.exp(-image_erp_warp_diff)
+        # rgb_diff = np.linalg.norm(image_erp_warp_diff, axis=1)
+        # weight_map = rgb_diff
+        # non_zeros_index = rgb_diff != 0.0
+        # weight_map = np.zeros(face_x_src_gnomonic.shape[0], dtype=np.float)
+        # weight_map[non_zeros_index] = 0.95 / rgb_diff[non_zeros_index]
+        # weight_map[non_zeros_index] =  rgb_diff[non_zeros_index]
     else:
         log.error("the weight method {} do not exist.".format(weight_type))
     return weight_map
