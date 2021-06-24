@@ -1,71 +1,92 @@
 \section{Experiments}
 \label{sec:exp}
 
-To evaluate the performance.
-\TODO{How much time it will take for; How to select the weight blending weight.}
-
+We evaluate our method on 360° Replica\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhoto\cite{BerteYLR2020} datasets and achieves state-of-the-art performance on both datasets.
+%
+To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error  (SRMS).
+%
+The method implemented in Python takes 20 seconds to estimate optical flow from a $1280 pixels\times640 pixels$ resolution image pairs.
 
 \subsection{Dataset \& Error Metric}
 
 The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
+%To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
 
-\textbf{Dataset}.
+\paragraph{Dataset}
+%% dicuess the 360 dataset
 %
-% synthetic dataset
-%And currently do not have any public optical flow equirectangular image dataset.
-To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
-OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
-So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
-The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
-
-% real word dataset
-The real-world data is more challenging, has complex lighting and motion etc. 
-For further explorer our method performance,  we also test the method on the real-world dataset OmniPhotos \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
-Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
-
-\textbf{Error Metric}.
+%% 360 dataset
 %
-The AAE, the average endpoint error (EPE) and RMS  ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
+%% synthetic dataset
+%
+%% 360 optical flow
+Compare to depth map sensor ToF camera or struct-light camera etc., 
+there are not have feasible hardware to capture high-quality optical flow from the real-world scene, especially the 360 optical flow.
+%
+For quantitive evaluation of the optical flow, the ground truth is necessery.
+Inspire by \cite{shugrina2019creative}, we render the ground truth 360 optical flow and RGB image from the 3D mesh reconstructed from the read-world scene.
+%% select the 3d mesh dataset
+The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contain high quality HDR texture and 3D mesh but also public a versatile render code.
+%% how to modify the replica code
+%OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
+%So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
+But the Replica official rendering pipeline doesn't support the panoramic camera model and optical flow generation, we implement the panoramic camera model on OpenGL geometry shaders to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
+%% The detail of the 360 replica optical flow dataset
+%The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
+The 360 Replica dataset rendering with two kinds of camera path circle and line. The circle path is the camera face to outward and moves along a circle, the line path is the camera face the same direction and moves in a straight line.
+
+%% real word dataset
+Although the synthetic data is very close to real-world data include shape, texture and light, but the real-world data is more challenging, has complex lighting and motion, etc. 
+%
+For further explorer our method performance, we also test our method on the OmniPhotos dataset \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
+%% how to evaluate
+%Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
+
+\paragraph{Error Metric}
+%
+The AAE, EPE and RMS ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
 %But the equirectangular image has distortion because closer top and bottom of image less space to corresponding one pixel.~\cite{??},
-To identically metric each pixel's equirectangular optical flow error, and neglect the equirectangular image distortion, when evaluate the ERP optical flow we map the equirectangular pixel coordinate to the spherical coordinates on the unit sphere~\cite{??}, and use the geodesic distance to replace the Euclidean distance of metric. 
-s%The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
+To identically metric each pixel's equirectangular optical flow error, and neglect the equirectangular image distortion, when evaluate the ERP optical flow we map the equirectangular pixel coordinate to the spherical coordinates on the unit sphere, and use the geodesic distance to replace the Euclidean distance of metric. 
+%The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
 %To evaluate the error with same metric on the whole images, we extend EPE, AAE and RMS to the spherical coordinate. 
 %Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
 %The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
 %
-\cref{equ:exp:epesph} and \cref{equ:exp:aaesph} is the ERP optical flow metric.
 %, which metric on the spherical coordinate system. 
-In $\hat{E}_{EPE}$, $d$ is the geodesic distance distance between to end point on unit sphere and the $n$ is the number of pixels.
-We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
+So we propose the spherical AAE (SAAE), the spherical EPE (SEPE) (see \cref{equ:exp:epesph}) and the spherical RMS (SRMS) to metric the 360° optical flow.
+In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
+The spherical AAE ($SAAE$) is a metric to measure the angle of the estimated optical flow between the ground truth optical flow on the unit sphere surface with spherical trigonometry.
+%We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
 
 %\begin{equation}\label{equ_exp_epe}
 %	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
 %\end{equation}
 \begin{equation}\label{equ:exp:epesph}
-	\hat{E}_{EPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right) 
+	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right) 
 \end{equation}
 
-The spherical AAE ($SAAE$) is metric to measure the deviation of spherical triangle, \cref{equ:exp:aaesph}, the 
+
+% \cref{equ:exp:aaesph}
 % \begin{equation}\label{equ_exp_aae}
 % 	E_{AAE} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
 % \end{equation}
-\begin{equation}\label{equ:exp:aaesph}
-	\hat{E}_{AAEs} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
-\end{equation}
+%\begin{equation}\label{equ:exp:aaesph}
+%	\hat{E}_{AAEs} = \frac{1}{n} \sum_{i \in \Omega}arctan(\frac{u^i_e v^i_g - u^i_g v^i_e}{u^i_e u^i_g + v^i_e v^i_g})
+%\end{equation}
 
-\TODO{Spherical version SSIM, which multiply a ERP weight, https://brilliant.org/wiki/surface-area-sphere/:Archimedes' Hat-Box Theorem}
-To metric the optical flow error of the real-world dataset use SSIM and The root mean square error (RMS) to calculate the error between the optical flow backwards warped target image $I_{t+1}$ and the source image $I_t$.~\cite{??}
-Meanwhile, to alleviate the equirectangular image distortion metric each pixel error based on the pixel area in the unit sphere.
-So scale the equirectangular each pixel SSIM with a normalized area weight.
+%\TODO{Spherical version SSIM, which multiply a ERP weight, https://brilliant.org/wiki/surface-area-sphere/:Archimedes' Hat-Box Theorem}
+%To metric the optical flow error of the real-world dataset use SSIM and The root mean square error (RMS) to calculate the error between the optical flow backwards warped target image $I_{t+1}$ and the source image $I_t$.~\cite{??}
+%Meanwhile, to alleviate the equirectangular image distortion metric each pixel error based on the pixel area in the unit sphere.
+%So scale the equirectangular each pixel SSIM with a normalized area weight.
 % both real world dataset and synthetic dataset.
 
-\TODO{The equation to compute the weight.}
-% \begin{equation}\label{equ:exp:rmse}
-% 	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
-% \end{equation}
-\begin{equation}\label{equ:exp:rmsesph}
-	E_{RMSE} = w_{} \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
-\end{equation}
+%\TODO{The equation to compute the weight.}
+%% \begin{equation}\label{equ:exp:rmse}
+%% 	E_{RMSE} = \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
+%% \end{equation}
+%\begin{equation}\label{equ:exp:rmsesph}
+%	E_{RMSE} = w_{} \sqrt{\frac{1}{n} \sum_{i \in \Omega}((u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2)}
+%\end{equation}
 
 %\begin{figure}[hbt!]
 %	\centering
@@ -76,9 +97,10 @@ So scale the equirectangular each pixel SSIM with a normalized area weight.
 
 \subsection{Comparison}
 
-We compare our method with following state of the art methods, FlowNet2~\cite{IlgMSKDB2017}, Dense Inverse Search (DIS) optical flow~\cite{KroegTDV2016} and PWC-Net~\cite{SunYLK2018}. 
-The FlowNet2~\cite{IlgMSKDB2017} implementation is NVIDIA official release code \href{https://github.com/NVIDIA/flownet2-pytorch}{flownet2-pytorch}.
-The PWC-Net~\cite{SunYLK2018}'s code is \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}
+We compare our method with following state of the art methods, RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and Dense Inverse Search (DIS)~\cite{KroegTDV2016}. 
+%
+We use the offical implemented RAFT and PWC-Net \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}, and OpenCV implemneted DIS. 
+
 
 \textbf{Quantitative Evaluation.}
 
@@ -98,23 +120,30 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 	\centering
 	\caption{\label{fig:exp:oferrorquality}%
 		Result of optical flow error on Replica dataset.}
-	\begin{tabular}{p{2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
+	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
 		\hline
-		 Dataset &  Method & ${EPE}$ & $AAE$ & $RMS$ & $SEPE$ & ${SAAE}$ & ${SRMS}$ \\
+		  &  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\hline
-		\multirow{3}{*}{Replica(Rotation)} & PWCNet & - & -  & - & - & -& - \\ 
-		 & RAFT & - & -  & - & - & -& - \\ 
-		 & Our & - & -  & - & - & -& - \\ 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{Circle}} & PWCNet & 16.60 & 0.2994  & 63.44  & 0.0588 & 0.1469 & 0.3845 \\ 
+		 & RAFT & 16.56 & 0.2775  & 64.94 & 0.04669 & 0.1482 & 0.3301 \\
+		 & DIS  & 16.50  & 0.2881  & 62.67  & 0.05375 &  0.1566 & 0.3515 \\
+		 & Our & \textbf{4.854} & \textbf{0.1863}  & 37.10 & 0.007118 & 0.05074 & 0.01899 \\ 
+		 & Our(W) & 4.988 & 0.1885 & 39.26 & 0.007241 & 0.05278 & 0.01824 \\ 
 		\hline
-		\multirow{3}{*}{Replica(Grid)} & PWCNet & - & -  & - & - & -& - \\ 
-		& RAFT & - & -  & - & - & -& - \\ 
-		& Our & - & -  & - & - & -& - \\ 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{Line}} & PWCNet & 32.25 & 0.2139  & 93.32 & 0.1215 & 0.1429 & 0.5289 \\ 
+		& RAFT & 31.75 & 0.2908 & 96.55 & 0.08752 & 0.1595 & 0.4201 \\ 
+		& DIS  & 35.55 & 0.3328 & 98.24 & 0.1149 & 0.2063 &  0.4768 \\
+		& Our & 10.13 & 0.2447  & 48.60 & 0.01600 & 0.08798 & 0.03566 \\
+		& Our(W) & 10.41 & 0.2462  & 55.78 & 0.01533 & 0.08943 & 0.03448 \\ 
 		\hline
-		\multirow{4}{*}{Replica(All)} 
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{All}} 
 		& PWCNet & 18.95 & 0.2866  & 67.92 & 0.06822 & 0.1463 & 0.4062 \\
 		& RAFT & 20.20 & 0.2807  & 72.53  & 0.05648 & 0.1509  & 0.3517 \\
 		& DIS  & 25.74  & 0.3045  & 79.94  & 0.08347 & 0.1797  & 0.4127 \\
-		& Our  & 7.524  & 0.2129  &  42.94 & 0.01161 & 0.06967 & 0.02741 \\
+		& Our(W/OB)  & \textbf{7.524}  & 0.2129  &  42.94 & 0.01161 & 0.06967 & 0.02741 \\
+		& Our & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
+		& Our(W/O cube) & 7.921 & 0.2182  & 47.91 & 0.01146 & 0.07114 & 0.02492 \\
+		& Our(W/O Ico) & 5.023 & 0.2140  & 31.97 & 0.009781 & 0.06662 & 0.02308 \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -184,21 +213,21 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
-		\\[-0.9em]
-		\labeledfig{images/of_error/room_0_circ_1k_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{black}
-		\\[-1.0em]
-		\labeledfig{images/of_error/room_0_circ_1k_0_gt_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
-		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
+%		\\[-0.9em]
+%		\labeledfig{images/of_error/room_0_circ_1k_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{black}
+%		\\[-1.0em]
+%		\labeledfig{images/of_error/room_0_circ_1k_0_gt_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
+%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 	\end{tabular}
 	\caption{\label{fig:exp:compflow}
-		The optical flow result on Replica and OmniPhoto.}
+		The optical flow results on Replica, 1st and 2nd rows are the result on the Replica $office\_0$ result, which are optical flow and optical flow $SEPE$ error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica $apartment\_0$.}
 \end{figure*}
 
 \begin{figure}[hbt!]
@@ -221,6 +250,24 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Our(Warp)}{black} &
 	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
 	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
+	\\[-0.9em]
+	\labeledfig{images/of_warp/BeihaiPark_panoramic-0549.jpg}{0.185}{(a) $I_t$}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(c) Our}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(d) PWCNet}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{black}
+	\\[-1.0em]
+	\labeledfig{images/of_warp/BeihaiPark_panoramic-0550.jpg}{0.185}{(f) $I_{t+1}$}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(g) DIS(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(h) Our(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(i) PWCNet(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(j) RAFT(Warp)}{black}
+	\\[-1.0em]
+	&
+	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(k) DIS(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Our(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
 \end{tabular}
 	\caption{\label{fig:exp:backwardwarp}
 		The backward warp result with forward optical flow on Omniphoto dataset.}

@@ -26,8 +26,8 @@ log.logger.propagate = False
 
 class OmniPhotoDataset():
 
-    # pano_dataset_root_dir = "D:/workdata/omniphoto_bmvc_2021/"
-    pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
+    pano_dataset_root_dir = "D:/workdata/omniphoto_bmvc_2021/"
+    # pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
     pano_data_dir = "pano/"
 
     pano_output_dir = "result/"
@@ -108,6 +108,8 @@ def of_estimate_omniphoto(omniphoto_dataset, opticalflow_mathod="our"):
                 # 1) estimate optical flow
                 if opticalflow_mathod == "our":
                     optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None)
+                elif opticalflow_mathod == "our_weight":
+                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 elif opticalflow_mathod == "dis":
                     optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
                 else:
@@ -154,7 +156,7 @@ class ReplicaPanoDataset(ReplicaConfig):
         # "room_2_circ_1k_0",
     ]
     circle_start_idx = 2
-    circle_end_idx = 5
+    circle_end_idx = 6
 
     # line data
     dataset_line_dirlist = [
@@ -178,9 +180,7 @@ class ReplicaPanoDataset(ReplicaConfig):
         # "room_2_grid_1k_0",
     ]
     line_start_idx = 2
-    line_end_idx = 8
-
-
+    line_end_idx = 6
 
 
 def summary_error_dataset_replica(replica_dataset, opticalflow_mathod="our"):
@@ -238,7 +238,7 @@ def summary_error_scene_replica(replica_dataset, opticalflow_mathod="our"):
         of_gt_dir = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_data_dir
         of_eva_dir = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir + opticalflow_mathod + "/"
         flow_evaluate.opticalflow_metric_folder(of_eva_dir, of_gt_dir, mask_filename_exp=replica_dataset.replica_pano_mask_filename_exp,
-                                                result_csv_filename=replica_dataset.pano_output_csv,  visual_of_error=False)
+                                                result_csv_filename=replica_dataset.pano_output_csv, visual_of_error=False, of_wraparound = True)
 
 
 def warp_of_multi(flow_filepath_exp, scene_name, method_list, flo_filename, rgb_filename, rgb_gt_filename,  output_dir):
@@ -250,6 +250,10 @@ def warp_of_multi(flow_filepath_exp, scene_name, method_list, flo_filename, rgb_
 
     rgb_image_data = image_io.image_read(flow_gt_filepath.format(scene_name, rgb_filename))
     rgb_gt_image_data = image_io.image_read(flow_gt_filepath.format(scene_name, rgb_gt_filename))
+
+    if rgb_image_data.shape[0:2] != flow_data_list[0].shape[0:2]:
+        rgb_image_data = image_io.image_resize(rgb_image_data, flow_data_list[0].shape[0:2])
+        rgb_gt_image_data = image_io.image_resize(rgb_gt_image_data, flow_data_list[0].shape[0:2])
 
     # 0) warp sour imave with  the optical flow
     counter = 0 
@@ -430,10 +434,14 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                 # 1) estimate optical flow
                 if opticalflow_mathod == "our":
                     optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None)
-                if opticalflow_mathod == "our_weight":
+                elif opticalflow_mathod == "our_weight":
                     optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 elif opticalflow_mathod == "dis":
                     optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
+                elif opticalflow_mathod == "our_wo_cube":
+                    optical_flow = flow_estimate.pano_of_0_wo_cube(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
+                elif opticalflow_mathod == "our_wo_ico":
+                    optical_flow = flow_estimate.pano_of_0_wo_ico(src_erp_image, tar_erp_image, debug_output_dir=None)
                 else:
                     log.error("the optical flow {} does not implement.")
 
@@ -448,15 +456,16 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
 
 
 if __name__ == "__main__":
-    test_list = [2]
+    test_list = [0]
 
     if 0 in test_list:
-        opticalflow_mathod = "our_weight"  # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight)
+        opticalflow_mathod = "our_wo_ico"  
+        # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight), our_wo_cube, our_wo_ico
         # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
 
         # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
         # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
-        # summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
+        summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
         # visualize_of_dataset_replica(ReplicaPanoDataset)
         # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
 
@@ -471,11 +480,19 @@ if __name__ == "__main__":
 
     if 2 in test_list:
         ## generate the warped rgb image for comparision
-        scene_name = "room_1_circ_1k_0"
-        method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
-        rgb_filename = "0001_rgb_pano.jpg"
-        rgb_gt_filename = "0002_rgb_pano.jpg"
-        flo_filename = "0002_opticalflow_backward_pano.flo"
-        flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
-        flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
+        # scene_name = "room_1_circ_1k_0"
+        # method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
+        # rgb_filename = "0001_rgb_pano.jpg"
+        # rgb_gt_filename = "0002_rgb_pano.jpg"
+        # flo_filename = "0002_opticalflow_backward_pano.flo"
+        # flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
+        # flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
+        scene_name = "BeihaiPark"
+        # method_list = ["our", "our_weight", "dis",  "raft"]
+        method_list = ["pwcnet"]
+        rgb_filename = "panoramic-0550.jpg"
+        rgb_gt_filename = "panoramic-0549.jpg"
+        flo_filename = "0549_opticalflow_forward_pano.flo"
+        flow_filepath_exp = "D:/workdata/omniphoto_bmvc_2021/{}/result/{}/{}"
+        flow_gt_filepath = "D:/workdata/omniphoto_bmvc_2021/{}/pano/{}"
         warp_of_multi(flow_filepath_exp, scene_name, method_list, flo_filename, rgb_filename, rgb_gt_filename, output_dir = "d:/")
