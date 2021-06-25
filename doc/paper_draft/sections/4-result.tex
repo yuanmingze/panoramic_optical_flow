@@ -291,10 +291,13 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 
 \paragraph{Qualitative Evaluation.}
 
-To analyse the optical flow methods performance on a real-world dataset without ground truth optical flow, we metric the RGB image error on the optical flow backwards warped image to evaluate optical flow.
+To analyse the performance of 360° optical flow methods on a real-world dataset without ground-truth optical flow, we measure the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the \CR{target image?} backward-warped \CR{source?} image.
 %
-The \cref{fig:exp:backwardwarp} show the result on Replica 360° and OmniPhotos,  in the  (k)-(n)  there is lest RGB error at the top and bottom of images in our method.
-The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniPhoto is a high frame rate dataset there is less camera motion between the two sequence images.
+\Cref{fig:exp:backwardwarp} shows an example result from the OmniPhotos dataset.
+The error maps in \Cref{fig:exp:backwardwarp}(k–n) show less error at the top and bottom of images for our method's result.
+%The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniPhoto is a high frame rate dataset there is less camera motion between the two sequence images.
+The differences between methods is less pronounced than in the Replica 360° dataset, as the baseline between frames is smaller in OmniPhotos due to a higher video frame rate.
+
 
 \begin{figure}[hbt!]
 	\centering
@@ -336,7 +339,11 @@ The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniP
 	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
 \end{tabular}
 	\caption{\label{fig:exp:backwardwarp}%
-		The optical flow backward warp result on Omniphoto dataset's $BeihaiPark$. The 3rd row is the image error heatmap, more error is darker.}
+		Backward warping results on OmniPhotos' \emph{BeihaiPark} scene:
+		(a, f) Source and target images.
+		(b–e) Estimated flow fields.
+		(g–j) Target image (f) warped to the source image (a) using the estimated optical flow (b–e).
+		(k–n) Interpolation error heatmaps (lighter is better).}
 \end{figure}
 
 
