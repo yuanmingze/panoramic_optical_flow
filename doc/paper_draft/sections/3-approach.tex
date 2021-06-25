@@ -20,7 +20,7 @@ At the same time, our high-level approach generalises to any off-the-shelf persp
 % overview method
 As shown in \cref{fig:approach:pipeline}, our method comprises three steps:
 %
-(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from image $I_{t}$ to image ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\mathcal{F}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
+(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from image $I_{t}$ to image ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\bar{\mathcal{F}}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
 %
 (2)~We estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ based on cubemap projection optical flow (see \cref{sec:approach:projstit}), and then rotate the image ${\bar{I}}_{t+1}$ according to the rotation $\hat{R}$ estimated from the cubemap flow ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$.
 %
@@ -35,6 +35,7 @@ To solve the equirectangular image distortion, especially at the top and bottom,
 We use cubemap and regular icosahedron faces to uniformly sample the equirectangular image to solve this problem (see \cref{sec:approach:projstit}).
 %
 However, compared to a panoramic image, a tangent image has a smaller field of view, not larger than $\pi$ and just $\frac{\pi}{2}$ for cubemap projection (without padding).
+\MZY{The tangent image optical flow just traces the pixel on the tangent image pair from the same ERP image area. This makes it hard to estimate the pixel moves out of the tangent image boundary.}
 To compensate for the tangent images' narrow field of view, the global rotation operation is used on the target image $I_{t+1}$ to align it with the source image $I_t$ (\cref{sec:approach:warping}).
 
 
