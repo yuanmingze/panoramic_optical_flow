@@ -1,18 +1,27 @@
 \section{Experiments}
 \label{sec:exp}
 
-We evaluate our method on Replica\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhoto\cite{BerteYLR2020} datasets and achieves state-of-the-art performance on both datasets.
+We evaluate our method on the Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhotos \cite{BerteYLR2020} datasets and achieve state-of-the-art performance on both datasets.
 %
-To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error  (SRMS).
+%To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
+To evaluate the accuracy of 360° optical flow regardless projection, and to account for the wrap-around (\cref{sec:approach:definition}), we measure the spherical average endpoint error (SEPE), spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
 %
-The method implemented in Python takes 20 seconds to estimate optical flow from a $1280 pixels\times640 pixels$ resolution image pairs.
+%The method implemented in Python takes 20 seconds to estimate optical flow from a $1280 pixels\times640 pixels$ resolution image pairs.
+%Our Python implementation uses DIS flow \cite{KroegTDV2016} for computing the tangent optical flow fields.
+%Computing optical flow at 1280$\times$640 resolution takes about 20 seconds.
+Our Python implementation computes 360° optical flow at 1280$\times$640 resolution in about 20 seconds.
+We use DIS flow \cite{KroegTDV2016} for the tangent flow fields.
+\looseness-1
 
-\subsection{Dataset \& Error Metric}
 
-The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
+\subsection{Datasets \& Error Metrics}
+
 %To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
+%The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
+We evaluate the performance of our method on synthetic and real-world datasets using multiple spherical error metrics.
 
-\paragraph{Dataset}
+
+\paragraph{Datasets}
 %% dicuess the 360 dataset
 %
 %% 360 dataset
