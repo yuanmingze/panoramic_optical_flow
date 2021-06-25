@@ -91,15 +91,22 @@ This naturally limits the maximum flow magnitude to $\leq$180°.
 \subsection{Projection \& Stitching}
 \label{sec:approach:projstit}
 
-% why need projection and stitch?
-To mitigate the ERP image distortion, we hire the perspective image optical flow methods with gnomonic projection to un-distort the ERP image in both cubemap and icosahedron sampling.
-% how to do it 
-The cubemap and icosahedron optical flow methods composes with 3 steps:
-project the ERP image with gnomonic projection \cite{?} to generate perspective image i.e. tangent images, with cubemap and icosahedron sampling respectively \cite{?}\cite{?};
-use perspective image optical flow method to estimate each tangent image optical flow;
-stitch each tangent images optical flow back to ERP format.
-% more detail
-The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
+%% why need projection and stitch?
+%To mitigate the ERP image distortion, we hire the perspective image optical flow methods with gnomonic projection to un-distort the ERP image in both cubemap and icosahedron sampling.
+To mitigate the distortions in ERP images, we locally undistort the ERP image to a perspective tangent image using gnomonic projection \cite{EderSLF2020}.
+This way, we can apply any off-the-shelf perspective optical flow method directly on pairs of tangent images, first using a cubemap projection and later using an icosahedron projection to refine the 360° flow estimates.
+%
+%% how to do it 
+%The cubemap and icosahedron optical flow methods composes with 3 steps:
+In both the cubemap and icosahedron cases, we proceed as follows:
+we first project the ERP image with gnomonic projection to generate 6 (cubemap) or 20 (icosahedron) perspective images that are tangent to the unit sphere;
+we then use an optical flow method for perspective images to estimate optical flow for pairs of corresponding tangent images; and
+finally, we stitch the optical flow fields for all tangent images back together in the ERP format.
+%
+%% more detail
+%The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
+Our approach in principle supports any perspective optical flow method, and results are therefore expected to improve as improved optical flow methods become available in future.
+
 
 \textbf{Equirectangular Image Projection}.
 % tangent image generation
