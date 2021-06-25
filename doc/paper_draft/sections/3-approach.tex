@@ -197,22 +197,25 @@ Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
 
-\textbf{Image Global Rotation Warping.}
-After extract the global rotation $R$ from optical flow, rotate the target image $I_{t+1}$ with $R$ from alignment to the source image $I_{t}$ with the equirectangular image rotation in 3D space. ~\cite{ZioulKZAD2019}.
+\textbf{Global Rotation Image Warping.}
+After extracting  the global rotation $R$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $R$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
 %
-The global rotation warping based on the coarse to fine principle, 
-Firstly, use panoramic images optical flow estimated $\bar{R}$ to roughly align the $I_{t+1}$ for getting rid of the ego-motion, then use the cubemap optical flow to fine-tune the alignment.
+We apply global rotation warping based on the coarse to fine principle.
+First, use estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
+We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
 
-\textbf{Panoramic Optical Flow Global Rotation Warping.}
+
+%\textbf{Panoramic Optical Flow Global Rotation Warping.}
+\textbf{Global Rotation Optical Flow Warping.}
 To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.
 % 
 When estimating the optical flow only the target image $I_{t+1}$ is warped, so just need to rotate the end point of $\tilde{\mathcal{F}}_t$, i.e $\tilde{\mathcal{F}}^{EP}_t$. 
 %
 To rotate the panoramic image, first transform it to 3D space with $\mathcal{P}$, and back to equirectangular image with $\mathcal{P}^{-1}$.
-
+%
 \begin{equation}\label{equ:approach:globalwarp}
-\begin{split}
+%\begin{split}
 	\mathcal{F}_{(i,j)} = \mathcal{F}^{EP}_{(i,j)} - (i,j)  
 				= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
-\end{split}
+%\end{split}
 \end{equation}
