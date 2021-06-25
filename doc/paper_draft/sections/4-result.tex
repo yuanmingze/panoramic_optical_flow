@@ -285,6 +285,7 @@ The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniP
 
 
 \subsection{Ablations}
+\label{sec:ablations}
 
 \paragraph{Global Rotation Warping's multi-step warp}
 The multi-step warp aligns the $I_{t+1}$ to $I_t$ by ERP, cubemap optical flow. The result without ERP optical flow alignment $W/o360^\circ$ and without cubemap optical flow alignment $W/oCube$ shown in the \cref{fig:exp:ablations}.
@@ -301,28 +302,30 @@ But the stitch blending weight will introduce a tiny error on the whole dataset.
 \begin{table}[h!]
 	\centering
 	\caption{\label{fig:exp:ablations}%
-		The result of ablations study.}
-	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
-		\hline
+		The results of our ablation study. See \cref{sec:ablations} for details.}
+	\resizebox{0.8\linewidth}{!}{%
+%	\setlength{\tabcolsep}{3pt}%
+	\begin{tabular}{p{0.2cm}p{1.9cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
-		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Circle$}}
-		 & Full & 4.9880 & 0.1885  & 39.26 & 0.007241 & 0.05278 & 0.01824 \\ 
-		& $W/oWeight$ &  4.854 &  0.1863  & 37.10   & \textbf{0.007118}  & \textbf{0.05074} &  0.01899 \\
-		& $W/o360^\circ$ & 4.961 & 0.1871 & 38.32  & 0.007165 & 0.05094  & 0.01504 \\ 
-		& $W/oCube$  & 4.956 & 0.1881 &  38.22 &  0.007171 & 0.05241  & \textbf{0.01451} \\ 
-		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Line$}} 
-		& Full & 10.41 & 0.2461  & 55.78 & \textbf{0.01533} & 0.08943 & \textbf{0.03448} \\
-		&  $W/oWeight$ &  10.13 & 0.2447 &  48.60 & 0.01600  & \textbf{0.08798}  & 0.03566 \\ 
-		& $W/o360^\circ$ & 10.82 & 0.2648 & 56.48 & 0.01580   & 0.09090  & 0.03519 \\ 
-		& $W/oCube$  & 10.88 & 0.2484 & 57.61  & 0.01575  & 0.08987  & 0.03535  \\ 
-		\hline
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{$All$}}
-		& Full & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
-		& $W/oWeight$ & 7.524  & 0.2130   & 42.94   & 0.01161  & \textbf{0.06967}  & 0.02741  \\
-		& $W/o360^\circ$ & 7.889 & 0.2260 & 47.40 & 0.01149 & 0.07092  & 0.02512  \\
-		& $W/oCube$  & 7.921 & 0.2182  & 47.91 & \textbf{0.01146} & 0.07114 & \textbf{0.02492} \\
-		\hline
-	\end{tabular}
+		\midrule
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		& Full method  & 4.988 & 0.1885 & 39.26 &     0.007241 &     0.05278 &     0.01824 \\ 
+		& w/o weight   & 4.854 & 0.1863 & 37.10 & \bf 0.007118 & \bf 0.05074 &     0.01899 \\
+		& w/o ERP      & 4.961 & 0.1871 & 38.32 &     0.007165 &     0.05094 &     0.01504 \\ 
+		& w/o cubemap  & 4.956 & 0.1881 & 38.22 &     0.007171 &     0.05241 & \bf 0.01451 \\ 
+		\midrule
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Line}}} 
+		& Full method  & 10.41 & 0.2461 & 55.78 & \bf 0.01533 &     0.08943 & \bf 0.03448 \\
+		& w/o weight   & 10.13 & 0.2447 & 48.60 &     0.01600 & \bf 0.08798 &     0.03566 \\ 
+		& w/o ERP      & 10.82 & 0.2648 & 56.48 &     0.01580 &     0.09090 &     0.03519 \\ 
+		& w/o cubemap  & 10.88 & 0.2484 & 57.61 &     0.01575 &     0.08987 &     0.03535 \\ 
+		\midrule
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}}
+		& Full method  & 8.602 & 0.2270 & 50.27 &     0.01264 &     0.07722 &     0.02907 \\
+		& w/o weight   & 7.524 & 0.2130 & 42.94 &     0.01161 & \bf 0.06967 &     0.02741 \\
+		& w/o ERP      & 7.889 & 0.2260 & 47.40 &     0.01149 &     0.07092 &     0.02512 \\
+		& w/o cubemap  & 7.921 & 0.2182 & 47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
+		\bottomrule
+	\end{tabular}}%
 \end{table}

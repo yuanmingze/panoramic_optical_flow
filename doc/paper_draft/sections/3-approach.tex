@@ -71,7 +71,7 @@ This naturally limits the maximum flow magnitude to $\leq$180°.
 %%close the spherical coordinate expression
 
 
-\begin{figure}%[hbt!]
+\begin{figure}[hbt!]
 	\centering
 %	\begin{center}
 	\subfigure[Source Image]{\includegraphics[width=0.26\linewidth]{images/wraparound/src_image.png}}
@@ -121,12 +121,12 @@ Depending on the choice and density of tangent points, tangent images cover diff
 %
 %For estimating the multi-scale motion and uniform sample the sphere surface, the tangent points selected with inscribe sphere points of regular cubemap and regular icosahedron, which are the most common convex regular polyhedron and have different FOV~\cite{?}.
 For estimating multi-scale motion and to uniformly sample the sphere surface, we select tangent points according to a regular cubemap and a regular icosahedron.
-These are the most common convex regular polyhedra with 6 and 20 faces, respectively, and this result in different FoV with cubemap tangent images having a considerably wider FoV than icosahedron tangent images
+These are the most common convex regular polyhedra with 6 and 20 faces, respectively, and this results in different FoV with cubemap tangent images having a considerably wider FoV than icosahedron tangent images
 %
 Therefore, cubemaps can estimate a larger motion vectors from the tangent images, although their angular resolution is coarser than the icosahedron's tangent images for the same spatial tangent image resolution.
 %
 %% tangent images padding
-To increase the FoV of tangent images and improve the continuity of optical flow at the boundary between tangent images, we add image padding to extend the area of tangent images, as shown in \cref{fig:approach:projection}.
+To increase the FoV of tangent images and improve the continuity of optical flow at the boundary between tangent images, we add image padding to extend the area of tangent images, as illustrated in \cref{fig:approach:projection}.
 
 
 \begin{figure}[hbt!]
@@ -134,9 +134,15 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 		\subfigure[Gnomonic Projection]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image_6.png}}
 		\subfigure[Target Image Padding]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image.pdf}} 
 	\end{center}
-	\caption{\label{fig:approach:projection}
-		Image cubemap and icosahedron projection with padding. \TODO{Image show the cubemap and icosahedron projection result and sampling points \& padding area with padding size.}}
+	\caption{\label{fig:approach:projection}%
+%		Image cubemap and icosahedron projection with padding.
+		Tangent image projection and padding.
+		(a)~Gnomonic projection maps points on the surface of a sphere from the sphere's centre to a point on the tangent plane.
+		(c)~We add padding to the tangent images to extend their area and ensure overlap between tangent images.
+%		\TODO{Image show the cubemap and icosahedron projection result and sampling points \& padding area with padding size.}
+	}
 \end{figure}
+
 
 \textbf{Perspective optical flow stitching}.
 % how to stitch
