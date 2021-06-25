@@ -132,8 +132,8 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 
 \begin{figure}[hbt!]
 	\begin{center}
-		\subfigure[Gnomonic Projection]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image_6.png}}
-		\subfigure[Target Image Padding]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image.pdf}} 
+		\subfigure[Gnomonic Projection]{\includegraphics[width=0.57\linewidth]{images/tangent_image/tangent_image_7.pdf}}
+		\subfigure[Target Image Padding]{\includegraphics[width=0.35\linewidth]{images/tangent_image/tangent_image.pdf}} 
 	\end{center}
 	\caption{\label{fig:approach:projection}%
 %		Image cubemap and icosahedron projection with padding.
@@ -217,14 +217,13 @@ To rotate an ERP pixel, we first convert it to Cartesian 3D coordinates using $\
 %
 Applied to optical flow, this yields:
 %
-\CR{Should the `$- \mathbf{x}$' be outside the parenthesis?}
 \begin{equation}\label{equ:approach:globalwarp}
 %\begin{split}
 %	\mathcal{F}_{(i,j)} = \mathcal{F}^{EP}_{(i,j)} - (i,j)  
 %				= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
 	\mathcal{F}(\mathbf{x})
 	= \mathcal{F}^\text{EP}(\mathbf{x}) - \mathbf{x}
-	= \mathcal{P}^{-1} \left( \hat{R}^\top \cdot \bar{R}^\top \cdot \mathcal{P}(\tilde{\mathcal{F}}^\text{EP}(\mathbf{x})) - \mathbf{x}\right)
+	= \mathcal{P}^{-1} \left( \hat{R}^\top \cdot \bar{R}^\top \cdot \mathcal{P}(\tilde{\mathcal{F}}^\text{EP}(\mathbf{x}))\right)  - \mathbf{x}
 	\text{.}
 %\end{split}
 \end{equation}
