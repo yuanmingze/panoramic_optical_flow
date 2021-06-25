@@ -109,7 +109,7 @@ Our approach in principle supports any perspective optical flow method, and resu
 
 
 %\textbf{Equirectangular Image Projection}.
-\textbf{Gnomonic Projection}.
+\textbf{Gnomonic Projection.}
 %
 %% tangent image generation
 Like \citet{ZhaoYZLBT2020}, we use the gnomonic projection to produce tangent images.
@@ -144,18 +144,28 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 \end{figure}
 
 
-\textbf{Perspective optical flow stitching}.
+\textbf{Tangent Optical Flow Blending.}
+%
 % how to stitch
 %The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from cubemap and Icosahedron face image (tangent image) optical flow.
-Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
-So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
-% blending 
-The blending weight $W_{face}$ is Hadamard product of $W_{cone}$ and $W_{warp}$.
+%Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
+As each tangent image's optical flow is estimated independently, the estimates might not be consistent in the overlap areas of adjacent tangent images.
 %
-The $W_{cone}$ is to down weight the optical flow close the image boundary, which decays base on the distance from the image original to the pixel.
-%The dacay is normal distribution, its 
+%So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
+When stitching the tangent flow fields in the equirectangular format, we thus compute a per-pixel blending weight to smoothly blend flows in the overlap areas.
 %
-And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
+%% blending 
+%The blending weight $W_{face}$ is Hadamard product of $W_{cone}$ and $W_{warp}$.
+The blending weight combines two terms:
+%
+%The $W_{cone}$ is to down weight the optical flow close the image boundary, which decays base on the distance from the image original to the pixel.
+%%The dacay is normal distribution, its 
+(1)~A spatial Gaussian fall-off term attenuates flow estimates far from the image centre and near the image boundary.
+To account for large displacements, we shift the mean of the Gaussian by the inverse of the average motion vector in the image.
+%
+%And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
+(2)~A warping error term that computes the colour difference between the source image and the backwards-warped target image, to reduce the weight of badly estimated motion vectors.
+
 
 %% blending method
 %\TODO{???}
