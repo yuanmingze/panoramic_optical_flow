@@ -65,27 +65,37 @@ To further explore our method's performance qualitatively, we also test our meth
 %Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
 
-\paragraph{Error Metric}
+\paragraph{Error Metrics}
+
+%The AAE, EPE and RMS ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
+Optical flow evaluation commonly uses the average angle error (AAE), end-point error (EPE), and root-mean-square error (RMS) metrics \cite{BakerSLRBS2011}.
+% are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
 %
-The AAE, EPE and RMS ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
 %But the equirectangular image has distortion because closer top and bottom of image less space to corresponding one pixel.~\cite{??},
-To identically metric each pixel's equirectangular optical flow error, and neglect the equirectangular image distortion, when evaluate the ERP optical flow we map the equirectangular pixel coordinate to the spherical coordinates on the unit sphere, and use the geodesic distance to replace the Euclidean distance of metric. 
+%To identically metric each pixel's equirectangular optical flow error, and neglect the equirectangular image distortion, when evaluate the ERP optical flow we map the equirectangular pixel coordinate to the spherical coordinates on the unit sphere, and use the geodesic distance to replace the Euclidean distance of metric.
+To evaluate spherical 360° optical flow, we extend these metrics to the spherical domain by mapping ERP pixel coordinates to spherical coordinates on the unit sphere, and measuring geodesic distances instead of Euclidean distances in image space as used for perspective flow metrics.
+This overcomes both distortions due to the equirectangular projection and also the wrap-around on the sphere.
+%
 %The ERP images introduce exaggerated distortion at north and south poles, which make a central angle error at spherical coordinate system in poles have much larger then the equator's.
 %To evaluate the error with same metric on the whole images, we extend EPE, AAE and RMS to the spherical coordinate. 
 %Replace the euclidean distance and angle with the great circle distance (geodesics) and the angles of a spherical triangle. 
 %The error in spherical coordinate denote with $EPE_{cs}$, $AAE_{cs}$ and $RMS_{cs}$.
 %
 %, which metric on the spherical coordinate system. 
-So we propose the spherical AAE (SAAE), the spherical EPE (SEPE) (see \cref{equ:exp:epesph}) and the spherical RMS (SRMS) to metric the 360° optical flow.
-In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
-The spherical AAE ($SAAE$) is a metric to measure the angle of the estimated optical flow between the ground truth optical flow on the unit sphere surface with spherical trigonometry.
+Specifically, we propose the spherical AAE (SAAE), spherical EPE (SEPE, see \cref{equ:exp:epesph}) and spherical RMS (SRMS) metrics to evaluate 360° optical flow.
+The spherical AAE (SAAE) measures the angle between the estimated and ground-truth optical flow vectors on the surface of a unit sphere using spherical trigonometry.
+%
+%In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
+For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere, and the $N$ is the number of pixels:
 %We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
-
+%
 %\begin{equation}\label{equ_exp_epe}
 %	E_{EPE} = \frac{1}{n} \sum_{i \in \Omega}\sqrt{(u_e^i - u_g^i)^2 + (v_e^i - v_g^i)^2}
 %\end{equation}
 \begin{equation}\label{equ:exp:epesph}
-	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right) 
+%	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right)
+	{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+	\text{.}
 \end{equation}
 
 
@@ -117,6 +127,7 @@ The spherical AAE ($SAAE$) is a metric to measure the angle of the estimated opt
 %	\caption{A diagram to show what the sphere version EPE and AAE like. And the failure case of perspective image AAE and EPE. And the weight of RMSE and SSIM.}
 %	\label{fig:exp:errormetric}
 %\end{figure}
+
 
 \subsection{Comparison}
 
