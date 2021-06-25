@@ -385,6 +385,7 @@ def of_estimate_replica_clean(replica_dataset, opticalflow_mathod="our"):
         output_pano_filepath = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir
         output_dir = output_pano_filepath + "/" + opticalflow_mathod + "/"
         fs_utility.dir_rm(output_dir)
+        log.info("Remove folder: {}".format(output_dir))
         
 
 def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
@@ -442,6 +443,8 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                     optical_flow = flow_estimate.pano_of_0_wo_cube(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 elif opticalflow_mathod == "our_wo_ico":
                     optical_flow = flow_estimate.pano_of_0_wo_ico(src_erp_image, tar_erp_image, debug_output_dir=None)
+                elif opticalflow_mathod == "our_wo_erp":
+                    optical_flow = flow_estimate.pano_of_0_wo_erp(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 else:
                     log.error("the optical flow {} does not implement.")
 
@@ -459,8 +462,8 @@ if __name__ == "__main__":
     test_list = [0]
 
     if 0 in test_list:
-        opticalflow_mathod = "our_wo_ico"  
-        # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight), our_wo_cube, our_wo_ico
+        opticalflow_mathod = "our_wo_erp"  
+        # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight), our_wo_cube, our_wo_ico, our_wo_erp
         # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
 
         # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)

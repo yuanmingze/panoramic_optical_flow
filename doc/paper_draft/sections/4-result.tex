@@ -33,10 +33,11 @@ The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZ
 But the Replica official rendering pipeline doesn't support the panoramic camera model and optical flow generation, we implement the panoramic camera model on OpenGL geometry shaders to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
 %% The detail of the 360 replica optical flow dataset
 %The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
-The 360 Replica dataset rendering with two kinds of camera path circle and line. The circle path is the camera face to outward and moves along a circle, the line path is the camera face the same direction and moves in a straight line.
+The 360 Replica dataset rendering with two kinds of camera path circle and line. The circle path is the camera face to outward and moves along a circle (\TODO{how much radian and image per circle}), the line path is the camera face the same direction and moves in a straight line.
 
 %% real word dataset
-Although the synthetic data is very close to real-world data include shape, texture and light, but the real-world data is more challenging, has complex lighting and motion, etc. 
+%The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
+Although the synthetic data is very close to real-world data, but the real-world data is more challenging, has complex lighting and motion, etc. 
 %
 For further explorer our method performance, we also test our method on the OmniPhotos dataset \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
 %% how to evaluate
@@ -97,29 +98,46 @@ The spherical AAE ($SAAE$) is a metric to measure the angle of the estimated opt
 
 \subsection{Comparison}
 
-We compare our method with following state of the art methods, RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and Dense Inverse Search (DIS)~\cite{KroegTDV2016}. 
+We compare our method with following state-of-the-art methods, RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}. 
 %
-We use the offical implemented RAFT and PWC-Net \href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}, and OpenCV implemneted DIS. 
+The \href{https://github.com/princeton-vl/RAFT}{RAFT} and PWC-Net (\href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}) are author official released code, the DIS is the OpenCV's implementation. 
+% 
+The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360 and OmniPhoto dataset.
 
 
-\textbf{Quantitative Evaluation.}
+\paragraph{Quantitative Evaluation}
 
-The error in spherical coordinate shown as \cref{fig:exp:quality}.
+%% how 
+The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360 dataset. 
+%% analyse table
+As shown in \cref{tab:exp:oferrorquality} the perspective optical flow and 360 optical flow error metric used on the different camera path result, our method gets the best performance.
+%
+In the $Circle$ path result, all methods are better than the $Line$ path's because there is more large pixel motion in the $Line$ path image pairs, make the optical flow hard to find the pixel's corresponding relationship between two images. Meanwhile, our global rotation warping aligns with the rotated image, make our method easily deal with the camera ego-motion.
+By the way, as shown in the DIS's $Line$ result, its EPE is the largest but its SEPE is less than PWCNet's SEPE, 
+the SEPE metric the error with geodesic distance to neglect the 360 image distortion, so the SEPE is more objective than EPE.
 
-\todolist{Test on and a table to list them:
-\begin{enumerate}
-\item whole dataset;
-\item different kinds of camera motion and different magnitude motion;
-\item different image resolution 0.5K, 1K, 2K.
-\item Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
-\end{enumerate}
-}
+%% analyse the diagram
+The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
+The other method error mainly introduces on the top and bottom of the optical flow.
+Our method has the least error at the top and bottom, the image middle rows area is close to the DIS result. 
+%The RAFT the best performance in the middle of the image.
+
+%% summary
+Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we find that 
+%
+the perspective image optical flow can not work well at the top and bottom of 360 images but our method can help them dramatically improve the performance on these areas;
+%
+our method succeeds the backbone optical flow features, it has the same performance in the image middle horizontal area as the backbone method.
 
 
+
+%% TODO 
+%different image resolution 0.5K, 1K, 2K.
+%Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
 \begin{table}[h!]
 	\centering
-	\caption{\label{fig:exp:oferrorquality}%
-		Result of optical flow error on Replica dataset.}
+	\caption{\label{tab:exp:oferrorquality}%
+		Optical flow error on Replica dataset.}
 	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
 		\hline
 		  &  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
@@ -127,23 +145,18 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 		\multirow{3}{*}{\rotatebox[origin=c]{90}{Circle}} & PWCNet & 16.60 & 0.2994  & 63.44  & 0.0588 & 0.1469 & 0.3845 \\ 
 		 & RAFT & 16.56 & 0.2775  & 64.94 & 0.04669 & 0.1482 & 0.3301 \\
 		 & DIS  & 16.50  & 0.2881  & 62.67  & 0.05375 &  0.1566 & 0.3515 \\
-		 & Our & \textbf{4.854} & \textbf{0.1863}  & 37.10 & 0.007118 & 0.05074 & 0.01899 \\ 
-		 & Our(W) & 4.988 & 0.1885 & 39.26 & 0.007241 & 0.05278 & 0.01824 \\ 
+		 & Our & {4.854} & {0.1863}  & 37.10 & 0.007118 & 0.05074 & 0.01899 \\ 
 		\hline
 		\multirow{3}{*}{\rotatebox[origin=c]{90}{Line}} & PWCNet & 32.25 & 0.2139  & 93.32 & 0.1215 & 0.1429 & 0.5289 \\ 
 		& RAFT & 31.75 & 0.2908 & 96.55 & 0.08752 & 0.1595 & 0.4201 \\ 
 		& DIS  & 35.55 & 0.3328 & 98.24 & 0.1149 & 0.2063 &  0.4768 \\
 		& Our & 10.13 & 0.2447  & 48.60 & 0.01600 & 0.08798 & 0.03566 \\
-		& Our(W) & 10.41 & 0.2462  & 55.78 & 0.01533 & 0.08943 & 0.03448 \\ 
 		\hline
 		\multirow{4}{*}{\rotatebox[origin=c]{90}{All}} 
 		& PWCNet & 18.95 & 0.2866  & 67.92 & 0.06822 & 0.1463 & 0.4062 \\
 		& RAFT & 20.20 & 0.2807  & 72.53  & 0.05648 & 0.1509  & 0.3517 \\
 		& DIS  & 25.74  & 0.3045  & 79.94  & 0.08347 & 0.1797  & 0.4127 \\
-		& Our(W/OB)  & \textbf{7.524}  & 0.2129  &  42.94 & 0.01161 & 0.06967 & 0.02741 \\
 		& Our & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
-		& Our(W/O cube) & 7.921 & 0.2182  & 47.91 & 0.01146 & 0.07114 & 0.02492 \\
-		& Our(W/O Ico) & 5.023 & 0.2140  & 31.97 & 0.009781 & 0.06662 & 0.02308 \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -167,17 +180,6 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 %		\hline
 %	\end{tabular}
 %\end{table}
-
-
-
-\todolist{analyze the error,where is larget, and why good and bad?}
-
-
-\textbf{Qualitative Evaluation.}
-
-\TODO{Compare on real-world dataset, OmniPhotos. The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.}
-
-\MZY{Our method can process the ego-motion very well, but maybe not good at other motion.}
 
 
 \newcommand{\labeledfig}[4]{
@@ -213,44 +215,52 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
-%		\\[-0.9em]
-%		\labeledfig{images/of_error/room_0_circ_1k_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{black}
-%		\\[-1.0em]
-%		\labeledfig{images/of_error/room_0_circ_1k_0_gt_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
-%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
+		%		\\[-0.9em]
+		%		\labeledfig{images/of_error/room_0_circ_1k_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{black}
+		%		\\[-1.0em]
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_gt_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
+		%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 	\end{tabular}
 	\caption{\label{fig:exp:compflow}
-		The optical flow results on Replica, 1st and 2nd rows are the result on the Replica $office\_0$ result, which are optical flow and optical flow $SEPE$ error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica $apartment\_0$.}
+		The optical flow SEPE heatmap on Replica 360 dataset, 1st and 2nd rows are the result on the Replica $office\_0$ result, which are optical flow and optical flow SEPE error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica $apartment\_0$.}
 \end{figure*}
+
+
+\paragraph{Qualitative Evaluation}
+
+To analyse the optical flow methods performance on a real-world dataset without ground truth optical flow, we metric the RGB image error on the optical flow backwards warped image to evaluate optical flow.
+%
+The \cref{fig:exp:backwardwarp} show the result on Replica 360 and OmniPhotos,  in the  (k)-(n)  there is lest RGB error at the top and bottom of images in our method.
+The OmniPhoto difference is not obvious as the Replica 360's because the OmniPhoto is a high frame rate dataset there is less camera motion between the two sequence images.
 
 \begin{figure}[hbt!]
 	\centering
 	\begin{tabular}{@{}c*{5}{@{\hspace{-8pt}}c}@{}}
-	\labeledfig{images/of_warp/room_1_circ_1k_0_0001_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) Our}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) PWCNet}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{black}
-	\\[-1.0em]
-	\labeledfig{images/of_warp/room_1_circ_1k_0_0002_rgb_pano.jpg}{0.185}{(f) $I_{t+1}$}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(g) DIS(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(h) Our(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(i) PWCNet(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(j) RAFT(Warp)}{black}
-	\\[-1.0em]
-	 &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(k) DIS(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Our(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
-	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
-	\\[-0.9em]
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_0001_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) Our}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) PWCNet}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{black}
+%	\\[-1.0em]
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_0002_rgb_pano.jpg}{0.185}{(f) $I_{t+1}$}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(g) DIS(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(h) Our(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(i) PWCNet(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_wrap.jpg}{0.185}{(j) RAFT(Warp)}{black}
+%	\\[-1.0em]
+%	 &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(k) DIS(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_our_weight_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Our(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
+%	\labeledfig{images/of_warp/room_1_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
+%	\\[-0.9em]
 	\labeledfig{images/of_warp/BeihaiPark_panoramic-0549.jpg}{0.185}{(a) $I_t$}{black} &
 	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
 	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(c) Our}{black} &
@@ -270,17 +280,47 @@ The error in spherical coordinate shown as \cref{fig:exp:quality}.
 	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
 \end{tabular}
 	\caption{\label{fig:exp:backwardwarp}
-		The backward warp result with forward optical flow on Omniphoto dataset.}
+		The optical flow backward warp result on Omniphoto dataset's $BeihaiPark$. The 3rd row is the image error heatmap, more error is darker.}
 \end{figure}
 
 
 \subsection{Ablations}
 
-\textbf{Multi-step warp.}
+\paragraph{Global Rotation Warping's multi-step warp}
+The multi-step warp aligns the $I_{t+1}$ to $I_t$ by ERP, Cubemap optical flow. The result without ERP optical flow alignment $W/o360^\circ$ and without Cubemap optical flow alignment $W/oCube$ shown in the \cref{fig:exp:ablations}.
+\TODO{analysis result}
 
-Compare the result with and without the image alignment.
-\todolist{How rotation affects accuracy?}
+\paragraph{Stitch blending weight}
+The blending weight aims to consistently stitch the overlap area of different face's optical flow when stitching the separated perspective optical flow.
+The result without Stitch blending weight shown in \cref{fig:exp:ablations} $W/oEight$, replacing the weight with unit weight.
+\TODO{analysis result}
 
-\textbf{Stitch blending weight.}
 
-Test every terms of the weight,
+\begin{table}[h!]
+	\centering
+	\caption{\label{fig:exp:ablations}%
+		The result of ablations study.}
+	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
+		\hline
+		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
+		\hline
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{Circle}}
+		 & Full & 4.9880 & 0.1885  & 39.26 & 0.007241 & 0.05278 & 0.01824 \\ 
+		& $W/oWeight$ &  4.854 &  0.1863  & 37.10   & 0.007118  &  0.05074 &  0.01899 \\
+		& $W/o360^\circ$ & 4.961 & 0.1871 & 38.32  & 0.007165 & 0.05094  & 0.01504 \\ 
+		& $W/oCube$  & 4.956 & 0.1881 &  38.22 &  0.007171 & 0.05241  & 0.01451 \\ 
+		\hline
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{Line}} 
+		& Full & 10.41 & 0.2461  & 55.78 & 0.01533 & 0.08943 & 0.03448 \\
+		&  $W/oWeight$ &  10.13 & 0.2447 &  48.60 & 0.01600  & 0.08798  & 0.03566 \\ 
+		& $W/o360^\circ$ & 10.82 & 0.2648 & 56.48 & 0.01580   & 0.09090  & 0.03519 \\ 
+		& $W/oCube$  & 10.88 & 0.2484 & 57.61  & 0.01575  & 0.08987  & 0.03535  \\ 
+		\hline
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{All}}
+		& Full & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
+		& $W/oWeight$ & 7.524  & 0.2130   & 42.94   & 0.01161  & 0.06967  & 0.02741  \\
+		& $W/o360^\circ$ & 7.889 & 0.2260 & 47.40 & 0.01149 & 0.07092  & 0.02512  \\
+		& $W/oCube$  & 7.921 & 0.2182  & 47.91 & 0.01146 & 0.07114 & 0.02492 \\
+		\hline
+	\end{tabular}
+\end{table}

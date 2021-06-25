@@ -173,6 +173,68 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
         
     return of_accu
 
+
+def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward"):
+    """Compute the optical flow with multi-step and icosahedron projection.
+
+    The multi-steps method, just transfer the ERP image rotation to next step.
+    The process use warp-around (overflowed) optical flow.
+
+    :param src_erp_image: the source ERP image data.
+    :type src_erp_image: numpy
+    :param tar_erp_image: the target ERP image data.
+    :type tar_erp_image: numpy
+    :param optical_flow_method: the optical flow estimation function.
+    :type: function
+    :param debug_output_dir: The folder storing output debug information.
+    :type debug_output_dir: str
+    :param face_blending_method: the weight to blending faces, default is "straightforward".
+    :type face_blending_method: str
+    :return: the optical flow from src image to tar image.
+    :rtype: numpy
+    """
+    if optical_flow_method == None:
+        optical_flow_method = of_methdod_DIS
+
+    padding_size_cubemap = 0.1
+    padding_size_ico = 0.1
+    erp_image_height = src_erp_image.shape[0]
+    tangent_image_width_ico = 480
+
+    # 1) compute flow with cubemap projection & warp target image
+    log.debug("1) compute cubemap projection image flow")
+    # 1-1) erp image to cube map
+    cubeface_images_src_list = proj_cm.erp2cubemap_image(src_erp_image, padding_size_cubemap)
+    cubeface_images_tar_list = proj_cm.erp2cubemap_image(tar_erp_image, padding_size_cubemap)
+    cubemap_face_of_list = []
+    for index in range(0, len(cubeface_images_src_list)):
+        optical_flow_cubemap = optical_flow_method(cubeface_images_src_list[index], cubeface_images_tar_list[index])
+        cubemap_face_of_list.append(optical_flow_cubemap)
+    optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
+    # 1-2) warp target image
+    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_cubemap, src_image=False)
+    cubemap_rot_mat = spherical_coordinates.rot_sph2mat(cubemap_rot_theta, cubemap_rot_phi)
+    log.debug("Cubemap optical flow rotation is {}, {}".format(np.degrees(cubemap_rot_theta), np.degrees(cubemap_rot_phi)))
+
+    # 2) compute flow with icosahedron projection & warp image
+    log.debug("2) compute icosahedron projection image flow")
+    # 2-1) erp image to cube map
+    icoface_images_src_list = proj_ico.erp2ico_image(src_erp_image, tangent_image_width_ico, padding_size_ico, full_face_image=True)
+    icoface_images_tar_list = proj_ico.erp2ico_image(tar_erp_image_rot_cubemap, tangent_image_width_ico, padding_size_ico, full_face_image=True)
+    ico_face_of_list = []
+    for index in range(0, len(icoface_images_src_list)):
+        optical_flow_ico = optical_flow_method(icoface_images_src_list[index], icoface_images_tar_list[index])
+        ico_face_of_list.append(optical_flow_ico)
+    optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, padding_size_ico, src_erp_image, tar_erp_image, wrap_around=True, face_blending_method=face_blending_method)
+
+    # 3) accumulate all-steps optical flow
+    of_accu = projection.flow_rotate_endpoint(optical_flow_ico, cubemap_rot_mat.T)
+
+    if debug_output_dir is not None:
+        debug_save_of(of_accu, debug_output_dir + "pano_of_0_ico_of_accu")
+        
+    return of_accu
+    
 def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward"):
     """Compute the optical flow with multi-step and icosahedron projection.
 
