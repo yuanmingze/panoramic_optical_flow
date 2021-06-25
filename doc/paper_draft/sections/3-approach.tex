@@ -150,20 +150,25 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
 So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
 % blending 
-The weight compose with 
-The padding area need blending
-% blending method
-\TODO{???}
-\begin{equation}
-W_{face} =
-\end{equation}
+The blending weight $W_{face}$ is Hadamard product of $W_{cone}$ and $W_{warp}$.
+%
+The $W_{cone}$ is to down weight the optical flow close the image boundary, which decays base on the distance from the image original to the pixel.
+%The dacay is normal distribution, its 
+%
+And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
 
-\begin{figure}[hbt!]
-	\centering
-	\includegraphics[width=0.35\linewidth]{example-image}
-	\caption{Optical flow stitching blending weight visualization.\TODO{Visualized different weight and blend result, and show each face's optical flow.}}
-	\label{fig:approach:blendweight}
-\end{figure}
+%% blending method
+%\TODO{???}
+%\begin{equation}
+%W_{face} = W_{cone} * W_{warp}
+%\end{equation}
+
+%\begin{figure}[hbt!]
+%	\centering
+%	\includegraphics[width=0.35\linewidth]{example-image}
+%	\caption{Optical flow stitching blending weight visualization.\TODO{Visualized different weight and blend result, and show each face's optical flow.}}
+%	\label{fig:approach:blendweight}
+%\end{figure}
 
 
 \subsection{Global Rotation Warping}
