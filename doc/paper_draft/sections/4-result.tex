@@ -15,6 +15,7 @@ We use DIS flow \cite{KroegTDV2016} for the tangent flow fields.
 
 
 \subsection{Datasets \& Error Metrics}
+\label{sec:datasets-metrics}
 
 %To quantitative evaluate the optical flow method, we generate a synthetic dataset include equirectangular RGB images and its ground truth equirectangular optical flow.
 %The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
@@ -138,7 +139,7 @@ The \href{https://github.com/princeton-vl/RAFT}{RAFT} and PWC-Net (\href{https:/
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhoto dataset.
 
 
-\paragraph{Quantitative Evaluation}
+\paragraph{Quantitative Evaluation.}
 
 %% how 
 The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360° dataset. 
@@ -170,28 +171,35 @@ our method succeeds the backbone optical flow features, it has the same performa
 \begin{table}[h!]
 	\centering
 	\caption{\label{tab:exp:oferrorquality}%
-		Optical flow error on Replica 360° dataset.}
-	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
-		\hline
-		  &  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
-		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Circle$}} & PWCNet & 16.60 & 0.2994  & 63.44  & 0.0588 & 0.1469 & 0.3845 \\ 
-		 & RAFT & 16.56 & 0.2775  & 64.94 & 0.04669 & 0.1482 & 0.3301 \\
-		 & DIS  & 16.50  & 0.2881  & 62.67  & 0.05375 &  0.1566 & 0.3515 \\
-		 & Our & {4.854} & {0.1863}  & 37.10 & 0.007118 & 0.05074 & 0.01899 \\ 
-		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Line$}} & PWCNet & 32.25 & 0.2139  & 93.32 & 0.1215 & 0.1429 & 0.5289 \\ 
-		& RAFT & 31.75 & 0.2908 & 96.55 & 0.08752 & 0.1595 & 0.4201 \\ 
-		& DIS  & 35.55 & 0.3328 & 98.24 & 0.1149 & 0.2063 &  0.4768 \\
-		& Our & 10.13 & 0.2447  & 48.60 & 0.01600 & 0.08798 & 0.03566 \\
-		\hline
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{$All$}} 
-		& PWCNet & 18.95 & 0.2866  & 67.92 & 0.06822 & 0.1463 & 0.4062 \\
-		& RAFT & 20.20 & 0.2807  & 72.53  & 0.05648 & 0.1509  & 0.3517 \\
-		& DIS  & 25.74  & 0.3045  & 79.94  & 0.08347 & 0.1797  & 0.4127 \\
-		& Our & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
-		\hline
-	\end{tabular}
+		Optical flow errors on the synthetic Replica 360° dataset.
+		See \cref{sec:datasets-metrics} for metrics.}
+	\resizebox{0.8\linewidth}{!}{%
+	%	\setlength{\tabcolsep}{3pt}%
+	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+%	\centering
+%	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
+		\toprule
+		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
+		\midrule
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		& PWC-Net &           16.60  & 0.2994 & 63.44 &     0.0588   &     0.1469  &     0.3845  \\ 
+		& RAFT    &           16.56  & 0.2775 & 64.94 &     0.04669  &     0.1482  &     0.3301  \\
+		& DIS     &           16.50  & 0.2881 & 62.67 &     0.05375  &     0.1566  &     0.3515  \\
+		& Ours    & \phantom{0}4.854 & 0.1863 & 37.10 & \bf 0.007118 & \bf 0.05074 & \bf 0.01899 \\ 
+		\midrule
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Line}}}
+		& PWC-Net &           32.25  & 0.2139 & 93.32 &     0.1215  &     0.1429  &     0.5289  \\ 
+		& RAFT    &           31.75  & 0.2908 & 96.55 &     0.08752 &     0.1595  &     0.4201  \\ 
+		& DIS     &           35.55  & 0.3328 & 98.24 &     0.1149  &     0.2063  &     0.4768  \\
+		& Ours    &           10.13  & 0.2447 & 48.60 & \bf 0.01600 & \bf 0.08798 & \bf 0.03566 \\
+		\midrule
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}} 
+		& PWC-Net &           18.95  & 0.2866 & 67.92 &     0.06822 &     0.1463  &     0.4062  \\
+		& RAFT    &           20.20  & 0.2807 & 72.53 &     0.05648 &     0.1509  &     0.3517  \\
+		& DIS     &           25.74  & 0.3045 & 79.94 &     0.08347 &     0.1797  &     0.4127  \\
+		& Ours    & \phantom{0}8.602 & 0.2270 & 50.27 & \bf 0.01264 & \bf 0.07722 & \bf 0.02907 \\
+		\bottomrule
+	\end{tabular}}%
 \end{table}
 
 
@@ -266,7 +274,7 @@ our method succeeds the backbone optical flow features, it has the same performa
 \end{figure*}
 
 
-\paragraph{Qualitative Evaluation}
+\paragraph{Qualitative Evaluation.}
 
 To analyse the optical flow methods performance on a real-world dataset without ground truth optical flow, we metric the RGB image error on the optical flow backwards warped image to evaluate optical flow.
 %
@@ -320,7 +328,7 @@ The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniP
 \subsection{Ablation Studies}
 \label{sec:ablations}
 
-\paragraph{Global Rotation Warping}
+\paragraph{Global Rotation Warping.}
 The multi-step rotation warping aligns image $I_{t+1}$ to $I_t$ by estimating rotation using the ERP and cubemap optical flow.
 The results without ERP optical flow alignment (`w/o ERP') and without cubemap optical flow alignment (`w/o cubemap') are shown in \cref{fig:exp:ablations}.
 %%{analysis result}
@@ -329,7 +337,7 @@ The `w/o ERP' error is higher than the `w/o cubemap' error for both `\emph{Line}
 as the ERP-based rotation estimation better handles large pixel motions.
 
 
-\paragraph{Stitch Blending Weight}
+\paragraph{Stitch Blending Weight.}
 The blending weight aims to smoothly and consistently stitch the overlap area of different faces' optical flow.
 The result without blending weight is shown as `w/o weight' in \cref{fig:exp:ablations}, which replaces all weights with the unit weight.
 %{analysis result}
