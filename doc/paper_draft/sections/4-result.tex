@@ -29,28 +29,41 @@ We evaluate the performance of our method on synthetic and real-world datasets u
 %% synthetic dataset
 %
 %% 360 optical flow
-Compare to depth map sensor ToF camera or struct-light camera etc., 
-there are not have feasible hardware to capture high-quality optical flow from the real-world scene, especially the 360° optical flow.
+Unlike depth sensors, %such as map sensor ToF camera or struct-light camera etc., 
+there is no feasible hardware for capturing high-quality optical flow from a real-world scene, especially for 360° optical flow.
 %
-For quantitive evaluation of the optical flow, the ground truth is necessery.
-Inspire by \cite{shugrina2019creative}, we render the ground truth 360° optical flow and RGB image from the 3D mesh reconstructed from the read-world scene.
+For quantitative evaluation of optical flow, ground truth is necessary.
+%
+Inspired by \citet{shugrina2019creative}, we render ground-truth 360° images and optical flow from the reconstructed 3D mesh of a read-world scene.
 %% select the 3d mesh dataset
-The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contain high quality HDR texture and 3D mesh but also public a versatile render code.
+The ground-truth data is rendered using the Replica dataset \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contains high-quality HDR textures and 3D meshes, but also public code for a versatile renderer.
+%
 %% how to modify the replica code
 %OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
 %So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
-But the Replica official rendering pipeline doesn't support the panoramic camera model and optical flow generation, we implement the panoramic camera model on OpenGL geometry shaders to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
+However, the official Replica rendering pipeline does not support any 360° camera model or optical flow generation.
+We therefore implemented an ERP camera model using OpenGL geometry shaders that transform the 3D mesh from Cartesian coordinates to spherical coordinates, finally renders the 3D mesh and ground-truth optical flow in the equirectangular format.
+\looseness-1
+
+
 %% The detail of the 360 replica optical flow dataset
 %The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
-The 360° Replica dataset rendering with two kinds of camera path circle and line. The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval. The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
+%The 360° Replica dataset rendering with two kinds of camera path circle and line.
+%The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval.
+%The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
+We render two types of camera paths for ground-truth evaluation.
+A circular path (\emph{Circle}), in which the camera moves along a 50\,cm radius circle and faces outwards, with images rendered every 10°.
+And a linear path (\emph{Line}), where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
+
 
 %% real word dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
-Although the synthetic data is very close to real-world data, but the real-world data is more challenging, has complex lighting and motion, etc. 
+Although the synthetic dataset is highly realistic, real-world data tends to be more challenging, with complex lighting and motions.
 %
-For further explorer our method performance, we also test our method on the OmniPhotos dataset \cite{BerteYLR2020}, which is an open accessed dataset with diversity scene and captured with a high-quality panoramic camera.
+To further explore our method's performance qualitatively, we also test our method on the OmniPhotos dataset \cite{BerteYLR2020}, which contains diverse 360° videos of real scenes captured with a high-quality 360° video camera.
 %% how to evaluate
 %Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
+
 
 \paragraph{Error Metric}
 %
