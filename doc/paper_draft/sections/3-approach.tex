@@ -8,7 +8,7 @@
 		The input is a pair of equirectangular images, $I_t$ and $I_{t+1}$, and the output is the optical flow $\mathcal{F}_t$.
 %		The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively.
 		The operators `$\oplus$' and `$\ominus$' rotate images forward and optical flow fields backward, respectively, using image warping (see \cref{sec:approach:warping}).
-		The green box estimates a rotation from an optical flow field.
+		The green box estimates a rotation from a 360° optical flow field.
 	}
 	\label{fig:approach:pipeline}
 \end{figure}
@@ -108,17 +108,26 @@ finally, we stitch the optical flow fields for all tangent images back together 
 Our approach in principle supports any perspective optical flow method, and results are therefore expected to improve as improved optical flow methods become available in future.
 
 
-\textbf{Equirectangular Image Projection}.
-% tangent image generation
-As \cite{ZhaoYZLBT2020} the gnomonic projection is used to generate the tangent images ~\cite{??}, which is a perspective image projected from the sphere surface at tangent point on the united sphere surface.
-% sampling points selection (Tangent/Center points selection.)
-With different tangent point selection, the tangent images cover the different spherical surface area and image field of view (FOV).
+%\textbf{Equirectangular Image Projection}.
+\textbf{Gnomonic Projection}.
 %
-For estimating the multi-scale motion and uniform sample the sphere surface, the tangent points selected with inscribe sphere points of regular cubemap and regular icosahedron, which are the most common convex regular polyhedron and have different FOV~\cite{?}.
+%% tangent image generation
+Like \citet{ZhaoYZLBT2020}, we use the gnomonic projection to produce tangent images.
+These images are perspective images with the same camera centre as the ERP image, but their optical axis intersects the unit sphere at the tangent point with a circumscribed cube or icosahedron.
 %
-The tangent image of cubemap has wider FOV than the tangent image of icosahedron, so cubemap can estimate a larger span motion vector from the tangent image, but its PPI is smaller than the icosahedron's when they are in the same tangent image resolution.
-% tangent images padding
-To increase the tangent images FOV and improve the optical flow near the image boundary ~\cite{?}, we use tangent image padding to increase more area and extend the tangent image boundary, shown as \cref{fig:approach:projection}.
+%% sampling points selection (Tangent/Center points selection.)
+%With different tangent point selection, the tangent images cover the different spherical surface area and image field of view (FOV).
+Depending on the choice and density of tangent points, tangent images cover different spherical surface areas, which determines the field of view (FoV) of the tangent images.
+%
+%For estimating the multi-scale motion and uniform sample the sphere surface, the tangent points selected with inscribe sphere points of regular cubemap and regular icosahedron, which are the most common convex regular polyhedron and have different FOV~\cite{?}.
+For estimating multi-scale motion and to uniformly sample the sphere surface, we select tangent points according to a regular cubemap and a regular icosahedron.
+These are the most common convex regular polyhedra with 6 and 20 faces, respectively, and this result in different FoV with cubemap tangent images having a considerably wider FoV than icosahedron tangent images
+%
+Therefore, cubemaps can estimate a larger motion vectors from the tangent images, although their angular resolution is coarser than the icosahedron's tangent images for the same spatial tangent image resolution.
+%
+%% tangent images padding
+To increase the FoV of tangent images and improve the continuity of optical flow at the boundary between tangent images, we add image padding to extend the area of tangent images, as shown in \cref{fig:approach:projection}.
+
 
 \begin{figure}[hbt!]
 	\begin{center}
