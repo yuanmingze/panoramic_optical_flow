@@ -119,19 +119,19 @@ To increase the tangent images FOV and improve the optical flow near the image b
 		\subfigure[Target Image Padding]{\includegraphics[width=0.43\linewidth]{images/tangent_image/tangent_image.pdf}} 
 	\end{center}
 	\caption{\label{fig:approach:projection}
-		Image Cubemap and Ico projection with padding. \TODO{Image show the cubemap and ico projection result and sampling points \& padding area with padding size.}}
+		Image cubemap and icosahedron projection with padding. \TODO{Image show the cubemap and icosahedron projection result and sampling points \& padding area with padding size.}}
 \end{figure}
 
 \textbf{Perspective optical flow stitching}.
 % how to stitch
-%The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from CubeMap and Icosahedron face image (tangent image) optical flow.
+%The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from cubemap and Icosahedron face image (tangent image) optical flow.
 Each tangent image optical flow estimation is separated, make the faces overlap area's optical flow is not consistent.
 So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
 % blending 
 The weight compose with 
 The padding area need blending
 % blending method
-
+\TODO{???}
 \begin{equation}
 W_{face} =
 \end{equation}
@@ -142,6 +142,7 @@ W_{face} =
 	\caption{Optical flow stitching blending weight visualization.\TODO{Visualized different weight and blend result, and show each face's optical flow.}}
 	\label{fig:approach:blendweight}
 \end{figure}
+
 
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
@@ -167,7 +168,7 @@ To rotate the panoramic image, first transform it to 3D space with $\mathcal{P}$
 
 \begin{equation}\label{equ:approach:globalwarp}
 \begin{split}
-	\mathcal{F}_{(i,j)} &= \mathcal{F}^{EP}_{(i,j)} - (i,j)  \\
-				&= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
+	\mathcal{F}_{(i,j)} = \mathcal{F}^{EP}_{(i,j)} - (i,j)  
+				= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
 \end{split}
 \end{equation}

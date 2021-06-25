@@ -1,7 +1,7 @@
 \section{Experiments}
 \label{sec:exp}
 
-We evaluate our method on 360° Replica\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhoto\cite{BerteYLR2020} datasets and achieves state-of-the-art performance on both datasets.
+We evaluate our method on Replica\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhoto\cite{BerteYLR2020} datasets and achieves state-of-the-art performance on both datasets.
 %
 To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error  (SRMS).
 %
@@ -21,10 +21,10 @@ The method performance evaluated on both synthetic and real-world dataset by pan
 %
 %% 360 optical flow
 Compare to depth map sensor ToF camera or struct-light camera etc., 
-there are not have feasible hardware to capture high-quality optical flow from the real-world scene, especially the 360 optical flow.
+there are not have feasible hardware to capture high-quality optical flow from the real-world scene, especially the 360° optical flow.
 %
 For quantitive evaluation of the optical flow, the ground truth is necessery.
-Inspire by \cite{shugrina2019creative}, we render the ground truth 360 optical flow and RGB image from the 3D mesh reconstructed from the read-world scene.
+Inspire by \cite{shugrina2019creative}, we render the ground truth 360° optical flow and RGB image from the 3D mesh reconstructed from the read-world scene.
 %% select the 3d mesh dataset
 The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contain high quality HDR texture and 3D mesh but also public a versatile render code.
 %% how to modify the replica code
@@ -33,7 +33,7 @@ The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZ
 But the Replica official rendering pipeline doesn't support the panoramic camera model and optical flow generation, we implement the panoramic camera model on OpenGL geometry shaders to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
 %% The detail of the 360 replica optical flow dataset
 %The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
-The 360 Replica dataset rendering with two kinds of camera path circle and line. The circle path is the camera face to outward and moves along a circle (\TODO{how much radian and image per circle}), the line path is the camera face the same direction and moves in a straight line.
+The 360° Replica dataset rendering with two kinds of camera path circle and line. The circle path ($Circle$) is the camera face to outward and moves along a circle (\TODO{how much radian and image per circle}), the line path ($Line$) is the camera face the same direction and moves in a straight line.
 
 %% real word dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
@@ -102,19 +102,19 @@ We compare our method with following state-of-the-art methods, RAFT~\cite{TeedD2
 %
 The \href{https://github.com/princeton-vl/RAFT}{RAFT} and PWC-Net (\href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}) are author official released code, the DIS is the OpenCV's implementation. 
 % 
-The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360 and OmniPhoto dataset.
+The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhoto dataset.
 
 
 \paragraph{Quantitative Evaluation}
 
 %% how 
-The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360 dataset. 
+The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360° dataset. 
 %% analyse table
-As shown in \cref{tab:exp:oferrorquality} the perspective optical flow and 360 optical flow error metric used on the different camera path result, our method gets the best performance.
+As shown in \cref{tab:exp:oferrorquality} the perspective optical flow and 360° optical flow error metric used on the different camera path result, our method gets the best performance.
 %
 In the $Circle$ path result, all methods are better than the $Line$ path's because there is more large pixel motion in the $Line$ path image pairs, make the optical flow hard to find the pixel's corresponding relationship between two images. Meanwhile, our global rotation warping aligns with the rotated image, make our method easily deal with the camera ego-motion.
 By the way, as shown in the DIS's $Line$ result, its EPE is the largest but its SEPE is less than PWCNet's SEPE, 
-the SEPE metric the error with geodesic distance to neglect the 360 image distortion, so the SEPE is more objective than EPE.
+the SEPE metric the error with geodesic distance to neglect the 360° image distortion, so the SEPE is more objective than EPE.
 
 %% analyse the diagram
 The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
@@ -125,7 +125,7 @@ Our method has the least error at the top and bottom, the image middle rows area
 %% summary
 Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we find that 
 %
-the perspective image optical flow can not work well at the top and bottom of 360 images but our method can help them dramatically improve the performance on these areas;
+the perspective image optical flow can not work well at the top and bottom of 360° images but our method can help them dramatically improve the performance on these areas;
 %
 our method succeeds the backbone optical flow features, it has the same performance in the image middle horizontal area as the backbone method.
 
@@ -137,22 +137,22 @@ our method succeeds the backbone optical flow features, it has the same performa
 \begin{table}[h!]
 	\centering
 	\caption{\label{tab:exp:oferrorquality}%
-		Optical flow error on Replica dataset.}
+		Optical flow error on Replica 360° dataset.}
 	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
 		\hline
 		  &  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{Circle}} & PWCNet & 16.60 & 0.2994  & 63.44  & 0.0588 & 0.1469 & 0.3845 \\ 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Circle$}} & PWCNet & 16.60 & 0.2994  & 63.44  & 0.0588 & 0.1469 & 0.3845 \\ 
 		 & RAFT & 16.56 & 0.2775  & 64.94 & 0.04669 & 0.1482 & 0.3301 \\
 		 & DIS  & 16.50  & 0.2881  & 62.67  & 0.05375 &  0.1566 & 0.3515 \\
 		 & Our & {4.854} & {0.1863}  & 37.10 & 0.007118 & 0.05074 & 0.01899 \\ 
 		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{Line}} & PWCNet & 32.25 & 0.2139  & 93.32 & 0.1215 & 0.1429 & 0.5289 \\ 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Line$}} & PWCNet & 32.25 & 0.2139  & 93.32 & 0.1215 & 0.1429 & 0.5289 \\ 
 		& RAFT & 31.75 & 0.2908 & 96.55 & 0.08752 & 0.1595 & 0.4201 \\ 
 		& DIS  & 35.55 & 0.3328 & 98.24 & 0.1149 & 0.2063 &  0.4768 \\
 		& Our & 10.13 & 0.2447  & 48.60 & 0.01600 & 0.08798 & 0.03566 \\
 		\hline
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{All}} 
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{$All$}} 
 		& PWCNet & 18.95 & 0.2866  & 67.92 & 0.06822 & 0.1463 & 0.4062 \\
 		& RAFT & 20.20 & 0.2807  & 72.53  & 0.05648 & 0.1509  & 0.3517 \\
 		& DIS  & 25.74  & 0.3045  & 79.94  & 0.08347 & 0.1797  & 0.4127 \\
@@ -229,7 +229,7 @@ our method succeeds the backbone optical flow features, it has the same performa
 		%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 	\end{tabular}
 	\caption{\label{fig:exp:compflow}
-		The optical flow SEPE heatmap on Replica 360 dataset, 1st and 2nd rows are the result on the Replica $office\_0$ result, which are optical flow and optical flow SEPE error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica $apartment\_0$.}
+		The optical flow SEPE heatmap on Replica 360° dataset, 1st and 2nd rows are the result on the Replica 360° $office\_0$ result, which are optical flow and optical flow SEPE error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica 360° $apartment\_0$.}
 \end{figure*}
 
 
@@ -237,8 +237,8 @@ our method succeeds the backbone optical flow features, it has the same performa
 
 To analyse the optical flow methods performance on a real-world dataset without ground truth optical flow, we metric the RGB image error on the optical flow backwards warped image to evaluate optical flow.
 %
-The \cref{fig:exp:backwardwarp} show the result on Replica 360 and OmniPhotos,  in the  (k)-(n)  there is lest RGB error at the top and bottom of images in our method.
-The OmniPhoto difference is not obvious as the Replica 360's because the OmniPhoto is a high frame rate dataset there is less camera motion between the two sequence images.
+The \cref{fig:exp:backwardwarp} show the result on Replica 360° and OmniPhotos,  in the  (k)-(n)  there is lest RGB error at the top and bottom of images in our method.
+The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniPhoto is a high frame rate dataset there is less camera motion between the two sequence images.
 
 \begin{figure}[hbt!]
 	\centering
@@ -287,14 +287,16 @@ The OmniPhoto difference is not obvious as the Replica 360's because the OmniPho
 \subsection{Ablations}
 
 \paragraph{Global Rotation Warping's multi-step warp}
-The multi-step warp aligns the $I_{t+1}$ to $I_t$ by ERP, Cubemap optical flow. The result without ERP optical flow alignment $W/o360^\circ$ and without Cubemap optical flow alignment $W/oCube$ shown in the \cref{fig:exp:ablations}.
-\TODO{analysis result}
+The multi-step warp aligns the $I_{t+1}$ to $I_t$ by ERP, cubemap optical flow. The result without ERP optical flow alignment $W/o360^\circ$ and without cubemap optical flow alignment $W/oCube$ shown in the \cref{fig:exp:ablations}.
+%%{analysis result}
+The $W/o360^\circ$ error is higher than the $W/oCube$' error in $Line$ and $all$ data because the ERP optical flow is the global motion, which can handle large pixel motion.
 
 \paragraph{Stitch blending weight}
 The blending weight aims to consistently stitch the overlap area of different face's optical flow when stitching the separated perspective optical flow.
-The result without Stitch blending weight shown in \cref{fig:exp:ablations} $W/oEight$, replacing the weight with unit weight.
-\TODO{analysis result}
-
+The result without Stitch blending weight shown in \cref{fig:exp:ablations} $W/oWeight$, replacing the weight with unit weight.
+%{analysis result}
+The $W/oWeight$ get the best performance in $Line$ because the blending weight helps the optical flow stitch to get rid of the error optical flow generated by large pixel motion.
+But the stitch blending weight will introduce a tiny error on the whole dataset.
 
 \begin{table}[h!]
 	\centering
@@ -304,23 +306,23 @@ The result without Stitch blending weight shown in \cref{fig:exp:ablations} $W/o
 		\hline
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{Circle}}
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Circle$}}
 		 & Full & 4.9880 & 0.1885  & 39.26 & 0.007241 & 0.05278 & 0.01824 \\ 
-		& $W/oWeight$ &  4.854 &  0.1863  & 37.10   & 0.007118  &  0.05074 &  0.01899 \\
+		& $W/oWeight$ &  4.854 &  0.1863  & 37.10   & \textbf{0.007118}  & \textbf{ 0.05074} &  0.01899 \\
 		& $W/o360^\circ$ & 4.961 & 0.1871 & 38.32  & 0.007165 & 0.05094  & 0.01504 \\ 
-		& $W/oCube$  & 4.956 & 0.1881 &  38.22 &  0.007171 & 0.05241  & 0.01451 \\ 
+		& $W/oCube$  & 4.956 & 0.1881 &  38.22 &  0.007171 & 0.05241  & \textbf{0.01451} \\ 
 		\hline
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{Line}} 
-		& Full & 10.41 & 0.2461  & 55.78 & 0.01533 & 0.08943 & 0.03448 \\
-		&  $W/oWeight$ &  10.13 & 0.2447 &  48.60 & 0.01600  & 0.08798  & 0.03566 \\ 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{$Line$}} 
+		& Full & 10.41 & 0.2461  & 55.78 & \textbf{0.01533} & 0.08943 & \textbf{0.03448} \\
+		&  $W/oWeight$ &  10.13 & 0.2447 &  48.60 & 0.01600  & \textbf{0.08798}  & 0.03566 \\ 
 		& $W/o360^\circ$ & 10.82 & 0.2648 & 56.48 & 0.01580   & 0.09090  & 0.03519 \\ 
 		& $W/oCube$  & 10.88 & 0.2484 & 57.61  & 0.01575  & 0.08987  & 0.03535  \\ 
 		\hline
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{All}}
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{$All$}}
 		& Full & 8.602 & 0.2270  & 50.27 & 0.01264 & 0.07722 & 0.02907 \\
-		& $W/oWeight$ & 7.524  & 0.2130   & 42.94   & 0.01161  & 0.06967  & 0.02741  \\
+		& $W/oWeight$ & 7.524  & 0.2130   & 42.94   & 0.01161  & \textbf{0.06967}  & 0.02741  \\
 		& $W/o360^\circ$ & 7.889 & 0.2260 & 47.40 & 0.01149 & 0.07092  & 0.02512  \\
-		& $W/oCube$  & 7.921 & 0.2182  & 47.91 & 0.01146 & 0.07114 & 0.02492 \\
+		& $W/oCube$  & 7.921 & 0.2182  & 47.91 & \textbf{0.01146} & 0.07114 & \textbf{0.02492} \\
 		\hline
 	\end{tabular}
 \end{table}
