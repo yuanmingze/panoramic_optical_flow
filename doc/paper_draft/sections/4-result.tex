@@ -33,7 +33,7 @@ The ground truth data render from the Replica dataset\cite{StrauWMCWGEMRVCYBYPYZ
 But the Replica official rendering pipeline doesn't support the panoramic camera model and optical flow generation, we implement the panoramic camera model on OpenGL geometry shaders to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
 %% The detail of the 360 replica optical flow dataset
 %The dataset 3D data is from Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, and \TODO{How much frame;What is the resolution;What kinds of motion it has?}
-The 360° Replica dataset rendering with two kinds of camera path circle and line. The circle path (\emph{Circle}) is the camera face to outward and moves along a circle (\TODO{how much radian and image per circle}), the line path (\emph{Line}) is the camera face the same direction and moves in a straight line.
+The 360° Replica dataset rendering with two kinds of camera path circle and line. The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval. The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
 
 %% real word dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.

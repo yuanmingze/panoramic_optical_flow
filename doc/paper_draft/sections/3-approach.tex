@@ -110,11 +110,11 @@ Our approach in principle supports any perspective optical flow method, and resu
 
 
 %\textbf{Equirectangular Image Projection}.
-\textbf{Gnomonic Projection.}
+\paragraph{Gnomonic Projection.}
 %
 %% tangent image generation
 Like \citet{ZhaoYZLBT2020}, we use the gnomonic projection to produce tangent images.
-These images are perspective images with the same camera centre as the ERP image, but their optical axis intersects the unit sphere at the tangent point with a circumscribed cube or icosahedron.
+These images are perspective images with the same camera centre as the ERP image, but their optical axis\MZY{principle axis} intersects the unit sphere at the tangent point with a circumscribed cube or icosahedron.
 %
 %% sampling points selection (Tangent/Center points selection.)
 %With different tangent point selection, the tangent images cover the different spherical surface area and image field of view (FOV).
@@ -122,7 +122,7 @@ Depending on the choice and density of tangent points, tangent images cover diff
 %
 %For estimating the multi-scale motion and uniform sample the sphere surface, the tangent points selected with inscribe sphere points of regular cubemap and regular icosahedron, which are the most common convex regular polyhedron and have different FOV~\cite{?}.
 For estimating multi-scale motion and to uniformly sample the sphere surface, we select tangent points according to a regular cubemap and a regular icosahedron.
-These are the most common convex regular polyhedra with 6 and 20 faces, respectively, and this results in different FoV with cubemap tangent images having a considerably wider FoV than icosahedron tangent images
+These are the most common convex regular polyhedra with 6 and 20 faces, respectively, and this results in different FoV with cubemap tangent images having a considerably wider FoV than icosahedron tangent images.
 %
 Therefore, cubemaps can estimate a larger motion vectors from the tangent images, although their angular resolution is coarser than the icosahedron's tangent images for the same spatial tangent image resolution.
 %
@@ -145,7 +145,7 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 \end{figure}
 
 
-\textbf{Tangent Optical Flow Blending.}
+\paragraph{Tangent Optical Flow Blending.}
 %
 % how to stitch
 %The $\hat{\mathcal{F}_t}$ and $\tilde{\mathcal{F}}_t$ is panoramic optical flow stitching from cubemap and Icosahedron face image (tangent image) optical flow.
@@ -194,7 +194,7 @@ The global rotation $R$ comprises both horizontal and vertical rotations, that a
 We compute the horizontal rotation from the horizontal flow component $\mathcal{F}_u(\mathbf{x})$ using $\frac{2\pi}{N\cdot W}\sum_\mathbf{x}\mathcal{F}_u(\mathbf{x})$, where $N$ is the number of pixels and $W \!\times\! H$ the resolution of the ERP image.
 %
 %The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
-Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using \CR{just one $\pi$, not $2\pi$?} $\frac{2\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.
+Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
 
