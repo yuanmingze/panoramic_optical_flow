@@ -132,36 +132,47 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 
 \subsection{Comparison}
 
-We compare our method with following state-of-the-art methods, RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}. 
+We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
 %
-The \href{https://github.com/princeton-vl/RAFT}{RAFT} and PWC-Net (\href{https://github.com/NVlabs/PWC-Net}{NVlabs/PWC-Net}) are author official released code, the DIS is the OpenCV's implementation. 
+For \href{https://github.com/princeton-vl/RAFT}{RAFT} and \href{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
-The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhoto dataset.
+The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
 
 \paragraph{Quantitative Evaluation.}
 
 %% how 
-The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360° dataset. 
-%% analyse table
-As shown in \cref{tab:exp:oferrorquality} the perspective optical flow and 360° optical flow error metric used on the different camera path result, our method gets the best performance.
+%The methods quantitative analysis result the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow} shown the metric error number the pixel-wise error heatmap, respectively, are done on the Replica 360° dataset.
+We show a quantitative comparison on the Replica 360° dataset using both perspective and spherical optical flow evaluation metrics in \cref{tab:exp:oferrorquality}.
 %
-In the $Circle$ path result, all methods are better than the $Line$ path's because there is more large pixel motion in the $Line$ path image pairs, make the optical flow hard to find the pixel's corresponding relationship between two images. Meanwhile, our global rotation warping aligns with the rotated image, make our method easily deal with the camera ego-motion.
-By the way, as shown in the DIS's $Line$ result, its EPE is the largest but its SEPE is less than PWCNet's SEPE, 
-the SEPE metric the error with geodesic distance to neglect the 360° image distortion, so the SEPE is more objective than EPE.
+%% analyse table
+%\Cref{tab:exp:oferrorquality}
+The table
+%the perspective optical flow and 360° optical flow error metric used on the different camera path result,
+shows that our method achieves the best performance across the board.
+%
+%In the $Circle$ path result, all methods are better than the \emph{Line} path's because there is more large pixel motion in the $Line$ path image pairs, make the optical flow hard to find the pixel's corresponding relationship between two images.
+All methods tend to be better on the \emph{Circle} paths than \emph{Line} paths, as the latter contains larger displacements that are more difficult to estimate accurately.
+%
+Meanwhile, our global rotation warping pre-aligns the input images, so that our method more easily handles camera ego-motion.
+%By the way, as shown in the DIS's $Line$ result, its EPE is the largest but its SEPE is less than PWCNet's SEPE, 
+%the SEPE metric the error with geodesic distance to neglect the 360° image distortion, so the SEPE is more objective than EPE.
 
+
+\Cref{fig:exp:compflow} shows some example estimated 360° optical flow fields and their SEPE visualised as heatmaps (lighter is better).
 %% analyse the diagram
-The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
-The other method error mainly introduces on the top and bottom of the optical flow.
-Our method has the least error at the top and bottom, the image middle rows area is close to the DIS result. 
+%The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
+Other methods mainly introduce errors on the top and bottom edges of the optical flow.
+Our method has the lowest errors at the top and bottom, while the middle region is quite similar to the DIS result.
 %The RAFT the best performance in the middle of the image.
 
+
 %% summary
-Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we find that 
+Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we can conclude that
 %
-the perspective image optical flow can not work well at the top and bottom of 360° images but our method can help them dramatically improve the performance on these areas;
+perspective optical flow cannot correctly handle the top and bottom regions of ERP images, but our method can help them improve dramatically in these areas.
 %
-our method succeeds the backbone optical flow features, it has the same performance in the image middle horizontal area as the backbone method.
+Our method succeeds where the underlying optical flow method (DIS) fails, while maintaining the same performance in the equatorial image region.
 
 
 
