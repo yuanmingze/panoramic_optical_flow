@@ -1,13 +1,25 @@
 \section{Conclusion}
 
-This paper proposes a 360° optical flow method using tangent images and global rotation warping.
-The tangent images use gnomonic projection uniform sampling from an initial cubemap to the final icosahedron-base tangent images to overcome the equirectangular projection distortions. Meanwhile use the global warping method to align large motions, 
-Finally, use the weight optical flow blending method to reduce discontinuities at face boundaries.
+We proposed a flexible method for estimating 360° optical flow using tangent images and global rotation warping.
 %
-The result shows our method dramatic improve optical flow in 360° images and achieve state-of-the-art performance.
+Tangent images use gnomonic projection to uniformly sample a 360° ERP image from an initial cubemap to the final icosahedron-based tangent images to overcome the equirectangular projection distortions.
+Any existing off-the-shelf optical flow method can be used on the tangent images.
+%
+Our method uses global rotation warping to pre-align the input images and overcome large motions between frames.
+Finally, we blend optical flow to reduce discontinuities at face boundaries.
+%
+%The result shows our method dramatic improve optical flow in 360° images and achieve state-of-the-art performance.
+Our evaluation shows that our method achieves state-of-the-art performance for 360° optical flow estimation.
 
 %%\textbf{Limitation \& Future Work}
+\textbf{Future Work.}
 %To sccelerate the projection and stitch step, with multi-thread or c++.
 %Pixel-based warping to deal with non-rigid or un-egomoiton.
-To reduce the runtime we will use the c++ and multi-thread to replace the current python and single thread implementation.
-To improve our method performance on camera translation motion, we will replace the global warping method with the pixel-based warping method which will introduce both rotation and translation to global warping.
+%
+%% CR: not an interesting limitation ->
+%To reduce the runtime we will use the c++ and multi-thread to replace the current python and single thread implementation.
+%To improve our method performance on camera translation motion, we will replace the global warping method with the pixel-based warping method which will introduce both rotation and translation to global warping.
+Our method struggles with large camera translations; one could replace the global rotation warping with a \CR{mesh? meshgrid?} pixel-based warping method that can pre-align both rotational and translational camera motions.
+
+
+% TODO: acknowledgements
