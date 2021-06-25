@@ -185,28 +185,38 @@ To account for large displacements, we shift the mean of the Gaussian by the inv
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-Inspired by the warping-based optical flow~\cite{BroxBPW2004}, we use the global rotation to align the $I_{t+1}$ to $I_{t}$ for compensation the tangent image small FOV and reduce the large pixel motion span.
-The global rotation $R$ compose of horizontal and vertical rotation extracted from the panoramic optical flow to rotate all pixels in the equirectangular image.
-The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
-The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
+Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align image $I_{t+1}$ to image $I_{t}$.
+This helps reduce the range of pixel motion to a level that is more suitable for the smaller FoV of tangent images.
+%
+The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
+%
+%The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
+We compute the horizontal rotation from the horizontal flow component $\mathcal{F}_u(\mathbf{x})$ using $\frac{2\pi}{N\cdot W}\sum_\mathbf{x}\mathcal{F}_u(\mathbf{x})$, where $N$ is the number of pixels and $W \!\times\! H$ the resolution of the ERP image.
+%
+%The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
+Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using \CR{just one $\pi$, not $2\pi$?} $\frac{2\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
-\textbf{Image Global Rotation Warping.}
-After extract the global rotation $R$ from optical flow, rotate the target image $I_{t+1}$ with $R$ from alignment to the source image $I_{t}$ with the equirectangular image rotation in 3D space. ~\cite{ZioulKZAD2019}.
-%
-The global rotation warping based on the coarse to fine principle, 
-Firstly, use panoramic images optical flow estimated $\bar{R}$ to roughly align the $I_{t+1}$ for getting rid of the ego-motion, then use the cubemap optical flow to fine-tune the alignment.
 
-\textbf{Panoramic Optical Flow Global Rotation Warping.}
+\textbf{Global Rotation Image Warping.}
+After extracting  the global rotation $R$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $R$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
+%
+We apply global rotation warping based on the coarse to fine principle.
+First, use estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
+We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
+
+
+%\textbf{Panoramic Optical Flow Global Rotation Warping.}
+\textbf{Global Rotation Optical Flow Warping.}
 To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.
 % 
 When estimating the optical flow only the target image $I_{t+1}$ is warped, so just need to rotate the end point of $\tilde{\mathcal{F}}_t$, i.e $\tilde{\mathcal{F}}^{EP}_t$. 
 %
 To rotate the panoramic image, first transform it to 3D space with $\mathcal{P}$, and back to equirectangular image with $\mathcal{P}^{-1}$.
-
+%
 \begin{equation}\label{equ:approach:globalwarp}
-\begin{split}
+%\begin{split}
 	\mathcal{F}_{(i,j)} = \mathcal{F}^{EP}_{(i,j)} - (i,j)  
 				= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
-\end{split}
+%\end{split}
 \end{equation}
