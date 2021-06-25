@@ -95,7 +95,7 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 %\end{equation}
 \begin{equation}\label{equ:exp:epesph}
 %	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right)
-	{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+	\text{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
 	\text{.}
 \end{equation}
 
@@ -190,13 +190,13 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
 		& PWC-Net &           16.60  & 0.2994 & 63.44 &     0.0588   &     0.1469  &     0.3845  \\ 
 		& RAFT    &           16.56  & 0.2775 & 64.94 &     0.04669  &     0.1482  &     0.3301  \\
 		& DIS     &           16.50  & 0.2881 & 62.67 &     0.05375  &     0.1566  &     0.3515  \\
 		& Ours    & \phantom{0}4.854 & 0.1863 & 37.10 & \bf 0.007118 & \bf 0.05074 & \bf 0.01899 \\ 
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Line}}}
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Line}}}
 		& PWC-Net &           32.25  & 0.2139 & 93.32 &     0.1215  &     0.1429  &     0.5289  \\ 
 		& RAFT    &           31.75  & 0.2908 & 96.55 &     0.08752 &     0.1595  &     0.4201  \\ 
 		& DIS     &           35.55  & 0.3328 & 98.24 &     0.1149  &     0.2063  &     0.4768  \\
@@ -243,28 +243,28 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 	\centering
 	\begin{tabular}{@{}c*{5}{@{\hspace{-9pt}}c}@{}}
 		\labeledfig{images/of_error/office_0_line_1k_0_dis_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
-		\labeledfig{images/of_error/office_0_line_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{white} &
-		\labeledfig{images/of_error/office_0_line_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{white} &
-		\labeledfig{images/of_error/office_0_line_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{white} &
-		\labeledfig{images/of_error/office_0_line_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{white}
+		\labeledfig{images/of_error/office_0_line_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{white} &
+		\labeledfig{images/of_error/office_0_line_1k_0_our_weight_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) Ours}{white} &
+		\labeledfig{images/of_error/office_0_line_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) PWC-Net}{white} &
+		\labeledfig{images/of_error/office_0_line_1k_0_raft_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{white}
 		\\[-1.0em]
 		\labeledfig{images/of_error/office_0_line_1k_0_gt_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{white} &
-		\labeledfig{images/of_error/office_0_line_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
-		\labeledfig{images/of_error/office_0_line_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
-		\labeledfig{images/of_error/office_0_line_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
-		\labeledfig{images/of_error/office_0_line_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
+		\labeledfig{images/of_error/office_0_line_1k_0_dis_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) DIS (SEPE)}{black} &
+		\labeledfig{images/of_error/office_0_line_1k_0_our_weight_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) Ours (SEPE)}{black} &
+		\labeledfig{images/of_error/office_0_line_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) PWC-Net (SEPE)}{black} &
+		\labeledfig{images/of_error/office_0_line_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) RAFT (SEPE)}{black}
 		\\[-0.9em]
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_0004_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) $Our$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) $PWCNet$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) $RAFT$}{black}
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(c) Ours}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{black}
 		\\[-1.0em]
 		\labeledfig{images/of_error/apartment_0_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(f) GT}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) $DIS\_SEPE$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) $Our\_SEPE$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
-		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(g) DIS (SEPE)}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_our_weight_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(h) Ours (SEPE)}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) PWC-Net (SEPE)}{black} &
+		\labeledfig{images/of_error/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) RAFT (SEPE)}{black}
 		%		\\[-0.9em]
 		%		\labeledfig{images/of_error/room_0_circ_1k_0002_rgb_pano.jpg}{0.185}{(a) $I_t$}{white} &
 		%		\labeledfig{images/of_error/room_0_circ_1k_0_dis_0002_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) $DIS$}{black} &
@@ -322,21 +322,21 @@ The differences between methods is less pronounced than in the Replica 360° dat
 %	\\[-0.9em]
 	\labeledfig{images/of_warp/BeihaiPark_panoramic-0549.jpg}{0.185}{(a) $I_t$}{black} &
 	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(c) Our}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(d) PWCNet}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(c) Ours}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(d) PWC-Net}{black} &
 	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_flow_vis.jpg}{0.185}{(e) RAFT}{black}
 	\\[-1.0em]
 	\labeledfig{images/of_warp/BeihaiPark_panoramic-0550.jpg}{0.185}{(f) $I_{t+1}$}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(g) DIS(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(h) Our(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(i) PWCNet(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(j) RAFT(Warp)}{black}
+	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(g) DIS (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(h) Ours (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(i) PWC-Net (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_wrap.jpg}{0.185}{(j) RAFT (Warp)}{black}
 	\\[-1.0em]
 	&
-	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(k) DIS(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Our(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
-	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
+	\labeledfig{images/of_warp/BeihaiPark_dis_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(k) DIS (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_our_weight_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(l) Ours (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWC-Net (Warp)}{black} &
+	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT (Warp)}{black}
 \end{tabular}
 	\caption{\label{fig:exp:backwardwarp}%
 		Backward warping results on OmniPhotos' \emph{BeihaiPark} scene:
@@ -378,13 +378,13 @@ However, `w/o weight' performs slightly better on the complete dataset.
 		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
 		& Full method  & 4.988 & 0.1885 & 39.26 &     0.007241 &     0.05278 &     0.01824 \\ 
 		& w/o weight   & 4.854 & 0.1863 & 37.10 & \bf 0.007118 & \bf 0.05074 &     0.01899 \\
 		& w/o ERP      & 4.961 & 0.1871 & 38.32 &     0.007165 &     0.05094 &     0.01504 \\ 
 		& w/o cubemap  & 4.956 & 0.1881 & 38.22 &     0.007171 &     0.05241 & \bf 0.01451 \\ 
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\emph{Line}}} 
+		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Line}}} 
 		& Full method  & 10.41 & 0.2461 & 55.78 & \bf 0.01533 &     0.08943 & \bf 0.03448 \\
 		& w/o weight   & 10.13 & 0.2447 & 48.60 &     0.01600 & \bf 0.08798 &     0.03566 \\ 
 		& w/o ERP      & 10.82 & 0.2648 & 56.48 &     0.01580 &     0.09090 &     0.03519 \\ 
