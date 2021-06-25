@@ -187,8 +187,6 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 	\resizebox{0.8\linewidth}{!}{%
 	%	\setlength{\tabcolsep}{3pt}%
 	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
-%	\centering
-%	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.2cm}}
 		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
@@ -280,8 +278,14 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 		%		\labeledfig{images/of_error/room_0_circ_1k_0_pwcnet_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(i) $PWCNet\_SEPE$}{black} &
 		%		\labeledfig{images/of_error/room_0_circ_1k_0_raft_0002_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 	\end{tabular}
-	\caption{\label{fig:exp:compflow}
-		The optical flow SEPE heatmap on Replica 360° dataset, 1st and 2nd rows are the result on the Replica 360° $office\_0$ result, which are optical flow and optical flow SEPE error heatmap respectively, darker is more error. And 3rd and 4th rows are part of the result on the Replica 360° $apartment\_0$.}
+	\caption{\label{fig:exp:compflow}%
+		Estimated 360° optical flow and error heatmaps on the Replica 360° dataset:
+		(a) Source image.
+		(b–e) Estimated flow fields.
+		(f) Ground-truth flow.
+		(g–j) SEPE (spherical end-point error) heatmaps (lighter is better).
+		Top: \emph{office\_0} scene.
+		Bottom: \emph{apartment\_0} scene.}
 \end{figure*}
 
 
@@ -331,7 +335,7 @@ The OmniPhoto difference is not obvious as the Replica 360°'s because the OmniP
 	\labeledfig{images/of_warp/BeihaiPark_pwcnet_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(m) PWCNet(Warp)}{black} &
 	\labeledfig{images/of_warp/BeihaiPark_raft_0549_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(n) RAFT(Warp)}{black}
 \end{tabular}
-	\caption{\label{fig:exp:backwardwarp}
+	\caption{\label{fig:exp:backwardwarp}%
 		The optical flow backward warp result on Omniphoto dataset's $BeihaiPark$. The 3rd row is the image error heatmap, more error is darker.}
 \end{figure}
 
