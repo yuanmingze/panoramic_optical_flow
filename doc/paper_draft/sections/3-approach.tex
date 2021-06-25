@@ -34,9 +34,14 @@ In \cref{sec:approach:definition}, we analyse and define the panoramic optical f
 To solve the equirectangular image distortion, especially at the top and bottom, our method employs gnomonic projection to project the equirectangular image to tangent image~\cite{EderSLF2020}.
 We use cubemap and regular icosahedron faces to uniformly sample the equirectangular image to solve this problem (see \cref{sec:approach:projstit}).
 %
-However, compared to a panoramic image, a tangent image has a smaller field of view, not larger than $\pi$ and just $\frac{\pi}{2}$ for cubemap projection (without padding).
-\MZY{The tangent image optical flow just traces the pixel on the tangent image pair from the same ERP image area. This makes it hard to estimate the pixel moves out of the tangent image boundary.}
-To compensate for the tangent images' narrow field of view, the global rotation operation is used on the target image $I_{t+1}$ to align it with the source image $I_t$ (\cref{sec:approach:warping}).
+However, compared to a panoramic image, a tangent image has a smaller field of view, not larger than 180°, and just 90° for cubemap projection (without padding).
+%The tangent image optical flow just traces the pixel on the tangent image pair from the same ERP image area.
+The tangent image optical flow operates on a pair of corresponding  tangent images from the same ERP image area,
+%
+%This makes it hard to estimate the pixel moves out of the tangent image boundary.
+which can fail when an object is only visible in one of the tangent images.
+%
+To compensate for the tangent images' narrow field of view, the global rotation operation is used on the target image $I_{t+1}$ to pre-align it with the source image $I_t$ (\cref{sec:approach:warping}).
 
 
 \subsection{Definition of 360° Optical Flow}
@@ -78,7 +83,7 @@ This naturally limits the maximum flow magnitude to $\leq$180°.
 	\subfigure[Source Image]{\includegraphics[width=0.26\linewidth]{images/wraparound/src_image.png}}
 	\subfigure[Target Image]{\includegraphics[width=0.26\linewidth]{images/wraparound/tar_image.png}} 
 	\subfigure[Perspective Optical Flow]{\includegraphics[width=0.26\linewidth]{images/wraparound/src2tar.png}}
-	\subfigure[Warp Around]{\includegraphics[width=0.19\linewidth]{images/wraparound/wraparound.png}}
+	\subfigure[Wrap-Around]{\includegraphics[width=0.19\linewidth]{images/wraparound/wraparound.png}}
 %	\end{center}
 	\caption{\label{fig:app:warparound}%
 		360° optical flow illustrated:
@@ -198,7 +203,7 @@ Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_
 % it's the noly 20% middle column of the $\mathcal{F}_v$
 
 
-\textbf{Global Rotation Image Warping.}
+\paragraph{Global Rotation Image Warping.}
 After extracting  the global rotation $R$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $R$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
 %
 We apply global rotation warping based on the coarse to fine principle.
@@ -207,7 +212,7 @@ We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
 
 
 %\textbf{Panoramic Optical Flow Global Rotation Warping.}
-\textbf{Global Rotation Optical Flow Warping.}
+\paragraph{Global Rotation Optical Flow Warping.}
 %To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.
 To recover the final 360° optical flow field $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ needs to align with the pixel position in the input image $I_{t+1}$.
 % 

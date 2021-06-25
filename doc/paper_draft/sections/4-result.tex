@@ -22,7 +22,7 @@ We use DIS flow \cite{KroegTDV2016} for the tangent flow fields.
 We evaluate the performance of our method on synthetic and real-world datasets using multiple spherical error metrics.
 
 
-\paragraph{Datasets}
+\paragraph{Datasets.}
 %% dicuess the 360 dataset
 %
 %% 360 dataset
@@ -66,7 +66,7 @@ To further explore our method's performance qualitatively, we also test our meth
 %Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
 
-\paragraph{Error Metrics}
+\paragraph{Error Metrics.}
 
 %The AAE, EPE and RMS ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
 Optical flow evaluation commonly uses the average angle error (AAE), end-point error (EPE), and root-mean-square error (RMS) metrics \cite{BakerSLRBS2011}.
@@ -291,7 +291,7 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 
 \paragraph{Qualitative Evaluation.}
 
-To analyse the performance of 360° optical flow methods on a real-world dataset without ground-truth optical flow, we measure the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the \CR{target image?} backward-warped \CR{source?} image.
+To analyse the performance of 360° optical flow methods on a real-world dataset without ground-truth optical flow, we measure the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the source image and backward-warped target image.
 %
 \Cref{fig:exp:backwardwarp} shows an example result from the OmniPhotos dataset.
 The error maps in \Cref{fig:exp:backwardwarp}(k–n) show less error at the top and bottom of images for our method's result.
@@ -397,4 +397,4 @@ However, `w/o weight' performs slightly better on the complete dataset.
 		& w/o cubemap  & 7.921 & 0.2182 & 47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
 		\bottomrule
 	\end{tabular}}%
-\end{table}
+\end{table}\vspace{-2em}

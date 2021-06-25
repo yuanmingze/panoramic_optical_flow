@@ -12,14 +12,14 @@ Finally, we blend optical flow to reduce discontinuities at face boundaries.
 Our evaluation shows that our method achieves state-of-the-art performance for 360° optical flow estimation.
 
 %%\textbf{Limitation \& Future Work}
-\textbf{Future Work.}
+\paragraph{Future Work.}
 %To sccelerate the projection and stitch step, with multi-thread or c++.
 %Pixel-based warping to deal with non-rigid or un-egomoiton.
 %
 %% CR: not an interesting limitation ->
 %To reduce the runtime we will use the c++ and multi-thread to replace the current python and single thread implementation.
 %To improve our method performance on camera translation motion, we will replace the global warping method with the pixel-based warping method which will introduce both rotation and translation to global warping.
-Our method struggles with large camera translations; one could replace the global rotation warping with a \CR{mesh? meshgrid?} pixel-based warping method that can pre-align both rotational and translational camera motions.
+Our method struggles with large camera translations; one could replace the global rotation warping with a meshgrid-based warping method that can pre-align both rotational and translational camera motions.
 
 
 % TODO: acknowledgements
