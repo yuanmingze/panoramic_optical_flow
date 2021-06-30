@@ -549,7 +549,7 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
 
         # Process the face -z, -y, +y, cross the boundary
         if (face_index == 5 or face_index == 2 or face_index == 3) and wrap_around:
-            log.info("ERP optical flow with wrap around. Face index {}".format(face_index))
+            log.debug("ERP optical flow with wrap around. Face index {}".format(face_index))
             face_x_src_gnomonic_available = face_x_src_gnomonic[available_list]
             face_y_src_gnomonic_available = face_y_src_gnomonic[available_list]
             p3 = np.stack((face_x_src_gnomonic_available, face_y_src_gnomonic_available))

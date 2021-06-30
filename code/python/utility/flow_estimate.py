@@ -73,7 +73,7 @@ def debug_save_of(of_data, output_filepath):
     image_io.image_save(of_data_warparound_visual, output_filepath + "_flow_unwraparound.jpg")
 
 
-def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward"):
+def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward", padding_size=0.1):
     """Compute the optical flow with multi-step and icosahedron projection.
 
     The multi-steps method, just transfer the ERP image rotation to next step.
@@ -89,14 +89,16 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     :type debug_output_dir: str
     :param face_blending_method: the weight to blending faces, default is "straightforward".
     :type face_blending_method: str
+    :param padding_size: The padding size of cubemap and icosahedron.
+    type padding_size: float
     :return: the optical flow from src image to tar image.
     :rtype: numpy
     """
     if optical_flow_method == None:
         optical_flow_method = of_methdod_DIS
 
-    padding_size_cubemap = 0.1
-    padding_size_ico = 0.1
+    padding_size_cubemap = padding_size
+    padding_size_ico = padding_size
     erp_image_height = src_erp_image.shape[0]
     tangent_image_width_ico = 480
 
@@ -170,11 +172,11 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     if debug_output_dir is not None:
         debug_save_of(of_ico2cub, debug_output_dir + "pano_of_0_ico_of_ico2cub")
         debug_save_of(of_accu, debug_output_dir + "pano_of_0_ico_of_accu")
-        
+
     return of_accu
 
 
-def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward"):
+def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward", padding_size=0.1):
     """Compute the optical flow with multi-step and icosahedron projection.
 
     The multi-steps method, just transfer the ERP image rotation to next step.
@@ -196,8 +198,8 @@ def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, deb
     if optical_flow_method == None:
         optical_flow_method = of_methdod_DIS
 
-    padding_size_cubemap = 0.1
-    padding_size_ico = 0.1
+    padding_size_cubemap = padding_size
+    padding_size_ico = padding_size
     erp_image_height = src_erp_image.shape[0]
     tangent_image_width_ico = 480
 
@@ -232,10 +234,11 @@ def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, deb
 
     if debug_output_dir is not None:
         debug_save_of(of_accu, debug_output_dir + "pano_of_0_ico_of_accu")
-        
+
     return of_accu
-    
-def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward"):
+
+
+def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, face_blending_method="straightforward", padding_size=0.1):
     """Compute the optical flow with multi-step and icosahedron projection.
 
     The multi-steps method, just transfer the ERP image rotation to next step.
@@ -257,7 +260,7 @@ def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, de
     if optical_flow_method == None:
         optical_flow_method = of_methdod_DIS
 
-    padding_size_ico = 0.1
+    padding_size_ico = padding_size
     erp_image_height = src_erp_image.shape[0]
     tangent_image_width_ico = 480
 
@@ -287,10 +290,11 @@ def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, de
     of_accu = projection.flow_rotate_endpoint(optical_flow_ico, erp_rot_mat.T)
     if debug_output_dir is not None:
         debug_save_of(of_accu, debug_output_dir + "pano_of_0_ico_of_accu")
-        
+
     return of_accu
 
-def pano_of_0_wo_ico(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None):
+
+def pano_of_0_wo_ico(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None, padding_size=0.1):
     """Compute the optical flow with multi-step and icosahedron projection.
 
     The multi-steps method, just transfer the ERP image rotation to next step.
@@ -312,7 +316,7 @@ def pano_of_0_wo_ico(src_erp_image, tar_erp_image, optical_flow_method=None, deb
     if optical_flow_method == None:
         optical_flow_method = of_methdod_DIS
 
-    padding_size_cubemap = 0.1
+    padding_size_cubemap = padding_size
     erp_image_height = src_erp_image.shape[0]
 
     # 0) compute flow in ERP image & wrap image, make it align with the source ERP image.
@@ -336,15 +340,14 @@ def pano_of_0_wo_ico(src_erp_image, tar_erp_image, optical_flow_method=None, deb
         optical_flow_cubemap = optical_flow_method(cubeface_images_src_list[index], cubeface_images_tar_list[index])
         cubemap_face_of_list.append(optical_flow_cubemap)
     optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
-  
+
     # 3) accumulate all-steps optical flow
     of_accu = projection.flow_rotate_endpoint(optical_flow_cubemap, erp_rot_mat.T)
 
     if debug_output_dir is not None:
         debug_save_of(of_accu, debug_output_dir + "pano_of_0_ico_of_accu")
-        
-    return of_accu
 
+    return of_accu
 
 
 def pano_of_1(src_erp_image, tar_erp_image, optical_flow_method=None, debug_output_dir=None):

@@ -91,12 +91,29 @@ def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap=
     return result_image
 
 
+def available_of(of_data, mask_data):
+    """ see @available_pixel
+    Set the unavailable pixel to 0, include U and V.
+
+    :param of_data: [description]
+    :type of_data: [type]
+    :param mask_data: [description]
+    :type mask_data: [type]
+    """
+    unavailable_index = (mask_data == 0)
+    of_data[unavailable_index, 0] = 0
+    of_data[unavailable_index, 1] = 0
+    return of_data
+
+
 def available_pixel(flow, of_mask=None, unknown_value=UNKNOWN_FLOW_THRESH):
     """
     The criterion of the available optical flow pixel.
     1) not very large; 2) not a NaN; 3) mask is not 0;
 
-    :param of_mask: 0 is the un-available pixel, 1 is available pixel, size is [height, width].
+    :param flow: The optical flow, size is [height, width, 2], U and V.
+    :type flow: numpy
+    :param of_mask: 0 is the un-available pixel, not 0 is available pixel, size is [height, width].
     :type of_mask: numpy, optional
     :return: available pixel lable matrix, True is valid and False is invalid
     :rtype: numpy, boolon
