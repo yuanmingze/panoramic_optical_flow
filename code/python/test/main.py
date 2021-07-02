@@ -188,7 +188,7 @@ class ReplicaPanoDataset(ReplicaConfig):
     line_end_idx = 6
 
 
-def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath = None):
+def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath = None, opticalflow_mathod = "our_weight"):
     """
     Plot the padding error.
     """
@@ -211,7 +211,10 @@ def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath =
     plt.ylabel("SEPE")
     # plt.legend()
     plt.show()
-    f.savefig(replica_dataset.pano_dataset_root_dir  + "padding.pdf", bbox_inches='tight')
+    if output_pdf_filepath is None:
+        f.savefig(replica_dataset.pano_dataset_root_dir  + "padding.pdf", bbox_inches='tight')
+    else:
+        f.savefig(output_pdf_filepath, bbox_inches='tight')
 
 
 def summary_error_dataset_replica(replica_dataset, opticalflow_mathod="our"):
@@ -630,7 +633,7 @@ if __name__ == "__main__":
 
     if 3 in test_list:
         # padding_list = np.linspace(0.4, 0.8, num=11) # interval is 0.04
-        padding_list = np.linspace(0.0, 0.6, num=16) # interval is 0.04
+        padding_list = np.linspace(0.0, 0.8, num=21) # interval is 0.04
         print("The padding list is {}".format(padding_list))
         opticalflow_mathod = "our_weight"
 
@@ -660,4 +663,5 @@ if __name__ == "__main__":
             replicaPanoDataset.padding_size = padding_size
             summary_error_dataset_replica(replicaPanoDataset, opticalflow_mathod)
 
-        plot_padding_error(ReplicaPanoDataset, padding_list)
+        output_pdf_filepath = None
+        plot_padding_error(ReplicaPanoDataset, padding_list, output_pdf_filepath , opticalflow_mathod = "our_weight")
