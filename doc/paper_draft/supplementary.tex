@@ -98,50 +98,21 @@
 
 \paragraph{Padding Size.}
 
-The Tangent image padding extent the tangent image field of view  (See paper section 3.2), so that the source image can find more corresponding on the target image to improve optical flow curacy.
-%
-But the padding also introduces pixel can not find the corresponding.
+The tangent image padding extent the field of view  (See paper Section 3.2), so that the source image can find more corresponding on the target image to improve optical flow consistency.
+But more padding is less angular resolution the same tangent image resolution.
 %
 %Which is the best padding ratio to balance the ??, the 
-In cref{table} we test padding size 0.1,0.2, 0.3 and 0.4.
-The corresponding FoV is .
+We test padding size from 0.0 to 0.6, the result shown in the \cref{fig:sup:ablationpadding}.
+The more padding get lower SEPE, when padding size is 0.45 it get best ballance between 
 
-The result shows how the padding 
 
-overlap area between the two neighbour tangent images, to reduce the inconsistency.
+\begin{figure*}[hbt!]
+	\centering
+	\includegraphics[width=0.80\textwidth]{images/abla_padding.pdf}
+	\caption{\label{fig:sup:ablationpadding}%
+		The SEPE with padding size from 0 to 0.6.}
+\end{figure*}
 
-%\paragraph{Blending Weights.}
-%
-%\begin{table}[h!]
-%	\centering
-%	\caption{\label{fig:sup:ablations}%
-%		The results of our ablation study. See \cref{sec:sup:ablations} for details.}
-%	\resizebox{0.8\linewidth}{!}{%
-%		%	\setlength{\tabcolsep}{3pt}%
-%		\begin{tabular}{p{0.2cm}p{1.9cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
-%			\toprule
-%			&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
-%			\midrule
-%			\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
-%			& Full method  &     4.988 &     0.1885 &     39.26 &     0.007241 &     0.05278 &     0.01824 \\ 
-%			& w/o weight   & \bf 4.854 & \bf 0.1863 & \bf 37.10 & \bf 0.007118 & \bf 0.05074 &     0.01899 \\
-%			& w/o ERP      &     4.961 &     0.1871 &     38.32 &     0.007165 &     0.05094 &     0.01504 \\ 
-%			& w/o cubemap  &     4.956 &     0.1881 &     38.22 &     0.007171 &     0.05241 & \bf 0.01451 \\ 
-%			\midrule
-%			\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Line}}} 
-%			& Full method  &     10.41 &     0.2461 &     55.78 & \bf 0.01533 &     0.08943 & \bf 0.03448 \\
-%			& w/o weight   & \bf 10.13 &     0.2447 & \bf 48.60 &     0.01600 & \bf 0.08798 &     0.03566 \\ 
-%			& w/o ERP      &     10.82 & \bf 0.2648 &     56.48 &     0.01580 &     0.09090 &     0.03519 \\ 
-%			& w/o cubemap  &     10.88 &     0.2484 &     57.61 &     0.01575 &     0.08987 &     0.03535 \\ 
-%			\midrule
-%			\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}}
-%			& Full method  &     8.602 &     0.2270 &     50.27 &     0.01264 &     0.07722 &     0.02907 \\
-%			& w/o weight   & \bf 7.524 & \bf 0.2130 & \bf 42.94 &     0.01161 & \bf 0.06967 &     0.02741 \\
-%			& w/o ERP      &     7.889 &     0.2260 &     47.40 &     0.01149 &     0.07092 &     0.02512 \\
-%			& w/o cubemap  &     7.921 &     0.2182 &     47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
-%			\bottomrule
-%	\end{tabular}}%
-%\end{table}
 
 \section{Result}
 
