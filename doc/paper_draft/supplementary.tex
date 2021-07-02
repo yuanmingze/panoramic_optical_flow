@@ -2,15 +2,14 @@
 
 %% Faster LaTeX compilation time, bigger file.
 %% TODO: Comment out for submission/final version.
-\pdfcompresslevel=0
-\pdfobjcompresslevel=0
+%\pdfcompresslevel=0
+%\pdfobjcompresslevel=0
 
 %% Enter your paper number here for the review copy
 \bmvcreviewcopy{298}
 
 %\title{Panoramic Optical Flow Using Global Rotation Warping and Tangent Image}
-\title{Supplementary Material \\
-360\!° Optical Flow using Tangent Images}
+\title{Supplementary Document:\\ 360\!° Optical Flow using Tangent Images}
 
 % Enter the paper's authors in order
 % \addauthor{Name}{email/homepage}{INSTITUTION_CODE}
@@ -92,35 +91,42 @@
 %\TODO{Heatmap show the blending weight.}
 
 
-\section{Ablation Study}
+%\section{Ablation Study}
+\section{Padding Size Ablation Study}
 \label{sec:sup:ablations}
 
 
-\paragraph{Padding Size.}
+%\paragraph{Padding Size.}
 
-The tangent image padding extent the field of view  (See paper Section 3.2), so that the source image can find more corresponding on the target image to improve optical flow consistency.
-But more padding is less angular resolution the same tangent image resolution.
+The tangent image padding extends the field of view  (see Section 3.2 in the main paper), such that there is more overlap between the source and target images to find better correspondences and improve optical flow consistency.
+%
+However, increasing the padding reduces the angular resolution per pixel for the same tangent image resolution.
 %
 %Which is the best padding ratio to balance the ??, the 
-We test padding size from 0.0 to 0.6 and the result shown in the \cref{fig:sup:ablationpadding}.
-Larger padding size gets lower SEPE, when padding size is 0.5 it gets the best balance between angular resolution and padding size.
+We test padding size from 0.0 to 0.6 and show the result in \cref{fig:sup:ablationpadding}.
+Larger padding sizes reduce the spherical end-point error (SEPE).
+The SEPE plateaus at a padding of around 0.5, which optimally trades off angular resolution and padding size.
 
 
 \begin{figure*}[hbt!]
 	\centering
 	\includegraphics[width=0.80\textwidth]{images/abla_padding.pdf}
 	\caption{\label{fig:sup:ablationpadding}%
-		The SEPE with padding size from 0 to 0.6.}
+		The spherical end-point error (SEPE) for a range of padding sizes.}
 \end{figure*}
 
 
-\section{Result}
+\section{Additional Results}
 
-There are more result of quantitative and qualitative evaluation.
+Here we show additional results for quantitative and qualitative evaluation.
+
 
 \paragraph{Quantitative Evaluation.}
 
-In \cref{fig:sup:compflowcircle} and \cref{fig:sup:compflowline}, there is more SEPE heatmap between the ground truth optical flow and our method result on Replica 360° data.
+%In \cref{fig:sup:compflowcircle} and \cref{fig:sup:compflowline}, the SEPE heatmaps between the ground truth optical flow and our methods' estimates show smaller errors near the poles (top and bottom image edges).
+\cref{fig:sup:compflowcircle} and \cref{fig:sup:compflowline} show additional results and comparisons on the Replica 360° dataset, for circular and linear camera motions, respectively.
+The SEPE heatmaps between the ground truth optical flow and our methods' estimates (h) show consistently smaller errors near the poles (top and bottom image edges).
+
 
 \begin{figure*}[h!]
 	\centering
@@ -224,7 +230,7 @@ In \cref{fig:sup:compflowcircle} and \cref{fig:sup:compflowline}, there is more 
 		\labeledfig{images/of_error/room_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 \end{tabular}
 \caption{\label{fig:sup:compflowcircle}%
-	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset, \emph{Circle}.}
+	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset (\emph{Circle}).}
 \end{figure*}
 
 
@@ -331,15 +337,16 @@ In \cref{fig:sup:compflowcircle} and \cref{fig:sup:compflowline}, there is more 
 		\labeledfig{images/of_error/room_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.185}{(j) $RAFT\_SEPE$}{black}
 \end{tabular}
 \caption{\label{fig:sup:compflowline}%
-	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset, \emph{Line}.}
+	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset (\emph{Line}).}
 \end{figure*}
 
 
 \paragraph{Qualitative Evaluation.}
 
-We measure the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the source image and backward-warped target image.
+In \cref{fig:sup:backwardwarp}, we show additional interpolation error heatmaps on the OmniPhotos dataset \cite{BerteYLR2020}.
 %
-In \cref{fig:sup:backwardwarp}, there are more interpolation error heatmap on OmniPhotos dataset \cite{BerteYLR2020}.
+They visualize the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the source image and backward-warped target image.
+
 
 \begin{figure*}[hbt!]
 	\centering
@@ -365,7 +372,7 @@ In \cref{fig:sup:backwardwarp}, there are more interpolation error heatmap on Om
 		\labeledfig{images/of_warp/Ballintoy_pwcnet_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(i) PWC-Net (Warp)}{black} &
 		\labeledfig{images/of_warp/Ballintoy_raft_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(j) RAFT (Warp)}{black}
 		\\[-0.8em]
-		\multicolumn{5}{l}{\footnotesize{\emph{DublinShip1}}}
+		\multicolumn{5}{l}{\footnotesize{\emph{Ship}}}
 		\\[-0.6em]
 		\labeledfig{images/of_warp/DublinShip1_panoramic-0547.jpg}{0.185}{(a) $I_t$}{black} &
 		\labeledfig{images/of_warp/DublinShip1_dis_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
@@ -385,7 +392,7 @@ In \cref{fig:sup:backwardwarp}, there are more interpolation error heatmap on Om
 		\labeledfig{images/of_warp/DublinShip1_pwcnet_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(i) PWC-Net (Warp)}{black} &
 		\labeledfig{images/of_warp/DublinShip1_raft_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.185}{(j) RAFT (Warp)}{black}
 		\\[-0.8em]
-		\multicolumn{5}{l}{\footnotesize{\emph{OsakaTemple6}}}
+		\multicolumn{5}{l}{\footnotesize{\emph{Temple3}}}
 		\\[-0.6em]
 		\labeledfig{images/of_warp/OsakaTemple6_panoramic-0365.jpg}{0.185}{(a) $I_t$}{black} &
 		\labeledfig{images/of_warp/OsakaTemple6_dis_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.185}{(b) DIS}{black} &
@@ -446,7 +453,7 @@ In \cref{fig:sup:backwardwarp}, there are more interpolation error heatmap on Om
 		\labeledfig{images/of_warp/Wulongting_raft_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.185}{(j) RAFT (Warp)}{black}
 	\end{tabular}
 	\caption{\label{fig:sup:backwardwarp}%
-		Backward warping results on OmniPhotos' dataset.}
+		Backward warping results on several OmniPhotos datasets.}
 \end{figure*}
 
 
@@ -458,7 +465,7 @@ In \cref{fig:sup:backwardwarp}, there are more interpolation error heatmap on Om
 %
 %\paragraph{Gnomonic Pixel Coordiante System}
 
-\clearpage
+%\clearpage
 \bibliography{360flow}
 
 \end{document}
