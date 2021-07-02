@@ -95,9 +95,9 @@
 \section{Padding Size Ablation Study}
 \label{sec:sup:ablations}
 
-
+The padding size is how much expand on the gnomonic projection coordinate system.
+When the padding size is 0.1, shown in \cref{fig:sup:howtopadding}, the tangent area is expended from 1.0 to 1.1 ($1.0  + padding\_size$).
 %\paragraph{Padding Size.}
-
 The tangent image padding extends the field of view  (see Section 3.2 in the main paper), such that there is more overlap between the source and target images to find better correspondences and improve optical flow consistency.
 %
 However, increasing the padding reduces the angular resolution per pixel for the same tangent image resolution.
@@ -107,6 +107,12 @@ We test padding size from 0.0 to 0.6 and show the result in \cref{fig:sup:ablati
 Larger padding sizes reduce the spherical end-point error (SEPE).
 The SEPE plateaus at a padding of around 0.5, which optimally trades off angular resolution and padding size.
 
+\begin{figure*}[hbt!]
+	\centering
+	\includegraphics[width=0.80\textwidth]{images/tangent_image/tangent_image_padding.pdf}
+	\caption{\label{fig:sup:howtopadding}%
+		The spherical end-point error (SEPE) for a range of padding sizes.}
+\end{figure*}
 
 \begin{figure*}[hbt!]
 	\centering

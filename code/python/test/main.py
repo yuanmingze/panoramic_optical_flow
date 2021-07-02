@@ -203,13 +203,23 @@ def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath =
         sepe = float(of_error_csv_file.readlines()[5].split(" ")[1])
         y.append(sepe)
 
-    f = plt.figure()
+    fig = plt.figure()
+    margin_ratio = 0.04
     plt.plot(x, y, marker="o")
-    plt.xlim(min(x) - max(x) * 0.1, max(x) + max(x)* 0.1)
-    plt.ylim(min(y) - min(y) * 0.1, max(y) + max(y)* 0.1)
-    plt.xlabel("padding size")
-    plt.ylabel("SEPE")
-    # plt.legend()
+    plt.xlim(min(x) - max(x) * margin_ratio, max(x) + max(x)* margin_ratio)
+    plt.ylim(min(y) - min(y) * margin_ratio, max(y) + max(y)* margin_ratio)
+
+    # set trick label font size
+    plt.xlabel("padding size", fontsize=22)
+    plt.ylabel("SEPE", fontsize=22)
+
+    # Set tick font size
+    for label in (plt.xticks()[1] + plt.yticks()[1]):
+        label.set_fontsize(18)
+
+    # Set general font size
+    plt.rcParams['font.size'] = '18'
+
     plt.show()
     if output_pdf_filepath is None:
         f.savefig(replica_dataset.pano_dataset_root_dir  + "padding.pdf", bbox_inches='tight')
@@ -637,31 +647,31 @@ if __name__ == "__main__":
         print("The padding list is {}".format(padding_list))
         opticalflow_mathod = "our_weight"
 
-        # for padding_size in padding_list:
-        #     replicaPanoDataset = ReplicaPanoDataset
-        #     replicaPanoDataset.padding_size = padding_size
-        #     log.info("###  Test padding {}".format(padding_size))
-        #     of_estimate_replica(replicaPanoDataset, opticalflow_mathod)
+        # # for padding_size in padding_list:
+        # #     replicaPanoDataset = ReplicaPanoDataset
+        # #     replicaPanoDataset.padding_size = padding_size
+        # #     log.info("###  Test padding {}".format(padding_size))
+        # #     of_estimate_replica(replicaPanoDataset, opticalflow_mathod)
         
-        # compute the optical flow with different padding size
-        from multiprocessing import Pool
-        params = []
-        for padding_size in padding_list:
-            replicaPanoDataset = ReplicaPanoDataset()
-            replicaPanoDataset.padding_size = padding_size
-            params.append((replicaPanoDataset, opticalflow_mathod))
-        with Pool(processes=6) as pool:
-            pool.starmap(of_estimate_replica, params)
+        # # compute the optical flow with different padding size
+        # from multiprocessing import Pool
+        # params = []
+        # for padding_size in padding_list:
+        #     replicaPanoDataset = ReplicaPanoDataset()
+        #     replicaPanoDataset.padding_size = padding_size
+        #     params.append((replicaPanoDataset, opticalflow_mathod))
+        # with Pool(processes=6) as pool:
+        #     pool.starmap(of_estimate_replica, params)
 
-        # summary the error
-        for padding_size in padding_list:
-            replicaPanoDataset = ReplicaPanoDataset()
-            replicaPanoDataset.padding_size = padding_size
-            summary_error_scene_replica(replicaPanoDataset, opticalflow_mathod)
-        for padding_size in padding_list:
-            replicaPanoDataset = ReplicaPanoDataset()
-            replicaPanoDataset.padding_size = padding_size
-            summary_error_dataset_replica(replicaPanoDataset, opticalflow_mathod)
+        # # summary the error
+        # for padding_size in padding_list:
+        #     replicaPanoDataset = ReplicaPanoDataset()
+        #     replicaPanoDataset.padding_size = padding_size
+        #     summary_error_scene_replica(replicaPanoDataset, opticalflow_mathod)
+        # for padding_size in padding_list:
+        #     replicaPanoDataset = ReplicaPanoDataset()
+        #     replicaPanoDataset.padding_size = padding_size
+        #     summary_error_dataset_replica(replicaPanoDataset, opticalflow_mathod)
 
         output_pdf_filepath = None
         plot_padding_error(ReplicaPanoDataset, padding_list, output_pdf_filepath , opticalflow_mathod = "our_weight")
