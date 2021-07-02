@@ -479,7 +479,7 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
 
     # 1) iterate each 360 image dataset
     for pano_image_folder in dataset_dirlist:
-        print("processing the data folder {}".format(pano_image_folder))
+        log.info("processing the data folder {} with padding {}".format(pano_image_folder, padding_size))
         # input dir
         input_filepath = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_data_dir + "/"
         # input index
