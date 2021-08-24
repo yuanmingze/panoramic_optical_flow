@@ -1,9 +1,13 @@
+import ipdb
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from flow_io import flow_read
+import flow_warp
 
 import image_evaluate
 import image_io
+import spherical_coordinates as sc
 
 from logger import Logger
 
@@ -93,29 +97,56 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     """
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
-    ncols = colorwheel.shape[0]
+    # image_io.image_show(np.expand_dim(colorwheel, axis = 1))
+    row_number = colorwheel.shape[0] # ncols is 55
     rad = np.sqrt(np.square(u) + np.square(v))
+    # 
     angle = np.arctan2(-v, -u) / np.pi
-    fk = (angle + 1) / 2 * (ncols - 1)
-    k0 = np.floor(fk).astype(np.int32)
-    k1 = k0 + 1
-    k1[k1 == ncols] = 0
-    f = fk - k0
+    angle_row_idx = (angle + 1) / 2 * (row_number - 1)
+    angle_row_idx_floor = np.floor(angle_row_idx).astype(np.int32)
+    angle_row_idx_ceil = angle_row_idx_floor + 1
+    angle_row_idx_ceil[angle_row_idx_ceil == row_number] = 0
+    ratio = angle_row_idx - angle_row_idx_floor
     for i in range(colorwheel.shape[1]):
-        tmp = colorwheel[:, i]
-        col0 = tmp[k0] / 255.0
-        col1 = tmp[k1] / 255.0
-        col = (1-f)*col0 + f*col1
+        colorwheel_channel = colorwheel[:, i]
+        row_floor = colorwheel_channel[angle_row_idx_floor] / 255.0
+        row_ceiling = colorwheel_channel[angle_row_idx_ceil] / 255.0
+        color = (1-ratio)*row_floor + ratio*row_ceiling # bilinear interpolation
         idx = (rad <= 1)
-        col[idx] = 1 - rad[idx] * (1-col[idx])
-        col[~idx] = col[~idx] * 0.75   # out of range
+        color[idx] = 1 - rad[idx] * (1-color[idx]) # 
+        color[~idx] = color[~idx] * 0.75   # radian larger than 1, out of range
         # Note the 2-i => BGR instead of RGB
         ch_idx = 2-i if convert_to_bgr else i
-        flow_image[:, :, ch_idx] = np.floor(255 * col)
+        flow_image[:, :, ch_idx] = np.floor(255 * color)
     return flow_image
 
 
-def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = False):
+def flow_pix2geo(u, v):
+    """Convert the optical flow from 2D cartesian distance to geodesic distance in ERP image.
+
+    :param u: ERP image optical flow, [height, width]
+    :type u: numpy
+    :param v: ERP image optical flow, [height, width]
+    :type v: numpy
+    :return: Spherical coordinate optical flow.
+    :rtype: numpy
+    """    
+    image_height = v.shape[0]
+    image_width = v.shape[1]
+    if image_height * 2 != image_width:
+        log.error("Need ERP image.")
+    # 
+    start_y_pixel, start_x_pixel = np.mgrid[0:image_height, 0:image_width]
+    start_x_sph, start_y_sph = sc.erp2sph(np.stack((start_x_pixel, start_y_pixel), axis=0), sph_modulo=True)
+    #
+    end_pixel = flow_warp.flow_warp_meshgrid(u,v)
+    end_x_sph, end_y_sph = sc.erp2sph(end_pixel, sph_modulo=True)
+    # 
+    uv_geo = sc.great_circle_distance_uv(start_x_sph, start_y_sph, end_x_sph, end_y_sph)
+    return uv_geo
+
+
+def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = False, sph_of = False):
     """ Expects a two dimensional flow image of shape.
 
     :param flow_uv: Flow UV image of shape [H,W,2]
@@ -124,6 +155,8 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     :type clip_flow: float
     :param convert_to_bgr: Convert output image to BGR. Defaults to False.
     :type convert_to_bgr: bool, optional
+    :param min_ratio:
+    :param sph_of: If Yes, it is visualize spherical optical flow.
     :return: Flow visualization image of shape [H,W,3]
     :rtype: numpy
     """
@@ -143,7 +176,11 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
     u = flow_uv[:, :, 0]
     v = flow_uv[:, :, 1]
     # normalize optical flow
-    rad = np.sqrt(np.square(u) + np.square(v))
+    if sph_of:
+        # get the geodesic distance
+        rad = flow_pix2geo(u, v)
+    else:
+        rad = np.sqrt(np.square(u) + np.square(v))
     rad_max = np.max(rad)
     epsilon = 1e-5
     u_norm = u / (rad_max + epsilon)

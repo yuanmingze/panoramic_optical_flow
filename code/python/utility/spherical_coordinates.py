@@ -121,7 +121,7 @@ def get_angle_from_length(length_AB, length_AC,  length_BC):
     #     # data[data < -1.0] = -1.0
     #     if data < -1.0:
     #         data = -1.0
-    # angle_A = np.arccos(data) 
+    # angle_A = np.arccos(data)
 
     # with tangent two avoid the error of Float
     s = 0.5 * (length_BC + length_AC + length_AB)
@@ -144,41 +144,39 @@ def get_angle_from_length(length_AB, length_AC,  length_BC):
     return angle_A
 
 
-def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
+
+def erp_pixel_modulo_0(erp_points_list, image_height):
+    """[summary]
+
+    :param erp_points_list: The erp pixel list, [2, points_number]
+    :type erp_points_list: numpy
+    :param image_height: erp image height
+    :type image_height: numpy
     """
-    warp the the original points (image's mesh grid) with the motion vector, meanwhile process the warp around.
+    x = erp_points_list[0,:]
+    y = erp_points_list[1,:]
+    x, y = erp_pixel_modulo(x, y , image_height)
+    return np.stack((x,y), axis=0)
 
-    :return: the target points
+
+def erp_pixel_modulo(x_arrray, y_array, image_height):
+    """ Make x,y and ERP pixels coordinate system range.
     """
-    if np.shape(motion_flow_u) != np.shape(motion_flow_v):
-        log.error("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
-
-    # get the mesh grid
-    height = np.shape(motion_flow_u)[0]
-    width = np.shape(motion_flow_u)[1]
-    x_index = np.linspace(0, width - 1, width)
-    y_index = np.linspace(0, height - 1, height)
-    x_array, y_array = np.meshgrid(x_index, y_index)
-
-    # get end point location
-    end_points_u = x_array + motion_flow_u
-    end_points_v = y_array + motion_flow_v
-
-    # process the warp around
-    u_index = end_points_u >= width - 0.5
-    end_points_u[u_index] = end_points_u[u_index] - width
-    u_index = end_points_u < -0.5
-    end_points_u[u_index] = end_points_u[u_index] + width
-
-    v_index = end_points_v >= height-0.5
-    end_points_v[v_index] = end_points_v[v_index] - height
-    v_index = end_points_v < -0.5
-    end_points_v[v_index] = end_points_v[v_index] + height
-
-    return np.stack((end_points_u, end_points_v))
+    image_width = 2 * image_height
+    x_arrray_new = np.remainder(x_arrray + 0.5, image_width) - 0.5
+    y_array_new = np.remainder(y_array + 0.5, image_height) - 0.5
+    return x_arrray_new, y_array_new
 
 
-def erp2sph(erp_points, erp_image_height=None, erp_modulo=False):
+def erp_sph_modulo(theta, phi):
+    """Modulo of the spherical coordinate for the erp coordinate.
+    """
+    points_theta = np.remainder(theta + np.pi, 2 * np.pi) - np.pi
+    points_phi = -(np.remainder(-phi + 0.5 * np.pi, np.pi) - 0.5 * np.pi)
+    return points_theta, points_phi
+
+
+def erp2sph(erp_points, erp_image_height=None, sph_modulo=False):
     """
     convert the point from erp image pixel location to spherical coordinate.
     The image center is spherical coordinate origin.
@@ -187,9 +185,9 @@ def erp2sph(erp_points, erp_image_height=None, erp_modulo=False):
     :type erp_points: numpy
     :param erp_image_height: ERP image's height, defaults to None
     :type erp_image_height: int, optional
-    :param wrap_around: if true, process the input points wrap around, make all pixel in [0, width), and [0, height).
-    :type wrap_around: bool
-    :return: the spherical coordinate points, theta is in the range (-pi, +pi), and phi is in the range (-pi/2, pi/2)
+    :param sph_modulo: if true, process the input points wrap around, .
+    :type sph_modulo: bool
+    :return: the spherical coordinate points, theta is in the range [-pi, +pi), and phi is in the range [-pi/2, pi/2)
     :rtype: numpy
     """
     # 0) the ERP image size
@@ -205,20 +203,28 @@ def erp2sph(erp_points, erp_image_height=None, erp_modulo=False):
 
     erp_points_x = erp_points[0]
     erp_points_y = erp_points[1]
-    if erp_modulo:
-        # erp_points_x = np.remainder(erp_points_x, width)
-        # erp_points_y = np.remainder(erp_points_y, height)
-        erp_points_x, erp_points_y = flow_postproc.erp_pixles_modulo(erp_points_x, erp_points_y, width, height)
 
     # 1) point location to theta and phi
-    # points_theta = (erp_points_x - (width - 1) * 0.5) * (2 * np.pi / width)
-    # points_phi = -(erp_points_y - (height - 1) * 0.5) * (np.pi / height)
     points_theta = erp_points_x * (2 * np.pi / width) + np.pi / width - np.pi
     points_phi = -(erp_points_y * (np.pi / height) + np.pi / height * 0.5) + 0.5 * np.pi
+
+    if sph_modulo:
+        points_theta, points_phi = erp_sph_modulo(points_theta, points_phi)
+
+    points_theta = np.where(points_theta == np.pi,  -np.pi, points_theta)
+    points_phi = np.where(points_phi == -0.5 * np.pi, 0.5 * np.pi, points_phi)
+
     return np.stack((points_theta, points_phi))
 
 
-def sph2erp(theta, phi, image_height, erp_modulo=False):
+def sph2erp_0(sph_points, erp_image_height=None, sph_modulo=False):
+    theta = sph_points[0, :]
+    phi = sph_points[1, :]
+    erp_x, erp_y = sph2erp(theta, phi, erp_image_height, sph_modulo)
+    return np.stack((erp_x, erp_y), axis=0)
+
+
+def sph2erp(theta, phi, erp_image_height, sph_modulo=False):
     """ 
     Transform the spherical coordinate location to ERP image pixel location.
 
@@ -228,25 +234,19 @@ def sph2erp(theta, phi, image_height, erp_modulo=False):
     :type phi: numpy
     :param image_height: the height of the ERP image. the image width is 2 times of image height
     :type image_height: [type]
-    :param wrap_around: if yes process the wrap around case, if no do not.
-    :type wrap_around: bool, optional
+    :param sph_modulo: if yes process the wrap around case, if no do not.
+    :type sph_modulo: bool, optional
     :return: the pixel location in the ERP image.
     :rtype: numpy
     """
-    image_width = 2 * image_height
-    # x = (theta + np.pi) / (2.0 * np.pi) * (2 * image_height - 1)
-    # y = -(phi - 0.5 * np.pi) / np.pi * (image_height - 1)
-    # x = ((theta + np.pi) / (2.0 * np.pi / image_width)).astype(np.int)
-    # y = (-(phi - 0.5 * np.pi) / (np.pi / image_height)).astype(np.int)
-    x = (theta + np.pi - (np.pi / image_width)) / (2.0 * np.pi / image_width)
-    y = -(phi - 0.5 * np.pi + (np.pi / image_height * 0.5)) / (np.pi / image_height)
+    if sph_modulo:
+        theta, phi = erp_sph_modulo(theta, phi)
 
-    # process the wrap around case
-    if erp_modulo:
-        # x = np.remainder(x + 0.5, image_width) - 0.5
-        # y = np.remainder(y + 0.5, image_height) - 0.5
-        x, y = flow_postproc.erp_pixles_modulo(x, y, image_width, image_height)
-    return x, y
+    erp_image_width = 2 * erp_image_height
+    erp_x = (theta + np.pi) / (2.0 * np.pi / erp_image_width) - 0.5
+    erp_y = (-phi + 0.5 * np.pi) / (np.pi / erp_image_height) - 0.5
+    return erp_x, erp_y
+
 
 
 def car2sph(points_car, min_radius=1e-10):
@@ -359,7 +359,7 @@ def rotate_sph_coord(sph_theta, sph_phi, rotate_theta=None, rotate_phi=None, rot
     return array_xy_rot[0, :], array_xy_rot[1, :]
 
 
-def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None, wraparound = False):
+def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None, wraparound=False):
     """
     Convert the spherical coordinate rotation to ERP coordinate motion flow.
     With rotate the image's mesh grid.
@@ -422,7 +422,7 @@ def sph_wraparound(src_theta, tar_theta):
     :type tar_theta: numpy
     :return: Pixel index of line wrap around.
     :rtype: numpy
-    """    
+    """
     # face_src_x_sph_avail = face_src_xy_sph[0, :, :][available_list]
     # face_src_y_sph_avail = face_src_xy_sph[1, :, :][available_list]
     # face_src_x_sph_avail, face_src_y_sph_avail = sc.sph_coord_modulo(face_src_x_sph_avail, face_src_y_sph_avail)

@@ -1,7 +1,7 @@
 {
     "_comment": "the unit is meter",
     "scene_name": "apartment_0",
-    "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
+    "_comment": "the output image is panorama or cubemap (panorama/cubemap/customized)",
     "render_type": "panorama",
     "_comment": "The c++ render opinions.",
     "render_params": {

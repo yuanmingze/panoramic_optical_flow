@@ -5,10 +5,6 @@ import numpy as np
 import image_io
 from logger import Logger
 
-"""
- *.flo file read and wirte;
-"""
-
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -49,14 +45,14 @@ def flow_write(flow_data, file_path):
         return write_flow_floss(file_path)
 
 
-# def readFlowFile(file_name):
 def read_flow_flo(file_name):
-    '''
-    args
-        file_name (str)
-    return
-        flow (numpy array) numpy array of shape (height, width, 2)
-    '''
+    """Load optical flow from *.flo file.
+
+    :param file_name: the flo file path.
+    :type file_name: str
+    :return: numpy array of shape (height, width, 2)
+    :rtype: numpy
+    """
     if not os.path.exists(file_name):
         log.error("{} do not exist!".format(file_name))
 
@@ -91,10 +87,13 @@ def read_flow_flo(file_name):
     return flow
 
 
-# def writeFlowFile(img, fname):
-def write_flow_flo(img, fname):
-    """
-    
+def write_flow_flo(flow_data, fname):
+    """Write the optical flow data to *.flo file.
+
+    :param img: Optical flow data, [height, widht, 2]
+    :type img: numpy
+    :param fname: the output file path.
+    :type fname: str
     """
     TAG_STRING = 'PIEH'    # use this when WRITING the file
 
@@ -103,7 +102,7 @@ def write_flow_flo(img, fname):
     assert len(ext) > 0, ('writeFlowFile: extension required in fname %s' % fname)
     assert ext == '.flo', exit('writeFlowFile: fname %s should have extension ''.flo''', fname)
 
-    height, width, nBands = img.shape
+    height, width, nBands = flow_data.shape
 
     assert nBands == 2, 'writeFlowFile: image must have two bands'
 
@@ -124,8 +123,8 @@ def write_flow_flo(img, fname):
     # arrange into matrix form
     tmp = np.zeros((height, width*nBands), np.float32)
 
-    tmp[:, np.arange(width) * nBands] = img[:, :, 0]
-    tmp[:, np.arange(width) * nBands + 1] = np.squeeze(img[:, :, 1])
+    tmp[:, np.arange(width) * nBands] = flow_data[:, :, 0]
+    tmp[:, np.arange(width) * nBands + 1] = np.squeeze(flow_data[:, :, 1])
 
     fid.write(bytes(tmp))
 

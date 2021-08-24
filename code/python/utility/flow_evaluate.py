@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 import flow_postproc
+import flow_warp
 
 import spherical_coordinates
 import image_io
@@ -84,7 +85,6 @@ def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap=
     result_image = np.asarray(image)
     # plt.close(fig)
     # fig.savefig('d:\sp_xyz.png', dpi=300)
-    # import ipdb; ipdb.set_trace()
     plt.clf()
     plt.cla()
     plt.close("all")
@@ -182,10 +182,10 @@ def EPE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
 
     if spherical:
         # compute the end point
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
+        of_gt_endpoints = flow_warp.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
 
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
+        of_eva_endpoints = flow_warp.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
 
         # get great circle distance
@@ -232,9 +232,9 @@ def RMSE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
 
     if spherical:
         # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
+        of_gt_endpoints = flow_warp.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
+        of_eva_endpoints = flow_warp.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
 
         # get the Spherical Triangle angle
@@ -284,11 +284,11 @@ def AAE_mat(of_ground_truth, of_evaluation, spherical=False, of_mask=None):
 
     if spherical:
         # get the three points of the triangle
-        of_gt_endpoints = spherical_coordinates.flow_warp_meshgrid(of_gt_u, of_gt_v)
+        of_gt_endpoints = flow_warp.flow_warp_meshgrid(of_gt_u, of_gt_v)
         of_gt_endpoints_uv = spherical_coordinates.erp2sph(of_gt_endpoints)
-        of_eva_endpoints = spherical_coordinates.flow_warp_meshgrid(of_u, of_v)
+        of_eva_endpoints = flow_warp.flow_warp_meshgrid(of_u, of_v)
         of_eva_endpoints_uv = spherical_coordinates.erp2sph(of_eva_endpoints)
-        of_origin_endpoints = spherical_coordinates.flow_warp_meshgrid(np.zeros_like(of_gt_u), np.zeros_like(of_gt_v))
+        of_origin_endpoints = flow_warp.flow_warp_meshgrid(np.zeros_like(of_gt_u), np.zeros_like(of_gt_v))
         of_origin_endpoints_uv = spherical_coordinates.erp2sph(of_origin_endpoints)
 
         # get the Spherical Triangle angle

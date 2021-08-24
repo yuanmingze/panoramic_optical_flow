@@ -7,6 +7,45 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
+def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
+    """
+    warp the the original points (image's mesh grid) with the motion vector, meanwhile process the warp around.
+
+    :param motion_flow_u: [height, width]
+    :type motion_flow_u: numpy
+    :param motion_flow_v: [height, width]
+    :type motion_flow_v: numpy
+    :return: the target points
+    :rtype: numpy
+    """
+    if np.shape(motion_flow_u) != np.shape(motion_flow_v):
+        log.error("motion flow u shape {} is not equal motion flow v shape {}".format(np.shape(motion_flow_u), np.shape(motion_flow_v)))
+
+    # get the mesh grid
+    height = np.shape(motion_flow_u)[0]
+    width = np.shape(motion_flow_u)[1]
+    x_index = np.linspace(0, width - 1, width)
+    y_index = np.linspace(0, height - 1, height)
+    x_array, y_array = np.meshgrid(x_index, y_index)
+
+    # get end point location
+    end_points_u = x_array + motion_flow_u
+    end_points_v = y_array + motion_flow_v
+
+    # process the warp around
+    u_index = end_points_u >= width - 0.5
+    end_points_u[u_index] = end_points_u[u_index] - width
+    u_index = end_points_u < -0.5
+    end_points_u[u_index] = end_points_u[u_index] + width
+
+    v_index = end_points_v >= height-0.5
+    end_points_v[v_index] = end_points_v[v_index] - height
+    v_index = end_points_v < -0.5
+    end_points_v[v_index] = end_points_v[v_index] + height
+
+    return np.stack((end_points_u, end_points_v))
+
+
 def warp_backward(image_target, of_forward):
     """
     Backward warp with optical flow from the target image to generate the source image. 

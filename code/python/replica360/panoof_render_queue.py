@@ -8,6 +8,10 @@ import subprocess
 import cubemap2erp as c2e
 import create_rendering_pose
 import fs_utility
+import depth_io
+import flow_io
+import image_io
+import flow_vis
 
 from logger import Logger
 
@@ -19,7 +23,7 @@ class ReplicaRenderConfig(ReplicaConfig):
     """Replica dataset rendering configuration.
     """
     # 1) the output root folder
-    output_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
+    output_root_dir = "D:/workdata/InstaOmniDepth/replica360/"
     output_cubemap_dir = "cubemap/"
     output_pano_dir = "pano/"
     config_json_filename = "config.json"
@@ -53,22 +57,32 @@ def render_panoramic_datasets(render_configs):
     # 1) render the cubemap data
     for render_folder_name in render_configs.render_folder_names:
         print("render the cubemap data for {}".format(render_folder_name))
-        render_config = render_configs.render_scene_configs[render_folder_name]
+        render_config = render_configs.render_scene_configs[render_folder_name]  # render configuration for each scene
         if not render_config["scene_name"] in render_configs.replica_scene_name_list:
             log.warn("{} is not in replica dataset.".format(render_config["scene_name"]))
             continue
 
-        # check the configurtion
-        if render_config["render_type"] == "panorama":
-            log.warn("Do not support render panorama images.")
+        # check the configuration
+        log.info("Rending with {} program.".format(render_config["render_type"]))
         if render_config["render_view"]["center_view"]:
             log.warn("Do not render center viewpoint images.")
 
-        render_scene_output_dir = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_cubemap_dir
+        # call the program to render cubemap
+        render_args = []
+        if render_config["render_type"] == "cubemap":
+            render_args.append(render_configs.render_cubemap_program_filepath)
+            render_args.append("--imageSize")
+            render_args.append(str(render_config["image"]["height"]))
+            render_scene_output_dir = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_cubemap_dir
+        elif render_config["render_type"] == "panorama":
+            render_args.append(render_configs.render_panorama_program_filepath)
+            render_args.append("--imageHeight")
+            render_args.append(str(render_config["image"]["height"]))
+            render_scene_output_dir = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_pano_dir
+        else:
+            log.error("Do not support render method {}".format(render_config["render_type"]))
         fs_utility.dir_make(render_scene_output_dir)
 
-        # call the program to render cubemap
-        render_args = [render_configs.render_cubemap_program_filepath]
         render_args.append("--data_root")
         render_args.append(render_configs.replica_data_root_dir + render_config["scene_name"] + "/")
         render_args.append("--meshFile")
@@ -81,8 +95,6 @@ def render_panoramic_datasets(render_configs):
         render_args.append(render_configs.render_scene_pose_files[render_folder_name])
         render_args.append("--outputDir")
         render_args.append(render_scene_output_dir)
-        render_args.append("--imageSize")
-        render_args.append(str(render_config["image"]["height"]))
         render_args.append("--texture_exposure")
         render_args.append(str(render_config["render_params"]["texture_exposure"]))
         render_args.append("--texture_gamma")
@@ -98,55 +110,59 @@ def render_panoramic_datasets(render_configs):
         render_seq_return = subprocess.check_call(render_args)
 
     # 2) stitch cubemap to panoramic images
-    for render_folder_name in render_configs.render_folder_names:
-        print("stitch cubemap to panoramic images for {}".format(render_folder_name))
-        render_config = render_configs.render_scene_configs[render_folder_name]
-        if not render_config["scene_name"] in render_configs.replica_scene_name_list:
-            log.warn("{} is not in replica dataset.".format(render_config["scene_name"]))
-            continue
+    if render_config["render_type"] == "cubemap":
+        for render_folder_name in render_configs.render_folder_names:
+            pano_output_dir = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_pano_dir
+            print("stitch cubemap to panoramic images for {}".format(render_folder_name))
+            render_config = render_configs.render_scene_configs[render_folder_name]
+            if not render_config["scene_name"] in render_configs.replica_scene_name_list:
+                log.warn("{} is not in replica dataset.".format(render_config["scene_name"]))
+                continue
 
-        replica_scene_data_root = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_cubemap_dir
+            replica_scene_data_root = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_cubemap_dir
+            fs_utility.dir_make(pano_output_dir)
+            # stitch rgb image
+            if render_configs.renderRGBEnable:
+                log.info("stitch rgb image")
+                c2e.stitch_rgb(replica_scene_data_root,
+                               pano_output_dir,
+                               render_configs.render_scene_frame_number[render_folder_name],
+                               render_configs.replica_cubemap_rgb_image_filename_exp,
+                               render_configs.replica_pano_rgb_image_filename_exp)
+            # stitch depth map
+            if render_configs.renderDepthEnable:
+                log.info("stitch depth map")
+                c2e.stitch_depthmap(replica_scene_data_root,
+                                    pano_output_dir,
+                                    render_configs.render_scene_frame_number[render_folder_name],
+                                    render_configs.replica_cubemap_depthmap_filename_exp,
+                                    render_configs.replica_pano_depthmap_filename_exp,
+                                    render_configs.replica_pano_depthmap_visual_filename_exp)
+            # stitch forward optical flow
+            if render_configs.renderMotionVectorEnable:
+                log.info("stitch forward optical flow")
+                c2e.stitch_opticalflow(replica_scene_data_root,
+                                       pano_output_dir,
+                                       render_configs.render_scene_frame_number[render_folder_name],
+                                       render_configs.replica_cubemap_opticalflow_forward_filename_exp,
+                                       render_configs.replica_pano_opticalflow_forward_filename_exp,
+                                       render_configs.replica_pano_opticalflow_forward_visual_filename_exp)
+                # stitch backward optical flow
+                log.info("stitch backward optical flow")
+                c2e.stitch_opticalflow(replica_scene_data_root,
+                                       pano_output_dir,
+                                       render_configs.render_scene_frame_number[render_folder_name],
+                                       render_configs.replica_cubemap_opticalflow_backward_filename_exp,
+                                       render_configs.replica_pano_opticalflow_backward_filename_exp,
+                                       render_configs.replica_pano_opticalflow_backward_visual_filename_exp)
+
+    # 3) generate unavailable mask image & visualize depth map
+    for render_folder_name in render_configs.render_folder_names:
         pano_output_dir = render_configs.output_root_dir + render_folder_name + "/" + render_configs.output_pano_dir
-        fs_utility.dir_make(pano_output_dir)
-        # stitch rgb image
-        if render_configs.renderRGBEnable:
-            log.info("stitch rgb image")
-            c2e.stitch_rgb(replica_scene_data_root,
-                           pano_output_dir,
-                           render_configs.render_scene_frame_number[render_folder_name],
-                           render_configs.replica_cubemap_rgb_image_filename_exp,
-                           render_configs.replica_pano_rgb_image_filename_exp)
-        # stitch depth map
-        if render_configs.renderDepthEnable:
-            log.info("stitch depth map")
-            c2e.stitch_depthmap(replica_scene_data_root,
-                                pano_output_dir,
-                                render_configs.render_scene_frame_number[render_folder_name],
-                                render_configs.replica_cubemap_depthmap_filename_exp,
-                                render_configs.replica_pano_depthmap_filename_exp,
-                                render_configs.replica_pano_depthmap_visual_filename_exp)
-        # stitch forward optical flow
-        if render_configs.renderMotionVectorEnable:
-            log.info("stitch forward optical flow")
-            c2e.stitch_opticalflow(replica_scene_data_root,
-                                   pano_output_dir,
-                                   render_configs.render_scene_frame_number[render_folder_name],
-                                   render_configs.replica_cubemap_opticalflow_forward_filename_exp,
-                                   render_configs.replica_pano_opticalflow_forward_filename_exp,
-                                   render_configs.replica_pano_opticalflow_forward_visual_filename_exp)
-            # stitch backward optical flow
-            log.info("stitch backward optical flow")
-            c2e.stitch_opticalflow(replica_scene_data_root,
-                                   pano_output_dir,
-                                   render_configs.render_scene_frame_number[render_folder_name],
-                                   render_configs.replica_cubemap_opticalflow_backward_filename_exp,
-                                   render_configs.replica_pano_opticalflow_backward_filename_exp,
-                                   render_configs.replica_pano_opticalflow_backward_visual_filename_exp)
-        # generate unavailable mask image
         if render_configs.renderUnavailableMask:
+            # generate unavailable pixel mask
             if not render_configs.renderDepthEnable:
                 log.warn("Need depth map to generate the mask.")
-                continue
             log.info("enerate unavailable mask image")
             c2e.create_mask(pano_output_dir,
                             pano_output_dir,
@@ -154,14 +170,60 @@ def render_panoramic_datasets(render_configs):
                             render_configs.replica_pano_depthmap_filename_exp,
                             render_configs.replica_pano_mask_filename_exp)
 
+            # visualize depth map and optical flow
+            for image_index in range(0, frame_number):
+                if image_index % 10 == 0:
+                    log.info("Image index: {}".format(image_index))
+
+                erp_depth_filepath = pano_output_dir + render_configs.replica_pano_depthmap_filename_exp.format(image_index)
+                erp_depth_visual_filepath = pano_output_dir + render_configs.replica_pano_depthmap_visual_filename_exp.format(image_index)
+                erp_depth_data = depth_io.read_dpt(erp_depth_filepath)
+                depth_io.depth_visual_save(erp_depth_data, erp_depth_visual_filepath)
+
+        # visualize the optical flow
+        if render_configs.renderMotionVectorEnable:
+            for image_index in range(0, frame_number):
+                if image_index % 10 == 0:
+                    log.info("Image index: {}".format(image_index))
+
+                erp_of_filepath = pano_output_dir + render_configs.replica_pano_opticalflow_forward_filename_exp.format(image_index)
+                erp_of_visual_filepath = pano_output_dir + render_configs.replica_pano_opticalflow_forward_visual_filename_exp.format(image_index)
+                erp_of_data = flow_io.flow_read(erp_of_filepath)
+                erp_of_vis = flow_vis.flow_to_color(erp_of_data, min_ratio=0.1, max_ratio=0.9)
+                image_io.image_save(erp_of_vis, erp_of_visual_filepath)
+
+                erp_of_filepath = pano_output_dir + render_configs.replica_pano_opticalflow_backward_filename_exp.format(image_index)
+                erp_of_visual_filepath = pano_output_dir + render_configs.replica_pano_opticalflow_backward_visual_filename_exp.format(image_index)
+                erp_of_data = flow_io.flow_read(erp_of_filepath)
+                erp_of_vis = flow_vis.flow_to_color(erp_of_data, min_ratio=0.1, max_ratio=0.9)
+                image_io.image_save(erp_of_vis, erp_of_visual_filepath)
+
     # 3) clean
 
 
 if __name__ == "__main__":
     folder_list = [
-        "office_3_line_1k_0"
+        # "apartment_0",
+        # "apartment_1",
+        # "apartment_2",
+        # "frl_apartment_0",
+        # "frl_apartment_1",
+        # "frl_apartment_2",
+        # "frl_apartment_3",
+        # "frl_apartment_4",
+        # "frl_apartment_5",
+        # "hotel_0",
+        # "office_0",
+        # "office_1",
+        # "office_2",
+        # "office_3",
+        # "office_4",
+        # "room_0",
+        # "room_1",
+        # "room_2"
     ]
 
-    render_config = ReplicaRenderConfig()
-    render_config.render_folder_names = folder_list
-    render_panoramic_datasets(render_config)
+    render_configs = ReplicaRenderConfig()
+    render_configs.render_folder_names = folder_list
+    render_configs.renderMotionVectorEnable = False
+    render_panoramic_datasets(render_configs)

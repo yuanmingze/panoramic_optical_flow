@@ -141,13 +141,13 @@ def stitch_depthmap(data_dir, output_dir, frame_number, cubemap_depthmap_filenam
             print(image_path)
             face_depth_list.append(depth_io.read_dpt(image_path))
 
-        # 2) test stitch the cubemap images
+        # 2) stitch the cubemap images
         erp_depth_data = proj_cm.cubemap2erp_depth(face_depth_list, padding_size=0.0)
         erp_depth_filepath = output_dir + pano_depthmap_filename_exp.format(image_index)
         # image_io.image_show(erp_depth_data)
         depth_io.write_dpt(erp_depth_data, erp_depth_filepath)
-        erp_depth_visual_filepath = output_dir + pano_depthmap_visual_filename_exp.format(image_index)
-        depth_io.depth_visual_save(erp_depth_data, erp_depth_visual_filepath)
+        # erp_depth_visual_filepath = output_dir + pano_depthmap_visual_filename_exp.format(image_index)
+        # depth_io.depth_visual_save(erp_depth_data, erp_depth_visual_filepath)
 
 
 def stitch_opticalflow(data_dir, output_dir, frame_number, cubemap_opticalflow_filename_exp, pano_opticalflow_filename_exp, pano_opticalflow_visual_filename_exp):
@@ -163,12 +163,12 @@ def stitch_opticalflow(data_dir, output_dir, frame_number, cubemap_opticalflow_f
             print(image_path)
             face_flo_list.append(flow_io.read_flow_flo(image_path))
 
-        # 2) test stitch the cubemap images
+        # 2) stitch the cubemap images
         erp_of_data = proj_cm.cubemap2erp_flow(face_flo_list, padding_size=0.0, wrap_around=True)
         erp_of_filepath = output_dir + pano_opticalflow_filename_exp.format(image_index)
         flow_io.flow_write(erp_of_data, erp_of_filepath)
-        erp_of_vis = flow_vis.flow_to_color(erp_of_data, min_ratio=0.1, max_ratio=0.9)
-        erp_of_visual_filepath = output_dir + pano_opticalflow_visual_filename_exp.format(image_index)
+        # erp_of_vis = flow_vis.flow_to_color(erp_of_data, min_ratio=0.1, max_ratio=0.9)
+        # erp_of_visual_filepath = output_dir + pano_opticalflow_visual_filename_exp.format(image_index)
 
         # TODO  one pixel at left side is wrong, larger the image size, how to deal with the point in the boundary
         # new_u = np.where(erp_of_data[:,:,0] > 2000, erp_of_data[:,:,0], 2000)
@@ -177,7 +177,7 @@ def stitch_opticalflow(data_dir, output_dir, frame_number, cubemap_opticalflow_f
         # image_io.image_show(new_u)
         # flow_vis.flow_value_to_color(erp_of_data, erp_of_visual_filepath + "_0.jpg")
 
-        image_io.image_save(erp_of_vis, erp_of_visual_filepath)
+        # image_io.image_save(erp_of_vis, erp_of_visual_filepath)
 
 
 if __name__ == "__main__":
