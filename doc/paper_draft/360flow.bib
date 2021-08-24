@@ -153,6 +153,20 @@
   _url       = {https://hal.archives-ouvertes.fr/hal-02968191},
 }
 
+@Article{ArunHB1987,
+  author    = {K. S. Arun and T. S. Huang and S. D. Blostein},
+  title     = {Least-Squares Fitting of Two {3-D} Point Sets},
+  journal   = PAMI,
+  year      = {1987},
+  volume    = {9},
+  number    = {5},
+  pages     = {698--700},
+  _month     = sep,
+  _issn      = {1939-3539},
+  abstract  = {Two point sets {pi} and {p'i}; i = 1, 2,..., N are related by p'i = Rpi + T + Ni, where R is a rotation matrix, T a translation vector, and Ni a noise vector. Given {pi} and {p'i}, we present an algorithm for finding the least-squares solution of R and T, which is based on the singular value decomposition (SVD) of a 3 × 3 matrix. This new algorithm is compared to two earlier algorithms with respect to computer time requirements.},
+  doi       = {10.1109/TPAMI.1987.4767965},
+}
+
 @Article{BakerSLRBS2011,
   author    = {Simon Baker and Daniel Scharstein and J. Lewis and Stefan Roth and Michael Black and Richard Szeliski},
   title     = {A Database and Evaluation Methodology for Optical Flow},
@@ -283,11 +297,11 @@
   _url       = {http://openaccess.thecvf.com/content_cvpr_2018/html/Cheng_Cube_Padding_for_CVPR_2018_paper.html},
 }
 
-@InProceedings{CobbWMMPdM2020,
+@InProceedings{CobbWMMPM2021,
   author    = {Oliver J. Cobb and Christopher G. R. Wallis and Augustine N. Mavor-Parker and Augustin Marignier and Matthew A. Price and Mayeul d'Avezac and Jason D. McEwen},
   title     = {Efficient Generalized Spherical {CNNs}},
   booktitle = ICLR,
-  year      = {2020},
+  year      = {2021},
   abstract  = {Many problems across computer vision and the natural sciences require the analysis of spherical data, for which representations may be learned efficiently by encoding equivariance to rotational symmetries. We present a generalized spherical CNN framework that encompasses various existing approaches and allows them to be leveraged alongside each other. The only existing non-linear spherical CNN layer that is strictly equivariant has complexity $\mathcalO(C^2L^5)$, where $C$ is a measure of representational capacity and $L$ the spherical harmonic bandlimit. Such a high computational cost often prohibits the use of strictly equivariant spherical CNNs. We develop two new strictly equivariant layers with reduced complexity $\mathcalO(CL^4)$ and $\mathcalO(CL^3 \log L)$, making larger, more expressive models computationally feasible. Moreover, we adopt efficient sampling theory to achieve further computational savings. We show that these developments allow the construction of more expressive hybrid models that achieve state-of-the-art accuracy and parameter efficiency on spherical benchmark problems.},
   arxiv     = {2010.11661},
   _url       = {https://arxiv.org/abs/2010.11661},
@@ -468,10 +482,13 @@ We propose a novel training objective that enables our convolutional neural netw
 
 @Article{HuiTL2021,
   author    = {Tak-Wai Hui and Xiaoou Tang and Chen Change Loy},
-  title     = {A Lightweight Optical Flow {CNN} - Revisiting Data Fidelity and Regularization},
+  title     = {A Lightweight Optical Flow {CNN} — Revisiting Data Fidelity and Regularization},
   journal   = PAMI,
   year      = {2021},
-  volume    = {preprints},
+  volume    = {43},
+  number    = {8},
+  pages     = {2555--2569},
+  _month     = aug,
   _issn      = {1939-3539},
   abstract  = {Over four decades, the majority addresses the problem of optical flow estimation using variational methods. With the advance of machine learning, some recent works have attempted to address the problem using convolutional neural network (CNN) and have showed promising results. FlowNet2 [1], the state-of-the-art CNN, requires over 160M parameters to achieve accurate flow estimation. Our LiteFlowNet2 outperforms FlowNet2 on Sintel and KITTI benchmarks, while being 25.3 times smaller in the model size and 3.1 times faster in the running speed. LiteFlowNet2 is built on the foundation laid by conventional methods and resembles the corresponding roles as data fidelity and regularization in variational methods. We compute optical flow in a spatial-pyramid formulation as SPyNet [2] but through a novel lightweight cascaded flow inference. It provides high flow estimation accuracy through early correction with seamless incorporation of descriptor matching. Flow regularization is used to ameliorate the issue of outliers and vague flow boundaries through feature-driven local convolutions. Our network also owns an effective structure for pyramidal feature extraction and embraces feature warping rather than image warping as practiced in FlowNet2 and SPyNet. Comparing to LiteFlowNet [3], LiteFlowNet2 improves the optical flow accuracy on Sintel Clean by 23.3%, Sintel Final by 12.8%, KITTI 2012 by 19.6%, and KITTI 2015 by 18.8%, while being 2.2 times faster. Our network protocol and trained models are made publicly available on https://github.com/twhui/LiteFlowNet2.},
   doi       = {10.1109/TPAMI.2020.2976928},
@@ -721,6 +738,28 @@ We propose a novel training objective that enables our convolutional neural netw
   abstract  = {We present the Creative Flow+ Dataset, the first diverse multi-style artistic video dataset richly labeled with per-pixel optical flow, occlusions, correspondences, segmentation labels, normals, and depth. Our dataset includes 3000 animated sequences rendered using styles randomly selected from 40 textured line styles and 38 shading styles, spanning the range between flat cartoon fill and wildly sketchy shading. Our dataset includes 124K+ train set frames and 10K test set frames rendered at 1500x1500 resolution, far surpassing the largest available optical flow datasets in size. While modern techniques for tasks such as optical flow estimation achieve impressive performance on realistic images and video, today there is no way to gauge their performance on non-photorealistic images. Creative Flow+ poses a new challenge to generalize real-world Computer Vision to messy stylized content. We show that learning-based optical flow methods fail to generalize to this data and struggle to compete with classical approaches, and invite new research in this area.  Our dataset and a new optical flow benchmark will be publicly available at: www.cs.toronto.edu/creativeflow/. We further release the complete dataset creation pipeline, allowing the community to generate and stylize their own data on demand.},
   doi       = {10.1109/CVPR.2019.00553},
   _url       = {https://openaccess.thecvf.com/content_CVPR_2019/html/Shugrina_Creative_Flow_Dataset_CVPR_2019_paper.html},
+}
+
+@Unpublished{SorkiR2017,
+  author    = {Olga Sorkine-Hornung and Michael Rabinovich},
+  title     = {Least-Squares Rigid Motion Using {SVD}},
+  note      = {Note},
+  _month     = jan,
+  year      = {2017},
+  abstract  = {This note summarizes the steps to computing the best-fitting rigid transformation that aligns two sets of corresponding points.},
+  keywords  = {shape matching, rigid alignment, rotation, SVD},
+  _url       = {https://igl.ethz.ch/projects/ARAP/svd_rot.pdf},
+}
+
+@InProceedings{StoneMAAJ2021,
+  author    = {Austin Stone and Daniel Maurer and Alper Ayvaci and Anelia Angelova and Rico Jonschkowski},
+  title     = {{SMURF}: Self-Teaching Multi-Frame Unsupervised {RAFT} With Full-Image Warping},
+  booktitle = CVPR,
+  year      = {2021},
+  pages     = {3887--3896},
+  _month     = jun,
+  abstract  = {We present SMURF, a method for unsupervised learning of optical flow that improves state of the art on all benchmarks by 36% to 40% and even outperforms several supervised approaches such as PWC-Net and FlowNet2. Our method integrates architecture improvements from supervised optical flow, i.e. the RAFT model, with new ideas for unsupervised learning that include a novel unsupervised sequence loss and self-supervision loss, a technique for handling out-of-frame motion, and an approach for learning effectively from multi-frame video data while still only requiring two frames for inference.},
+  _url       = {https://github.com/google-research/google-research/tree/master/smurf},
 }
 
 @Unpublished{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019,

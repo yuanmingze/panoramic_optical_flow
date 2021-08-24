@@ -20,7 +20,7 @@ At the same time, our high-level approach generalises to any off-the-shelf persp
 % overview method
 As shown in \cref{fig:approach:pipeline}, our method comprises three steps:
 %
-(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from image $I_{t}$ to image ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\bar{\mathcal{F}}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
+(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from \new{ERP} image $I_{t}$ to ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\bar{\mathcal{F}}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
 %
 (2)~We estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ based on cubemap projection optical flow (see \cref{sec:approach:projstit}), and then rotate the image ${\bar{I}}_{t+1}$ according to the rotation $\hat{R}$ estimated from the cubemap flow ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$.
 %
@@ -171,6 +171,7 @@ To account for large displacements, we shift the mean of the Gaussian by the inv
 %
 %And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
 (2)~A warping error term that computes the colour difference between the source image and the backwards-warped target image, to reduce the weight of badly estimated motion vectors.
+\TODO{Provide more mathematical explanation of the blending procedure.}
 
 
 %% blending method
@@ -190,9 +191,12 @@ To account for large displacements, we shift the mean of the Gaussian by the inv
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
+\TODO{Make more mathematical}
+
 Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align image $I_{t+1}$ to image $I_{t}$.
 This helps reduce the range of pixel motion to a level that is more suitable for the smaller FoV of tangent images.
 %
+\TODO{This needs updating with least-squares rotation estimation \cite{ArunHB1987,SorkiR2017}.}
 The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
 %
 %The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
@@ -208,7 +212,8 @@ After extracting  the global rotation $R$ from the 360° optical flow, we warp t
 %
 We apply global rotation warping based on the coarse to fine principle.
 First, use estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
-We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
+%We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
+We then use the cubemap optical flow to \new{estimate the residual rotation} $\hat{R}$ \new{to} fine-tune the \new{rotation} alignment.
 
 
 %\textbf{Panoramic Optical Flow Global Rotation Warping.}
