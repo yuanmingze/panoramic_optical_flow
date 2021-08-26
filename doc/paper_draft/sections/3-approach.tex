@@ -191,39 +191,42 @@ To account for large displacements, we shift the mean of the Gaussian by the inv
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-\TODO{Make more mathematical}
-
-Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align image $I_{t+1}$ to image $I_{t}$.
+Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align \new{the ERP} image $I_{t+1}$ to \DELETE{image} $I_{t}$.
 This helps reduce the range of pixel motion to a level that is more suitable for the smaller FoV of tangent images.
 %
-\TODO{This needs updating with least-squares rotation estimation \cite{ArunHB1987,SorkiR2017}.}
-The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
+\DELETE{The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
 %
 %The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
 We compute the horizontal rotation from the horizontal flow component $\mathcal{F}_u(\mathbf{x})$ using $\frac{2\pi}{N\cdot W}\sum_\mathbf{x}\mathcal{F}_u(\mathbf{x})$, where $N$ is the number of pixels and $W \!\times\! H$ the resolution of the ERP image.
 %
 %The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
-Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.
+Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.}
 % it's the noly 20% middle column of the $\mathcal{F}_v$
+\new{We compute the global rotation $R$ \CR{should this be $\bar{R}$ to be consistent with \cref{fig:approach:pipeline,equ:approach:globalwarp}?}from the computed optical flow field as follows.
+First, we convert the coordinates of the start and end points of all optical flow vectors to spherical coordinates with unit length.
+Then, we solve for the optimal rotation between the start points and the corresponding end points using least-squares fitting, which can be solved in closed form by singular value decomposition \cite{ArunHB1987,SorkiR2017}.}
 
 
 \paragraph{Global Rotation Image Warping.}
-After extracting  the global rotation $R$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $R$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
+After \new{estimating} the global rotation $R$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $R$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
 %
 We apply global rotation warping based on the coarse to fine principle.
-First, use estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
+First, we estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
 %We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
-We then use the cubemap optical flow to \new{estimate the residual rotation} $\hat{R}$ \new{to} fine-tune the \new{rotation} alignment.
+We then use the cubemap optical flow to \new{estimate the residual rotation} $\hat{R}$ \new{to} fine-tune the \new{global rotation} alignment.
+
+
+\ \\\TODO{Make more mathematical below}
 
 
 %\textbf{Panoramic Optical Flow Global Rotation Warping.}
 \paragraph{Global Rotation Optical Flow Warping.}
 %To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.
-To recover the final 360° optical flow field $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ needs to align with the pixel position in the input image $I_{t+1}$.
+To recover the final 360° optical flow field $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end points of $\tilde{\mathcal{F}}$ need to align with the pixel position in the input image $I_{t+1}$.
 % 
-When estimating the optical flow, only the target image $I_{t+1}$ is rotated, so we now need to rotate the end point of $\tilde{\mathcal{F}}_t$, i.e $\tilde{\mathcal{F}}^{EP}_t$ in the opposite direction.
+When estimating the optical flow, only the target image $I_{t+1}$ is rotated, so we now need to rotate the end points of $\tilde{\mathcal{F}}$, i.e $\tilde{\mathcal{F}}^\text{EP}$ in the opposite direction.
 %
-To rotate an ERP pixel, we first convert it to Cartesian 3D coordinates using $\mathcal{P}$, rotate it about the centre of the sphere, and then convert it back to ERP using $\mathcal{P}^{-1}$.
+To `rotate' an ERP pixel, we first convert it\new{s ERP image coordinates $\mathbf{x}$} to Cartesian 3D coordinates using \new{the inverse projection operator} $\mathcal{P}^{-1}$, rotate it about the centre of the sphere, and then convert it back to ERP \new{image coordinates} using $\mathcal{P}$.
 %
 Applied to optical flow, this yields:
 %
@@ -233,7 +236,7 @@ Applied to optical flow, this yields:
 %				= \mathcal{P}^{-1} \left( \hat{R}^{-1} \cdot \bar{R}^{-1} \cdot \mathcal{P}(\tilde{\mathcal{F}}^{EP}_{(i,j)}) - (i,j)\right)
 	\mathcal{F}(\mathbf{x})
 	= \mathcal{F}^\text{EP}(\mathbf{x}) - \mathbf{x}
-	= \mathcal{P}^{-1} \left( \hat{R}^\top \cdot \bar{R}^\top \cdot \mathcal{P}(\tilde{\mathcal{F}}^\text{EP}(\mathbf{x}))\right)  - \mathbf{x}
+	= \mathcal{P} \left( \hat{R}^\top \cdot \bar{R}^\top \cdot \mathcal{P}^{-1}(\tilde{\mathcal{F}}^\text{EP}(\mathbf{x}))\right)  - \mathbf{x}
 	\text{.}
 %\end{split}
 \end{equation}
