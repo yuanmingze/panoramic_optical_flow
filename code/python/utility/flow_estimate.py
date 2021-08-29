@@ -3,6 +3,7 @@ import numpy as np
 import flow_postproc
 import flow_vis
 import flow_io
+import flow_warp
 
 import projection
 import image_io
@@ -105,7 +106,7 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
     # 0) compute flow in ERP image & wrap image, make it align with the source ERP image.
     log.debug("0) compute ERP image flow")
     optical_flow_erp = optical_flow_method(src_erp_image, tar_erp_image)
-    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_erp, src_image=False)
+    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = flow_warp.global_rotation_warping(tar_erp_image, optical_flow_erp, forward_warp=False)
     erp_rot_mat = spherical_coordinates.rot_sph2mat(erp_rot_theta, erp_rot_phi)
     log.debug("ERP optical flow rotation is {}, {}".format(np.degrees(erp_rot_theta), np.degrees(erp_rot_phi)))
 
@@ -124,7 +125,7 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
         cubemap_face_of_list.append(optical_flow_cubemap)
     optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
     # 1-2) warp target image
-    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_erp, optical_flow_cubemap, src_image=False)
+    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = flow_warp.global_rotation_warping(tar_erp_image_rot_erp, optical_flow_cubemap, forward_warp=False)
     cubemap_rot_mat = spherical_coordinates.rot_sph2mat(cubemap_rot_theta, cubemap_rot_phi)
     log.debug("Cubemap optical flow rotation is {}, {}".format(np.degrees(cubemap_rot_theta), np.degrees(cubemap_rot_phi)))
 
@@ -153,7 +154,7 @@ def pano_of_0(src_erp_image, tar_erp_image, optical_flow_method=None, debug_outp
 
     # optical_flow_ico = flow_postproc.erp_of_wraparound(optical_flow_ico)
     # 2-2) warp target image
-    #tar_erp_image_rot_ico, ico_rot_theta, ico_rot_phi = projection.image_rotate_flow(tar_erp_image_rot_cubemap, optical_flow_ico)
+    #tar_erp_image_rot_ico, ico_rot_theta, ico_rot_phi = flow_warp.global_rotation_warping(tar_erp_image_rot_cubemap, optical_flow_ico)
 
     if debug_output_dir is not None:
         debug_save_of(optical_flow_ico, debug_output_dir + "pano_of_0_of_ico")
@@ -214,7 +215,7 @@ def pano_of_0_wo_erp(src_erp_image, tar_erp_image, optical_flow_method=None, deb
         cubemap_face_of_list.append(optical_flow_cubemap)
     optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
     # 1-2) warp target image
-    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_cubemap, src_image=False)
+    tar_erp_image_rot_cubemap, cubemap_rot_theta, cubemap_rot_phi = flow_warp.global_rotation_warping(tar_erp_image, optical_flow_cubemap, forward_warp=False)
     cubemap_rot_mat = spherical_coordinates.rot_sph2mat(cubemap_rot_theta, cubemap_rot_phi)
     log.debug("Cubemap optical flow rotation is {}, {}".format(np.degrees(cubemap_rot_theta), np.degrees(cubemap_rot_phi)))
 
@@ -267,7 +268,7 @@ def pano_of_0_wo_cube(src_erp_image, tar_erp_image, optical_flow_method=None, de
     # 0) compute flow in ERP image & wrap image, make it align with the source ERP image.
     log.debug("0) compute ERP image flow")
     optical_flow_erp = optical_flow_method(src_erp_image, tar_erp_image)
-    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_erp, src_image=False)
+    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = flow_warp.global_rotation_warping(tar_erp_image, optical_flow_erp, forward_warp=False)
     erp_rot_mat = spherical_coordinates.rot_sph2mat(erp_rot_theta, erp_rot_phi)
     log.debug("ERP optical flow rotation is {}, {}".format(np.degrees(erp_rot_theta), np.degrees(erp_rot_phi)))
 
@@ -322,7 +323,7 @@ def pano_of_0_wo_ico(src_erp_image, tar_erp_image, optical_flow_method=None, deb
     # 0) compute flow in ERP image & wrap image, make it align with the source ERP image.
     log.debug("0) compute ERP image flow")
     optical_flow_erp = optical_flow_method(src_erp_image, tar_erp_image)
-    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = projection.image_rotate_flow(tar_erp_image, optical_flow_erp, src_image=False)
+    tar_erp_image_rot_erp, erp_rot_theta, erp_rot_phi = flow_warp.global_rotation_warping(tar_erp_image, optical_flow_erp, forward_warp=False)
     erp_rot_mat = spherical_coordinates.rot_sph2mat(erp_rot_theta, erp_rot_phi)
     log.debug("ERP optical flow rotation is {}, {}".format(np.degrees(erp_rot_theta), np.degrees(erp_rot_phi)))
 

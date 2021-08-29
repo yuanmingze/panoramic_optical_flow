@@ -1,10 +1,7 @@
 import numpy as np
 from scipy import ndimage
-from scipy.spatial.transform import rotation
-from scipy.stats import norm
 
 import flow_postproc
-import flow_vis
 import polygon
 import spherical_coordinates as sc
 
@@ -171,86 +168,6 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
     else:
         log.error("the weight method {} do not exist.".format(weight_type))
     return weight_map
-
-
-def flow2sph_rotation(erp_flow_, use_weight=True):
-    """Compute the  two image rotation from the ERP image's optical flow.
-    The rotation is from the first image to second image.
-
-    :param erp_flow: the erp image's flow 
-    :type erp_flow: numpy 
-    :param use_weight: use the centre rows and columns to compute the rotation, default is True.
-    :type: bool
-    :return: the offset of ERP image, [theta shift, phi shift
-    :rtype: float
-    """
-    erp_image_height = erp_flow_.shape[0]
-    erp_image_width = erp_flow_.shape[1]
-
-    # convert the pixel offset to rotation radian
-    erp_flow = flow_postproc.erp_of_wraparound(erp_flow_)
-    theta_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
-    theta_delta = np.mean(theta_delta_array)
-
-    # just the center column of the optical flow.
-    delta = theta_delta / (2.0 * np.pi)
-    flow_col_start = int(erp_image_width * (0.5 - delta))
-    flow_col_end = int(erp_image_width * (0.5 + delta))
-    if delta < 0:
-        temp = flow_col_start
-        flow_col_start = flow_col_end
-        flow_col_end = temp
-    flow_col_center = np.full((erp_image_height, erp_image_width), False, dtype=np.bool)
-    flow_col_center[:, flow_col_start:flow_col_end] = True
-    flow_sign = np.sign(np.sum(np.sign(erp_flow[flow_col_center, 1])))
-    # phi_delta_array = np.pi * (erp_flow[flow_col_start:flow_col_end, :, 1] / erp_image_height)
-    if flow_sign < 0:
-        positive_index = np.logical_and(erp_flow[:, :, 1] < 0, flow_col_center)
-    else:
-        positive_index = np.logical_and(erp_flow[:, :, 1] > 0, flow_col_center)
-    phi_delta_array = -np.pi * (erp_flow[positive_index, 1] / erp_image_height)
-
-    if use_weight:
-        # TODO Check the weight performance
-        # weight of the u, width
-        stdev = erp_image_height * 0.5 * 0.25
-        weight_u_array_index = np.arange(erp_image_height)
-        weight_u_array = norm.pdf(weight_u_array_index, erp_image_height / 2.0, stdev)
-        theta_delta_array = np.average(theta_delta_array, axis=0, weights=weight_u_array)
-
-        # weight of the v, height
-        stdev = erp_image_width * 0.5 * 0.25
-        weight_v_array_index = np.arange(erp_image_width)
-        weight_v_array = norm.pdf(weight_v_array_index, erp_image_width / 2.0, stdev)
-        phi_delta_array = np.average(phi_delta_array, axis=1,  weights=weight_v_array)
-
-    phi_delta = np.mean(phi_delta_array)
-
-    return theta_delta, phi_delta
-
-
-def image_rotate_flow(erp_image, erp_flow, src_image=True):
-    """
-    Rotate the ERP image base on the flow. 
-    The flow is from erp_image to another image.
-
-    :param erp_image: the flow's ERP image, the image is 
-    :type erp_image: numpy 
-    :param erp_flow: the erp image's flow.
-    :type erp_flow: numpy 
-    :return: The rotated ERP image
-    :rtype: numpy
-    """
-    # compuate the average of optical flow & get the delta theta and phi
-    theta_delta, phi_delta = flow2sph_rotation(erp_flow, False)
-    # rotate the ERP image
-    if not src_image:
-        theta_delta = -theta_delta
-        phi_delta = -phi_delta
-    erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
-    if erp_image.dtype == np.uint8:
-        erp_image_rot = erp_image_rot.astype(np.uint8)
-    return erp_image_rot, theta_delta, phi_delta
 
 
 def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):

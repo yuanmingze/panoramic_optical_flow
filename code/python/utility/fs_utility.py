@@ -3,8 +3,6 @@ import pathlib
 
 import os
 
-import ipdb
-
 from logger import Logger
 
 log = Logger(__name__)

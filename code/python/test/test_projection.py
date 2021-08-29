@@ -23,7 +23,7 @@ def test_get_rotation(erp_src_image_path, erp_flow_path):
     erp_flow = flow_postproc.erp_of_wraparound(erp_flow)
 
     # get the rotation
-    erp_image_rotated = projection.image_rotate_flow(erp_image, erp_flow)
+    erp_image_rotated = flow_warp.global_rotation_warping(erp_image, erp_flow)
 
     # rotate the src image
     rotated_image_path = erp_src_image_path + "_rotated.jpg"
@@ -64,7 +64,7 @@ def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath
     image_io.image_save(src_image_data_rot, erp_src_image_filepath + "_warp_backward_rot.jpg")
 
 
-def test_flow2sph_rotation(erp_src_image_filepath, erp_tar_image_filepath):
+def test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
     tar_image_data = image_io.image_read(erp_tar_image_filepath)
     # flow_array = flow_estimate.of_methdod_DIS(src_image_data, tar_image_data)
@@ -76,7 +76,7 @@ def test_flow2sph_rotation(erp_src_image_filepath, erp_tar_image_filepath):
         rotation_phi = np.radians(rotation[1])
         flow_array, _ = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_theta, rotation_phi)
         # flow_vis.flow_value_to_color(flow_array)
-        theta_delta, phi_delta = projection.flow2sph_rotation(flow_array, False)
+        theta_delta, phi_delta = projection.flow2rotation_2d(flow_array, False)
         print("original rotation: {},{}, result is: {}, {}".
               format(np.degrees(rotation_theta), np.degrees(rotation_phi), np.degrees(theta_delta), np.degrees(phi_delta)))
 
@@ -91,4 +91,4 @@ if __name__ == "__main__":
     # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
     # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
     # test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)
-    test_flow2sph_rotation(erp_src_image_filepath, erp_tar_image_filepath)
+    test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath)

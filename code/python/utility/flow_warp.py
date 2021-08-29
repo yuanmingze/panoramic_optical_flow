@@ -1,7 +1,14 @@
 import numpy as np
 from scipy import ndimage
+import pointcloud_utils
 
+from utility import flow_postproc
+from utility import spherical_coordinates as sc
+from utility import flow_warp
 from logger import Logger
+
+from scipy.spatial.transform import rotation
+from scipy.stats import norm
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -236,3 +243,134 @@ def warp_forward_padding(image_first, of_forward, padding_x=0, padding_y=0):
     image_first_padded = image_first_padded[padding_y:(padding_y + image_height), padding_x:(padding_x + image_width)]
     dest_image[y_idx, x_idx] = image_first_padded
     return dest_image
+
+
+def flow2rotation_3d(erp_flow):
+    """Compute the two image rotation from the ERP image's optical flow with SVD.
+    The rotation is from the first image to second image.
+
+    :param erp_flow: The ERP optical flow. [height, width,2]
+    :type erp_flow: numpy
+    :return: The rotation matrix.
+    :rtype: numpy
+    """
+    # 0) source 3D points and target 3D points
+    motion_flow_u = erp_flow[:, :, 0]
+    motion_flow_v = erp_flow[:, :, 1]
+    tar_points_2d = flow_warp_meshgrid(motion_flow_u, motion_flow_v)
+
+    height = np.shape(motion_flow_u)[0]
+    width = np.shape(motion_flow_u)[1]
+    x_index = np.linspace(0, width - 1, width)
+    y_index = np.linspace(0, height - 1, height)
+    x_array, y_array = np.meshgrid(x_index, y_index)
+    src_points_2d = np.stack((x_array, y_array))
+
+    # convert to 3D points
+    src_points_2d_sph = sc.erp2sph(src_points_2d)
+    src_points_3d = sc.sph2car(src_points_2d_sph[0], src_points_2d_sph[1])
+
+    tar_points_2d_sph = sc.erp2sph(tar_points_2d)
+    tar_points_3d = sc.sph2car(tar_points_2d_sph[0], tar_points_2d_sph[1])
+
+    # 1) SVD get the rotation matrix
+    src_points_3d = np.swapaxes(src_points_3d.reshape((3, -1)), 0, 1)
+    tar_points_3d = np.swapaxes(tar_points_3d.reshape((3, -1)), 0, 1)
+    rotation_mat = pointcloud_utils.correpairs2rotation(src_points_3d, tar_points_3d)
+
+    return rotation_mat
+
+
+def flow2rotation_2d(erp_flow_, use_weight=True):
+    """Compute the  two image rotation from the ERP image's optical flow.
+    The rotation is from the first image to second image.
+
+    :param erp_flow: the erp image's flow 
+    :type erp_flow: numpy 
+    :param use_weight: use the centre rows and columns to compute the rotation, default is True.
+    :type: bool
+    :return: the offset of ERP image, [theta shift, phi shift
+    :rtype: float
+    """
+    erp_image_height = erp_flow_.shape[0]
+    erp_image_width = erp_flow_.shape[1]
+
+    # convert the pixel offset to rotation radian
+    erp_flow = flow_postproc.erp_of_wraparound(erp_flow_)
+    theta_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
+    theta_delta = np.mean(theta_delta_array)
+
+    # just the center column of the optical flow.
+    delta = theta_delta / (2.0 * np.pi)
+    flow_col_start = int(erp_image_width * (0.5 - delta))
+    flow_col_end = int(erp_image_width * (0.5 + delta))
+    if delta < 0:
+        temp = flow_col_start
+        flow_col_start = flow_col_end
+        flow_col_end = temp
+    flow_col_center = np.full((erp_image_height, erp_image_width), False, dtype=np.bool)
+    flow_col_center[:, flow_col_start:flow_col_end] = True
+    flow_sign = np.sign(np.sum(np.sign(erp_flow[flow_col_center, 1])))
+    # phi_delta_array = np.pi * (erp_flow[flow_col_start:flow_col_end, :, 1] / erp_image_height)
+    if flow_sign < 0:
+        positive_index = np.logical_and(erp_flow[:, :, 1] < 0, flow_col_center)
+    else:
+        positive_index = np.logical_and(erp_flow[:, :, 1] > 0, flow_col_center)
+    phi_delta_array = -np.pi * (erp_flow[positive_index, 1] / erp_image_height)
+
+    if use_weight:
+        # TODO Check the weight performance
+        # weight of the u, width
+        stdev = erp_image_height * 0.5 * 0.25
+        weight_u_array_index = np.arange(erp_image_height)
+        weight_u_array = norm.pdf(weight_u_array_index, erp_image_height / 2.0, stdev)
+        theta_delta_array = np.average(theta_delta_array, axis=0, weights=weight_u_array)
+
+        # weight of the v, height
+        stdev = erp_image_width * 0.5 * 0.25
+        weight_v_array_index = np.arange(erp_image_width)
+        weight_v_array = norm.pdf(weight_v_array_index, erp_image_width / 2.0, stdev)
+        phi_delta_array = np.average(phi_delta_array, axis=1,  weights=weight_v_array)
+
+    phi_delta = np.mean(phi_delta_array)
+
+    return theta_delta, phi_delta
+
+
+def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_type = "3D"):
+    """ Global rotation warping.
+    Rotate the ERP image base on the flow. 
+    The flow is from erp_image to another image.
+
+    :param erp_image: the flow's ERP image, the image is 
+    :type erp_image: numpy 
+    :param erp_flow: the erp image's flow.
+    :type erp_flow: numpy 
+    :param forward_warp: use the erp_flow forward warp erp_image.
+    :type forward_warp: bool 
+    :param 
+    :return: The rotated ERP image
+    :rtype: numpy
+    """
+    if rotation_type == "3D":
+        # 0) get the rotation matrix from optical flow
+        # compuate the average of optical flow & get the delta theta and phi
+        theta_delta, phi_delta = flow2rotation_2d(erp_flow, False)
+
+        # 1) rotate the ERP image with the rotation matrix
+        if not forward_warp:
+            theta_delta = -theta_delta
+            phi_delta = -phi_delta
+        erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
+    elif rotation_type == "3D":
+        rotation_mat = flow_warp.flow2rotation_3d(erp_flow)
+        if not forward_warp:
+            rotation_mat = rotation_mat.T
+        erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, rotation_mat = rotation_mat)
+    else:
+        log.error("Do not suport rotation type {}".format(rotation_type))
+
+    if erp_image.dtype == np.uint8:
+        erp_image_rot = erp_image_rot.astype(np.uint8)
+    # return erp_image_rot, theta_delta, phi_delta
+    return erp_image_rot, rotation_mat

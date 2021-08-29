@@ -377,14 +377,14 @@ def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, r
     erp_vx, erp_vy = np.meshgrid(erp_x, erp_y)
 
     # 1) spherical system to Cartesian system and rotate the points
-    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], erp_modulo=False)
+    sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], sph_modulo=False)
     # erp_x_rot, erp_y_rot = sph2erp(sph_xy[0, :], sph_xy[1, :], array_size[0], erp_modulo=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
     if rotation_matrix is None:
         rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
-    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], erp_modulo=False)
+    erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], sph_modulo=False)
 
     # get motion vector
     motion_vector_x = erp_x_rot.reshape((array_size[0], array_size[1])) - erp_vx
