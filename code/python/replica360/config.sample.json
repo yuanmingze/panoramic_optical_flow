@@ -1,7 +1,7 @@
 {
     "_comment": "the unit is meter",
     "scene_name": "apartment_0",
-    "_comment": "the output image is panorama or cubemap (panorama/cubemap/customized)",
+    "_comment": "the output image is panorama or cubemap (panorama/cubemap)",
     "render_type": "panorama",
     "_comment": "The c++ render opinions.",
     "render_params": {
@@ -28,7 +28,7 @@
         "generate_msg_file": true
     },
     "camera_traj": {
-        "_comment": "circle/grid",
+        "_comment": "circle/grid/line/random",
         "type": "circle",
         "_comment": "the interval of grid two points",
         "grid_interval": 0.1,
@@ -48,6 +48,18 @@
             "x": 0.0,
             "y": 0.0,
             "z": 0.0
-        }
+        },
+        "_comment": "the camera position bounding box, the bbox center is center_position",
+        "random_position_bbox": [
+            [x_offset_min, x_offset_max],
+            [y_offset_min, y_offset_max],
+            [z_offset_min, z_offset_max]
+        ],
+        "_comment": "the camera rotation range (degree)",
+        "random_rotation_bbox": [
+            [x_rot_min, x_rot_max],
+            [y_rot_min, y_rot_max],
+            [z_rot_min, z_rot_max]
+        ]
     }
 }

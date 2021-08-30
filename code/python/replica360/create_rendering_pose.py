@@ -1,5 +1,4 @@
 import math
-import pathlib
 import numpy as np
 from random import randint
 import math
@@ -31,7 +30,7 @@ def create_camera_obj(center, camera_position_list, obj_file_path):
         obj_file.write(obj_str)
 
 
-def generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, center_csv_file,
+def generate_path_grid_circle(scene_name, grid_size, radius, path_csv_file, center_csv_file,
                               center_point, lock_direction_enable=True):
     """
      the unit is Meter
@@ -91,7 +90,7 @@ def generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, cent
     return counter
 
 
-def gen_circle_path(scene_name, steps, radius, path_csv_file, center_csv_file,
+def generate_path_circle(scene_name, steps, radius, path_csv_file, center_csv_file,
                     initial_rotation, center_point=None, lock_direction_enable=False):
     '''
     Args:
@@ -161,7 +160,7 @@ def gen_circle_path(scene_name, steps, radius, path_csv_file, center_csv_file,
     print("output path 3D model file {}".format(path_obj_file))
 
 
-def generate_line_path(scene_name, line_segment_size, line_length, path_csv_file, center_csv_file,
+def generate_path_line(scene_name, line_segment_size, line_length, path_csv_file, center_csv_file,
                               center_point, center_point_rotation):
     """
     The line is parallel to x-axis.
@@ -205,6 +204,83 @@ def generate_line_path(scene_name, line_segment_size, line_length, path_csv_file
     print("output path 3D model file {}".format(path_obj_file))
 
     return counter
+
+
+def generate_path_random(scene_name, camera_pose_number, camera_position_range, camera_rotation_range,
+                                            path_csv_file, center_csv_file,
+                                            center_point, center_point_rotation):
+    """ Create random camera position sequence.
+
+
+    :param bounding_box: [description]
+    :type bounding_box: numpy
+    :param center_point: camera original pose's position
+    :type center_point: list
+    :param center_point_rotation:  camera original pose's position, degree
+    :type center_point_rotation: list
+    :return: [description]
+    :rtype: [type]
+    """                                  
+    # 1) create random camera pose
+    cx = center_point[0]
+    cy = center_point[1]
+    cz = center_point[2]
+
+    camera_position_list = np.zeros((camera_pose_number, 3), dtype=np.float64)
+    camera_orientation_list = np.zeros((camera_pose_number, 3), dtype=np.float64)
+
+    for axis_idx in range(0, 3):
+        # position
+        position_stddev = (camera_position_range[axis_idx][1] - camera_position_range[axis_idx][0]) / 2.0
+        camera_position_list[:, axis_idx] = np.random.normal(0, position_stddev, camera_pose_number)  \
+            + camera_position_range[axis_idx][0] + center_point[axis_idx]
+
+        # rotation
+        rotation_stddev = (camera_rotation_range[axis_idx][1] - camera_rotation_range[axis_idx][0]) / 2.0
+        camera_orientation_list[:, axis_idx] = np.random.normal(0, rotation_stddev, camera_pose_number) \
+            + camera_rotation_range[axis_idx][0] + center_point_rotation[axis_idx]
+
+    # 2) output file
+    # output camera pose file for render
+    with open(path_csv_file, 'w') as f:
+        # f.writelines(' '.join(str(j) for j in i) + '\n' for i in navigable_positions)
+        for camera_idx in range(camera_pose_number):
+            cam_p_x, cam_p_y, cam_p_z = camera_position_list[camera_idx, :]
+            cam_r_x, cam_r_y, cam_r_z = camera_orientation_list[camera_idx, :]
+            f.write(f"{camera_idx} {cam_p_x} {cam_p_y} {cam_p_z} {cam_r_x} {cam_r_y} {cam_r_z}\n")
+    print("output path file {}".format(path_csv_file))
+
+    # output the camera centre csv file
+    with open(center_csv_file, 'w') as f:
+        f.writelines("0 {} {} {} {} {} {} \n".format(cx, cy, cz, 0.0, 0.0, 0.0))
+    print("output centre file {}".format(center_csv_file))
+
+    # output camera position obj file
+    path_obj_file = path_csv_file + ".obj"
+    camera_position_list_ = np.ones((camera_position_list.shape[0], camera_position_list.shape[1] + 1), dtype= np.float64)
+    camera_position_list_[:, 1:] = camera_orientation_list
+    create_camera_obj([cx, cy, cz + 0.07], camera_position_list_.tolist(), path_obj_file)
+    print("output path camera position 3D model file {}".format(path_obj_file))
+
+    return camera_pose_number
+
+
+def json_parse(dict_data):
+    """
+    Load the pixels corresponding relationship from JSON file.
+    """
+    def _cam_param_json2dict(dict_data):
+        for key, value in dict_data.items():
+            if isinstance(value, list):
+                dict_data[key] = np.asarray(value)
+            elif isinstance(value, dict):
+                dict_data[key] = _cam_param_json2dict(value)
+        return dict_data
+
+    # parer dict and translate the list to numpy array
+    _cam_param_json2dict(dict_data)
+    return dict_data
+
 
 def generate_path(root_dir, config):
     """
@@ -258,7 +334,7 @@ def generate_path(root_dir, config):
         nsteps = config["camera_traj"]["circle_step_number"]
         print("generate camera path for {}, view number is {}, radius is {}.".format(scene_name, nsteps, radius))
 
-        gen_circle_path(scene_name, nsteps, radius,
+        generate_path_circle(scene_name, nsteps, radius,
                         path_csv_file, center_csv_file, center_point=center_point_position,
                         initial_rotation=center_point_rotation,
                         lock_direction_enable=lock_direction_enable)
@@ -273,7 +349,7 @@ def generate_path(root_dir, config):
         center_csv_file = root_dir + "/" + output_center_filename
 
         grid_size = config["camera_traj"]["grid_size"]
-        frame_number = generate_circle_path_grid(scene_name, grid_size, radius, path_csv_file, center_csv_file,
+        frame_number = generate_path_grid_circle(scene_name, grid_size, radius, path_csv_file, center_csv_file,
                                   center_point=center_point_position, lock_direction_enable=lock_direction_enable)
 
     elif path_type == "line":
@@ -282,9 +358,21 @@ def generate_path(root_dir, config):
         path_csv_file = root_dir + "/" + output_filename
         center_csv_file = root_dir + "/" + output_center_filename
         grid_size = config["camera_traj"]["grid_size"]
-        frame_number =  generate_line_path(scene_name, grid_size, radius, path_csv_file, center_csv_file,
+        frame_number =  generate_path_line(scene_name, grid_size, radius, path_csv_file, center_csv_file,
                                   center_point=center_point_position, center_point_rotation = center_point_rotation)
 
+    elif path_type == "random":
+        config_data = json_parse(config)
+        output_filename = "random.csv"
+        output_center_filename = "random_center.csv"
+        path_csv_file = root_dir + "/" + output_filename
+        center_csv_file = root_dir + "/" + output_center_filename
+        camera_pose_number = config["camera_traj"]["grid_size"]
+        camera_position_range = config_data["camera_traj"]["random_position_bbox"]  # meter
+        camera_rotation_range = config_data["camera_traj"]["random_rotation_bbox"]  # degree
+        frame_number = generate_path_random(scene_name, camera_pose_number, camera_position_range, camera_rotation_range,
+                                            path_csv_file, center_csv_file,
+                                            center_point=center_point_position, center_point_rotation=center_point_rotation)
     else:
         raise RuntimeError("Do not support {} camera path".format(path_type))
 
@@ -295,6 +383,11 @@ if __name__ == '__main__':
     """
         #time_str = datetime.now().strftime(r"%Y-%m-%d-%H-%M-%S")
     """
-    scene_name = "room_0"
-    root_dir = "/mnt/sda1/workdata/lightfield/GT-Replica/"
-    generate_path(root_dir, scene_name)
+    import configuration as config
+    
+    root_dir = config.TEST_data_root_dir
+    config_json_filename = "config.json"
+    import json
+    with open(root_dir + config_json_filename) as json_file:
+        config = json.load(json_file)
+    generate_path(root_dir, config)

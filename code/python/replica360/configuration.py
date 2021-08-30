@@ -12,6 +12,8 @@ sys.path.append(dir_root)
 sys.path.append(dir_utility)
 sys.path.append(dir_replica360)
 
+# setting the test data path
+TEST_data_root_dir = "../../../data/replica_360/"
 
 class ReplicaConfig():
     """The dataset convention 
