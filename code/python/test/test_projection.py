@@ -4,7 +4,7 @@ import configuration as config
 import flow_estimate
 import flow_vis
 import flow_warp
-import spherical_coordinates
+import spherical_coordinates 
 
 from utility import projection
 from utility import image_io
@@ -43,11 +43,13 @@ def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath
     rotation_phi = np.radians(30.0)
 
     # 1) compute the flow from src to rotated rotated tar image
-    tar_image_data_rot, rotation_mat = spherical_coordinates.rotate_erp_array(src_image_data, rotation_theta, rotation_phi)
+    rotation_mat = spherical_coordinates.rot_sph2mat(rotation_theta, rotation_phi, False)
+    tar_image_data_rot = spherical_coordinates.rotate_erp_array(src_image_data, rotation_mat)
     image_io.image_save(tar_image_data_rot, erp_tar_image_filepath + "_rot.jpg")
     # # genera
     # flow_dis = flow_estimate.of_methdod_DIS(src_image_data, tar_image_data_rot)
-    flow_dis, rotation_mat = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_theta, rotation_phi)
+    rotation_mat = spherical_coordinates.rot_sph2mat(rotation_theta, rotation_phi, False)
+    flow_dis = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_mat)
     flow_vis_data = flow_vis.flow_to_color(flow_dis, min_ratio=0.2, max_ratio=0.8)
     image_io.image_save(flow_vis_data, erp_src_image_filepath + "_flow.jpg")
     tar_image_data_warp = flow_warp.warp_backward(tar_image_data_rot, flow_dis)
@@ -74,7 +76,8 @@ def test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath):
     for rotation in rotation_list:
         rotation_theta = np.radians(rotation[0])
         rotation_phi = np.radians(rotation[1])
-        flow_array, _ = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_theta, rotation_phi)
+        rotation_mat = spherical_coordinates.rot_sph2mat(rotation_theta, rotation_phi)
+        flow_array = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_mat)
         # flow_vis.flow_value_to_color(flow_array)
         theta_delta, phi_delta = projection.flow2rotation_2d(flow_array, False)
         print("original rotation: {},{}, result is: {}, {}".

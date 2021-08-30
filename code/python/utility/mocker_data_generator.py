@@ -1,6 +1,7 @@
 import configuration
 
 import numpy as np
+from scipy import ndimage
 
 
 def hsv_to_rgb(hsv):
@@ -46,7 +47,7 @@ def hsv_to_rgb(hsv):
     return rgb.reshape(input_shape)
 
 
-def get_erp_image(image_height=300):
+def erp_image_strip(image_height=300):
     """ Get a mocking data, size is [height, width, 3]
     
     :return: the mocking data.
@@ -55,6 +56,20 @@ def get_erp_image(image_height=300):
     data = np.arange(image_height * image_height * 2.0) / (image_height * image_height * 2.0)
 
     hsv_data = np.stack((data, np.ones_like(data), np.ones_like(data)), axis=1)
+    rgb_data = hsv_to_rgb(hsv_data)
+    rgb_data = (rgb_data * 255.0).astype(np.uint8)
+    rgb_data = rgb_data.reshape((image_height, image_height * 2, 3))
+    return rgb_data
+
+
+def erp_image_square(image_height=300):
+    data = np.zeros((image_height, image_height * 2), np.float64)
+    data[5:-5, 5:-5] = 1.0
+    data = ndimage.distance_transform_bf(data)
+    max_value = np.max(data)
+    min_value = np.min(data)
+    data = (data - min_value) / (max_value - min_value)
+    hsv_data = np.stack((data, np.ones_like(data), np.ones_like(data)), axis=2).reshape((-1, 3))
     rgb_data = hsv_to_rgb(hsv_data)
     rgb_data = (rgb_data * 255.0).astype(np.uint8)
     rgb_data = rgb_data.reshape((image_height, image_height * 2, 3))

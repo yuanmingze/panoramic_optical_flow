@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage
 import pointcloud_utils
+import spherical_coordinates
 
 from utility import flow_postproc
 from utility import spherical_coordinates as sc
@@ -245,7 +246,7 @@ def warp_forward_padding(image_first, of_forward, padding_x=0, padding_y=0):
     return dest_image
 
 
-def flow2rotation_3d(erp_flow):
+def flow2rotation_3d(erp_flow, mask_method = "center"):
     """Compute the two image rotation from the ERP image's optical flow with SVD.
     The rotation is from the first image to second image.
 
@@ -268,9 +269,16 @@ def flow2rotation_3d(erp_flow):
 
     # convert to 3D points
     src_points_2d_sph = sc.erp2sph(src_points_2d)
-    src_points_3d = sc.sph2car(src_points_2d_sph[0], src_points_2d_sph[1])
-
     tar_points_2d_sph = sc.erp2sph(tar_points_2d)
+
+    if mask_method is "center":
+        # just use the center rows optical flow
+        row_idx_start = int(height * 0.25)
+        row_idx_end = int(height * 0.75)
+        src_points_2d_sph = src_points_2d_sph[:, row_idx_start:row_idx_end, :]
+        tar_points_2d_sph = tar_points_2d_sph[:, row_idx_start:row_idx_end, :]
+
+    src_points_3d = sc.sph2car(src_points_2d_sph[0], src_points_2d_sph[1])
     tar_points_3d = sc.sph2car(tar_points_2d_sph[0], tar_points_2d_sph[1])
 
     # 1) SVD get the rotation matrix
@@ -289,7 +297,7 @@ def flow2rotation_2d(erp_flow_, use_weight=True):
     :type erp_flow: numpy 
     :param use_weight: use the centre rows and columns to compute the rotation, default is True.
     :type: bool
-    :return: the offset of ERP image, [theta shift, phi shift
+    :return: the offset of ERP image, [theta shift, phi shift], radian
     :rtype: float
     """
     erp_image_height = erp_flow_.shape[0]
@@ -337,40 +345,42 @@ def flow2rotation_2d(erp_flow_, use_weight=True):
     return theta_delta, phi_delta
 
 
-def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_type = "3D"):
+def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_type="3D"):
     """ Global rotation warping.
-    Rotate the ERP image base on the flow. 
-    The flow is from erp_image to another image.
 
-    :param erp_image: the flow's ERP image, the image is 
+    Rotate the ERP image base on the flow. 
+    If `forward_warp` is True, the `erp_image` is the source image, `erp_flow` is form source to target.
+    If `forward_warp` is False, the `erp_image` is the target image, `erp_flow` is from source to target.
+
+    :param erp_image: the image of optical flow, 
     :type erp_image: numpy 
-    :param erp_flow: the erp image's flow.
+    :param erp_flow: the erp image's flow, from source image to target image.
     :type erp_flow: numpy 
-    :param forward_warp: use the erp_flow forward warp erp_image.
+    :param forward_warp: If yes, the erp_image is use the erp_flow forward warp erp_image.
     :type forward_warp: bool 
     :param 
-    :return: The rotated ERP image
+    :return: The rotated ERP image,  the rotation matrix from original to target (returned erp image).
     :rtype: numpy
     """
-    if rotation_type == "3D":
-        # 0) get the rotation matrix from optical flow
+    # 0) get the rotation matrix from optical flow
+    if rotation_type == "2D":
         # compuate the average of optical flow & get the delta theta and phi
         theta_delta, phi_delta = flow2rotation_2d(erp_flow, False)
 
-        # 1) rotate the ERP image with the rotation matrix
         if not forward_warp:
             theta_delta = -theta_delta
             phi_delta = -phi_delta
-        erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, theta_delta, phi_delta)
+        rotation_mat = spherical_coordinates.rot_sph2mat(theta_delta, phi_delta, False)
     elif rotation_type == "3D":
-        rotation_mat = flow_warp.flow2rotation_3d(erp_flow)
+        rotation_mat = flow2rotation_3d(erp_flow)
         if not forward_warp:
             rotation_mat = rotation_mat.T
-        erp_image_rot, rotation_mat = sc.rotate_erp_array(erp_image, rotation_mat = rotation_mat)
     else:
         log.error("Do not suport rotation type {}".format(rotation_type))
 
+    # 1) rotate the ERP image with the rotation matrix
+    erp_image_rot = sc.rotate_erp_array(erp_image, rotation_mat = rotation_mat)
     if erp_image.dtype == np.uint8:
         erp_image_rot = erp_image_rot.astype(np.uint8)
-    # return erp_image_rot, theta_delta, phi_delta
+
     return erp_image_rot, rotation_mat

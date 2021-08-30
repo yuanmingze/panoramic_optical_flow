@@ -193,9 +193,10 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
 
     end_points_array = None
     if isinstance(rotation, (list, tuple)):
-        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation[0], rotation[1],wraparound=True)
+        rotation_mat = sc.rot_sph2mat(rotation[0], rotation[1])
+        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation_mat, wraparound=True)
     elif isinstance(rotation, np.ndarray):
-        end_points_array, _ = sc.rotation2erp_motion_vector((flow_height, flow_width),  rotation_matrix=rotation,wraparound=True)
+        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation_matrix=rotation,wraparound=True)
     else:
         log.error("Do not support rotation data type {}.".format(type(rotation)))
 

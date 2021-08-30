@@ -109,9 +109,9 @@ def of_estimate_omniphoto(omniphoto_dataset, opticalflow_mathod="our"):
 
                 # 1) estimate optical flow
                 if opticalflow_mathod == "our":
-                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None)
+                    optical_flow = flow_estimate.pano_of_our(src_erp_image, tar_erp_image, debug_output_dir=None)
                 elif opticalflow_mathod == "our_weight":
-                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
+                    optical_flow = flow_estimate.pano_of_our(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp")
                 elif opticalflow_mathod == "dis":
                     optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
                 else:
@@ -140,26 +140,29 @@ class ReplicaPanoDataset(ReplicaConfig):
     padding_size = None
 
     # circle data
+    # dataset_circ_dirlist = [
+    #     "apartment_0_circ_1k_0",
+    #     "apartment_1_circ_1k_0",
+    #     # "apartment_2_circ_1k_0",
+    #     "frl_apartment_0_circ_1k_0",
+    #     # "frl_apartment_1_circ_1k_0",
+    #     "frl_apartment_2_circ_1k_0",
+    #     "frl_apartment_3_circ_1k_0",
+    #     # "frl_apartment_4_circ_1k_0",
+    #     # "frl_apartment_5_circ_1k_0",
+    #     "hotel_0_circ_1k_0",
+    #     "office_0_circ_1k_0",
+    #     "office_1_circ_1k_0",
+    #     "office_2_circ_1k_0",
+    #     "office_3_circ_1k_0",
+    #     "office_4_circ_1k_0",
+    #     "room_0_circ_1k_0",
+    #     "room_1_circ_1k_0",
+    #     # "room_2_circ_1k_0",
+    # ]
     dataset_circ_dirlist = [
-        "apartment_0_circ_1k_0",
-        "apartment_1_circ_1k_0",
-        # "apartment_2_circ_1k_0",
-        "frl_apartment_0_circ_1k_0",
-        # "frl_apartment_1_circ_1k_0",
-        "frl_apartment_2_circ_1k_0",
-        "frl_apartment_3_circ_1k_0",
-        # "frl_apartment_4_circ_1k_0",
-        # "frl_apartment_5_circ_1k_0",
-        "hotel_0_circ_1k_0",
-        "office_0_circ_1k_0",
-        "office_1_circ_1k_0",
-        "office_2_circ_1k_0",
-        "office_3_circ_1k_0",
-        "office_4_circ_1k_0",
-        "room_0_circ_1k_0",
-        "room_1_circ_1k_0",
-        # "room_2_circ_1k_0",
-    ]
+        "apartment_0_circ_1k_0"
+        ]
     circle_start_idx = 4
     circle_end_idx = 6
 
@@ -186,6 +189,31 @@ class ReplicaPanoDataset(ReplicaConfig):
     ]
     line_start_idx = 4
     line_end_idx = 6
+
+    # random data
+    dataset_rand_dirlist = [
+        "apartment_0_rand_1k_0",
+        "apartment_1_rand_1k_0",
+        # "apartment_2_rand_1k_0",
+        "frl_apartment_0_rand_1k_0",
+        # "frl_apartment_1_rand_1k_0",
+        "frl_apartment_2_rand_1k_0",
+        "frl_apartment_3_rand_1k_0",
+        # "frl_apartment_4_rand_1k_0",
+        # "frl_apartment_5_rand_1k_0",
+        "hotel_0_rand_1k_0",
+        "office_0_rand_1k_0",
+        "office_1_rand_1k_0",
+        "office_2_rand_1k_0",
+        "office_3_rand_1k_0",
+        "office_4_rand_1k_0",
+        "room_0_rand_1k_0",
+        "room_1_rand_1k_0",
+        # "room_2_rand_1k_0",
+    ]
+    rand_start_idx = 4
+    rand_end_idx = 6
+    
 
 
 def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath = None, opticalflow_mathod = "our_weight"):
@@ -487,8 +515,11 @@ def of_estimate_replica_clean(replica_dataset, opticalflow_mathod="our"):
 
 def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
     """Get the our and DIS's result in replica. """
-    dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    # dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    dataset_dirlist = replica_dataset.dataset_circ_dirlist
     padding_size = replica_dataset.padding_size
+
+    debug_output_dir = None
 
     # 1) iterate each 360 image dataset
     for pano_image_folder in dataset_dirlist:
@@ -512,7 +543,9 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
         fs_utility.dir_make(output_pano_filepath)
         fs_utility.dir_make(output_dir)
 
+        # estimate on the all images
         for pano_image_idx in range(pano_start_idx, pano_end_idx):
+            # forward and backward optical flow
             for forward_of in [True, False]:
                 # 0) load image to CPU memory
                 if forward_of:
@@ -528,7 +561,7 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                 result_opticalflow_vis_filepath = output_dir + optical_flow_vis_filepath
 
                 if os.path.exists(result_opticalflow_filepath):
-                    log.debug("{} exist, skip it.".format(result_opticalflow_filepath))
+                    log.info("{} exist, skip it.".format(result_opticalflow_filepath))
                     continue
 
                 src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
@@ -540,18 +573,24 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
                 log.info("The padding size is {}".format(padding_size))
 
                 # 1) estimate optical flow
-                if opticalflow_mathod == "our":
-                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, padding_size=padding_size)
-                elif opticalflow_mathod == "our_weight":
-                    optical_flow = flow_estimate.pano_of_0(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp", padding_size=padding_size)
-                elif opticalflow_mathod == "dis":
-                    optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
-                elif opticalflow_mathod == "our_wo_cube":
-                    optical_flow = flow_estimate.pano_of_0_wo_cube(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp", padding_size=padding_size)
-                elif opticalflow_mathod == "our_wo_ico":
-                    optical_flow = flow_estimate.pano_of_0_wo_ico(src_erp_image, tar_erp_image, debug_output_dir=None, padding_size=padding_size)
+                if opticalflow_mathod == "our_weight":
+                    # our method full term 
+                    optical_flow = flow_estimate.pano_of_our(src_erp_image, tar_erp_image, debug_output_dir=debug_output_dir, face_blending_method="normwarp", padding_size=padding_size)
+                elif opticalflow_mathod == "our":
+                    # our method without blending method
+                    optical_flow = flow_estimate.pano_of_our(src_erp_image, tar_erp_image, debug_output_dir=debug_output_dir, face_blending_method="straightforward", padding_size=padding_size)
                 elif opticalflow_mathod == "our_wo_erp":
-                    optical_flow = flow_estimate.pano_of_0_wo_erp(src_erp_image, tar_erp_image, debug_output_dir=None, face_blending_method="normwarp", padding_size=padding_size)
+                    # our method without erp warp
+                    optical_flow = flow_estimate.pano_of_0_wo_erp(src_erp_image, tar_erp_image, debug_output_dir=debug_output_dir, face_blending_method="normwarp", padding_size=padding_size)
+                elif opticalflow_mathod == "our_wo_cube":
+                    # our method without cubemap warp
+                    optical_flow = flow_estimate.pano_of_0_wo_cube(src_erp_image, tar_erp_image, debug_output_dir=debug_output_dir, face_blending_method="normwarp", padding_size=padding_size)
+                elif opticalflow_mathod == "our_wo_ico":
+                    # our method without icosahedron warp
+                    optical_flow = flow_estimate.pano_of_0_wo_ico(src_erp_image, tar_erp_image, debug_output_dir=debug_output_dir, padding_size=padding_size)
+                elif opticalflow_mathod == "dis":
+                    # DIS optical flow
+                    optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
                 else:
                     log.error("the optical flow {} does not implement.")
 
@@ -564,20 +603,23 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our"):
 
 
 if __name__ == "__main__":
-    test_list = [3]
+    task_list = [0]
 
-    if 0 in test_list:
+    if 0 in task_list:
+        # estimation the optical flow on the test datasets
         opticalflow_mathod = "our_weight"
         # our(directly blend), dis, raft, pwcnet, our_weight(with blend weight), our_wo_cube, our_wo_ico, our_wo_erp
         # of_estimate_replica_clean(ReplicaPanoDataset, opticalflow_mathod)
 
-        # of_estimate_replica(ReplicaPanoDataset, opticalflow_mathod)
+        replica_pano_dataset = ReplicaPanoDataset()
+        replica_pano_dataset.padding_size = 0.2
+        of_estimate_replica(replica_pano_dataset, opticalflow_mathod)
         # summary_error_scene_replica(ReplicaPanoDataset, opticalflow_mathod)
-        summary_error_dataset_replica(ReplicaPanoDataset, opticalflow_mathod)
+        # summary_error_dataset_replica(replica_pano_dataset, opticalflow_mathod)
         # visualize_of_dataset_replica(ReplicaPanoDataset)
         # of_estimate_omniphoto(OmniPhotoDataset, opticalflow_mathod)
 
-    if 1 in test_list:
+    if 1 in task_list:
         # generate the error map and visualized optical flow for comparison
         dataset_dirlist = ReplicaPanoDataset.dataset_circ_dirlist + ReplicaPanoDataset.dataset_line_dirlist
         # dataset_dirlist = ["frl_apartment_0_circ_1k_0"]
@@ -594,7 +636,7 @@ if __name__ == "__main__":
             visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, rgb_filename,  mask_filename, output_dir=output_dir)
             # copy the original rgb images
 
-    if 2 in test_list:
+    if 2 in task_list:
         # generate the warped rgb image for comparision
         method_list = ["our_weight", "dis", "pwcnet", "raft"]
         # method_list = ["pwcnet"]
@@ -641,7 +683,8 @@ if __name__ == "__main__":
         warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
                       rgb_filepath_exp, rgb_filename, rgb_gt_filename, output_dir=output_dir)
 
-    if 3 in test_list:
+    if 3 in task_list:
+        # ablation study for the padding size
         # padding_list = np.linspace(0.4, 0.8, num=11) # interval is 0.04
         padding_list = np.linspace(0.0, 0.8, num=21) # interval is 0.04
         print("The padding list is {}".format(padding_list))

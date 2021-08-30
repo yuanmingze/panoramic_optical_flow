@@ -292,7 +292,7 @@ def sph2car(theta, phi, radius=1.0):
     return np.stack((x, y, z), axis=0)
 
 
-def rotate_erp_array(erp_image, rotation_theta=None, rotation_phi=None, rotation_mat=None):
+def rotate_erp_array(erp_image, rotation_mat=None):
     """ Rotate the ERP image with the theta and phi.
 
     :param erp_image: The ERP image, [height, width, 3]
@@ -303,16 +303,16 @@ def rotate_erp_array(erp_image, rotation_theta=None, rotation_phi=None, rotation
     :type rotation_phi: float
     """
     # flow from tar to src
-    if rotation_mat is not None:
-        opticalflow, rotation_mat_ret = rotation2erp_motion_vector(erp_image.shape[0:2], rotation_matrix=rotation_mat)
-    else:
-        opticalflow, rotation_mat_ret = rotation2erp_motion_vector(erp_image.shape[0:2], -rotation_theta, -rotation_phi)
-    return flow_warp.warp_backward(erp_image, opticalflow), rotation_mat_ret    # the image backword warp
+    opticalflow = rotation2erp_motion_vector(erp_image.shape[0:2], rotation_matrix=rotation_mat.T)
+    return flow_warp.warp_backward(erp_image, opticalflow)    # the image backword warp
+    
 
-
-def rotate_erp_array_skylib(data_array, rotate_theta, rotate_phi):
+def rotate_erp_array_skylib(data_array, rotation_matrix):
     """
     Rotate the image along the theta and phi.
+
+    Note Skylib coordinate system x is left, Y is up, z is forward
+    It is different with our method.
 
     :param data_array: the data array (image, depth map, etc.), size is [height, height*2, :]
     :type data_array: numpy
@@ -324,8 +324,12 @@ def rotate_erp_array_skylib(data_array, rotate_theta, rotate_phi):
     :rtype: numpy
     """
     # The envmap's 3d coordinate system is +x right, +y up and -z front.
-    rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_phi), np.degrees(rotate_theta), 0], degrees=True).as_matrix()
-
+    # rotation_matrix = R.from_euler("xyz", [np.degrees(-rotate_phi), np.degrees(rotate_theta), 0], degrees=True).as_matrix()
+    # rotation_matrix = sc.rot_sph2mat(rotate_theta, rotate_phi, False)
+    # TODO get the coordinate system tranformation.
+    cs_transfrom = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    log.warn("skylib coordinate system is differnet with use not fix yet.")
+    rotation_matrix = cs_transfrom.dot(rotation_matrix)
     # rotate the ERP image
     from envmap import EnvironmentMap
     envmap = EnvironmentMap(data_array, format_='latlong')
@@ -359,7 +363,7 @@ def rotate_sph_coord(sph_theta, sph_phi, rotate_theta=None, rotate_phi=None, rot
     return array_xy_rot[0, :], array_xy_rot[1, :]
 
 
-def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, rotation_matrix=None, wraparound=False):
+def rotation2erp_motion_vector(array_size, rotation_matrix=None, wraparound=False):
     """
     Convert the spherical coordinate rotation to ERP coordinate motion flow.
     With rotate the image's mesh grid.
@@ -380,8 +384,6 @@ def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, r
     sph_xy = erp2sph(np.stack((erp_vx, erp_vy)), erp_image_height=array_size[0], sph_modulo=False)
     # erp_x_rot, erp_y_rot = sph2erp(sph_xy[0, :], sph_xy[1, :], array_size[0], erp_modulo=False)
     xyz = sph2car(sph_xy[0], sph_xy[1], radius=1.0)
-    if rotation_matrix is None:
-        rotation_matrix = R.from_euler("xyz", [rotate_phi, rotate_theta, 0], degrees=False).as_matrix()
     xyz_rot = np.dot(rotation_matrix, xyz.reshape((3, -1)))
     array_xy_rot = car2sph(xyz_rot.T).T
     erp_x_rot, erp_y_rot = sph2erp(array_xy_rot[0, :], array_xy_rot[1, :], array_size[0], sph_modulo=False)
@@ -396,13 +398,20 @@ def rotation2erp_motion_vector(array_size, rotate_theta=None, rotate_phi=None, r
         motion_vector_x[cross_minus2pi] = motion_vector_x[cross_minus2pi] - array_size[1]
         motion_vector_x[cross_plus2pi] = motion_vector_x[cross_plus2pi] + array_size[1]
 
-    return np.stack((motion_vector_x, motion_vector_y), -1), rotation_matrix
+    return np.stack((motion_vector_x, motion_vector_y), -1)
 
 
-def rot_sph2mat(theta, phi):
+def rot_sph2mat(theta, phi, degrees_=True):
     """Convert the spherical rotation to rotation matrix.
     """
-    return R.from_euler("xyz", [np.degrees(phi), np.degrees(theta), 0], degrees=True).as_matrix()
+    return R.from_euler("xyz", [phi, theta, 0], degrees=degrees_).as_matrix()
+
+
+def rot_mat2sph(rot_mat, degrees_ = True):
+    """Convert the 3D rotation to spherical coodinate theta and phi."""
+    euler_angle = R.from_matrix(rot_mat).as_euler("xyz", degrees=degrees_)
+    # log.debug("rot_mat2sph: {}".format(euler_angle))
+    return tuple(euler_angle[:2])
 
 
 def sph_coord_modulo(theta, phi):

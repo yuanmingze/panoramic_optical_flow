@@ -5,12 +5,14 @@ from scipy.spatial.transform import Rotation as R
 
 import numpy as np
 
+
 def test_correpairs2rotation():
     """Get the 3D rotation from 3D points pairs."""
-    src_points_list = [[1,0,0],[0,1,0],[0,0,1],[0,0,0]]
-    src_points = np.array(src_points_list)
+    # x = 90 degree
+    src_points_list = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]]
+    tar_points_list = [[1, 0, 0], [0, 0, 1], [0, -1, 0], [0, 0, 0]]
 
-    tar_points_list = [[1,0,0],[0,0,1],[0,-1,0],[0,0,0]]
+    src_points = np.array(src_points_list)
     tar_points = np.array(tar_points_list)
 
     rotation_mat = pointcloud_utils.correpairs2rotation(src_points, tar_points)
