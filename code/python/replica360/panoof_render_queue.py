@@ -23,16 +23,25 @@ class ReplicaRenderConfig(ReplicaConfig):
     """Replica dataset rendering configuration.
     """
     # 1) the output root folder
-    output_root_dir = "D:/workdata/InstaOmniDepth/replica360/"
+    # output_root_dir = "D:/workdata/InstaOmniDepth/replica360/"
+    output_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
     output_cubemap_dir = "cubemap/"
     output_pano_dir = "pano/"
     config_json_filename = "config.json"
 
-    # the render and stitch configuration
-    render_folder_names = []
-    render_scene_configs = {}
-    render_scene_pose_files = {}
-    render_scene_frame_number = {}
+    def __init__(self):
+        # the render and stitch configuration
+        self.render_folder_names = []
+        self.render_scene_configs = {}
+        self.render_scene_pose_files = {}
+        self.render_scene_frame_number = {}
+
+    def folder_name_add_postfix(self, folder_postfix):
+        log.info("The folder name postfix is : {}".format(folder_postfix))
+        for idx in range(len(super().replica_scene_name_list)):
+            folder_name = super().replica_scene_name_list[idx] + folder_postfix
+            # log.info("Render to folder {}".format(folder_name))
+            self.render_folder_names.append(folder_name)
 
 
 def render_panoramic_datasets(render_configs):
@@ -202,28 +211,12 @@ def render_panoramic_datasets(render_configs):
 
 
 if __name__ == "__main__":
-    folder_list = [
-        # "apartment_0",
-        # "apartment_1",
-        # "apartment_2",
-        # "frl_apartment_0",
-        # "frl_apartment_1",
-        # "frl_apartment_2",
-        # "frl_apartment_3",
-        # "frl_apartment_4",
-        # "frl_apartment_5",
-        # "hotel_0",
-        # "office_0",
-        # "office_1",
-        # "office_2",
-        # "office_3",
-        # "office_4",
-        # "room_0",
-        # "room_1",
-        # "room_2"
-    ]
+
 
     render_configs = ReplicaRenderConfig()
-    render_configs.render_folder_names = folder_list
-    render_configs.renderMotionVectorEnable = False
+    render_configs.folder_name_add_postfix("_rand_1k_0")
+    # exit(0)
+    # render_configs.render_folder_names = folder_list
+    # render_configs.renderMotionVectorEnable = False
+    # render_configs.renderDepthEnable = False
     render_panoramic_datasets(render_configs)

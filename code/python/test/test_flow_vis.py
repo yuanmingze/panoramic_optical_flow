@@ -39,11 +39,12 @@ def test_flow_pix2geo():
     uv_geo = flow_vis.flow_pix2geo(u, v)
     image_io.image_show(uv_geo)
 
+
 def test_flow_pix2geo_0():
     # load *.flo file
     flo_filepath = config.TEST_data_root_dir + "replica_360/apartment_0/0001_opticalflow_forward.flo"
     flo_data = flow_io.read_flow_flo(flo_filepath)
-    uv_geo = flow_vis.flow_pix2geo(flo_data[:,:,0], flo_data[:,:,1])
+    uv_geo = flow_vis.flow_pix2geo(flo_data[:, :, 0], flo_data[:, :, 1])
     image_io.image_show(uv_geo)
 
 
@@ -57,13 +58,18 @@ def test_flow_uv_to_colors():
 
 
 if __name__ == "__main__":
-    # vis_of_folder("D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/")
-    # of_data = flow_io.readFlowFile("D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/")
-    # image_io.image_show(of_data[:,:,0])
-    # image_io.image_show(of_data[:,:,1])
-    # of_data_vis = flow_vis.flow_to_color(of_data, [-3, 3])
-    # image_io.image_show(of_data_vis)
-    # test_flow_uv_to_colors()
-    # test_create_colorwheel_bar()
-    # test_flow_pix2geo()
-    test_flow_pix2geo_0()
+
+    data_dir = "D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/"
+    data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/cubemap/"
+
+    test_list = [0]
+    if 0 in test_list:
+        vis_of_folder(data_dir)
+    if 1 in test_list:
+        test_create_colorwheel_bar()
+    if 2 in test_list:
+        test_flow_pix2geo()
+    if 3 in test_list:
+        test_flow_pix2geo_0()
+    if 4 in test_list:
+        test_flow_uv_to_colors()

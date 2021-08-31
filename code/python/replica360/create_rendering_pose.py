@@ -1,8 +1,13 @@
 import math
+
 import numpy as np
 from random import randint
 import math
 
+from logger import Logger
+
+log = Logger(__name__)
+log.logger.propagate = False
 
 def create_camera_obj(center, camera_position_list, obj_file_path):
     """
@@ -229,16 +234,38 @@ def generate_path_random(scene_name, camera_pose_number, camera_position_range, 
     camera_position_list = np.zeros((camera_pose_number, 3), dtype=np.float64)
     camera_orientation_list = np.zeros((camera_pose_number, 3), dtype=np.float64)
 
-    for axis_idx in range(0, 3):
-        # position
-        position_stddev = (camera_position_range[axis_idx][1] - camera_position_range[axis_idx][0]) / 2.0
-        camera_position_list[:, axis_idx] = np.random.normal(0, position_stddev, camera_pose_number)  \
-            + camera_position_range[axis_idx][0] + center_point[axis_idx]
+    # position_stddev = (camera_position_range[axis_idx][1] - camera_position_range[axis_idx][0]) / 2.0
+    # camera_position_list[:, axis_idx] = np.random.normal(0, position_stddev, camera_pose_number)  \
+    #     + camera_position_range[axis_idx][0] + center_point[axis_idx]
 
-        # rotation
-        rotation_stddev = (camera_rotation_range[axis_idx][1] - camera_rotation_range[axis_idx][0]) / 2.0
-        camera_orientation_list[:, axis_idx] = np.random.normal(0, rotation_stddev, camera_pose_number) \
-            + camera_rotation_range[axis_idx][0] + center_point_rotation[axis_idx]
+    # # rotation
+    # rotation_stddev = (camera_rotation_range[axis_idx][1] - camera_rotation_range[axis_idx][0]) / 2.0
+    # camera_orientation_list[:, axis_idx] = np.random.normal(0, rotation_stddev, camera_pose_number) \
+    #     + camera_rotation_range[axis_idx][0] + center_point_rotation[axis_idx]
+
+    counter = 0
+    position_pre = np.array([cx, cy, cz], np.float64)
+    while counter < camera_pose_number:
+        position_cur = np.zeros((3), np.float64)
+        orientation_cur = np.zeros((3), np.float64)
+        for axis_idx in range(0, 3):
+            # position
+            position_cur[axis_idx] = np.random.uniform(camera_position_range[axis_idx][0], camera_position_range[axis_idx][1], 1) + center_point[axis_idx]
+
+            # rotation
+            orientation_cur[axis_idx] = np.random.uniform(camera_rotation_range[axis_idx][0], camera_rotation_range[axis_idx][1], 1) + center_point_rotation[axis_idx]
+
+        # limit the two camera position distance in case optical flow stitch error
+        dist = np.linalg.norm(position_cur-position_pre)
+        points_distance_threshold = 0.3 
+        if dist > points_distance_threshold:
+            log.debug("Distance is {}, skip.".format(dist))
+            continue
+
+        position_pre = position_cur
+        camera_position_list[counter, :] = position_cur
+        camera_orientation_list[counter, :] = orientation_cur
+        counter = counter + 1
 
     # 2) output file
     # output camera pose file for render
@@ -257,8 +284,15 @@ def generate_path_random(scene_name, camera_pose_number, camera_position_range, 
 
     # output camera position obj file
     path_obj_file = path_csv_file + ".obj"
-    camera_position_list_ = np.ones((camera_position_list.shape[0], camera_position_list.shape[1] + 1), dtype= np.float64)
-    camera_position_list_[:, 1:] = camera_orientation_list
+    camera_position_list_ = np.ones((camera_position_list.shape[0] + 8, camera_position_list.shape[1] + 1), dtype= np.float64)
+    camera_position_list_[8:, 1:] = camera_position_list
+    # add the bbox
+    counter = 0
+    for x_offset in camera_position_range[0]:
+        for y_offset in camera_position_range[1]:
+            for z_offset in camera_position_range[2]:
+                camera_position_list_[counter, :] = [1, cx+x_offset, cy + y_offset, cz + z_offset]
+                counter = counter + 1
     create_camera_obj([cx, cy, cz + 0.07], camera_position_list_.tolist(), path_obj_file)
     print("output path camera position 3D model file {}".format(path_obj_file))
 
@@ -368,8 +402,8 @@ def generate_path(root_dir, config):
         path_csv_file = root_dir + "/" + output_filename
         center_csv_file = root_dir + "/" + output_center_filename
         camera_pose_number = config["camera_traj"]["grid_size"]
-        camera_position_range = config_data["camera_traj"]["random_position_bbox"]  # meter
-        camera_rotation_range = config_data["camera_traj"]["random_rotation_bbox"]  # degree
+        camera_position_range = config_data["camera_traj"]["random_position_offset_range"]  # meter
+        camera_rotation_range = config_data["camera_traj"]["random_rotation_offset_range"]  # degree
         frame_number = generate_path_random(scene_name, camera_pose_number, camera_position_range, camera_rotation_range,
                                             path_csv_file, center_csv_file,
                                             center_point=center_point_position, center_point_rotation=center_point_rotation)

@@ -36,7 +36,10 @@
         "lock_direction": false,
         "_comment": "the number of the circle path position",
         "circle_step_number": 90,
+        "_comment": "the circle camera trajectory's circle radius",
         "radius": 0.5,
+        "_comment": "the line/grid/random trajectory's camera pose number",
+        "grid_size": 10,
         "_comment": "The center of grid or circle path",
         "center_position": {
             "x": 0.153774,
@@ -49,14 +52,14 @@
             "y": 0.0,
             "z": 0.0
         },
-        "_comment": "the camera position bounding box, the bbox center is center_position",
-        "random_position_bbox": [
+        "_comment": "the camera position offset range, the bbox center is center_position",
+        "random_position_offset_range": [
             [x_offset_min, x_offset_max],
             [y_offset_min, y_offset_max],
             [z_offset_min, z_offset_max]
         ],
-        "_comment": "the camera rotation range (degree)",
-        "random_rotation_bbox": [
+        "_comment": "the camera rotation offset range (degree)",
+        "random_rotation_offset_range": [
             [x_rot_min, x_rot_max],
             [y_rot_min, y_rot_max],
             [z_rot_min, z_rot_max]
