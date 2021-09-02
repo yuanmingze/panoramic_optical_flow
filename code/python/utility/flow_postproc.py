@@ -92,3 +92,36 @@ def erp_of_unwraparound(optical_flow):
     # optical_flow_new[:, :, 1][y_idx_outrange_idx] = y_idx_tar[y_idx_outrange_idx] + image_height
 
     return optical_flow_new
+
+
+def flow_resize(optical_flow_data, resize_ratio=None, width_new=None, height_new=None):
+    """Resize the optical flow resolution.
+
+    :param optical_flow_data: Size is [height, width, 2]
+    :type optical_flow_data: numpy 
+    :return: [description]
+    :rtype: [type]
+    """
+    if resize_ratio is None and (width_new is None or height_new is None):
+        log.error("new optical flow size set error")
+
+    of_height = optical_flow_data.shape[0]
+    of_width = optical_flow_data.shape[1]
+
+    if not resize_ratio is None:
+        width_new = int(of_width * resize_ratio)
+        height_new = int(of_height * resize_ratio)
+        resize_ratio_width = resize_ratio
+        resize_ratio_height = resize_ratio
+    else:
+        resize_ratio_width = width_new / of_width
+        resize_ratio_height = height_new / of_height
+
+    # resize and rescale
+    from skimage.transform import resize
+    optical_flow_u = resize(optical_flow_data[:, :, 0], (height_new, width_new), anti_aliasing=False, preserve_range=True) * resize_ratio_width
+    optical_flow_v = resize(optical_flow_data[:, :, 1], (height_new, width_new), anti_aliasing=False, preserve_range=True) * resize_ratio_height
+
+    optical_flow_data_resized = np.stack((optical_flow_u, optical_flow_v), axis=2)
+
+    return optical_flow_data_resized

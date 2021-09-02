@@ -399,6 +399,14 @@ def opticalflow_metric_folder(of_dir, of_gt_dir, mask_filename_exp=None, result_
         # load of and gt of
         optical_flow = flow_io.read_flow_flo(of_dir + filename)
         optical_flow_gt = flow_io.read_flow_flo(of_gt_dir + filename)
+
+        if optical_flow.shape != optical_flow_gt.shape:
+            # resize optical flow
+            log.warn("The optical flow shape is different, {} and {}.".format(optical_flow.shape, optical_flow_gt.shape))
+            width = optical_flow_gt.shape[1]
+            height = optical_flow_gt.shape[0]
+            optical_flow = flow_postproc.flow_resize(optical_flow, width_new=width, height_new=height)
+
         if of_wraparound:
             optical_flow = flow_postproc.erp_of_wraparound(optical_flow)
             optical_flow_gt = flow_postproc.erp_of_wraparound(optical_flow_gt)

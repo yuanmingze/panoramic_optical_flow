@@ -211,8 +211,6 @@ def render_panoramic_datasets(render_configs):
 
 
 if __name__ == "__main__":
-
-
     render_configs = ReplicaRenderConfig()
     render_configs.folder_name_add_postfix("_rand_1k_0")
     # exit(0)

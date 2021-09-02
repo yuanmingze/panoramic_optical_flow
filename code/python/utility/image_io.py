@@ -87,7 +87,6 @@ def visual_data(data_array):
     # return image[:, :, 0:3]
 
 
-
 def image_show(image, title=" "):
     """
     visualize the numpy array
@@ -176,20 +175,3 @@ def image_save(image_data, image_file_path):
         im.save(image_file_path)
     else:
         log.error("The image channel number is {}".format(image_channels_number))
-
-
-def image_resize(image_data, image_size=None, image_ratio=None):
-    """ Resize image
-
-    :param image_data: [description]
-    :type image_data: [type]
-    :param image_size: [description], defaults to None
-    :type image_size: [type], optional
-    :param image_ratio: [description], defaults to None
-    :type image_ratio: [type], optional
-    :return: [description]
-    :rtype: [type]
-    """    
-    from skimage.transform import resize
-    image_rescaled = resize(image_data, image_size, anti_aliasing=True, preserve_range=True)
-    return image_rescaled
