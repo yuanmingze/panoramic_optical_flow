@@ -17,9 +17,13 @@ This enables the estimation of high-resolution 360° optical flow, for example a
 
 
 %%\textbf{Limitation \& Future Work}
-\paragraph{Limitations.}
-\TODO{Large translations.}
-\TODO{My current optical flow stitch code can not support large motion, because the Gnomonic Projection. If the pixel move to the back of the OpenGL camera, the gnomonic projection based optical flow code will generate wrong optical flow.}
+\new{\paragraph{Limitations.}
+Large pose changes are a common limitation of most optical flow methods, which are primarily designed for handling small motions.
+In our method, we use global rotation alignment to effectively minimise the net disparity across the unit sphere.
+This helps in the case of moderate pose changes, but large pose changes remain challenging.
+%\TODO{Maybe? My current optical flow stitch code can not support large motion, because the Gnomonic Projection. If the pixel move to the back of the OpenGL camera, the gnomonic projection based optical flow code will generate wrong optical flow.}
+}
+
 
 
 \paragraph{Future Work.}
