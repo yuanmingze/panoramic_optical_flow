@@ -4,7 +4,7 @@
 We evaluate our method on the Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhotos \cite{BerteYLR2020} datasets and achieve state-of-the-art performance on both datasets.
 %
 %To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
-To evaluate the accuracy of 360° optical flow regardless projection, and to account for the wrap-around (\cref{sec:approach:definition}), we measure the spherical average endpoint error (SEPE), spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
+To evaluate the accuracy of 360° optical flow regardless projection, and to account for the wrap-around (\cref{sec:approach:definition}), we measure the \emph{spherical} average endpoint error (SEPE), \emph{spherical} average angle error (SAAE), and the \emph{spherical} root mean square error (SRMS).
 %
 %The method implemented in Python takes 20 seconds to estimate optical flow from a $1280 pixels\times640 pixels$ resolution image pairs.
 %Our Python implementation uses DIS flow \cite{KroegTDV2016} for computing the tangent optical flow fields.
@@ -35,7 +35,7 @@ there is no feasible hardware for capturing high-quality optical flow from a rea
 %
 For quantitative evaluation of optical flow, ground truth is necessary.
 %
-Inspired by \citet{ShugrLKLSSF2019}, we render ground-truth 360° images and optical flow from the reconstructed 3D mesh of a read-world scene.
+Inspired by \citet{ShugrLKLSSF2019}, we render ground-truth 360° images and optical flow from the reconstructed 3D mesh of a real-world scene.
 %% select the 3d mesh dataset
 The ground-truth data is rendered using the Replica dataset \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contains high-quality HDR textures and 3D meshes, but also public code for a versatile renderer.
 %
@@ -43,7 +43,7 @@ The ground-truth data is rendered using the Replica dataset \cite{StrauWMCWGEMRV
 %OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
 %So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
 However, the official Replica rendering pipeline does not support any 360° camera model or optical flow generation.
-We therefore implemented an ERP camera model using OpenGL geometry shaders that transform the 3D mesh from Cartesian coordinates to spherical coordinates, finally renders the 3D mesh and ground-truth optical flow in the equirectangular format.
+We therefore implemented an ERP camera model using OpenGL geometry shaders that transform the 3D mesh from Cartesian coordinates to spherical coordinates, finally render the 3D mesh and ground-truth optical flow in the equirectangular format.
 \looseness-1
 
 
@@ -52,12 +52,14 @@ We therefore implemented an ERP camera model using OpenGL geometry shaders that 
 %The 360° Replica dataset rendering with two kinds of camera path circle and line.
 %The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval.
 %The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
-We render two types of camera paths for ground-truth evaluation \new{at a resolution orf 2048$\times$1024\,pixels}.
+We render \new{three} types of camera paths for ground-truth evaluation \new{at a resolution of 2048$\times$1024\,pixels}.
 A \emph{Circle}, in which the camera moves along a 50\,cm radius circle and faces outwards, with images rendered every 10°.
-And a \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
+A \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
+\TODO{please check this, Mingze $\to$}
+\new{And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$0.5\,metres and rotations jittered by $\pm$20° degrees along each of the Euler angle axes.}
 
 
-%% real word dataset
+%% real world dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
 %Although the synthetic dataset is highly realistic, real-world data tends to be more challenging, with complex lighting and motions.
 Although the synthetic dataset is \new{reasonably} realistic, real-world data tends to be more challenging, with complex lighting and motions.
@@ -88,7 +90,7 @@ Specifically, we propose the spherical AAE (SAAE), spherical EPE (SEPE, see \cre
 The spherical AAE (SAAE) measures the angle between the estimated and ground-truth optical flow vectors on the surface of a unit sphere using spherical trigonometry.
 %
 %In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
-For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere, and the $N$ is the number of pixels:
+For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere\DELETE{, and the $N$ is the number of pixels}:
 %We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
 %
 %\begin{equation}\label{equ_exp_epe}
@@ -96,7 +98,8 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 %\end{equation}
 \begin{equation}\label{equ:exp:epesph}
 %	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right)
-	\text{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+%	\text{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+	\text{SEPE} = \frac{1}{\new{|\Omega|}} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
 	\text{.}
 \end{equation}
 
@@ -133,10 +136,13 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 
 \subsection{Comparison}
 
-We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+%We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+We compare our method with \new{OmniFlowNet \cite{ArtizZAD2020}, a state-of-the-art 360° optical flow method, as well as the} following state-of-the-art \new{perspective} methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
 %
-For \href{https://github.com/princeton-vl/RAFT}{RAFT} and \href{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
+For \footurl{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, \footurl{https://github.com/princeton-vl/RAFT}{RAFT} and \footurl{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
+\new{OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of \TODO{W$\times$H\,pixels}, and upsample the estimated flow fields back to the original image resolution.}
+%
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
 
@@ -180,34 +186,59 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 %% TODO 
 %different image resolution 0.5K, 1K, 2K.
 %Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
-\begin{table}[h!]
+\begin{table}%[h!]
 	\centering
 	\caption{\label{tab:exp:oferrorquality}%
 		Optical flow errors on the synthetic Replica 360° dataset.
-		See \cref{sec:datasets-metrics} for metrics.}
-	\resizebox{0.8\linewidth}{!}{%
+		See \cref{sec:datasets-metrics} for metrics.
+		\TODO{Please double-check if Ours is indeed more than 10$\times$ better in SRMS than other methods.}
+	}
+	\resizebox{0.85\linewidth}{!}{%
 	%	\setlength{\tabcolsep}{3pt}%
-	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+	\begin{tabular}{p{0.2cm}p{2.0cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
 		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
-		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.0588   &     0.1469  &     0.3845  \\ 
-		& RAFT    &               16.56  &     0.2775 &     64.94 &     0.04669  &     0.1482  &     0.3301  \\
-		& DIS     &               16.50  &     0.2881 &     62.67 &     0.05375  &     0.1566  &     0.3515  \\
-		& Ours    & \bf \phantom{0}4.988 & \bf 0.1885 & \bf 39.26 & \bf 0.007241 & \bf 0.05278 & \bf 0.01824 \\ 
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+%		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.05880  &     0.1469  &     0.3845  \\
+%		& RAFT    &               16.56  &     0.2775 &     64.94 &     0.04669  &     0.1482  &     0.3301  \\
+%		& DIS     &               16.50  &     0.2881 &     62.67 &     0.05375  &     0.1566  &     0.3515  \\
+%		& Ours    & \bf \phantom{0}4.988 & \bf 0.1885 & \bf 39.26 & \bf 0.007241 & \bf 0.05278 & \bf 0.01824 \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Line}}}
-		& PWC-Net &           32.25  &     0.2139 & 93.32     &     0.1215  &     0.1429  &     0.5289  \\ 
-		& RAFT    &           31.75  &     0.2908 & 96.55     &     0.08752 &     0.1595  &     0.4201  \\ 
-		& DIS     &           35.55  &     0.3328 & 98.24     &     0.1149  &     0.2063  &     0.4768  \\
-		& Ours    &    \bf    10.41  & \bf 0.2461 & \bf 55.78 & \bf 0.01533 & \bf 0.08943 & \bf 0.03448 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{Line}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+%		& PWC-Net &           32.25  &     0.2139 & 93.32     &     0.1215  &     0.1429  &     0.5289  \\
+%		& RAFT    &           31.75  &     0.2908 & 96.55     &     0.08752 &     0.1595  &     0.4201  \\
+%		& DIS     &           35.55  &     0.3328 & 98.24     &     0.1149  &     0.2063  &     0.4768  \\
+%		& Ours    &    \bf    10.41  & \bf 0.2461 & \bf 55.78 & \bf 0.01533 & \bf 0.08943 & \bf 0.03448 \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}} 
-		& PWC-Net &               18.95  &     0.2866 &     67.92 &     0.06822 &     0.1463  &     0.4062  \\
-		& RAFT    &               20.20  &     0.2807 &     72.53 &     0.05648 &     0.1509  &     0.3517  \\
-		& DIS     &               25.74  &     0.3045 &     79.94 &     0.08347 &     0.1797  &     0.4127  \\
-		& Ours    & \bf \phantom{0}8.602 & \bf 0.2270 & \bf 50.27 & \bf 0.01264 & \bf 0.07722 & \bf 0.02907 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{\new{Random}}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{PWC-Net} &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{RAFT}    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{DIS}     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{Ours}    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
+		\midrule
+%		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}} % All = Circle + Line
+%		& PWC-Net &               18.95  &     0.2866 &     67.92 &     0.06822 &     0.1463  &     0.4062  \\
+%		& RAFT    &               20.20  &     0.2807 &     72.53 &     0.05648 &     0.1509  &     0.3517  \\
+%		& DIS     &               25.74  &     0.3045 &     79.94 &     0.08347 &     0.1797  &     0.4127  \\
+%		& Ours    & \bf \phantom{0}8.602 & \bf 0.2270 & \bf 50.27 & \bf 0.01264 & \bf 0.07722 & \bf 0.02907 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{All}}} % All = Circle + Line + Random
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\bottomrule
 	\end{tabular}}%
 \end{table}
@@ -355,6 +386,7 @@ The differences between methods is less pronounced than in the Replica 360° dat
 The multi-step rotation warping aligns image $I_{t+1}$ to $I_t$ by estimating rotation using the ERP and cubemap optical flow.
 The results without ERP optical flow alignment (`w/o ERP') and without cubemap optical flow alignment (`w/o cubemap') are shown in \cref{fig:exp:ablations}.
 %%{analysis result}
+\TODO{update analysis to match results $\to$}
 The `w/o ERP' error is higher than the `w/o cubemap' error for both `\emph{Line}' and `\emph{All}' data,
 %because the ERP optical flow is the global motion, which can handle large pixel motion.
 as the ERP-based rotation estimation better handles large pixel motions.
@@ -369,7 +401,7 @@ Our full method performs best for `\emph{Line}' data as helps the optical flow s
 However, `w/o weight' performs slightly better on the complete dataset.
 
 
-\begin{table}[h!]
+\begin{table}%[h!]
 	\centering
 	\caption{\label{fig:exp:ablations}%
 		The results of our ablation study. See \cref{sec:ablations} for details.}
@@ -398,4 +430,4 @@ However, `w/o weight' performs slightly better on the complete dataset.
 		& w/o cubemap  &     7.921 &     0.2182 &     47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
 		\bottomrule
 	\end{tabular}}%
-\end{table}\vspace{-2em}
+\end{table}%\vspace{-2em}
