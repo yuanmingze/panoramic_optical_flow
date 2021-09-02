@@ -186,34 +186,59 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 %% TODO 
 %different image resolution 0.5K, 1K, 2K.
 %Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
-\begin{table}[h!]
+\begin{table}%[h!]
 	\centering
 	\caption{\label{tab:exp:oferrorquality}%
 		Optical flow errors on the synthetic Replica 360° dataset.
-		See \cref{sec:datasets-metrics} for metrics.}
-	\resizebox{0.8\linewidth}{!}{%
+		See \cref{sec:datasets-metrics} for metrics.
+		\TODO{Please double-check if Ours is indeed more than 10$\times$ better in SRMS than other methods.}
+	}
+	\resizebox{0.85\linewidth}{!}{%
 	%	\setlength{\tabcolsep}{3pt}%
-	\begin{tabular}{p{0.2cm}p{1.6cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+	\begin{tabular}{p{0.2cm}p{2.0cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
 		\toprule
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
-		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.05880  &     0.1469  &     0.3845  \\ 
-		& RAFT    &               16.56  &     0.2775 &     64.94 &     0.04669  &     0.1482  &     0.3301  \\
-		& DIS     &               16.50  &     0.2881 &     62.67 &     0.05375  &     0.1566  &     0.3515  \\
-		& Ours    & \bf \phantom{0}4.988 & \bf 0.1885 & \bf 39.26 & \bf 0.007241 & \bf 0.05278 & \bf 0.01824 \\ 
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+%		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.05880  &     0.1469  &     0.3845  \\
+%		& RAFT    &               16.56  &     0.2775 &     64.94 &     0.04669  &     0.1482  &     0.3301  \\
+%		& DIS     &               16.50  &     0.2881 &     62.67 &     0.05375  &     0.1566  &     0.3515  \\
+%		& Ours    & \bf \phantom{0}4.988 & \bf 0.1885 & \bf 39.26 & \bf 0.007241 & \bf 0.05278 & \bf 0.01824 \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\midrule
-		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Line}}}
-		& PWC-Net &           32.25  &     0.2139 & 93.32     &     0.1215  &     0.1429  &     0.5289  \\ 
-		& RAFT    &           31.75  &     0.2908 & 96.55     &     0.08752 &     0.1595  &     0.4201  \\ 
-		& DIS     &           35.55  &     0.3328 & 98.24     &     0.1149  &     0.2063  &     0.4768  \\
-		& Ours    &    \bf    10.41  & \bf 0.2461 & \bf 55.78 & \bf 0.01533 & \bf 0.08943 & \bf 0.03448 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{Line}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+%		& PWC-Net &           32.25  &     0.2139 & 93.32     &     0.1215  &     0.1429  &     0.5289  \\
+%		& RAFT    &           31.75  &     0.2908 & 96.55     &     0.08752 &     0.1595  &     0.4201  \\
+%		& DIS     &           35.55  &     0.3328 & 98.24     &     0.1149  &     0.2063  &     0.4768  \\
+%		& Ours    &    \bf    10.41  & \bf 0.2461 & \bf 55.78 & \bf 0.01533 & \bf 0.08943 & \bf 0.03448 \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}} 
-		& PWC-Net &               18.95  &     0.2866 &     67.92 &     0.06822 &     0.1463  &     0.4062  \\
-		& RAFT    &               20.20  &     0.2807 &     72.53 &     0.05648 &     0.1509  &     0.3517  \\
-		& DIS     &               25.74  &     0.3045 &     79.94 &     0.08347 &     0.1797  &     0.4127  \\
-		& Ours    & \bf \phantom{0}8.602 & \bf 0.2270 & \bf 50.27 & \bf 0.01264 & \bf 0.07722 & \bf 0.02907 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{\new{Random}}}}
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{PWC-Net} &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{RAFT}    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{DIS}     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& \new{Ours}    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
+		\midrule
+%		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}} % All = Circle + Line
+%		& PWC-Net &               18.95  &     0.2866 &     67.92 &     0.06822 &     0.1463  &     0.4062  \\
+%		& RAFT    &               20.20  &     0.2807 &     72.53 &     0.05648 &     0.1509  &     0.3517  \\
+%		& DIS     &               25.74  &     0.3045 &     79.94 &     0.08347 &     0.1797  &     0.4127  \\
+%		& Ours    & \bf \phantom{0}8.602 & \bf 0.2270 & \bf 50.27 & \bf 0.01264 & \bf 0.07722 & \bf 0.02907 \\
+		\multirow{5}{*}{\rotatebox[origin=c]{90}{\emph{All}}} % All = Circle + Line + Random
+		& \new{OmniFlowNet} &\new{xx.xx} & \new{0.xxxx} & \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& PWC-Net &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& RAFT    &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& DIS     &    \new{xx.xx} &    \new{0.xxxx} &    \new{xx.xx} &    \new{0.xxxxx} &    \new{0.xxxx} &    \new{0.xxxx} \\
+		& Ours    & \bf\new{xx.xx} & \bf\new{0.xxxx} & \bf\new{xx.xx} & \bf\new{0.xxxxx} & \bf\new{0.xxxx} & \bf\new{0.xxxx} \\
 		\bottomrule
 	\end{tabular}}%
 \end{table}
@@ -361,6 +386,7 @@ The differences between methods is less pronounced than in the Replica 360° dat
 The multi-step rotation warping aligns image $I_{t+1}$ to $I_t$ by estimating rotation using the ERP and cubemap optical flow.
 The results without ERP optical flow alignment (`w/o ERP') and without cubemap optical flow alignment (`w/o cubemap') are shown in \cref{fig:exp:ablations}.
 %%{analysis result}
+\TODO{update analysis to match results $\to$}
 The `w/o ERP' error is higher than the `w/o cubemap' error for both `\emph{Line}' and `\emph{All}' data,
 %because the ERP optical flow is the global motion, which can handle large pixel motion.
 as the ERP-based rotation estimation better handles large pixel motions.
@@ -375,7 +401,7 @@ Our full method performs best for `\emph{Line}' data as helps the optical flow s
 However, `w/o weight' performs slightly better on the complete dataset.
 
 
-\begin{table}[h!]
+\begin{table}%[h!]
 	\centering
 	\caption{\label{fig:exp:ablations}%
 		The results of our ablation study. See \cref{sec:ablations} for details.}
@@ -404,4 +430,4 @@ However, `w/o weight' performs slightly better on the complete dataset.
 		& w/o cubemap  &     7.921 &     0.2182 &     47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
 		\bottomrule
 	\end{tabular}}%
-\end{table}\vspace{-2em}
+\end{table}%\vspace{-2em}
