@@ -52,11 +52,11 @@ We therefore implemented an ERP camera model using OpenGL geometry shaders that 
 %The 360° Replica dataset rendering with two kinds of camera path circle and line.
 %The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval.
 %The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
-We render \new{three} types of camera paths for ground-truth evaluation \new{at a resolution of 2048$\times$1024\,pixels}.
+We render \new{three} types of camera paths for ground-truth evaluation \new{at a resolution of 1280$\times$640\,pixels}.
 A \emph{Circle}, in which the camera moves along a 50\,cm radius circle and faces outwards, with images rendered every 10°.
 A \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
 \TODO{please check this, Mingze $\to$}
-\new{And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$0.5\,metres and rotations jittered by $\pm$20° degrees along each of the Euler angle axes.}
+\new{And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$1\,metres and rotations jittered by $\pm$10° degrees along each of the Euler angle axes.}
 
 
 %% real world dataset
@@ -141,7 +141,7 @@ We compare our method with \new{OmniFlowNet \cite{ArtizZAD2020}, a state-of-the-
 %
 For \footurl{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, \footurl{https://github.com/princeton-vl/RAFT}{RAFT} and \footurl{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
-\new{OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of \TODO{W$\times$H\,pixels}, and upsample the estimated flow fields back to the original image resolution.}
+\new{OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of 1024$\times$512\,pixels, and upsample the estimated flow fields back to the original image resolution afterwards.}
 %
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
