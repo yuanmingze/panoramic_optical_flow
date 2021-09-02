@@ -4,7 +4,7 @@
 We evaluate our method on the Replica \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019} and OmniPhotos \cite{BerteYLR2020} datasets and achieve state-of-the-art performance on both datasets.
 %
 %To uniformly evaluate each pixel optical flow error neglect the distortion and solve the wrap-around problem, we propose the spherical average endpoint error (SEPE), the spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
-To evaluate the accuracy of 360° optical flow regardless projection, and to account for the wrap-around (\cref{sec:approach:definition}), we measure the spherical average endpoint error (SEPE), spherical average angle error (SAAE), and the spherical root mean square error (SRMS).
+To evaluate the accuracy of 360° optical flow regardless projection, and to account for the wrap-around (\cref{sec:approach:definition}), we measure the \emph{spherical} average endpoint error (SEPE), \emph{spherical} average angle error (SAAE), and the \emph{spherical} root mean square error (SRMS).
 %
 %The method implemented in Python takes 20 seconds to estimate optical flow from a $1280 pixels\times640 pixels$ resolution image pairs.
 %Our Python implementation uses DIS flow \cite{KroegTDV2016} for computing the tangent optical flow fields.
@@ -35,7 +35,7 @@ there is no feasible hardware for capturing high-quality optical flow from a rea
 %
 For quantitative evaluation of optical flow, ground truth is necessary.
 %
-Inspired by \citet{ShugrLKLSSF2019}, we render ground-truth 360° images and optical flow from the reconstructed 3D mesh of a read-world scene.
+Inspired by \citet{ShugrLKLSSF2019}, we render ground-truth 360° images and optical flow from the reconstructed 3D mesh of a real-world scene.
 %% select the 3d mesh dataset
 The ground-truth data is rendered using the Replica dataset \cite{StrauWMCWGEMRVCYBYPYZLCBGMPSBSNGLN2019}, which not only contains high-quality HDR textures and 3D meshes, but also public code for a versatile renderer.
 %
@@ -43,7 +43,7 @@ The ground-truth data is rendered using the Replica dataset \cite{StrauWMCWGEMRV
 %OpenGL is the most common rasterization rendering method, but the general OpenGL rendering pipeline doesn't support the panoramic camera model and optical flow generation.
 %So we implement the panoramic camera model on OpenGL geometry shaders with GLSL to transform the 3D mesh from Cartesian coordinate system to spherical coordinate system, finally render the 3D mesh to equirectangular format images.
 However, the official Replica rendering pipeline does not support any 360° camera model or optical flow generation.
-We therefore implemented an ERP camera model using OpenGL geometry shaders that transform the 3D mesh from Cartesian coordinates to spherical coordinates, finally renders the 3D mesh and ground-truth optical flow in the equirectangular format.
+We therefore implemented an ERP camera model using OpenGL geometry shaders that transform the 3D mesh from Cartesian coordinates to spherical coordinates, finally render the 3D mesh and ground-truth optical flow in the equirectangular format.
 \looseness-1
 
 
@@ -52,12 +52,14 @@ We therefore implemented an ERP camera model using OpenGL geometry shaders that 
 %The 360° Replica dataset rendering with two kinds of camera path circle and line.
 %The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval.
 %The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
-We render two types of camera paths for ground-truth evaluation \new{at a resolution orf 2048$\times$1024\,pixels}.
+We render \new{three} types of camera paths for ground-truth evaluation \new{at a resolution of 2048$\times$1024\,pixels}.
 A \emph{Circle}, in which the camera moves along a 50\,cm radius circle and faces outwards, with images rendered every 10°.
-And a \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
+A \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
+\TODO{please check this, Mingze $\to$}
+\new{And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$0.5\,metres and rotations jittered by $\pm$20° degrees along each of the Euler angle axes.}
 
 
-%% real word dataset
+%% real world dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
 %Although the synthetic dataset is highly realistic, real-world data tends to be more challenging, with complex lighting and motions.
 Although the synthetic dataset is \new{reasonably} realistic, real-world data tends to be more challenging, with complex lighting and motions.
@@ -88,7 +90,7 @@ Specifically, we propose the spherical AAE (SAAE), spherical EPE (SEPE, see \cre
 The spherical AAE (SAAE) measures the angle between the estimated and ground-truth optical flow vectors on the surface of a unit sphere using spherical trigonometry.
 %
 %In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
-For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere, and the $N$ is the number of pixels:
+For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere\DELETE{, and the $N$ is the number of pixels}:
 %We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
 %
 %\begin{equation}\label{equ_exp_epe}
@@ -96,7 +98,8 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 %\end{equation}
 \begin{equation}\label{equ:exp:epesph}
 %	{SEPE} = \frac{1}{n} \sum_{i \in \Omega} d\left( (\theta^e_i,\phi^e_i), (\theta^g_i,\phi^g_i)\right)
-	\text{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+%	\text{SEPE} = \frac{1}{N} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
+	\text{SEPE} = \frac{1}{\new{|\Omega|}} \sum_{i \in \Omega} d\left( (\theta^\text{est}_i, \phi^\text{est}_i), (\theta^\text{GT}_i, \phi^\text{GT}_i)\right)
 	\text{.}
 \end{equation}
 
@@ -134,12 +137,12 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 \subsection{Comparison}
 
 %We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
-We compare our method with \new{the state-of-the-art 360° optical flow method OmniFlowNet \cite{ArtizZAD2020}, as well as the} following state-of-the-art \new{perspective} methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+We compare our method with \new{OmniFlowNet \cite{ArtizZAD2020}, a state-of-the-art 360° optical flow method, as well as the} following state-of-the-art \new{perspective} methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
 %
-\new{For \href{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, we downscale the input images to a resolution of \TODO{W$\times$H\,pixels} to fit them into 6 GB GPU memory (NVIDIA RTX 2060), and upsample the estimated flow fields to the original image resolution.}
-%
-For \href{https://github.com/princeton-vl/RAFT}{RAFT} and \href{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
+For \footurl{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, \footurl{https://github.com/princeton-vl/RAFT}{RAFT} and \footurl{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
+\new{OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of \TODO{W$\times$H\,pixels}, and upsample the estimated flow fields back to the original image resolution.}
+%
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
 

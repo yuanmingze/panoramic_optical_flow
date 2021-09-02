@@ -2,11 +2,11 @@
 
 %% Faster LaTeX compilation time, bigger file.
 %% TODO: Comment out for submission/final version.
-\pdfcompresslevel=0
-\pdfobjcompresslevel=0
+%\pdfcompresslevel=0
+%\pdfobjcompresslevel=0
 
 %% Enter your paper number here for the review copy
-%\bmvcreviewcopy{298}
+\bmvcreviewcopy{298}
 
 %\title{Panoramic Optical Flow Using Global Rotation Warping and Tangent Image}
 \title{360\!° Optical Flow using Tangent Images}
@@ -46,10 +46,11 @@
 \newcommand{\TODO}[1]{\textcolor{red}{{[TODO: #1]}}}
 %\newcommand\todolist[1]{\textcolor{red}{#1}}
 %\newcommand{\IGNORE}[1]{}
-\newcommand{\DELETE}[1]{\textcolor{red}{#1}}
+\newcommand{\DELETE}[1]{}%\textcolor{red}{#1}}
 \newcommand{\new}[1]{\textcolor{blue}{#1}}
 \newcommand\MZY[1]{\textcolor{green}{{[Mingze: #1]}}}
 \newcommand{\CR}[1]{\textcolor{cyan}{{[Christian: #1]}}}
+\newcommand{\footurl}[2]{\href{#1}{#2}\footnote{\url{#1}}}
 
 \usepackage{microtype}
 %\usepackage{amsfonts}
@@ -64,6 +65,7 @@
 \usepackage[nameinlink,capitalise,noabbrev]{cleveref}
 \crefformat{equation}{#2Equation~#1#3}
 \frenchspacing
+\urlstyle{sf}
 
 %-------------------------------------------------------------------------
 % Document starts here
