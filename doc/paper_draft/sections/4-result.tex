@@ -133,7 +133,10 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 
 \subsection{Comparison}
 
-We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+%We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+We compare our method with \new{the state-of-the-art 360° optical flow method OmniFlowNet \cite{ArtizZAD2020}, as well as the} following state-of-the-art \new{perspective} methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+%
+\new{For \href{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, we downscale the input images to a resolution of \TODO{W$\times$H\,pixels} to fit them into 6 GB GPU memory (NVIDIA RTX 2060), and upsample the estimated flow fields to the original image resolution.}
 %
 For \href{https://github.com/princeton-vl/RAFT}{RAFT} and \href{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
@@ -192,7 +195,7 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
 		\midrule
 		\multirow{3}{*}{\rotatebox[origin=c]{90}{\hspace{-1em}\emph{Circle}}}
-		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.0588   &     0.1469  &     0.3845  \\ 
+		& PWC-Net &               16.60  &     0.2994 &     63.44 &     0.05880  &     0.1469  &     0.3845  \\ 
 		& RAFT    &               16.56  &     0.2775 &     64.94 &     0.04669  &     0.1482  &     0.3301  \\
 		& DIS     &               16.50  &     0.2881 &     62.67 &     0.05375  &     0.1566  &     0.3515  \\
 		& Ours    & \bf \phantom{0}4.988 & \bf 0.1885 & \bf 39.26 & \bf 0.007241 & \bf 0.05278 & \bf 0.01824 \\ 

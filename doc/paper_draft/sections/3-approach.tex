@@ -8,7 +8,7 @@
 		The input is a pair of equirectangular images, $I_t$ and $I_{t+1}$, and the output is the optical flow $\mathcal{F}_t$.
 %		The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively.
 		The operators `$\oplus$' and `$\ominus$' rotate images forward and optical flow fields backward, respectively, using image warping (see \cref{sec:approach:warping}).
-		The green box estimates a rotation from a 360° optical flow field.
+		The green box estimates \new{the optimal} rotation from a 360° optical flow field.
 	}
 	\label{fig:approach:pipeline}
 \end{figure}
@@ -202,7 +202,7 @@ We compute the horizontal rotation from the horizontal flow component $\mathcal{
 %The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
 Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.}
 % it's the noly 20% middle column of the $\mathcal{F}_v$
-\new{We compute the global rotation $R$ \CR{should this be $\bar{R}$ to be consistent with \cref{fig:approach:pipeline,equ:approach:globalwarp}?}from the computed optical flow field as follows.
+\new{We compute the global rotation $\bar{R}$ from the computed optical flow field as follows.
 First, we convert the coordinates of the start and end points of all optical flow vectors to spherical coordinates with unit length.
 Then, we solve for the optimal rotation between the start points and the corresponding end points using least-squares fitting, which can be solved in closed form by singular value decomposition \cite{ArunHB1987,SorkiR2017}.}
 
