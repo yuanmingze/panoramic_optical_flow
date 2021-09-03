@@ -175,7 +175,7 @@ As each tangent image's optical flow is estimated independently, the estimates m
 \new{The $\omega_{i}$ computes the colour difference between the source tangent image $I_{t,i}$ and the backwards-warped target image, to reduce the weight of badly estimated tangent images' optical flow $\mathcal{F}_{t,i}$.}
 %
 \new{The $\omega_i$ is estimated by 
-$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation and $I_{t+1,i}$ the corresponding tangent image of target image $I_{t+1}$.}
+$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation and $I_{t+1,i}$ the corresponding tangent image of $I_{t+1}$.}
 %
 \new{The $\mathcal{F}_t$ blended with the weighted tangent images' optical flow,  $\frac{\sum_i{\mathcal{F}_{t,i} \cdot \omega_{i}}}{\sum_i{\omega_i}}$.}
 
