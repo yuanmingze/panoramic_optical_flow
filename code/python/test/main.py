@@ -12,6 +12,7 @@ from utility import flow_postproc
 from utility import fs_utility
 from utility import image_evaluate
 from utility import flow_warp
+from utility import image_utility
 
 import os
 import csv
@@ -379,13 +380,15 @@ def warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
         rgb_image_data_temp = None
         if rgb_image_data.shape[0:2] != flow_data_list[counter].shape[0:2]:
             print("The {} flow size is {}, the rgb image size is {}.".format(scene_name, flow_data_list[counter].shape[0:2], rgb_image_data.shape[0:2]))
-            rgb_image_data_temp = image_io.image_resize(rgb_image_data, flow_data_list[counter].shape[0:2])
+            rgb_image_data_temp = image_utility.image_resize(rgb_image_data, flow_data_list[counter].shape[0:2])
         else:
             rgb_image_data_temp = rgb_image_data
 
         warped_image_data = flow_warp.warp_backward(rgb_image_data_temp, flow_data)
         rgb_image_warp_data_list.append(warped_image_data)
-        image_io.image_save(warped_image_data, output_dir + "{}_{}_{}_wrap.jpg".format(scene_name, method_list[counter], flo_filename))
+        output_filepath = output_dir + "{}_{}_{}_wrap.jpg".format(scene_name, method_list[counter], flo_filename)
+        image_io.image_save(warped_image_data, output_filepath)
+        log.info("Output file to {}".format(output_filepath))
         counter += 1
 
     # 0) visualize the optical flow
@@ -401,14 +404,14 @@ def warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
     counter = 0
     image_warp_error_list = []
     error_min_ratio = 0.1
-    error_max_ratio = 0.95
+    error_max_ratio = 0.90
     min_error = 9999999
     max_error = -1
     for rgb_image_warp_data in rgb_image_warp_data_list:
         rgb_gt_image_data_temp = None
         if rgb_image_warp_data.shape[0:2] != rgb_gt_image_data.shape[0:2]:
             print("The {} flow size is {}, the rgb image size is {}.".format(scene_name, flow_data_list[counter].shape[0:2], rgb_image_data.shape[0:2]))
-            rgb_gt_image_data_temp = image_io.image_resize(rgb_gt_image_data, rgb_image_warp_data.shape[0:2])
+            rgb_gt_image_data_temp = image_utility.image_resize(rgb_gt_image_data, rgb_image_warp_data.shape[0:2])
         else:
             rgb_gt_image_data_temp = rgb_gt_image_data
 
@@ -434,18 +437,31 @@ def warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
 def visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, rgb_filename, mask_filename, output_dir):
     """Visualize optical flows error with same scale."""
     # mask the unavailable optical flow
+
+    flow_data_gt = flow_io.flow_read(flow_gt_filepath.format(scene_name, flo_filename))
+
+    of_mask = None
     mask_filename = flow_gt_filepath.format(scene_name, mask_filename)
-    of_mask = image_io.image_read(mask_filename)
+    if mask_filename is not None and os.path.exists(mask_filename):
+        of_mask = image_io.image_read(mask_filename)
+        flow_data_gt = flow_evaluate.available_of(flow_data_gt, of_mask)
+
+    image_height = flow_data_gt.shape[0]
+    image_width = flow_data_gt.shape[1]
 
     # load file from flo
     flow_data_list = []
     for method in method_list:
         flow_data = flow_io.flow_read(flow_filepath_exp.format(scene_name, method, flo_filename))
+        
+        if flow_data.shape[:2] != flow_data_gt.shape[:2]:
+            log.warn("The {} flow shape is {}, it's not match the ground truth size {}".format(method, flow_data.shape, flow_data_gt.shape))
+            height_new = flow_data_gt.shape[0]
+            width_new = flow_data_gt.shape[1]
+            flow_data = flow_postproc.flow_resize(flow_data, width_new=width_new, height_new=height_new)
         flow_data = flow_evaluate.available_of(flow_data, of_mask)
         flow_data_list.append(flow_data)
 
-    flow_data_gt = flow_io.flow_read(flow_gt_filepath.format(scene_name, flo_filename))
-    flow_data_gt = flow_evaluate.available_of(flow_data_gt, of_mask)
 
     # 0) visualize the optical flow
     flow_min_ratio = 0.03
@@ -457,12 +473,14 @@ def visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, me
         counter += 1
 
     flow_vis_image = flow_vis.flow_to_color(flow_data_gt, min_ratio=flow_min_ratio, max_ratio=flow_max_ratio)
-    image_io.image_save(flow_vis_image, output_dir + "{}_{}_{}_flow_vis.jpg".format(scene_name, "gt", flo_filename))
+    visual_output_filepath = output_dir + "{}_{}_{}_flow_vis.jpg".format(scene_name, "gt", flo_filename)
+    log.info("Output the optical flow visualization image to {}".format(visual_output_filepath))
+    image_io.image_save(flow_vis_image, visual_output_filepath)
 
     # 1) get the visualization error range
     flow_error_list = []
-    error_min_ratio = 0.1
-    error_max_ratio = 0.9
+    error_min_ratio = 0.05
+    error_max_ratio = 0.85
     min_error = 9999999
     max_error = -1
     for flow_data in flow_data_list:
@@ -475,9 +493,10 @@ def visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, me
         if vmax_ > max_error:
             max_error = vmax_
 
-    # 2) visualize the error  and output
+    # 2) visualize the error and output
     counter = 0
     for flow_error in flow_error_list:
+        flow_error[of_mask] = 0.0
         epe_mat_vis = flow_evaluate.error_visual(flow_error, max_error, min_error, bar_enable=False)
         # image_io.image_show(epe_mat_vis)
         image_io.image_save(epe_mat_vis, output_dir + "{}_{}_{}_error_vis.jpg".format(scene_name, method_list[counter], flo_filename))
@@ -643,7 +662,7 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our", dataset_dirli
                     optical_flow = flow_estimator.estimate(src_erp_image, tar_erp_image)
                 elif opticalflow_mathod == "dis":
                     # DIS optical flow
-                    optical_flow = flow_estimator.of_methdod_DIS(src_erp_image, tar_erp_image)
+                    optical_flow = flow_estimate.of_methdod_DIS(src_erp_image, tar_erp_image)
                 else:
                     log.error("the optical flow {} does not implement.")
 
@@ -675,14 +694,14 @@ if __name__ == "__main__":
     if -1 in task_list:
         exit()
         replica_dataset = ReplicaPanoDataset()
-        dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist + replica_dataset.dataset_rand_dirlist
+        # dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist + replica_dataset.dataset_rand_dirlist
         # dataset_dirlist = None
-        # dataset_dirlist = replica_dataset.dataset_line_dirlist
+        dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
         # opticalflow_mathod = "our_weight"
         # 0) remove folder with full folder name
-        # of_estimate_replica_clean(dataset_dirlist, opticalflow_result_foldername ="our")
+        of_estimate_replica_clean(dataset_dirlist, opticalflow_result_foldername ="dis")
         # 1) remove folder with folder name prefix
-        # of_estimate_replica_clean(dataset_dirlist, opticalflow_result_foldername_prefix ="our_wo")
+        of_estimate_replica_clean(dataset_dirlist, opticalflow_result_foldername_prefix ="dis_")
 
     if 0 in task_list:
         # run our method
@@ -693,9 +712,11 @@ if __name__ == "__main__":
         # estimation the optical flow on the test datasets
         # our, dis, raft, pwcnet, our_wo_weight, our_wo_cube, our_wo_ico, our_wo_erp
         opticalflow_mathod = args.ofmethod
-        ofmethod_list = ["our", "our_wo_weight", "our_wo_cube", "our_wo_ico", "our_wo_erp"]
+        ofmethod_list = ["our", "our_wo_weight", "our_wo_cube", "our_wo_ico", "our_wo_erp", "dis"]
         if not opticalflow_mathod in ofmethod_list:
             log.error("The optical flow method {} is not support.".format(opticalflow_mathod))
+        if opticalflow_mathod == "dis":
+             replica_pano_dataset.padding_size = None
 
         # dataset_dirlist = replica_pano_dataset.dataset_circ_dirlist + replica_pano_dataset.dataset_line_dirlist + replica_pano_dataset.dataset_rand_dirlist
         # # 0) create *.flo file for each image pair
@@ -712,8 +733,8 @@ if __name__ == "__main__":
             dataset_dirlist += replica_pano_dataset.dataset_rand_dirlist
 
         # 0) estimate optical flow
-        # of_estimate_replica(replica_pano_dataset, opticalflow_mathod, dataset_dirlist, overwrite_exist=False)
-        of_estimate_omniphoto(OmniPhotoDataset)
+        of_estimate_replica(replica_pano_dataset, opticalflow_mathod, dataset_dirlist, overwrite_exist=False)
+        # of_estimate_omniphoto(OmniPhotoDataset)
 
     if 1 in task_list:
         # summary error. for replica 360
@@ -757,32 +778,35 @@ if __name__ == "__main__":
     
     if 2 in task_list:
         # generate the error map and visualized optical flow for comparison
-        dataset_dirlist = ReplicaPanoDataset.dataset_circ_dirlist + ReplicaPanoDataset.dataset_line_dirlist
-        # dataset_dirlist = ["frl_apartment_0_circ_1k_0"]
+        replica_pano_dataset = ReplicaPanoDataset()
+        # dataset_dirlist = replica_pano_dataset.dataset_circ_dirlist + replica_pano_dataset.dataset_line_dirlist
+        dataset_dirlist = ["frl_apartment_0_rand_1k_0"]#["frl_apartment_0_circ_1k_0"] # apartment_0_circ_1k#apartment_0_circ_1k_0
         for scene_name in dataset_dirlist:
             # scene_name = "room_0_circ_1k_0"
-            method_list = ["our", "our_weight", "dis", "pwcnet", "raft"]
+            # method_list = ["our", "our_weight", "dis", "pwcnet", "raft", "omniflownet"]
+            method_list = ["our_0.4", "dis", "pwcnet", "raft", "omniflownet"]
             flo_filename = "0004_opticalflow_backward_pano.flo"
             rgb_filename = "0004_rgb_pano.jpg"
             mask_filename = "0004_mask_pano.png"
+            # mask_filename = None
             flow_filepath_exp = "D:/workdata/opticalflow_data_bmvc_2021/{}/result/{}/{}"
             flow_gt_filepath = "D:/workdata/opticalflow_data_bmvc_2021/{}/pano/{}"
-            output_dir = ReplicaPanoDataset.result_output_dir
+            output_dir = replica_pano_dataset.result_output_dir
             # visualize the error heatmap
             visualize_of_error_multi(flow_filepath_exp, flow_gt_filepath, scene_name, method_list, flo_filename, rgb_filename,  mask_filename, output_dir=output_dir)
             # copy the original rgb images
 
     if 3 in task_list:
         # generate the warped rgb image for comparision
-        method_list = ["our_weight", "dis", "pwcnet", "raft"]
-        # method_list = ["pwcnet"]
+        method_list = ["our_weight", "dis", "pwcnet", "raft", "omniflownet"]
+        # method_list = ["omniflownet"]
         output_dir = OmniPhotoDataset.result_output_dir
         fs_utility.dir_make(output_dir)
         # #
-        # scene_name = "BeihaiPark"
-        # rgb_filename = "panoramic-0550.jpg"
-        # rgb_gt_filename = "panoramic-0549.jpg"
-        # flo_filename = "0549_opticalflow_forward_pano.flo"
+        scene_name = "BeihaiPark"
+        rgb_filename = "panoramic-0550.jpg"
+        rgb_gt_filename = "panoramic-0549.jpg"
+        flo_filename = "0549_opticalflow_forward_pano.flo"
         # #
         # scene_name = "Ballintoy"
         # rgb_filename = "panoramic-0256.jpg"
@@ -808,12 +832,12 @@ if __name__ == "__main__":
         # rgb_filename = "panoramic-0530.jpg"
         # rgb_gt_filename = "panoramic-0531.jpg"
         # flo_filename = "0531_opticalflow_backward_pano.flo"
-        #
-        scene_name = "Wulongting"
-        rgb_filename = "panoramic-0697.jpg"
-        rgb_gt_filename = "panoramic-0696.jpg"
-        flo_filename = "0696_opticalflow_forward_pano.flo"
-        #
+        # #
+        # scene_name = "Wulongting"
+        # rgb_filename = "panoramic-0697.jpg"
+        # rgb_gt_filename = "panoramic-0696.jpg"
+        # flo_filename = "0696_opticalflow_forward_pano.flo"
+        # #
         flow_filepath_exp = "D:/workdata/omniphoto_bmvc_2021/{}/result/{}/{}"
         rgb_filepath_exp = "D:/workdata/omniphoto_bmvc_2021/{}/pano/{}"
         warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
