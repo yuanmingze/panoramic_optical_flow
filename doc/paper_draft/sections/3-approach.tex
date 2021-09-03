@@ -158,21 +158,26 @@ To increase the FoV of tangent images and improve the continuity of optical flow
 As each tangent image's optical flow is estimated independently, the estimates might not be consistent in the overlap areas of adjacent tangent images.
 %
 %So when stitch each faces optical flow to equirectangular format, we compute a confidence weight to each perspective images.
-When stitching the tangent flow fields in the equirectangular format, we thus compute a per-pixel blending weight to smoothly blend flows in the overlap areas.
 %
 %% blending 
 %The blending weight $W_{face}$ is Hadamard product of $W_{cone}$ and $W_{warp}$.
-The blending weight combines two terms:
+%The blending weight combines two terms:
 %
 %The $W_{cone}$ is to down weight the optical flow close the image boundary, which decays base on the distance from the image original to the pixel.
 %%The dacay is normal distribution, its 
-(1)~A spatial Gaussian fall-off term attenuates flow estimates far from the image centre and near the image boundary.
-To account for large displacements, we shift the mean of the Gaussian by the inverse of the average motion vector in the image.
+%(1)~A spatial Gaussian fall-off term attenuates flow estimates far from the image centre and near the image boundary.
+%To account for large displacements, we shift the mean of the Gaussian by the inverse of the average motion vector in the image.
 %
 %And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
-(2)~A warping error term that computes the colour difference between the source image and the backwards-warped target image, to reduce the weight of badly estimated motion vectors.
-\TODO{Provide more mathematical explanation of the blending procedure.}
-
+%(2)~A warping error term that computes the colour difference between the source image and the backwards-warped target image, to reduce the weight of badly estimated motion vectors.
+%\TODO{Provide more mathematical explanation of the blending procedure.}
+\new{When stitching the tangent flow fields in the equirectangular format, we thus compute a per-pixel blending weight $\omega_{i}$ for each tangent image $I_{t,i}$ to smoothly blend its optical flows $\mathcal{F}_{t,i}$ in the overlap areas.}
+\new{The $\omega_{i}$ computes the colour difference between the source tangent image $I_{t,i}$ and the backwards-warped target image, to reduce the weight of badly estimated tangent images' optical flow $\mathcal{F}_{t,i}$.}
+%
+\new{The $\omega_i$ is estimated by 
+$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation and $I_{t+1,i}$ the corresponding tangent image of target image $I_{t+1}$.}
+%
+\new{The $\mathcal{F}_t$ blended with the weighted tangent images' optical flow,  $\frac{\sum_i{\mathcal{F}_{t,i} \cdot \omega_{i}}}{\sum_i{\omega_i}}$.}
 
 %% blending method
 %\TODO{???}
