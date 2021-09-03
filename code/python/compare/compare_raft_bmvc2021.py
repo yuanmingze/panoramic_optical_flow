@@ -147,7 +147,7 @@ def omniphoto_test(omniphoto_dataset, args):
         # input dir
         input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
         # input index
-        inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
+        inputfile_list = fs_utility.dir_grep(input_filepath, ".jpg")
         pano_start_idx = 1
         pano_end_idx = len(inputfile_list) - 1
 
@@ -195,7 +195,8 @@ def replica_test(replica_dataset, args):
 
     opticalflow_mathod = "raft"  # our, dis
 
-    dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    # dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist + replica_dataset.dataset_rand_dirlist
+    dataset_dirlist = replica_dataset.dataset_rand_dirlist
 
     # initial RAFT
     model = torch.nn.DataParallel(RAFT(args))
@@ -219,8 +220,12 @@ def replica_test(replica_dataset, args):
             elif pano_image_folder.find("circ") != -1:
                 pano_start_idx = replica_dataset.circle_start_idx
                 pano_end_idx = replica_dataset.circle_end_idx
+            elif pano_image_folder.find("rand") != -1:
+                pano_start_idx = replica_dataset.rand_start_idx
+                pano_end_idx = replica_dataset.rand_end_idx
             else:
                 print("{} folder naming is wrong".format(pano_image_folder))
+                exit()
 
             # output folder
             output_pano_filepath = replica_dataset.pano_dataset_root_dir + pano_image_folder + "/" + replica_dataset.pano_output_dir
@@ -241,7 +246,7 @@ def replica_test(replica_dataset, args):
                         optical_flow_filepath = replica_dataset.replica_pano_opticalflow_backward_filename_exp.format(pano_image_idx)
 
                     if pano_image_idx % 2 == 0:
-                        print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
+                        print("Flow Method: {}, image index: {}, srouce Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
                     # 1) estimate optical flow
                     src_erp_image = load_image(input_filepath + src_erp_image_filepath)
                     tar_erp_image = load_image(input_filepath + tar_erp_image_filepath)

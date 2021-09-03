@@ -9,6 +9,9 @@ from utility import flow_warp
 
 import os
 
+from logger import Logger
+log = Logger(__name__)
+log.logger.propagate = False
 
 def test_DIS_flow(erp_src_image_filepath, erp_tar_image_filepath, erp_of_dif_output_filepath):
     # load image to CPU memory
@@ -30,7 +33,14 @@ def test_pano_of_our(erp_src_image_filepath, erp_tar_image_filepath, erp_optical
     tar_erp_image = image_io.image_read(erp_tar_image_filepath)
 
     print("compute optical flow by multi-step DIS")
-    optical_flow = flow_estimate.pano_of_our(src_erp_image, tar_erp_image, debug_output_dir=erp_opticalflow_debug_dir)
+    flow_estimator = flow_estimate.PanoOpticalFlow()
+    flow_estimator.debug_output_dir = erp_opticalflow_debug_dir
+    log.info("debug output folder: {}".format(erp_opticalflow_debug_dir))
+    flow_estimator.debug_enable = True
+    # flow_estimator.erp_enable = False
+    # flow_estimator.cubemap_enable = False
+    # flow_estimator.ico_enable = False
+    optical_flow = flow_estimator.estimate(src_erp_image, tar_erp_image)
     optical_flow = flow_postproc.erp_of_wraparound(optical_flow)
 
     # output optical flow

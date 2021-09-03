@@ -114,6 +114,9 @@ def generate_input_txt_bmvc_omniphoto(omniphoto_dataset, txt_output_dir):
 
 def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
     """Get the our and DIS's result in replica. """
+
+    fs_utility.dir_make(txt_output_dir)
+
     img1_txt_path = txt_output_dir + "img1.txt"
     img2_txt_path = txt_output_dir + "img2.txt"
     out_txt_path = txt_output_dir + "out.txt"
@@ -124,7 +127,8 @@ def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
 
     opticalflow_mathod = "pwcnet"
 
-    dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist
+    # dataset_dirlist = replica_dataset.dataset_circ_dirlist + replica_dataset.dataset_line_dirlist + replica_dataset.dataset_rand_dirlist
+    dataset_dirlist = replica_dataset.dataset_rand_dirlist
 
     # 1) iterate each 360 image dataset
     for pano_image_folder in dataset_dirlist:
@@ -138,6 +142,9 @@ def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
         elif pano_image_folder.find("circ") != -1:
             pano_start_idx = replica_dataset.circle_start_idx
             pano_end_idx = replica_dataset.circle_end_idx
+        elif pano_image_folder.find("rand") != -1:
+            pano_start_idx = replica_dataset.rand_start_idx
+            pano_end_idx = replica_dataset.rand_end_idx
         else:
             print("{} folder naming is wrong".format(pano_image_folder))
 
@@ -159,14 +166,13 @@ def generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir):
                     tar_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx - 1)
                     optical_flow_filepath = replica_dataset.replica_pano_opticalflow_backward_filename_exp.format(pano_image_idx)
 
-
                 if pano_image_idx % 2 == 0:
-                    print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
+                    print("Flow Method: {}, image folder: {}, source Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_folder, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
 
                 # output file path
                 img1_txt_file.write(input_filepath + src_erp_image_filepath + "\n")
                 img2_txt_file.write(input_filepath + tar_erp_image_filepath + "\n")
-                out_txt_file.write( output_dir + optical_flow_filepath + "\n")
+                out_txt_file.write(output_dir + optical_flow_filepath + "\n")
 
 
     img1_txt_file.close()
@@ -190,7 +196,10 @@ if __name__ == "__main__":
     #     generate_input_txt(root_dir, txt_output_dir, flo_output_dir)
     #     visual_of(flo_output_dir)
 
-    # txt_output_dir = "/mnt/sda1/"
-    txt_output_dir = "d:/"
-    generate_input_txt_bmvc_replica(ReplicaPanoDataset, txt_output_dir)
+    if sys.platform == "win32":
+        txt_output_dir = "d:/workdata/opticalflow_data_bmvc_2021/pwcnet/"
+    elif sys.platform == "linux":
+        txt_output_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/pwcnet/"
+    replica_dataset = ReplicaPanoDataset()
+    generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir)
     # generate_input_txt_bmvc_omniphoto(OmniPhotoDataset, txt_output_dir)

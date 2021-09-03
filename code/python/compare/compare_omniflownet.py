@@ -15,7 +15,6 @@ Each line contain 3 column,
 
 """
 
-
 import os, sys, csv
 import shutil
 import subprocess
@@ -50,11 +49,12 @@ from skimage.transform import resize
 import numpy as np
 from PIL import Image
 
-def image_file_resize(image_input_filepath, image_output_filepath, resize_ratio = 1.0):
+def image_file_resize(image_input_filepath, image_output_filepath, image_height=None, image_width=None , resize_ratio = 1.0):
     image_data = np.asarray(Image.open(image_input_filepath))
 
-    image_height = int(image_data.shape[0] * resize_ratio)
-    image_width = int(image_data.shape[1] * resize_ratio)
+    if image_height is None or image_width is None:
+        image_height = int(image_data.shape[0] * resize_ratio)
+        image_width = int(image_data.shape[1] * resize_ratio)
 
     image_data_resized = resize(image_data, (image_height, image_width),
                                 anti_aliasing=False, preserve_range=True).astype(np.uint8)
@@ -77,9 +77,85 @@ def fs_utility_move_file(src, tar):
     # check
     shutil.move(src, tar)
 
+def fs_utility_dir_ls(dir_path, postfix = None):
+    file_list = []
+    for file_name in os.listdir(dir_path):
+        if os.path.isdir(dir_path + "/" + file_name) and postfix is None:
+            file_list.append(file_name)
+        elif postfix is not None:
+            if file_name.endswith(postfix):
+                file_list.append(file_name)
+    file_list.sort()
+    return file_list
 
-def create_image_list_omniphoto():
-    pass
+
+def create_image_list_omniphoto(omniphotos_dataset_root_dir):
+    """"""
+    #  data
+    dataset_dirlist = [
+        "Ballintoy",
+        "BathAbbey2",
+        "BathParadeGardens",
+        "BeihaiPark",
+        "Coast",
+        "DublinShip1",
+        "OsakaTemple6",
+        "SecretGarden1",
+        "Wulongting",
+    ]
+    #
+    omniphoto_dataset_pano_data_dir = "pano/"
+    omniphoto_pano_opticalflow_forward_filename_exp = "{:04d}_opticalflow_forward_pano.flo"
+    omniphoto_pano_opticalflow_backward_filename_exp = "{:04d}_opticalflow_backward_pano.flo"
+
+    # output folder
+    # 1) iterate each 360 image dataset
+    for scene_image_folder in dataset_dirlist:
+        # each scene
+        print("processing the data folder {}".format(scene_image_folder))
+
+        # input image dir
+        input_image_root_dir = scene_image_folder + "/" + omniphoto_dataset_pano_data_dir
+        # input index
+        inputfile_list = fs_utility_dir_ls(omniphotos_dataset_root_dir + input_image_root_dir, ".jpg")
+        pano_start_idx = 1
+        pano_end_idx = len(inputfile_list) - 1
+
+        # output flo folder
+        output_flo_root_dir =  scene_image_folder + "/result/"  + opticalflow_mathod + "/"
+        fs_utility_dir_make(omniphotos_dataset_root_dir + output_flo_root_dir)
+
+        # output image list txt filepath
+        image_list_txt_output_dir = omniphotos_dataset_root_dir + opticalflow_mathod + "/"
+        fs_utility_dir_make(image_list_txt_output_dir)
+        image_list_txt_output_filepath = image_list_txt_output_dir + scene_image_folder + ".txt"
+        image_list_txt_file = open(image_list_txt_output_filepath, "w")
+
+        for pano_image_idx in range(pano_start_idx, pano_end_idx):
+            pano_image_file_idx = int(inputfile_list[pano_image_idx][-8:-4])
+            
+            for forward_of in [True, False]:
+                # 0) load image to CPU memory
+                src_erp_image_filepath = inputfile_list[pano_image_idx]
+                if forward_of:
+                    tar_erp_image_filepath = inputfile_list[pano_image_idx + 1]
+                    optical_flow_filepath = omniphoto_pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
+                else:
+                    tar_erp_image_filepath = inputfile_list[pano_image_idx - 1]
+                    optical_flow_filepath = omniphoto_pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
+
+                if pano_image_idx % 3 == 0:
+                     print("Flow Method: {}, image folder: {}, srouce Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, scene_image_folder, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
+
+                # output file path
+                src_erp_image_filepath = input_image_root_dir + src_erp_image_filepath
+                tar_erp_image_filepath = input_image_root_dir + tar_erp_image_filepath
+                optical_flow_filepath = output_flo_root_dir + optical_flow_filepath
+                line_txt = "{},{},{}".format(src_erp_image_filepath,tar_erp_image_filepath,optical_flow_filepath)
+
+                image_list_txt_file.write(line_txt + "\n")
+
+        image_list_txt_file.close()
 
 
 def create_image_list_replica(replica_dataset_root_dir):
@@ -156,7 +232,7 @@ def create_image_list_replica(replica_dataset_root_dir):
                     optical_flow_filepath = replica_pano_opticalflow_backward_filename_exp.format(pano_image_idx)
 
                 if pano_image_idx % 3 == 0:
-                    print("{} Flow Method: {}\n{}\n{}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath))
+                     print("Flow Method: {}, image folder: {}, srouce Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_folder, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
 
                 # output file path
                 src_erp_image_filepath = input_image_root_dir + src_erp_image_filepath
@@ -298,8 +374,8 @@ def OmniFlowNet_run(replica_dataset_root_dir):
                 img1_new = img1 + "_{}_{}.jpg".format(img1_new_height, img1_new_width)
                 img2_new = img2 + "_{}_{}.jpg".format(img1_new_height, img1_new_width)
                 
-                image_file_resize(img1, img1_new)
-                image_file_resize(img2, img2_new)
+                image_file_resize(img1, img1_new, img1_new_height, img1_new_width)
+                image_file_resize(img2, img2_new, img1_new_height, img1_new_width)
                 img1 = img1_new
                 img2 = img2_new
                 img1_size = (img1_new_width,img1_new_height)
@@ -373,15 +449,32 @@ def OmniFlowNet_run(replica_dataset_root_dir):
 
 
 if __name__ == "__main__":
-    data_root_dir = "/home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/"
-    image_list_txt_root_dir = data_root_dir + opticalflow_mathod + "/"
-    task_list = [2]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=int, help='the task index')
+    #parser.add_argument('--datatype',type=str, help='the dataset type [circ|line|rand|all]')
+    #parser.add_argument('--ofmethod',type=str, help='the dataset type [our, dis, raft, pwcnet, our_wo_weight, our_wo_cube, our_wo_ico]')
+
+    args = parser.parse_args()
+    
+    task_list = []
+    task_list.append(args.task)
+
+
     if 0 in task_list:
         # create replica *.txt image list file
+        data_root_dir = "/home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/"
         create_image_list_replica(data_root_dir)
+        print("Output the image list txt file to: {}".format(data_root_dir + opticalflow_mathod + "/"))
     if 1 in task_list:
         # create omniphoto *.txt image list file
+        data_root_dir = "/home/mingze/sda1/workdata/omniphoto_bmvc_2021/"
         create_image_list_omniphoto(data_root_dir)
+        print("Output the image list txt file to: {}".format(data_root_dir + opticalflow_mathod + "/"))
     if 2 in task_list:
         # estimate the panoramic optical flow.
+        # data_root_dir = "/home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/"
+        data_root_dir = "/home/mingze/sda1/workdata/omniphoto_bmvc_2021/"
         OmniFlowNet_run(data_root_dir)

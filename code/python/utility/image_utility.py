@@ -9,7 +9,7 @@ log = Logger(__name__)
 log.logger.propagate = False
 
 
-def image_file_resize(image_input_filepath, image_output_filepath, resize_ratio=1.0):
+def image_file_resize(image_input_filepath, image_output_filepath, image_height=None, image_width=None, resize_ratio=1.0):
     """[summary]
 
     :param image1_filepath: The input image file path.
@@ -19,8 +19,9 @@ def image_file_resize(image_input_filepath, image_output_filepath, resize_ratio=
     """
     image_data = image_io.image_read(image_input_filepath)
 
-    image_height = int(image_data.shape[0] * resize_ratio)
-    image_width = int(image_data.shape[1] * resize_ratio)
+    if image_height is None or image_width is None:
+        image_height = int(image_data.shape[0] * resize_ratio)
+        image_width = int(image_data.shape[1] * resize_ratio)
 
     image_data_resized = resize(image_data, (image_height, image_width), anti_aliasing=True, preserve_range=True)
 
