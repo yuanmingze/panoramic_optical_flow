@@ -24,7 +24,7 @@ With the PWC-Net office Caffe Code. And use the python code `python/compare_pwc-
 - Virtual env: `/mnt/sda1/workenv_linux/python_2_7_pwcnet/`
 - Caffe code `/mnt/sda1/workspace_linux/PWC-Net-flownet2`
 - The `compare_pwc_net.py` generate the img1.txt, img2.txt and out.txt files.
-- Run the script `source set-env.sh` than `proc_images.py` python script as `python ./proc_images.py /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img1.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/img2.txt /mnt/sda1/workdata/opticalflow_data/replica_360/apartment_0/pwcnet/out.txt`
+- Run the script `source set-env.sh` than `proc_images.py` python script as `python ./proc_images.py /home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/pwcnet/img1.txt /home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/pwcnet/img2.txt /home/mingze/sda1/workdata/opticalflow_data_bmvc_2021/pwcnet/out.txt`
 - PWC-Net model: `/mnt/sda1/workspace_linux/PWC-Net/Caffe/`
 
 2. PyTorch Code (Slow, don't know why):
@@ -47,7 +47,10 @@ Get the code from [GitHub](https://github.com/princeton-vl/RAFT)
 
 - Windows:
 Conda venv: `D:\workenv_windows\conda_raft`
-Run script: `D:\source_code\RAFT\bmvc2021.py`
+Run script: `D:\source_code\RAFT\compare_raft_bmvc2021.py`
+
+`python compare_raft_bmvc2021.py --model=models/raft-things.pth `
+
 
 - Linux:
 Conda install in: `/home/mingze/anaconda3` run int Ubuntu 18.04.5
@@ -64,12 +67,21 @@ Inference:
 - RAFT model: `/mnt/sda1/workspace_linux/RAFT`
 
 
-
-
 ### 1.2.5. Sun IJCV
 
 Code is [IJCV](http://cs.brown.edu/~dqsun/code/ijcv_flow_code.zip)
 - Matlab code: `/mnt/sda1/workspace_windows/IJCV_2013_matlab_opticalflow/ijcv_flow_code`
+
+
+### 1.2.5. OmniFlowNet
+
+It's base on Caffe only run on Linux.
+Code: `/mnt/sda1/workspace_linux/OmniFlowNet/OmniFlowNet/models/testing/`
+
+`python ./compare_omniflownet.py`
+setup venv : `/mnt/sda1/workenv_linux/python_2_7_omniflownet/bin/activate`
+
+
 
 ## 1.3. Output data
 
