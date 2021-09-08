@@ -194,7 +194,8 @@ def warp_forward(image_first, of_forward, wrap_around=False, ignore_transparent=
 
     x_idx_new = x_idx_new.astype(int)
     y_idx_new = y_idx_new.astype(int)
-    dest_image = np.zeros(np.shape(image_first), dtype=image_first.dtype)
+    # dest_image = np.zeros(np.shape(image_first), dtype=image_first.dtype)
+    dest_image = np.full_like(image_first, [255, 255, 255], dtype=image_first.dtype)
     for channel_index in range(0, image_channels):
         dest_image[y_idx_new, x_idx_new, channel_index] = ndimage.map_coordinates(image_first[:, :, channel_index], [y_idx, x_idx], order=1, mode='constant', cval=255)
 

@@ -63,7 +63,7 @@ def gnomonic_projection(theta, phi, theta_0, phi_0, label_outrange_pixel=False):
     :param label_outrange_pixel: If True set the outrange to Nan, if False do nothing.
     :type label_outrange_pixel: bool, optional
     :return: The gnomonic coordinate normalized coordinate.
-    :rtype: numpy
+    :rtype: tuple
     """
     cos_c = np.sin(phi_0) * np.sin(phi) + np.cos(phi_0) * np.cos(phi) * np.cos(theta - theta_0)
 
@@ -83,15 +83,16 @@ def gnomonic_projection(theta, phi, theta_0, phi_0, label_outrange_pixel=False):
     if label_outrange_pixel:
         dist_array = spherical_coordinates.great_circle_distance_uv(theta, phi, theta_0, phi_0)
         overflow_point = dist_array >= (np.pi * 0.5)
+        return x, y, overflow_point
         # if overflow_point.any():
         #     log.warn("The points overflow the gnomonic projection hemisphere.")
-        x[overflow_point] = np.NaN
-        y[overflow_point] = np.NaN
+        # x[overflow_point] = np.NaN
+        # y[overflow_point] = np.NaN
+    else:
+        return x, y
 
-    return x, y
 
-
-def reverse_gnomonic_projection(x, y, theta_0, phi_0):
+def reverse_gnomonic_projection(x, y, theta_0, phi_0, hemisphere_index = None):
     """ Reverse gnomonic projection.
     Convert the gnomonic nomalized coordinate to spherical coordinate.
 
@@ -103,6 +104,8 @@ def reverse_gnomonic_projection(x, y, theta_0, phi_0):
     :type theta_0: float
     :param phi_0: the gnomonic projection tangent point's latitude f .
     :type phi_0: float
+    :param hemisphere_index: the index of hemisphere, true in the hemisphere same with the tangent image, false is on the another one.
+    :type hemisphere_index: numpy
     :return: the point array's spherical coordinate location. the longitude range is continuous and exceed the range [-pi, +pi]
     :rtype: numpy
     """
@@ -116,6 +119,10 @@ def reverse_gnomonic_projection(x, y, theta_0, phi_0):
     c = np.arctan2(rho, 1)
     phi_ = np.arcsin(np.cos(c) * np.sin(phi_0) + (y * np.sin(c) * np.cos(phi_0)) / rho)
     theta_ = theta_0 + np.arctan2(x * np.sin(c), rho * np.cos(phi_0) * np.cos(c) - y * np.sin(phi_0) * np.sin(c))
+
+    if hemisphere_index is not None:
+        need_around = ~hemisphere_index 
+        theta_[need_around], phi_[need_around] = spherical_coordinates.sph_coord_modulo(theta_[need_around] + np.pi, -phi_[need_around])
 
     if np.any(zeros_index):
         phi_[zeros_index] = phi_0

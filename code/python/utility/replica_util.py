@@ -4,6 +4,20 @@ import pathlib
 
 INDEX_MAX = sys.maxsize
 
+
+def opticalflow_warparound(depthmap, threshold = -0.2):
+    """ Detect the wrap around optical flow.
+
+    :param depthmap: The points depth information.
+    :type depthmap: numpy
+    :param threshold: The depth map threshold, default is -0.2, TODO why is not 0.0?
+    :return: The pixel index of optical flow wrap-around. The pixels True is wrap-around.
+    :rtype: numpy
+    """
+    wraparound_map = depthmap < threshold
+    return wraparound_map
+
+
 def scene_of_folder(root_dir):
     """
     """

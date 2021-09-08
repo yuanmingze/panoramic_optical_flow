@@ -4,6 +4,7 @@ import configuration as config
 from utility import image_io
 from utility import flow_io
 from utility import flow_vis
+from utility import flow_postproc
 
 import numpy as np
 import os
@@ -18,9 +19,10 @@ def vis_of_folder(data_dir):
 
         if filename.endswith(".flo"):  # and filename == "0002_R_motionvector_forward.flo":
             of_data = flow_io.read_flow_flo(data_dir + filename)
-            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.2, max_ratio=0.8)  # ,  min_ratio=0.3, max_ratio=0.97)
-            # of_data_vis = flow_vis.flow_value_to_color(of_data, min_ratio=0.2, max_ratio=0.8)
+            of_data = flow_postproc.erp_of_unwraparound(of_data)
+            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.3, max_ratio=0.7, sph_of = False)  # ,  min_ratio=0.3, max_ratio=0.97)
             image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
+            # of_data_vis = flow_vis.flow_value_to_color(of_data, min_ratio=0.2, max_ratio=0.8)
             # print("visual optical flow {}".format(filename))
             # of_data_vis_uv = flow_vis.flow_max_min_visual(of_data, None)#"D:/1.jpg")
 
@@ -59,8 +61,18 @@ def test_flow_uv_to_colors():
 
 if __name__ == "__main__":
 
-    data_dir = "D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/"
-    data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/cubemap/"
+    # data_dir = "D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/"
+    # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/cubemap/"
+    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/LiteFlowNet/models/testing/results/"
+    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/LiteFlowNet2/models/testing/results/"
+    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/OmniFlowNet/models/testing/results/"
+    # data_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/hotel_0_line_1k_0/result/omniflownet/"
+    # data_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/apartment_0_circ_1k_0/result/omniflownet/"
+    # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/result/raft/"
+    # data_dir = config.TEST_data_root_dir + "/replica_360/apartment_0_line_1k_0/cubemap_flo/"
+    # data_dir = config.TEST_data_root_dir + "/replica_360/office_0_line_cubemap_stitch_debug/cubemap_flo/"
+    data_dir = config.TEST_data_root_dir + "replica_360_cubemap/office_0_line_pano/"
+
 
     test_list = [0]
     if 0 in test_list:

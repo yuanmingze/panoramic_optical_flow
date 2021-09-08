@@ -452,12 +452,14 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0, erp_image_height=N
     return erp_image_mat
 
 
-def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False, synthetic_data=False):
+def cubemap2erp_flow(cubemap_flows_list, face_flows_wraparound = None, erp_image_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False, synthetic_data=False):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
 
     :param cubemap_flows_list: the images sequence is +x, -x, +y, -y, +z, -z
     :type cubemap_flows_list: list
+    :param face_flows_wraparound: the optical flow wrap around index, List of Numpy, True need to wrap around, False is not.
+    :type face_flows_wraparound: list
     :param erp_flow_height: the height of output flow 
     :type erp_flow_height: int
     :param padding_size: the cubemap's padding area size, defaults to 0.0
@@ -493,27 +495,9 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
     # gnomonic2image_ratio = (cubemap_image_size - 1) / (2.0 + padding_size * 2.0)
 
     for face_index in range(0, 6):
-        # # get the tangent ERP image pixel's spherical coordinate location range for each face
-        # face_theta_min = np.amin(face_erp_range_sphere_list[flow_index][:, 0], axis=0)
-        # face_theta_max = np.amax(face_erp_range_sphere_list[flow_index][:, 0], axis=0)
-        # face_phi_min = np.amin(face_erp_range_sphere_list[flow_index][:, 1], axis=0)
-        # face_phi_max = np.amax(face_erp_range_sphere_list[flow_index][:, 1], axis=0)
-
-        # face_erp_x_min, face_erp_y_max = spherical_coordinates.sph2erp(face_theta_min, face_phi_min, erp_flow_height, False)
-        # face_erp_x_max, face_erp_y_min = spherical_coordinates.sph2erp(face_theta_max, face_phi_max, erp_flow_height, False)
-
-        # # process the boundary of image
-        # face_erp_x_min = int(face_erp_x_min) if int(face_erp_x_min) > 0 else int(face_erp_x_min - 0.5)
-        # face_erp_x_max = int(face_erp_x_max + 0.5) if int(face_erp_x_max) > 0 else int(face_erp_x_max)
-        # face_erp_y_min = int(face_erp_y_min) if int(face_erp_y_min) > 0 else int(face_erp_y_min - 0.5)
-        # face_erp_y_max = int(face_erp_y_max + 0.5) if int(face_erp_y_max) > 0 else int(face_erp_y_max)
-
         # # 2) get the pixels location in tangent image location
-        # # ERP image space --> spherical space
-        # face_erp_x_grid = np.linspace(face_erp_x_min, face_erp_x_max, face_erp_x_max - face_erp_x_min + 1)
-        # face_erp_y_grid = np.linspace(face_erp_y_min, face_erp_y_max, face_erp_y_max - face_erp_y_min + 1)
-        # face_erp_x, face_erp_y = np.meshgrid(face_erp_x_grid, face_erp_y_grid)
-
+        # get the tangent ERP image pixel's spherical coordinate location range for each face
+        # ERP image space --> spherical space
         face_erp_x, face_erp_y = face_meshgrid(face_erp_range_sphere_list[face_index], erp_image_height)
         face_theta_, face_phi_ = spherical_coordinates.erp2sph((face_erp_x, face_erp_y), erp_image_height, False)
 
@@ -537,41 +521,47 @@ def cubemap2erp_flow(cubemap_flows_list, erp_image_height=None, padding_size=0.0
         face_flow_y = ndimage.map_coordinates(cubemap_flows_list[face_index][:, :, 1], [face_y_src_available, face_x_src_available], order=1, mode='constant', cval=0.0)
         face_y_tar_pixel_available = face_y_src_available + face_flow_y
 
+        face_tar_points_wraparound = None
+        if face_flows_wraparound is not None:
+            face_tar_points_wraparound = ndimage.map_coordinates(face_flows_wraparound[face_index], [face_y_src_available, face_x_src_available], order=1, mode='constant', cval=0.0)
+            face_tar_points_wraparound = ~face_tar_points_wraparound
+
         # 3-1) transfrom the flow from tangent image space to ERP image space
         # tangent image space --> tangent normalized space
         face_x_tar_gnomonic_available, face_y_tar_gnomonic_available = gnomonic_projection.pixel2gnomonic(
             face_x_tar_pixel_available, face_y_tar_pixel_available, 0.0, cubemap_image_size, cubemap_image_size, tangent_gnomonic_range)
 
         # tangent normailzed space --> spherical space
-        face_theta_tar, face_phi_tar = gnomonic_projection.reverse_gnomonic_projection(face_x_tar_gnomonic_available, face_y_tar_gnomonic_available, theta_0, phi_0)
+        face_theta_tar, face_phi_tar = gnomonic_projection.reverse_gnomonic_projection(face_x_tar_gnomonic_available, face_y_tar_gnomonic_available, theta_0, phi_0, face_tar_points_wraparound)
+
         # spherical space --> ERP image space
         face_x_tar_available, face_y_tar_available = spherical_coordinates.sph2erp(face_theta_tar, face_phi_tar, erp_image_height, True)
 
-        # Process the face -z, -y, +y, cross the boundary
-        if (face_index == 5 or face_index == 2 or face_index == 3) and wrap_around:
-            log.debug("ERP optical flow with wrap around. Face index {}".format(face_index))
-            face_x_src_gnomonic_available = face_x_src_gnomonic[available_list]
-            face_y_src_gnomonic_available = face_y_src_gnomonic[available_list]
-            p3 = np.stack((face_x_src_gnomonic_available, face_y_src_gnomonic_available))
-            p4 = np.stack((face_x_tar_gnomonic_available, face_y_tar_gnomonic_available))
-            # the line at tangent image cross the boundary (y axis of tangent image)
-            gnomonic_max = 99999999
-            if face_index == 5:
-                # cross_x_axis = polygon.detect_intersection_segments_array([0, -gnomonic_max], [0, +gnomonic_max], p3, p4)
-                # cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
-                # cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
-                cross_x_axis_plus2pi = np.logical_and(face_x_src_gnomonic_available < 0, face_x_tar_gnomonic_available >= 0)
-                cross_x_axis_minus2pi = np.logical_and(face_x_src_gnomonic_available > 0, face_x_tar_gnomonic_available < 0)
-            elif face_index == 2:
-                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, -gnomonic_max], p3, p4)
-                cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
-                cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
-            elif face_index == 3:
-                cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, gnomonic_max], p3, p4)
-                cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
-                cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
-            face_x_tar_available[cross_x_axis_minus2pi] = face_x_tar_available[cross_x_axis_minus2pi] - erp_flow_width
-            face_x_tar_available[cross_x_axis_plus2pi] = face_x_tar_available[cross_x_axis_plus2pi] + erp_flow_width
+        # # Process the face -z, -y, +y, cross the boundary
+        # if (face_index == 5 or face_index == 2 or face_index == 3) and wrap_around:
+        #     log.debug("ERP optical flow with wrap around. Face index {}".format(face_index))
+        #     face_x_src_gnomonic_available = face_x_src_gnomonic[available_list]
+        #     face_y_src_gnomonic_available = face_y_src_gnomonic[available_list]
+        #     p3 = np.stack((face_x_src_gnomonic_available, face_y_src_gnomonic_available))
+        #     p4 = np.stack((face_x_tar_gnomonic_available, face_y_tar_gnomonic_available))
+        #     # the line at tangent image cross the boundary (y axis of tangent image)
+        #     gnomonic_max = 99999999
+        #     if face_index == 5:
+        #         # cross_x_axis = polygon.detect_intersection_segments_array([0, -gnomonic_max], [0, +gnomonic_max], p3, p4)
+        #         # cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
+        #         # cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
+        #         cross_x_axis_plus2pi = np.logical_and(face_x_src_gnomonic_available < 0, face_x_tar_gnomonic_available >= 0)
+        #         cross_x_axis_minus2pi = np.logical_and(face_x_src_gnomonic_available > 0, face_x_tar_gnomonic_available < 0)
+        #     elif face_index == 2:
+        #         cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, -gnomonic_max], p3, p4)
+        #         cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
+        #         cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
+        #     elif face_index == 3:
+        #         cross_x_axis = polygon.detect_intersection_segments_array([0, 0], [0, gnomonic_max], p3, p4)
+        #         cross_x_axis_plus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available < 0)
+        #         cross_x_axis_minus2pi = np.logical_and(cross_x_axis, face_x_tar_gnomonic_available > 0)
+        #     face_x_tar_available[cross_x_axis_minus2pi] = face_x_tar_available[cross_x_axis_minus2pi] - erp_flow_width
+        #     face_x_tar_available[cross_x_axis_plus2pi] = face_x_tar_available[cross_x_axis_plus2pi] + erp_flow_width
 
         # 4) get ERP flow with source and target pixels location
         # 4-0) the ERP flow

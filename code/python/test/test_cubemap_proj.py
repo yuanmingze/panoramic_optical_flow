@@ -76,7 +76,10 @@ def test_cubemap_flow_stitch(padding_size, cubemap_flow_output, flow_filename_ex
     log.info("test_cubemap_flow_stitch")
     # 1) load the flow file to memory
     face_flows = []
-    for index in range(0, 6):
+    # for index in range(0, 6):
+
+    cubemap_face_abbre = ["R", "L", "U", "D", "F", "B"]
+    for index in cubemap_face_abbre:
         cubemap_flow_path = cubemap_flow_output + flow_filename_expression.format(index)
         face_flows.append(flow_io.read_flow_flo(cubemap_flow_path))
 
@@ -209,8 +212,16 @@ def test_cubemap_depth_proj_stitch():
 
 
 if __name__ == "__main__":
-    # test_cubemap_depth_proj_stitch()
-    # exit()
+
+    import argparse
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=float, help='the task index')
+    args = parser.parse_args()
+    
+    test_list = []
+    test_list.append(args.task)
+
+    # Test code
 
     padding_size = 0.1
 
@@ -233,7 +244,7 @@ if __name__ == "__main__":
     face_image_size = 400
     erp_image_height = 480
 
-    test_list = [4]
+    # test_list = []
 
     # 0) test rgb image project and stitch
     if 0 in test_list:
@@ -245,6 +256,14 @@ if __name__ == "__main__":
         # test_cubemap_flow_proj(padding_size, erp_flow_gt_filepath, cubemap_src_images_output_folder, face_gt_flow_padding_name_expression, face_image_padding_name_expression, face_image_size)
         test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)
         # test_cubemap_flow_warp(cubemap_src_images_output_folder, face_image_padding_name_expression, face_gt_flow_padding_name_expression,  face_image_flo_warp_name_expression)
+    if 1.1 in test_list:
+        # debug optical flow ground truth data stitch
+        padding_size= 0.0
+        cubemap_src_images_output_folder = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0_line_1k_0/cubemap_flo/")
+        face_gt_flow_padding_name_expression = "0009_{}_motionvector_forward.flo"
+        cubemap_stitch_gt_flo_filename = cubemap_src_images_output_folder + "../cubemap_flow_gt_padding_stitch.flo"
+        test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)
+
 
     # 2) test on DIS estimated optical flow with padding
     if 2 in test_list:
@@ -275,3 +294,6 @@ if __name__ == "__main__":
         face_gt_flow_padding_name_expression = "cubemap_flow_padding_{}.flo"
         cubemap_stitch_gt_flo_filename = cubemap_src_images_output_folder + "cubemap_flow_padding_stitch.flo"
         test_cubemap_flow_stitch(padding_size, cubemap_src_images_output_folder,  face_gt_flow_padding_name_expression, cubemap_stitch_gt_flo_filename)
+
+    if 5 in test_list:
+        test_cubemap_depth_proj_stitch()

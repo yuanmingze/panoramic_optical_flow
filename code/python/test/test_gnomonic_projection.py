@@ -1,3 +1,4 @@
+from re import X
 import configuration as config
 
 from utility import gnomonic_projection as gp
@@ -44,6 +45,22 @@ def test_reverse_gnomonic_projection():
     plt.show()
 
 
+def test_reverse_gnomonic_projection_hemisphere():
+    tangent_point_theta = 0.0
+    tangent_point_phi = 0.0
+
+    tangent_x_list = np.array([1.0, 1.0])
+    tangent_y_list = np.array([0.7, 0.7])
+    hemisphere_list = np.array(np.array([True, False], np.bool))
+
+    sph_list_theta, sph_list_phi = gp.reverse_gnomonic_projection(tangent_x_list, tangent_y_list, tangent_point_theta, tangent_point_phi, hemisphere_list)
+
+    print("{}".format(sph_list_theta[0] - sph_list_theta[1]))
+
+    for idx in range(sph_list_theta.shape[0]):
+        print("Theta: {}, Phi: {} , SameHemiSph: {}".format(sph_list_theta[idx], sph_list_phi[idx], hemisphere_list[idx]))
+
+
 def test_gnomonic_projection():
     """Test reverse gnomonic projection
     """
@@ -85,6 +102,22 @@ def test_gnomonic_projection():
     plt.show()
 
 
+def test_gnomonic_projection_hemisphere_index():
+    """Test sph->GP with hemisphere index.
+    """
+    # tangent point
+    theta_0 = np.radians(0.0)
+    phi_0 = np.radians(0.0)
+
+    # the point in sphere
+    theta = np.radians(np.array([80.0, -100.0, 40.0, -140], np.float))
+    phi = np.radians(np.array([0.0, 0.0, 20.0, -20.0], np.float))
+
+    #
+    x_g, y_g, overflow_label = gp.gnomonic_projection(theta, phi, theta_0, phi_0, True)
+    print("Gnomonic Projection\nx: {} \ny: {} \n {}".format(x_g, y_g, overflow_label))
+
+
 def test_gnomonic_unit():
     """Compute the tangent image's unit.
     The relationship between the tangent image and radius.
@@ -112,3 +145,11 @@ if __name__ == "__main__":
     # test_gnomonic_projection()
     # test_reverse_gnomonic_projection()
     test_gnomonic_unit()
+
+    test_list =[0]
+
+    if 0 in test_list:
+        test_gnomonic_projection_hemisphere_index()
+
+    if 1 in test_list:
+        test_reverse_gnomonic_projection_hemisphere()

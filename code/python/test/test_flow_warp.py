@@ -5,9 +5,22 @@ from utility import flow_warp
 from utility import flow_vis
 from utility import spherical_coordinates as sc
 from utility import image_io
+from utility import flow_io
 from utility import mocker_data_generator as MDG
 
 from scipy.spatial.transform import Rotation as R
+
+def test_warp_forward():
+    data_root = configuration.TEST_data_root_dir + "replica_360/apartment_0/"
+    rgb_filepath = data_root + "0001_rgb.jpg"
+    rgb_data= image_io.image_read(rgb_filepath)
+    of_filepath = data_root + "0001_opticalflow_forward.flo"
+    of_data = flow_io.read_flow_flo(of_filepath)
+
+    rgb_warp_filepath =  data_root + "0001_rgb_warp.jpg"
+    rgb_warp = flow_warp.warp_forward(rgb_data, of_data,wrap_around= True)
+    print("Output warped image to {}".format(rgb_warp_filepath))
+    image_io.image_save(rgb_warp, rgb_warp_filepath)
 
 
 def test_flow2rotation():
@@ -71,8 +84,10 @@ def test_global_rotation_warping():
 
 
 if __name__ == "__main__":
-    test_list = [1]
+    test_list = [2]
     if 0 in test_list:
         test_flow2rotation()
     if 1 in test_list:
         test_global_rotation_warping()
+    if 2 in test_list:
+        test_warp_forward()
