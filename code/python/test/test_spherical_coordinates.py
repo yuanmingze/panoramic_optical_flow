@@ -66,19 +66,167 @@ class TestSphericalCoordinates(unittest.TestCase):
         self.assertTrue(np.allclose(erp_points_from_sph, temp, atol=1e-4, rtol=1e-4))
 
 
+def test_get_angle_ofcolor():
+    """ Test the point from the spherical surface."""
+    points_number = 100
+    r = np.pi * 0.15
+
+    # pointA = np.ones((points_number, 2), dtype=np.float64) * np.pi * 0.25
+    # center point
+    # point_center_u = 0.0
+    # point_center_v = 0.0
+    point_center_u = np.pi * 0.1
+    point_center_v = point_center_u * 0.5
+
+
+    point_center = np.zeros((points_number, 2), dtype=np.float64)
+    point_center[:, 0] = point_center_u
+    point_center[:, 1] = point_center_v
+
+    # points of u
+    point_u = np.zeros((points_number, 2), dtype=np.float64)  # theta, phi
+    # point_u[:, 0] = 0.125 * np.pi  # theta
+    point_u[:, 1] = point_center_v
+
+    # points of v
+    point_v = np.zeros((points_number, 2), dtype=np.float64)
+    point_v[:, 0] = point_center_u
+
+    for idx in range(0, points_number):
+        x = np.cos(2*np.pi / points_number * idx) * r
+        y = -np.sin(2 * np.pi / points_number * idx) * r
+        point_u[idx, 0] = x + point_center_u
+        point_v[idx, 1] = y + point_center_v
+
+    import matplotlib.pyplot as plt
+    # plt.plot(pointC[:, 0], pointC[:, 1])
+    # plt.axis('tight')
+
+    # print(math.degrees((sc.get_angle_from_length(math.radians(76.4111), math.radians(58.31),  math.radians(105.74295)))))  # 118.50778
+    # angle_sph_result = sc.get_angle_uv(point_center[:, 0], point_center[:, 1], point_u[:, 0], point_u[:, 1], point_v[:, 0], point_v[:, 1])
+
+    from utility import polygon
+    # angle_cartesian_result = polygon.get_angle_from_vector(pointB- pointA, pointC-pointA)
+    angle_cartesian_result = spherical_coordinates.get_angle_sph_ofcolor(point_center, point_u, point_v)
+    # print(angle_cartesian_result)
+
+    plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
+    # plt.plot(plt_x_index, angle_sph_result)
+    plt.scatter(plt_x_index, angle_cartesian_result, c=plt_x_index)
+    # plt.plot(plt_x_index, point_u)
+    # plt.plot(plt_x_index, point_v)
+    # plt.plot(point_u[:,0], point_v[:,1])
+    plt.scatter(point_u[:,0], point_v[:,1], c=plt_x_index)
+    plt.colorbar()
+    plt.show()
+
+
+def test_get_angle_uv_random():
+    # 1) random sample
+    rng = np.random.default_rng(12345)
+    points_number = 10
+    points_A_sph_list = np.zeros((points_number, 2), dtype=np.float64)
+    points_A_sph_list[:, 0] = rng.uniform(low=-np.pi, high=np.pi, size=points_number)  # theta
+    points_A_sph_list[:, 1] = rng.uniform(low=-np.pi * 0.5, high=np.pi * 0.5, size=points_number)
+
+    points_B_sph_list = np.zeros((points_number, 2), dtype=np.float64)
+    points_B_sph_list[:, 0] = rng.uniform(low=-np.pi, high=np.pi, size=points_number)
+    points_B_sph_list[:, 1] = rng.uniform(low=-np.pi * 0.5, high=np.pi * 0.5, size=points_number)
+
+    points_C_sph_list = np.zeros((points_number, 2), dtype=np.float64)
+    points_C_sph_list[:, 0] = rng.uniform(low=-np.pi, high=np.pi, size=points_number)
+    points_C_sph_list[:, 1] = rng.uniform(low=-np.pi * 0.5, high=np.pi * 0.5, size=points_number)
+
+    # 2) get length from spherical_geometry
+    import spherical_geometry.great_circle_arc
+    # point_pair_np_3d = sc.erp2sph(point)
+    points_A_car_list = sc.sph2car(points_A_sph_list[:, 0], points_A_sph_list[:, 1])
+    points_B_car_list = sc.sph2car(points_B_sph_list[:, 0], points_B_sph_list[:, 1])
+    points_C_cat_list = sc.sph2car(points_C_sph_list[:, 0], points_C_sph_list[:, 1])
+    angle_sg_degree = spherical_geometry.great_circle_arc.angle(points_B_car_list.T, points_A_car_list.T, points_C_cat_list.T)
+    angle_sg_radian = np.radians(angle_sg_degree)
+    angle_sg_radian[angle_sg_radian > np.pi] = np.pi * 2.0 - angle_sg_radian[angle_sg_radian > np.pi]
+
+    # 3) get length from myself code
+    # length_our_radian = sc.great_circle_distance_uv(points_A_sph_list[:, 0], points_A_sph_list[:, 1], points_B_sph_list[:, 0], points_B_sph_list[:, 1])
+    angle_our_radian = sc.get_angle_sph(points_A_sph_list, points_B_sph_list, points_C_sph_list)
+    result = np.isclose(angle_sg_radian, angle_our_radian, atol=1e-08)
+    assert(result.all())
+
+
+
 def test_get_angle_uv():
     # 0) from http://128.192.17.191/EMAT6680Fa08/Broderick/unit/day2.html
     # print(sc.get_angle_from_length([0.136 * np.pi], [0.303 * np.pi],  [0.226 * np.pi]) / np.pi)  # 0.261
     # print(sc.get_angle_from_length([0.226 * np.pi], [0.303 * np.pi],  [0.136 * np.pi]) / np.pi)  # 0.153
     # print(sc.get_angle_from_length([0.226 * np.pi], [0.136 * np.pi],  [0.303 * np.pi]) / np.pi)  # 0.633
 
-    length_AB_arr = np.array([0.136 * np.pi, 0.226 * np.pi, 0.226 * np.pi])
-    length_AC_arr = np.array([0.303 * np.pi, 0.303 * np.pi, 0.136 * np.pi])
-    length_BC_arr = np.array([0.226 * np.pi, 0.136 * np.pi, 0.303 * np.pi])
-    angle_A_arr = sc.get_angle_from_length(length_AB_arr, length_AC_arr, length_BC_arr)
-    print(angle_A_arr)
 
-    print(math.degrees((sc.get_angle_from_length(math.radians(76.4111), math.radians(58.31),  math.radians(105.74295)))))  # 118.50778
+    # length_AB_arr = np.array([0.136 * np.pi, 0.303 * np.pi, 0.226 * np.pi, 0.226 * np.pi])
+    # length_AC_arr = np.array([0.303 * np.pi, 0.136 * np.pi, 0.303 * np.pi, 0.136 * np.pi])
+    # length_BC_arr = np.array([0.226 * np.pi, 0.226 * np.pi, 0.136 * np.pi, 0.303 * np.pi])
+    # pointA_list = np.array([], dtype=np.float64)
+    # pointB_list = np.array([], dtype=np.float64)
+    # pointC_list = np.array([], dtype=np.float64)
+    # angle_A_arr = sc.get_angle_sph(pointA_list, pointB_list, pointC_list)
+    # print(angle_A_arr)
+
+    points_number = 100
+    r = np.pi * 0.15
+    # center point
+    point_center = np.zeros((points_number, 2), dtype=np.float64)
+    # points of u
+    point_B = np.zeros((points_number, 2), dtype=np.float64)  # theta, phi
+    # points of v
+    point_C = np.zeros((points_number, 2), dtype=np.float64)
+    point_C[:, 0] = 0.2
+
+    for idx in range(0, points_number):
+        x = np.cos(2*np.pi / points_number * idx) * r
+        y = -np.sin(2 * np.pi / points_number * idx) * r
+        point_B[idx, 0] = x  # theta
+        point_B[idx, 1] = y  # phi
+
+    import matplotlib.pyplot as plt
+    angle_cartesian_result = spherical_coordinates.get_angle_sph(point_center,  point_C, point_B)
+    plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
+    # plt.plot(plt_x_index, angle_sph_result)
+    plt.scatter(plt_x_index, angle_cartesian_result, c=plt_x_index)
+    # plt.plot(plt_x_index, point_u)
+    # plt.plot(plt_x_index, point_v)
+    # plt.plot(point_u[:,0], point_v[:,1])
+    plt.scatter(point_B[:, 0], point_B[:, 1], c=plt_x_index)
+    plt.colorbar()
+    plt.show()
+
+
+def test_great_circle_distance_uv_random():
+    # the gt form module: https://pypi.org/project/spherical-geometry/
+
+    # 1) random sample
+    rng = np.random.default_rng(12345)
+    points_number = 100
+    points_src_sph_list = np.zeros((points_number, 2), dtype=np.float64)
+    points_src_sph_list[:, 0] = rng.uniform(low=-np.pi, high=np.pi, size=points_number)  # theta
+    points_src_sph_list[:, 1] = rng.uniform(low=-np.pi * 0.5, high=np.pi * 0.5, size=points_number)
+
+    points_tar_sph_list = np.zeros((points_number, 2), dtype=np.float64)
+    points_tar_sph_list[:, 0] = rng.uniform(low=-np.pi, high=np.pi, size=points_number)
+    points_tar_sph_list[:, 1] = rng.uniform(low=-np.pi * 0.5, high=np.pi * 0.5, size=points_number)
+
+    # 2) get length from spherical_geometry
+    import spherical_geometry.great_circle_arc
+    # point_pair_np_3d = sc.erp2sph(point)
+    points_src_car_list = sc.sph2car(points_src_sph_list[:, 0], points_src_sph_list[:, 1])
+    points_tar_car_list = sc.sph2car(points_tar_sph_list[:, 0], points_tar_sph_list[:, 1])
+    length_sg_degree = spherical_geometry.great_circle_arc.length(points_src_car_list.T, points_tar_car_list.T)
+    length_sg_radian = np.radians(length_sg_degree)
+
+    # 3) get length from myself code
+    length_our_radian = sc.great_circle_distance_uv(points_src_sph_list[:, 0], points_src_sph_list[:, 1], points_tar_sph_list[:, 0], points_tar_sph_list[:, 1])
+
+    result = np.isclose(length_sg_radian, length_our_radian, atol=1e-08)
+    assert(result.all())
 
 
 def test_great_circle_distance_uv():
@@ -97,6 +245,7 @@ def test_great_circle_distance_uv():
     point_pair.append([[0.0, -np.pi / 4.0], [0.0, np.pi / 4.0]])
     point_pair.append([[-np.pi / 4.0, np.pi / 4.0], [np.pi / 4.0, np.pi / 4.0]])
     point_pair.append([[-np.pi / 6.0, -np.pi / 8.0], [np.pi / 4.0, 0.0]])
+    point_pair_np = np.array(point_pair)
     # point_pair.append([[0, -np.pi / 2.0 + 0.001], [0, np.pi / 2.0]])
 
     result = [np.pi / 2.0, np.pi / 2.0, np.pi / 2.0, np.pi / 4.0, np.pi / 2.0, 0.0, np.pi / 2.0, 0.0, 0.0, np.pi / 2, 1.0471975511965979, 1.32933932]
@@ -230,9 +379,19 @@ def test_rotate_array_coord(erp_src_image_filepath):
     image_io.image_save(tar_image_data_rot, erp_src_image_filepath + "_warp_backward_rot.jpg")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=int, help='the task index')
+
+    args = parser.parse_args()
+
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
-    test_list = [2]
+    
+    test_list = []
+    test_list.append(args.task)
+
     if 0 in test_list:
         test_great_circle_distance_uv()
     if 1 in test_list:
@@ -247,3 +406,9 @@ if __name__ == "__main__":
         unittest.main()
     if 6 in test_list:
         test_rotate_erp_array_mat(erp_src_image_filepath)
+    if 7 in test_list:
+        test_get_angle_ofcolor()
+    if 8 in test_list:
+        test_great_circle_distance_uv_random()
+    if 9 in test_list:
+        test_get_angle_uv_random()

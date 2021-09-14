@@ -1,12 +1,14 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from flow_io import flow_read
 import flow_warp
-
 import image_evaluate
 import image_io
+import image_utility
 import spherical_coordinates as sc
+
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from PIL import Image
+import numpy as np
 
 from logger import Logger
 
@@ -78,7 +80,8 @@ def create_colorwheel_bar(image_size):
     flow_wheel = flow_uv_to_colors(xv, yv)
     return flow_wheel
 
-def flow_uv_to_colors(u, v, convert_to_bgr=False):
+
+def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of = False):
     """
     Applies the flow color wheel to (possibly clipped) flow components u and v.
 
@@ -91,16 +94,24 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
     :type v: numpy
     :param convert_to_bgr: Convert output image to BGR. Defaults to False.
     :type convert_to_bgr: bool, optional
+    :param sph_of: if True use the spherical angle
+    :type sph_of: 
     :return: Flow visualization image of shape [H,W,3]
     :rtype: numpy
     """
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
-    # image_io.image_show(np.expand_dim(colorwheel, axis = 1))
+    image_io.image_show(np.expand_dims(colorwheel, axis = 1))
     row_number = colorwheel.shape[0] # ncols is 55
     rad = np.sqrt(np.square(u) + np.square(v))
     # 
-    angle = np.arctan2(-v, -u) / np.pi
+    angle = None
+    if sph_of:
+        angle = np.arctan2(-v, -u) / np.pi # [-1, +1]
+    else:
+        # spherical optical flow 
+        # TODO correct the angle 
+        angle = flow_pix2sphangle(u, v)
     angle_row_idx = (angle + 1) / 2 * (row_number - 1)
     angle_row_idx_floor = np.floor(angle_row_idx).astype(np.int32)
     angle_row_idx_ceil = angle_row_idx_floor + 1
@@ -118,6 +129,47 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False):
         ch_idx = 2-i if convert_to_bgr else i
         flow_image[:, :, ch_idx] = np.floor(255 * color)
     return flow_image
+
+
+def flow_pix2sphangle(u, v):
+    """ Get the geo angle from U and V.
+
+    :param u: The U of erp optical flow, [height, width]
+    :type u: numpy
+    :param v: The V of erp optical flow, [height, width]
+    :type v: numpy
+    :return: The spherical angle, [height, width]
+    :rtype: numpy
+    """
+    height = u.shape[0]
+    width = u.shape[1]
+    start_points_erp = image_utility.get_erp_image_meshgrid(height)
+    start_points_sph = sc.erp2sph(np.stack((start_points_erp[0, :, :], start_points_erp[1, :, :])))
+
+    # u, v end points
+    end_pixel = flow_warp.flow_warp_meshgrid(u, v)
+    end_points_sph = sc.erp2sph(end_pixel)
+    end_points_sph_u = np.zeros((2, height, width), dtype=np.float64)
+    end_points_sph_u[0, :] = end_points_sph[0, :, :]  # theta
+    end_points_sph_u[1, :] = start_points_sph[0, :, :]  # phi
+
+    end_points_sph_v = np.zeros((2, height, width), dtype=np.float64)
+    end_points_sph_v[0, :] = start_points_sph[0, :, :]
+    end_points_sph_v[1, :] = end_points_sph[1, :, :]
+
+    start_points_sph = start_points_sph.reshape((2, -1))
+    end_points_sph_v = end_points_sph_v.reshape((2, -1))
+    end_points_sph_u = end_points_sph_u.reshape((2, -1))
+    # get the angle
+    # TODO update with new function
+    # angle_mat = sc.get_angle_sph(start_sph_u, start_sph_v,
+    #                             start_sph_u, end_sph_v,
+    #                             end_sph_u, start_sph_v)
+
+    angle_mat = sc.get_angle_sph_ofcolor(start_points_sph.T, end_points_sph_u.T, end_points_sph_v.T)
+    angle_mat = angle_mat.reshape((height, width))
+    # TODO debug
+    return angle_mat
 
 
 def flow_pix2geo(u, v):
@@ -210,7 +262,22 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
                                        box_alignment=(0., 0.5))
         ax.add_artist(colorwheel_ab)
         ax.imshow(flow_colored)
-        plt.show()
+        # plt.show()
+        fig.dpi = 100.0
+        wi, hi = fig.get_size_inches()
+        fig.set_size_inches(hi* (10.0 /4.0), hi)
+
+        # convet to numpy
+        fig.canvas.draw()  # draw the renderer
+        w, h = fig.canvas.get_width_height()  # Get the RGBA buffer from the figure
+        buf = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
+        buf.shape = (w, h, 3)
+        image = Image.frombytes("RGB", (w, h), buf.tostring())
+        flow_colored = np.asarray(image)
+        # plt.close(fig)
+        plt.clf()
+        plt.cla()
+        plt.close("all")
     return flow_colored
 
 

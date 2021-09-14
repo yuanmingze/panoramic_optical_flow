@@ -1,4 +1,5 @@
 import configuration as config
+import mocker_data_generator as MDG
 
 
 from utility import image_io
@@ -19,12 +20,23 @@ def vis_of_folder(data_dir):
 
         if filename.endswith(".flo"):  # and filename == "0002_R_motionvector_forward.flo":
             of_data = flow_io.read_flow_flo(data_dir + filename)
-            of_data = flow_postproc.erp_of_unwraparound(of_data)
-            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.3, max_ratio=0.7, sph_of = False)  # ,  min_ratio=0.3, max_ratio=0.97)
+            # of_data = flow_postproc.erp_of_unwraparound(of_data)
+            of_data = flow_postproc.erp_of_wraparound(of_data)
+            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.0, max_ratio=0.7, add_bar = True, sph_of=False)  # ,  min_ratio=0.3, max_ratio=0.97)
+            # image_io.image_show(of_data_vis)
             image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
             # of_data_vis = flow_vis.flow_value_to_color(of_data, min_ratio=0.2, max_ratio=0.8)
             # print("visual optical flow {}".format(filename))
             # of_data_vis_uv = flow_vis.flow_max_min_visual(of_data, None)#"D:/1.jpg")
+
+
+def test_flow_pix2angle():
+    """ """
+    erp_image_height = 400
+    erp_opticalflow = MDG.erp_opticalflow_simple(erp_image_height)
+
+    flow_angle = flow_vis.flow_pix2sphangle(erp_opticalflow[0, :, :], erp_opticalflow[1, :, :])
+    image_io.image_show(flow_angle)
 
 
 def test_create_colorwheel_bar():
@@ -56,10 +68,20 @@ def test_flow_uv_to_colors():
     u = np.full((image_width, image_height), 3, dtype=np.float64)
     v = np.full((image_width, image_height), 0, dtype=np.float64)
 
-    flow_vis.flow_uv_to_colors(u, v, )
+    flow_vis.flow_uv_to_colors(u, v)
 
 
 if __name__ == "__main__":
+
+    root_dir = "/mnt/sda1/workdata/opticalflow_data/replica_360/office_0/"
+    data_dir = root_dir + "replica_seq_data/"
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=int, help='the task index')
+
+    args = parser.parse_args()
 
     # data_dir = "D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/"
     # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/cubemap/"
@@ -71,10 +93,11 @@ if __name__ == "__main__":
     # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/result/raft/"
     # data_dir = config.TEST_data_root_dir + "/replica_360/apartment_0_line_1k_0/cubemap_flo/"
     # data_dir = config.TEST_data_root_dir + "/replica_360/office_0_line_cubemap_stitch_debug/cubemap_flo/"
-    data_dir = config.TEST_data_root_dir + "replica_360_cubemap/office_0_line_pano/"
+    data_dir = config.TEST_data_root_dir + "replica_360_cubemap/office_0_circ_pano/"
 
+    test_list = []
+    test_list.append(args.task)
 
-    test_list = [0]
     if 0 in test_list:
         vis_of_folder(data_dir)
     if 1 in test_list:
@@ -85,3 +108,5 @@ if __name__ == "__main__":
         test_flow_pix2geo_0()
     if 4 in test_list:
         test_flow_uv_to_colors()
+    if 5 in test_list:
+        test_flow_pix2angle()

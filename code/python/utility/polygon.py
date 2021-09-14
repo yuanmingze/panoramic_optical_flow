@@ -354,3 +354,36 @@ def enlarge_polygon(old_points, offset):
         enlarged_points.append(lines_intersect)
 
     return enlarged_points
+
+
+def get_angle_from_vector(vector1, vector2):
+    """Get the angle (radian) form two vectors.
+
+    :param vector1: The vector data, size is [length, 3].
+    :type vector1: numpy
+    :param vector2: The vector data, size is [length, 3].
+    :type vector2: numpy
+    :return: The angle between two vectors, [0, pi]
+    :rtype: numpy 
+    """
+    data_number = vector1.shape[0]
+    dim_number = vector1.shape[1]
+    vector1_ = None
+    vector2_ = None
+    if dim_number == 2:
+        vector1_ = np.zeros((data_number, 3), dtype=np.float64)
+        vector1_[:, 0:2] = vector1
+        vector2_ = np.zeros((data_number, 3), dtype=np.float64)
+        vector2_[:, 0:2] = vector2
+    elif dim_number == 3:
+        vector1_ = vector1
+        vector2_ = vector2
+    else:
+        log.error("Just suport dimension 2 and 3 vector.")
+
+    unit_vector_1 = vector1_ / np.linalg.norm(vector1_, ord=None, axis=1).reshape(data_number, 1)
+    unit_vector_2 = vector2_ / np.linalg.norm(vector2_, ord=None, axis=1).reshape(data_number, 1)
+    dot_product = np.dot(unit_vector_1, unit_vector_2.T)
+    dot_product = np.diag(dot_product)
+    angle = np.arccos(dot_product)
+    return angle

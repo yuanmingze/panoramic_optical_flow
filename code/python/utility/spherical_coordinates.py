@@ -32,9 +32,9 @@ def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, point
     @see great_circle_distance (haversine distances )
     https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.haversine_distances.html
 
-    :param points_1_theta: theta in radians
+    :param points_1_theta: theta in radians, size is [N]
     :type points_1_theta : numpy
-    :param points_1_phi: phi in radians
+    :param points_1_phi: phi in radians, size is [N]
     :type points_1_phi : numpy
     :param points_2_theta: radians
     :type points_2_theta: float
@@ -54,61 +54,100 @@ def great_circle_distance_uv(points_1_theta, points_1_phi, points_2_theta, point
     return np.abs(radius * central_angle_delta)
 
 
-def get_angle(points_A, points_B, points_C):
+def get_angle_sph_ofcolor(points_center, points_u, points_v):
+    """
+    A triangle's angle between center_point, u and v on the surface of a sphere.
+    The angle range is [0, 2*pi], and angle is from cu to cv on clock-wise direction.
+
+    :param points_center: The pixel point location, The (theta, phi) radian of point A on sphere, [point_number, 2].
+    :type points_center: numpy
+    :param points_u: The U (horizontal), theta part of optical flow, [point_number, 2].
+    :type points_u: numpy
+    :param points_v: The V (vertical), phi part of the optical flow, [point_number, 2].
+    :type points_v: numpy
+    :return: the angle between cu and uv, radian
+    :rtype: numpy
+    """
+    # 1) get the quadrants
+    #TODO process the u or v equal 0
+    u_sign_positive_0 = points_u[:, 0] > points_center[:, 0]
+    u_sign_positive_1 = np.logical_and(points_center[:, 0] > 0, points_u[:, 0] < 0)
+    u_sign_positive_1 = np.logical_and(u_sign_positive_1, (np.pi - points_center[:, 0] + (points_u[:, 0] - (-np.pi))) < np.pi)
+    u_sign_positive = np.logical_or(u_sign_positive_0, u_sign_positive_1)
+
+    v_sign_positive_0 = points_v[:, 1] > points_center[:, 1]
+    v_sign_positive_1 = np.logical_and(points_center[:, 1] > 0, points_v[:, 1] < 0)
+    v_sign_positive_1 = np.logical_and(v_sign_positive_1,  ((0.5*np.pi - points_center[:, 0]) + (0.5 * np.pi + points_v[:, 0])) < np.pi)
+    v_sign_positive = np.logical_or(v_sign_positive_0, v_sign_positive_1)
+
+    quadrants_index = np.zeros_like(u_sign_positive, dtype=np.int64)
+    quadrants_index[np.logical_and(v_sign_positive, u_sign_positive)] = 1
+    quadrants_index[np.logical_and(v_sign_positive, ~u_sign_positive)] = 2
+    quadrants_index[np.logical_and(~v_sign_positive, ~u_sign_positive)] = 3
+    quadrants_index[np.logical_and(~v_sign_positive, u_sign_positive)] = 4
+
+    # 2) get the angle
+    length_cu = great_circle_distance_uv(points_center[:, 0], points_center[:, 1], points_u[:, 0], points_u[:, 1], radius=1)
+    length_cv = great_circle_distance_uv(points_center[:, 0], points_center[:, 1], points_v[:, 0], points_v[:, 1], radius=1)
+    length_uv = great_circle_distance_uv(points_u[:, 0], points_u[:, 1], points_v[:, 0], points_v[:, 1], radius=1)
+
+    # with tangent two avoid the error of Float
+    s = 0.5 * (length_uv + length_cv + length_cu)
+    numerator = np.sin(s-length_cu) * np.sin(s-length_uv)
+    denominator = np.sin(s) * np.sin(s-length_cv)
+    if (denominator == 0).any():
+        # log.warn("The angle_A contain NAN")
+        denominator[denominator == 0] = pow(0.1, 10)
+    temp_data = numerator / denominator
+    angle_cv = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
+    # angle_A = 2*np.pi - angle_A # second solution
+
+    # check constraints
+    indices_1 = (np.abs(np.pi - length_cu) - np.abs(np.pi-length_cv)) > np.abs(np.pi-length_uv)
+    indices_2 = (np.abs(np.pi-length_uv) > (np.abs(np.pi-length_cu) + np.abs(np.pi-length_cv)))
+    indices = np.logical_or(indices_1, indices_2)
+    if indices.any():
+        log.warn("side length check constraints wrong.")
+        angle_cv[indices] = 2*np.pi - angle_cv[indices]
+
+    # 3) correct the quadrants, increasing clockwise and start from +u.
+    angle_cv[quadrants_index == 3] = -angle_cv[quadrants_index == 3] + np.pi
+    angle_cv[quadrants_index == 2] = angle_cv[quadrants_index == 2] + np.pi
+    angle_cv[quadrants_index == 1] = -angle_cv[quadrants_index == 1] + 2.0 * np.pi
+    return angle_cv
+
+
+def get_angle_sph(points_A, points_B, points_C):
     """
     A triangle's angle between AB and AC on the surface of a sphere.
+    
+    https://mathworld.wolfram.com/SphericalTrigonometry.html
+    https://en.wikipedia.org/wiki/Spherical_trigonometry
 
-    Reference: https://en.wikipedia.org/wiki/Spherical_trigonometry
-               https://mathworld.wolfram.com/SphericalTrigonometry.html
+    Half-angle and half-side formule: 
+    https://en.wikipedia.org/wiki/Solution_of_triangles#Solving_spherical_triangles
 
-    :param points_A: The (theta, phi) radian of point A on sphere.
-    :type points_A: list or tuple
-    :param points_B: 
+  
+    :param points_A: The (theta, phi) radian of point A on sphere, [point_number, 2]
+    :type points_A: numpy
+    :param points_B: The (theta, phi) radian of point B on sphere, [point_number, 2]
     :type points_B: list or tuple
-    :param points_C: 
-    :type points_C: list or tuple
-    :return: the angle between AB and AC
+    :param points_C: The (theta, phi) radian of point C on sphere, [point_number, 2]
+    :type points_C: numpy
+    :return: the angle between AB and AC, alway return the smaller angle which is in range [0, +pi]
+    :rtype: numpy
     """
-    points_A_theta = points_A[0]
-    points_A_phi = points_A[1]
-    points_B_theta = points_B[0]
-    points_B_phi = points_B[1]
-    points_C_theta = points_C[0]
-    points_C_phi = points_C[1]
-    return get_angle_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, points_C_theta, points_C_phi)
+    points_A_theta = points_A[:,0]
+    points_A_phi = points_A[:,1]
+    points_B_theta = points_B[:,0]
+    points_B_phi = points_B[:,1]
+    points_C_theta = points_C[:,0]
+    points_C_phi = points_C[:,1]
 
-
-def get_angle_uv(points_A_theta, points_A_phi,
-                 points_B_theta, points_B_phi,
-                 points_C_theta, points_C_phi):
-    """
-    @see get_angle
-    :return: the angle between AB and AC
-    """
     length_AB = great_circle_distance_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, radius=1)
     length_AC = great_circle_distance_uv(points_A_theta, points_A_phi, points_C_theta, points_C_phi, radius=1)
     length_BC = great_circle_distance_uv(points_B_theta, points_B_phi, points_C_theta, points_C_phi, radius=1)
-    return get_angle_from_length(length_AB, length_AC,  length_BC)
 
-
-def get_angle_from_length(length_AB, length_AC,  length_BC):
-    """
-    return the angle in radians between length_AB and length_AC.
-    
-    https://en.wikipedia.org/wiki/Spherical_trigonometry 
-     Half-angle and half-side formulae
-
-    https://en.wikipedia.org/wiki/Solution_of_triangles#Solving_spherical_triangles
-   
-    :param length_AB: the side length of AB
-    :type length_AB: numpy 
-    :param length_AC: the side length of AC
-    :type length_AC: numpy
-    :param length_BC: the side length of BC
-    :type length_BC: numpy
-    :return: the angle between length_AB and length_AC.
-    :rtype: numpy
-    """
     # # with the arccos
     # data = (np.cos(length_BC) - np.cos(length_AC) * np.cos(length_AB)) / (np.sin(length_AC) * np.sin(length_AB))
     # # remove the float error
@@ -128,21 +167,21 @@ def get_angle_from_length(length_AB, length_AC,  length_BC):
     numerator = np.sin(s-length_AC) * np.sin(s-length_AB)
     denominator = np.sin(s) * np.sin(s-length_BC)
     if (denominator == 0).any():
-        # log.warn("The angle_A contain NAN")
+        log.warn("The angle_A contain NAN")
         denominator[denominator == 0] = pow(0.1, 10)
     temp_data = numerator / denominator
     angle_A = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
     # angle_A = 2*np.pi - angle_A # second solution
 
-    # check constraints
-    indices_1 = (np.abs(np.pi - length_AB) - np.abs(np.pi-length_AC)) > np.abs(np.pi-length_BC)
-    indices_2 = (np.abs(np.pi-length_BC) > (np.abs(np.pi-length_AB) + np.abs(np.pi-length_AC)))
-    indices = np.logical_or(indices_1, indices_2)
-    if indices.any():
-        log.warn("side length check constraints wrong.")
-        angle_A[indices] = 2*np.pi - angle_A[indices]
+    # # check constraints
+    # indices_1 = (np.abs(np.pi - length_AB) - np.abs(np.pi-length_AC)) > np.abs(np.pi-length_BC)
+    # indices_2 = (np.abs(np.pi-length_BC) > (np.abs(np.pi-length_AB) + np.abs(np.pi-length_AC)))
+    # indices = np.logical_or(indices_1, indices_2)
+    # if indices.any():
+    #     log.warn("side length check constraints wrong.")
+    #     print(indices)
+    #     angle_A[indices] = 2*np.pi - angle_A[indices]
     return angle_A
-
 
 
 def erp_pixel_modulo_0(erp_points_list, image_height):

@@ -121,11 +121,60 @@ def test_is_clockwise():
     point_list = [[0, 1], [-1, 0], [1, 0]]
     assert(polygon.is_clockwise(point_list) == False)
 
+def test_get_angle_from_vector():
+    points_number = 4
+    vector1 = np.zeros((points_number, 3), dtype= np.float64)
+    vector2 = np.zeros((points_number, 3), dtype= np.float64)
 
-if __name__ == "__main__":
-    # test_find_intersection()
-    # test_find_intersection_array()
-    # test_enlarge_polygon()
-    # test_is_clockwise()
-    test_detect_intersection_segments()
-    test_detect_intersection_segments_array()
+    # set the data
+    vector1[:, 0] = 0
+    vector1[:, 1] = 1
+    vector1[:, 2] = 0
+    vector2[0, :] = [1, 1, 0]
+    vector2[1, :] = [-1, 1, 0]
+    vector2[2, :] = [-1, -1, 0]
+    vector2[3, :] = [1, -1, 0]
+
+    # get the euler angle
+    angle_list = polygon.get_angle_from_vector(vector1, vector2)
+    angle_list = np.degrees(angle_list)
+    print("Test 3D: The angle is \n{}".format(angle_list))
+
+    vector1 = np.zeros((points_number, 2), dtype= np.float64)
+    vector2 = np.zeros((points_number, 2), dtype= np.float64)
+
+    # set the data
+    vector1[:, 0] = 0
+    vector1[:, 1] = 1
+    vector2[0, :] = [1, 1]
+    vector2[1, :] = [-1, 1]
+    vector2[2, :] = [-1, -1]
+    vector2[3, :] = [1, -1]
+    # get the euler angle
+    angle_list = polygon.get_angle_from_vector(vector1, vector2)
+    angle_list = np.degrees(angle_list)
+    print("Test 2D: The angle is \n{}".format(angle_list))
+
+
+if __name__ == "__main__": 
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=int, help='the task index')
+
+    args = parser.parse_args()
+
+    erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
+    
+    test_list = []
+    test_list.append(args.task)
+
+    if 0 in test_list:
+        test_get_angle_from_vector()
+    if 1 in test_list:
+        # test_find_intersection()
+        # test_find_intersection_array()
+        # test_enlarge_polygon()
+        # test_is_clockwise()
+        test_detect_intersection_segments()
+        test_detect_intersection_segments_array()

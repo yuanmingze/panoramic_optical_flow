@@ -4,7 +4,7 @@ import configuration as config
 import flow_estimate
 import flow_vis
 import flow_warp
-import spherical_coordinates 
+import spherical_coordinates
 
 from utility import projection
 from utility import image_io
@@ -70,7 +70,7 @@ def test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath):
     src_image_data = image_io.image_read(erp_src_image_filepath)
     tar_image_data = image_io.image_read(erp_tar_image_filepath)
     # flow_array = flow_estimate.of_methdod_DIS(src_image_data, tar_image_data)
-    
+
     # theta, phi
     rotation_list = [(-20, 10.0), (30.0, -10.0), (30.0, 15.0), (-30.0, 15.0), (-25.0, -13.0)]
     for rotation in rotation_list:
@@ -84,6 +84,30 @@ def test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath):
               format(np.degrees(rotation_theta), np.degrees(rotation_phi), np.degrees(theta_delta), np.degrees(phi_delta)))
 
 
+def get_padding_vs_fov_plot():
+    """ Plot the relationship between the padding and FoV. """
+    points_number = 200
+    padding_list = np.linspace(0.0, 20.0, points_number, endpoint=True)
+
+    fov_h_list = []
+    fov_v_list = []
+
+    for padding_size in padding_list:
+        cam_param = projection.ico_projection_cam_params(padding_size=padding_size)
+        fov_h_list.append(np.rad2deg(cam_param[7]["fov_h"]))
+        fov_v_list.append(np.rad2deg(cam_param[7]["fov_v"]))
+
+    import matplotlib.pyplot as plt
+    # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
+    fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='fov_h')  # ,c=plt_x_index)
+    fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='fov_v')  # ,c=plt_x_index)
+    plt.xlabel("FoV degree")
+    plt.ylabel("padding_size")
+    plt.legend(handles=[fov_h_not, fov_v_not])
+    # plt.colorbar()
+    plt.show()
+
+
 if __name__ == "__main__":
     erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
     erp_tar_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0002_rgb.jpg")
@@ -91,7 +115,27 @@ if __name__ == "__main__":
     erp_flow_gt_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_opticalflow_forward.flo")
     erp_flow_dis_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb_cubemap/cubemap_flo_dis_padding_stitch.flo")
 
-    # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
-    # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
-    # test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)
-    test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=int, help='the task index')
+
+    args = parser.parse_args()
+
+    erp_src_image_filepath = os.path.join(config.TEST_data_root_dir, "replica_360/apartment_0/0001_rgb.jpg")
+
+    test_list = []
+    test_list.append(args.task)
+
+    if 1 in test_list:
+        # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
+        # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
+        test_get_rotation()
+    if 2 in test_list:
+        # test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)
+        test_flow_accumulate_endpoint()
+    if 3 in test_list:
+        # test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath)
+        test_flow2rotation_2d()
+    if 4 in test_list:
+        get_padding_vs_fov_plot()

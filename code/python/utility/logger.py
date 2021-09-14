@@ -58,6 +58,7 @@ class Logger:
 
         # create console handler and set level to debug
         handler = logging.StreamHandler()
+        # handler.setLevel(logging.DEBUG)
         handler.setLevel(logging.INFO)
         # add formatter
         handler.setFormatter(CustomFormatter())

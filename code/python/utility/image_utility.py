@@ -10,7 +10,7 @@ log.logger.propagate = False
 
 
 def image_file_resize(image_input_filepath, image_output_filepath, image_height=None, image_width=None, resize_ratio=1.0):
-    """[summary]
+    """ Resize image files.
 
     :param image1_filepath: The input image file path.
     :type image1_filepath: str
@@ -32,11 +32,11 @@ def image_resize(image_data, image_size=None, image_ratio=None):
     """ Resize image
 
     :param image_data: [description]
-    :type image_data: [type]
-    :param image_size: [description], defaults to None
-    :type image_size: [type], optional
+    :type image_data: numpy
+    :param image_size: Resize image's size, defaults to None
+    :type image_size: tuple, optional
     :param image_ratio: [description], defaults to None
-    :type image_ratio: [type], optional
+    :type image_ratio: float, optional
     :return: [description]
     :rtype: [type]
     """
@@ -44,3 +44,17 @@ def image_resize(image_data, image_size=None, image_ratio=None):
         image_size = [size * image_ratio for size in image_data.shape[:2]]
     image_rescaled = resize(image_data, image_size, anti_aliasing=True, preserve_range=True)
     return image_rescaled
+
+
+def get_erp_image_meshgrid(erp_height):
+    """Get the erp image's mesh grid.
+
+    :return: The erp image's meshgrid, [2, height, width]
+    :rtype: numpy
+    """
+    erp_width = 2 * erp_height
+    x_index = np.linspace(0, erp_width - 1, erp_width)
+    y_index = np.linspace(0, erp_height - 1, erp_height)
+    x_array, y_array = np.meshgrid(x_index, y_index)
+
+    return np.stack((x_array, y_array))

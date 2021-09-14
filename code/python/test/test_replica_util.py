@@ -45,7 +45,8 @@ def test_cubemap_optical_flow_withwraparound():
 
     # # test optical flow warp around
     dataroot_dir = config.TEST_data_root_dir
-    optical_flow_dir = dataroot_dir + "replica_360_cubemap/office_0_line_cubemap/"
+    optical_flow_dir = dataroot_dir + "replica_360_cubemap/office_0_circ_cubemap/"
+    optical_flow_gt_dir = dataroot_dir + "replica_360_cubemap/office_0_circ_pano/"
 
     # 1) load the flow file to memory
     face_flows = []
@@ -69,13 +70,12 @@ def test_cubemap_optical_flow_withwraparound():
         wraparound_data = replica_util.opticalflow_warparound(of_depth_data)
         face_flows_wraparound.append(wraparound_data)
         
-        if index == 'L':
+        if index == 'x':
             image_io.image_show(flow_vis.flow_to_color(face_flow_data,min_ratio=0.2, max_ratio=0.8, add_bar = True))
             flow_vis.flow_value_to_color(face_flow_data)
             image_io.image_show(of_depth_data)
             # rgb_data = image_io.image_read(optical_flow_dir + face_rgb_name_expression.format(index))
             # rgb_data_warp = flow_warp.warp_forward_padding(rgb_data, face_flow_data, padding_x=1000, padding_y=1000)
-            # import ipdb; ipdb.set_trace()
             # image_io.image_show(rgb_data_warp)
 
     # 2) test stitch the cubemap flow. Note enable test 3
@@ -91,7 +91,7 @@ def test_cubemap_optical_flow_withwraparound():
     erp_flow_stitch_name = optical_flow_dir + "0001_motionvector_backward.flo.jpg"
     image_io.image_save(face_flow_vis, erp_flow_stitch_name)
     # forward warp the source image
-    rgb_data = image_io.image_read(optical_flow_dir + "0001_rgb_pano.jpg")
+    rgb_data = image_io.image_read(optical_flow_gt_dir + "0001_rgb_pano.jpg")
     from utility import image_utility
     rgb_data = image_utility.image_resize(rgb_data, erp_flow_stitch.shape[:2])
     rgb_data_forward_warp = flow_warp.warp_forward(rgb_data, erp_flow_stitch, wrap_around=True)

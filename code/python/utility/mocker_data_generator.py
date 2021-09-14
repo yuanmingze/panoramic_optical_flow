@@ -74,3 +74,17 @@ def erp_image_square(image_height=300):
     rgb_data = (rgb_data * 255.0).astype(np.uint8)
     rgb_data = rgb_data.reshape((image_height, image_height * 2, 3))
     return rgb_data
+
+
+def erp_opticalflow_simple(erp_image_height):
+    """ Create the mock optical flow data.
+
+    :param erp_image_height: [2, height, width], float 64
+    :type erp_image_height: [type]
+    """
+    erp_image_width = 2 * erp_image_height
+    of_data = np.zeros((2, erp_image_height, erp_image_width), np.float64)
+
+    of_data[0, :, :] = 10
+    of_data[1, :, :] = 10
+    return of_data

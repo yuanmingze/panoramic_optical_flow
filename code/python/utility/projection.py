@@ -4,6 +4,8 @@ from scipy import ndimage
 import flow_postproc
 import polygon
 import spherical_coordinates as sc
+import projection_icosahedron as proj_ico
+from scipy.spatial.transform import Rotation as R
 
 from logger import Logger
 log = Logger(__name__)
@@ -215,3 +217,123 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
     if wraparound:
         flow_rotated = flow_postproc.erp_of_wraparound(flow_rotated)
     return  flow_rotated
+
+
+def ico_padding2fov(padding_size = 0.0):
+    """
+    Convert the ico projection with padding to FoV parameters.
+
+    """
+
+
+    pass
+
+def cube_padding2fov(padding_size = 0.0):
+    """
+
+    """
+
+    pass
+
+
+
+
+def tangent_image_resolution(erp_image_width, padding_size):
+    """Get the suggested tangent image resolution base on the FoV.
+
+    :param erp_image_width: [description]
+    :type erp_image_width: [type]
+    :param padding_size: [description]
+    :type padding_size: [type]
+    :return: recommended tangent image size in pixel.
+    :rtype: int
+    """
+    # camera intrinsic parameters
+    ico_param_list = proj_ico.get_icosahedron_parameters(7, padding_size)
+    triangle_points_tangent = ico_param_list["triangle_points_tangent"]
+    # compute the tangent image resoution.
+    tangent_points_x_min = np.amin(np.array(triangle_points_tangent)[:, 0])
+    fov_h = np.abs(2 * np.arctan2(tangent_points_x_min, 1.0))
+    tangent_image_width = erp_image_width * (fov_h / (2 * np.pi))
+    tangent_image_height = 0.5 * tangent_image_width / np.tan(np.radians(30.0))
+    return int(tangent_image_width + 0.5), int(tangent_image_height + 0.5)
+
+
+def ico_projection_cam_params(image_width = 400, padding_size=0):
+    """    
+    Figure out the camera intrinsic parameters for 20 faces of icosahedron.
+    It does not need camera parameters.
+
+    :param image_width: Tangent image's width, the image height derive from image ratio.
+    :type image_width: int
+    :param padding_size: The tangent face padding size, defaults to 0
+    :type padding_size: float, optional
+    :return: 20 faces camera parameters.
+    :rtype: list
+    """
+    # camera intrinsic parameters
+    ico_param_list = proj_ico.get_icosahedron_parameters(7, padding_size)
+    tangent_point = ico_param_list["tangent_point"]
+    triangle_points_tangent = ico_param_list["triangle_points_tangent"]
+
+    # use tangent plane
+    tangent_points_x_min = np.amin(np.array(triangle_points_tangent)[:, 0])
+    tangent_points_y_min = np.amin(np.array(triangle_points_tangent)[:, 1])
+    tangent_points_y_max = np.amax(np.array(triangle_points_tangent)[:, 1])
+    fov_v = np.abs(np.arctan2(tangent_points_y_min, 1.0)) + np.abs(np.arctan2(tangent_points_y_max, 1.0))
+    fov_h = np.abs(2 * np.arctan2(tangent_points_x_min, 1.0))
+
+    log.debug("Pin-hole camera fov_h: {}, fov_v: {}".format(np.degrees(fov_h), np.degrees(fov_v)))
+
+    # image aspect ratio, the triangle is equilateral triangle
+    image_height = 0.5 * image_width / np.tan(np.radians(30.0))
+    fx = 0.5 * image_width / np.tan(fov_h * 0.5)
+    fy = 0.5 * image_height / np.tan(fov_v * 0.5)
+
+    cx = (image_width - 1) / 2.0
+    # invert and upright triangle cy
+    cy_invert = 0.5 * (image_width - 1.0) * np.tan(np.radians(30.0)) + 10.0
+    cy_up = 0.5 * (image_width - 1.0) / np.sin(np.radians(60.0)) + 10.0
+
+    subimage_cam_param_list = []
+    for index in range(0, 20):
+        # intrinsic parameters
+        cy = None
+        if 0 <= index <= 4:
+            cy = cy_up
+        elif 5 <= index <= 9:
+            cy = cy_invert
+        elif 10 <= index <= 14:
+            cy = cy_up
+        else:
+            cy = cy_invert
+
+        intrinsic_matrix = np.array([[fx, 0, cx],
+                                     [0, fy, cy],
+                                     [0, 0, 1]])
+
+        # rotation
+        ico_param_list = proj_ico.get_icosahedron_parameters(index, padding_size)
+        tangent_point = ico_param_list["tangent_point"]
+        # print(tangent_point)
+        rot_y = tangent_point[0]
+        rot_x = tangent_point[1]
+        rotation = R.from_euler("zyx", [0.0, -rot_y, -rot_x], degrees=False)
+        rotation_mat = rotation.as_matrix()
+
+        params = {'rotation': rotation_mat,
+                  'translation': np.array([0, 0, 0]),
+                  "fov_h" : fov_h,
+                  "fov_v": fov_v,
+                  'intrinsic': {
+                      'image_width': image_width,
+                      'image_height': image_height,
+                      'focal_length_x': fx,
+                      'focal_length_y': fy,
+                      'principal_point': [cx, cy],
+                      'matrix': intrinsic_matrix}
+                  }
+
+        subimage_cam_param_list.append(params)
+
+    return subimage_cam_param_list
