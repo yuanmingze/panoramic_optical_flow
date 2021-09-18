@@ -88,30 +88,32 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of = False):
     According to the C++ source code of Daniel Scharstein
     According to the Matlab source code of Deqing Sun
 
-    :param u:  Input normalized horizontal flow, shape [H,W].
+    Spherical optical flow the u and v is pixel offset on ERP image space, do not need to normalize.
+
+    :param u: If spherical, u is pixel offset. if perspectiveInput, it's normalized horizontal flow, shape [H,W].
     :type u: numpy
-    :param v: Input normalized vertical flow, shape [H,W].
+    :param v: If spherical, u is pixel offset. if perspectiveInput, it's normalized vertical flow, shape [H,W].
     :type v: numpy
     :param convert_to_bgr: Convert output image to BGR. Defaults to False.
     :type convert_to_bgr: bool, optional
-    :param sph_of: if True use the spherical angle
+    :param sph_of: if True use the spherical optical flow
     :type sph_of: 
     :return: Flow visualization image of shape [H,W,3]
     :rtype: numpy
     """
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
-    image_io.image_show(np.expand_dims(colorwheel, axis = 1))
+    # image_io.image_show(np.expand_dims(colorwheel, axis = 1))
     row_number = colorwheel.shape[0] # ncols is 55
-    rad = np.sqrt(np.square(u) + np.square(v))
     # 
     angle = None
     if sph_of:
-        angle = np.arctan2(-v, -u) / np.pi # [-1, +1]
+        # get the geodesic distance and spherical angle
+        rad = flow_pix2geo(u, v) 
+        angle = flow_pix2sphangle(u, v) / np.pi - 1.0 # spherical optical flow 
     else:
-        # spherical optical flow 
-        # TODO correct the angle 
-        angle = flow_pix2sphangle(u, v)
+        rad = np.sqrt(np.square(u) + np.square(v))
+        angle = np.arctan2(-v, -u) / np.pi # [-1, +1]
     angle_row_idx = (angle + 1) / 2 * (row_number - 1)
     angle_row_idx_floor = np.floor(angle_row_idx).astype(np.int32)
     angle_row_idx_ceil = angle_row_idx_floor + 1
@@ -172,6 +174,9 @@ def flow_pix2sphangle(u, v):
     # get the angle
     angle_mat = sc.get_angle_sph_ofcolor(start_points_sph.T, end_points_sph_u.T, end_points_sph_v.T)
     angle_mat = angle_mat.reshape((height, width))
+
+    # Modulo
+    angle_mat = np.remainder(angle_mat, np.pi * 2)
     return angle_mat
 
 
@@ -229,17 +234,17 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
         flow_uv = np.clip(flow_uv, clip_flow[0], clip_flow[1])
     u = flow_uv[:, :, 0]
     v = flow_uv[:, :, 1]
-    # normalize optical flow
     if sph_of:
-        # get the geodesic distance
-        rad = flow_pix2geo(u, v)
+        u_norm = u
+        v_norm = v
     else:
+        # normalize optical flow
         rad = np.sqrt(np.square(u) + np.square(v))
-    rad_max = np.max(rad)
-    epsilon = 1e-5
-    u_norm = u / (rad_max + epsilon)
-    v_norm = v / (rad_max + epsilon)
-    flow_colored = flow_uv_to_colors(u_norm, v_norm, convert_to_bgr)
+        rad_max = np.max(rad)
+        epsilon = 1e-5
+        u_norm = u / (rad_max + epsilon)
+        v_norm = v / (rad_max + epsilon)
+    flow_colored = flow_uv_to_colors(u_norm, v_norm, convert_to_bgr, sph_of)
     # add color wheel and range to image
     if add_bar:
         fig, ax = plt.subplots()

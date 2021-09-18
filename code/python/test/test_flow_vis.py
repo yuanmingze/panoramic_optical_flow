@@ -43,6 +43,12 @@ def test_flow_pix2angle():
     image_io.image_show(flow_angle)
 
 
+def test_flow_to_color():
+    of_file_path = config.TEST_data_root_dir + "replica_360/apartment_0/0001_opticalflow_forward.flo"
+    of_data = flow_io.read_flow_flo(of_file_path)
+    flow_vis_sph = flow_vis.flow_to_color(of_data, sph_of=True)
+    image_io.image_show(flow_vis_sph)
+
 def test_create_colorwheel_bar():
     #
     color_wheel_image = flow_vis.create_colorwheel_bar(500)
@@ -114,3 +120,5 @@ if __name__ == "__main__":
         test_flow_uv_to_colors()
     if 5 in test_list:
         test_flow_pix2angle()
+    if 6 in test_list:
+        test_flow_to_color()
