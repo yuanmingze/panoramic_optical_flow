@@ -68,17 +68,25 @@ def get_angle_sph_ofcolor(points_center, points_u, points_v):
     :return: the angle between cu and uv, radian
     :rtype: numpy
     """
+    # module the theta and phi
+
     # 1) get the quadrants
     #TODO process the u or v equal 0
     u_sign_positive_0 = points_u[:, 0] > points_center[:, 0]
     u_sign_positive_1 = np.logical_and(points_center[:, 0] > 0, points_u[:, 0] < 0)
-    u_sign_positive_1 = np.logical_and(u_sign_positive_1, (np.pi - points_center[:, 0] + (points_u[:, 0] - (-np.pi))) < np.pi)
+    u_sign_positive_1 = np.logical_and(u_sign_positive_1, ((np.pi - points_center[:, 0]) + (points_u[:, 0] - (-np.pi))) < np.pi)
     u_sign_positive = np.logical_or(u_sign_positive_0, u_sign_positive_1)
+
+    # u_axis_positive = np.logical_and(points_v[:, 1] == points_center[:, 1], u_sign_positive_1)
+    # u_axis_negative = np.logical_and(points_v[:, 1] == points_center[:, 1], ~u_sign_positive_1)
 
     v_sign_positive_0 = points_v[:, 1] > points_center[:, 1]
     v_sign_positive_1 = np.logical_and(points_center[:, 1] > 0, points_v[:, 1] < 0)
-    v_sign_positive_1 = np.logical_and(v_sign_positive_1,  ((0.5*np.pi - points_center[:, 0]) + (0.5 * np.pi + points_v[:, 0])) < np.pi)
+    v_sign_positive_1 = np.logical_and(v_sign_positive_1,  ((0.5*np.pi - points_center[:, 0]) + (0.5 * np.pi + points_v[:, 0])) < 0.5 * np.pi)
     v_sign_positive = np.logical_or(v_sign_positive_0, v_sign_positive_1)
+
+    # v_axis_positive = np.logical_and(points_u[:, 0] == points_center[:, 0], v_sign_positive)
+    # v_axis_negative = np.logical_and(points_u[:, 0] == points_center[:, 0], ~v_sign_positive)
 
     quadrants_index = np.zeros_like(u_sign_positive, dtype=np.int64)
     quadrants_index[np.logical_and(v_sign_positive, u_sign_positive)] = 1
@@ -95,25 +103,42 @@ def get_angle_sph_ofcolor(points_center, points_u, points_v):
     s = 0.5 * (length_uv + length_cv + length_cu)
     numerator = np.sin(s-length_cu) * np.sin(s-length_uv)
     denominator = np.sin(s) * np.sin(s-length_cv)
+    denominator_nan_idx = None
     if (denominator == 0).any():
         # log.warn("The angle_A contain NAN")
-        denominator[denominator == 0] = pow(0.1, 10)
+        denominator_nan_idx = denominator == 0
+        denominator[denominator_nan_idx] = pow(0.1, 10)
     temp_data = numerator / denominator
     angle_cv = 2 * np.arctan(np.sqrt(np.abs(temp_data)))
+    if denominator_nan_idx is not None:
+        angle_cv[denominator_nan_idx] = np.pi * 0.5
     # angle_A = 2*np.pi - angle_A # second solution
 
-    # check constraints
-    indices_1 = (np.abs(np.pi - length_cu) - np.abs(np.pi-length_cv)) > np.abs(np.pi-length_uv)
-    indices_2 = (np.abs(np.pi-length_uv) > (np.abs(np.pi-length_cu) + np.abs(np.pi-length_cv)))
-    indices = np.logical_or(indices_1, indices_2)
-    if indices.any():
-        log.warn("side length check constraints wrong.")
-        angle_cv[indices] = 2*np.pi - angle_cv[indices]
+    # # check constraints
+    # indices_1 = (np.abs(np.pi - length_cu) - np.abs(np.pi-length_cv)) > np.abs(np.pi-length_uv)
+    # indices_2 = (np.abs(np.pi-length_uv) > (np.abs(np.pi-length_cu) + np.abs(np.pi-length_cv)))
+    # indices = np.logical_or(indices_1, indices_2)
+    # if indices.any():
+    #     log.warn("side length check constraints wrong.")
+    #     angle_cv[indices] = 2*np.pi - angle_cv[indices]
 
-    # 3) correct the quadrants, increasing clockwise and start from +u.
+    # # 3) correct the quadrants, increasing clockwise and start from +u.
+    # angle_cv[np.logical_and(points_u[:, 0] == points_center[:, 0], points_v[:, 1] == points_center[:, 1])] = 0
+
+    # angle_cv[u_axis_positive] = 0
+    # angle_cv[v_axis_negative] = np.pi * 0.5
+    # angle_cv[u_axis_negative] = np.pi
+    # angle_cv[v_axis_positive] = np.pi * 1.5
+
     angle_cv[quadrants_index == 3] = -angle_cv[quadrants_index == 3] + np.pi
     angle_cv[quadrants_index == 2] = angle_cv[quadrants_index == 2] + np.pi
     angle_cv[quadrants_index == 1] = -angle_cv[quadrants_index == 1] + 2.0 * np.pi
+
+    # if the center at pole the angle is 
+    poles_index = np.logical_or(points_center[:,1] == np.pi * 0.5, points_center[:,1] == -np.pi * 0.5)
+    if poles_index.any():
+        angle_cv[poles_index] = points_u[poles_index,0]
+
     return angle_cv
 
 

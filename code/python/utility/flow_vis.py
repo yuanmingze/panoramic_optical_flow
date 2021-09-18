@@ -143,32 +143,35 @@ def flow_pix2sphangle(u, v):
     """
     height = u.shape[0]
     width = u.shape[1]
+    # u, v end points in erp image space
     start_points_erp = image_utility.get_erp_image_meshgrid(height)
+    end_pixel_erp = flow_warp.flow_warp_meshgrid(u, v)
+
+    end_points_erp_u = np.zeros((2, height, width), dtype=np.float64)
+    end_points_erp_u[0, :] = end_pixel_erp[0, :, :]  # theta
+    end_points_erp_u[1, :] = start_points_erp[1, :, :]  # phi
+
+    end_points_erp_v = np.zeros((2, height, width), dtype=np.float64)
+    end_points_erp_v[0, :] = start_points_erp[0, :, :]  # theta
+    end_points_erp_v[1, :] = end_pixel_erp[1, :, :]  # phi
+
+    # to spherical coordinate system
     start_points_sph = sc.erp2sph(np.stack((start_points_erp[0, :, :], start_points_erp[1, :, :])))
+    end_points_sph_u = sc.erp2sph(end_points_erp_u, sph_modulo=True)
+    end_points_sph_v = sc.erp2sph(end_points_erp_v, sph_modulo=True)
 
-    # u, v end points
-    end_pixel = flow_warp.flow_warp_meshgrid(u, v)
-    end_points_sph = sc.erp2sph(end_pixel)
-    end_points_sph_u = np.zeros((2, height, width), dtype=np.float64)
-    end_points_sph_u[0, :] = end_points_sph[0, :, :]  # theta
-    end_points_sph_u[1, :] = start_points_sph[0, :, :]  # phi
-
-    end_points_sph_v = np.zeros((2, height, width), dtype=np.float64)
-    end_points_sph_v[0, :] = start_points_sph[0, :, :]
-    end_points_sph_v[1, :] = end_points_sph[1, :, :]
+    # import flow_vis
+    # flow_vis.flow_value_to_color(np.moveaxis(start_points_sph, 0, -1))
+    # flow_vis.flow_value_to_color(np.moveaxis(end_points_sph_u, 0, -1))
+    # flow_vis.flow_value_to_color(np.moveaxis(end_points_sph_v, 0, -1))
 
     start_points_sph = start_points_sph.reshape((2, -1))
-    end_points_sph_v = end_points_sph_v.reshape((2, -1))
     end_points_sph_u = end_points_sph_u.reshape((2, -1))
+    end_points_sph_v = end_points_sph_v.reshape((2, -1))
+    
     # get the angle
-    # TODO update with new function
-    # angle_mat = sc.get_angle_sph(start_sph_u, start_sph_v,
-    #                             start_sph_u, end_sph_v,
-    #                             end_sph_u, start_sph_v)
-
     angle_mat = sc.get_angle_sph_ofcolor(start_points_sph.T, end_points_sph_u.T, end_points_sph_v.T)
     angle_mat = angle_mat.reshape((height, width))
-    # TODO debug
     return angle_mat
 
 
@@ -307,6 +310,7 @@ def flow_value_to_color(flow_uv, output_path=None, min_ratio=0.0, max_ratio=1.0,
     im = axes[1].imshow(flow_uv[:, :, 1], cmap=cm.get_cmap(visual_colormap), vmin=vmin_, vmax=vmax_)
 
     figure.tight_layout()
+    # TODO unifrom the color bar
     plt.colorbar(im, ax=axes.ravel().tolist())
     if output_path is not None:
         plt.savefig(output_path, dpi=150)

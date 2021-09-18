@@ -76,7 +76,7 @@ def erp_image_square(image_height=300):
     return rgb_data
 
 
-def erp_opticalflow_simple(erp_image_height):
+def erp_opticalflow_simple(erp_image_height = 20, u_default = 10, v_default =10):
     """ Create the mock optical flow data.
 
     :param erp_image_height: [2, height, width], float 64
@@ -85,6 +85,6 @@ def erp_opticalflow_simple(erp_image_height):
     erp_image_width = 2 * erp_image_height
     of_data = np.zeros((2, erp_image_height, erp_image_width), np.float64)
 
-    of_data[0, :, :] = 10
-    of_data[1, :, :] = 10
+    of_data[0, :, :] = u_default
+    of_data[1, :, :] = v_default
     return of_data

@@ -32,8 +32,12 @@ def vis_of_folder(data_dir):
 
 def test_flow_pix2angle():
     """ """
-    erp_image_height = 400
-    erp_opticalflow = MDG.erp_opticalflow_simple(erp_image_height)
+    erp_image_height = 50
+    erp_opticalflow = MDG.erp_opticalflow_simple(erp_image_height, 20, 10)
+
+    # erp_opticalflow_uv = np.moveaxis(erp_opticalflow, 0, -1)
+    # vis_of = flow_vis.flow_value_to_color(erp_opticalflow_uv)
+    # image_io.image_show(vis_of)
 
     flow_angle = flow_vis.flow_pix2sphangle(erp_opticalflow[0, :, :], erp_opticalflow[1, :, :])
     image_io.image_show(flow_angle)

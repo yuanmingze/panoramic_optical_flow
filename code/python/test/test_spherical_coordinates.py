@@ -68,16 +68,19 @@ class TestSphericalCoordinates(unittest.TestCase):
 
 def test_get_angle_ofcolor():
     """ Test the point from the spherical surface."""
-    points_number = 100
+    points_number = 1000
     r = np.pi * 0.15
 
     # pointA = np.ones((points_number, 2), dtype=np.float64) * np.pi * 0.25
     # center point
-    # point_center_u = 0.0
-    # point_center_v = 0.0
-    point_center_u = np.pi * 0.1
-    point_center_v = point_center_u * 0.5
-
+    point_center_u = 0.0
+    point_center_v = 0.0
+    # point_center_u = -np.pi * 0.2
+    # point_center_v = -point_center_u * 0.5
+    # point_center_u = 0
+    # # TODO Fix bug!!
+    # point_center_v = np.pi * 0.5
+    # point_v[:, 1]  =  np.pi * 0.5
 
     point_center = np.zeros((points_number, 2), dtype=np.float64)
     point_center[:, 0] = point_center_u
@@ -98,6 +101,10 @@ def test_get_angle_ofcolor():
         point_u[idx, 0] = x + point_center_u
         point_v[idx, 1] = y + point_center_v
 
+    # Modulo the theta and phi
+
+    point_u[:, 0], point_v[idx, 1] = spherical_coordinates.erp_sph_modulo(point_u[:, 0], point_v[idx, 1])
+
     import matplotlib.pyplot as plt
     # plt.plot(pointC[:, 0], pointC[:, 1])
     # plt.axis('tight')
@@ -105,19 +112,20 @@ def test_get_angle_ofcolor():
     # print(math.degrees((sc.get_angle_from_length(math.radians(76.4111), math.radians(58.31),  math.radians(105.74295)))))  # 118.50778
     # angle_sph_result = sc.get_angle_uv(point_center[:, 0], point_center[:, 1], point_u[:, 0], point_u[:, 1], point_v[:, 0], point_v[:, 1])
 
-    from utility import polygon
+    # from utility import polygon
     # angle_cartesian_result = polygon.get_angle_from_vector(pointB- pointA, pointC-pointA)
     angle_cartesian_result = spherical_coordinates.get_angle_sph_ofcolor(point_center, point_u, point_v)
     # print(angle_cartesian_result)
 
     plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
     # plt.plot(plt_x_index, angle_sph_result)
-    plt.scatter(plt_x_index, angle_cartesian_result, c=plt_x_index)
-    # plt.plot(plt_x_index, point_u)
-    # plt.plot(plt_x_index, point_v)
+    scatter_angle = plt.scatter(plt_x_index, angle_cartesian_result, c=plt_x_index, label='angle')
+    # plot_u = plt.scatter(plt_x_index, point_u[:, 0], c="r", marker="o", label='u')
+    # plot_v = plt.scatter(plt_x_index, point_v[:, 1], c="g", marker="s", label='v')
     # plt.plot(point_u[:,0], point_v[:,1])
-    plt.scatter(point_u[:,0], point_v[:,1], c=plt_x_index)
-    plt.colorbar()
+    # plt.scatter(point_u[:,0], point_v[:,1], c=plt_x_index)
+    plt.legend(handles=[scatter_angle])#, plot_u,plot_v])
+    # plt.colorbar()
     plt.show()
 
 
@@ -152,7 +160,6 @@ def test_get_angle_uv_random():
     angle_our_radian = sc.get_angle_sph(points_A_sph_list, points_B_sph_list, points_C_sph_list)
     result = np.isclose(angle_sg_radian, angle_our_radian, atol=1e-08)
     assert(result.all())
-
 
 
 def test_get_angle_uv():
