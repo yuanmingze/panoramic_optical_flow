@@ -22,7 +22,7 @@ def vis_of_folder(data_dir):
             of_data = flow_io.read_flow_flo(data_dir + filename)
             # of_data = flow_postproc.erp_of_unwraparound(of_data)
             of_data = flow_postproc.erp_of_wraparound(of_data)
-            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.0, max_ratio=0.7, add_bar = True, sph_of=False)  # ,  min_ratio=0.3, max_ratio=0.97)
+            of_data_vis = flow_vis.flow_to_color(of_data, min_ratio=0.0, max_ratio=0.7, add_bar=True, sph_of=False)  # ,  min_ratio=0.3, max_ratio=0.97)
             # image_io.image_show(of_data_vis)
             image_io.image_save(of_data_vis, data_dir + filename + ".jpg")
             # of_data_vis = flow_vis.flow_value_to_color(of_data, min_ratio=0.2, max_ratio=0.8)
@@ -33,7 +33,7 @@ def vis_of_folder(data_dir):
 def test_flow_pix2angle():
     """ """
     erp_image_height = 50
-    erp_opticalflow = MDG.erp_opticalflow_simple(erp_image_height, 20, 10)
+    erp_opticalflow = MDG.opticalflow_simple(erp_image_height, erp_image_height * 2, 20, 10)
 
     # erp_opticalflow_uv = np.moveaxis(erp_opticalflow, 0, -1)
     # vis_of = flow_vis.flow_value_to_color(erp_opticalflow_uv)

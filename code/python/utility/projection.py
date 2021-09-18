@@ -25,7 +25,7 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
     :type face_y_src_gnomonic: numpy, [pixel_number]
     :param weight_type: The weight compute method, [straightforward|cartesian_distance]
     :type weight_type: str
-    :param flow_uv: the tangent face forward optical flow which is in image coordinate, unit is pixel.
+    :param flow_uv: the tangent face forward optical flow which is in image coordinate, unit is pixel. [:, 2]
     :type flow_uv: numpy 
     :param image_erp_src: the source ERP rgb image, used to compute the optical flow warp error
     :type: numpy
@@ -79,7 +79,7 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
             image_erp_src_image_flow[:, channel] = ndimage.map_coordinates(image_erp_src[:, :, channel], [face_y_src_gnomonic, face_x_src_gnomonic], order=1, mode='constant', cval=255)
             image_erp_warp_diff[:, channel] = np.absolute(image_erp_tar_image_flow[:, channel] - image_erp_src_image_flow[:, channel])
 
-        image_erp_warp_diff = np.mean(image_erp_warp_diff, axis=1) / np.mean(image_erp_warp_diff) #255.0
+        image_erp_warp_diff = np.mean(image_erp_warp_diff, axis=1) / np.mean(image_erp_warp_diff)  # 255.0
         weight_map = np.exp(-image_erp_warp_diff)
         # rgb_diff = np.linalg.norm(image_erp_warp_diff, axis=1)
         # weight_map = rgb_diff
@@ -172,7 +172,7 @@ def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
     return weight_map
 
 
-def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
+def flow_rotate_endpoint(optical_flow, rotation, wraparound=False):
     """ Add the rotation offset to the end points of optical flow.
 
     :param optical_flow: the original optical flow, [height, width, 2]
@@ -198,7 +198,7 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
         rotation_mat = sc.rot_sph2mat(rotation[0], rotation[1])
         end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation_mat, wraparound=True)
     elif isinstance(rotation, np.ndarray):
-        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation_matrix=rotation,wraparound=True)
+        end_points_array = sc.rotation2erp_motion_vector((flow_height, flow_width), rotation_matrix=rotation, wraparound=True)
     else:
         log.error("Do not support rotation data type {}.".format(type(rotation)))
 
@@ -216,26 +216,7 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound = False):
     flow_rotated = np.stack((end_points_array_xv, end_points_array_yv), axis=-1)
     if wraparound:
         flow_rotated = flow_postproc.erp_of_wraparound(flow_rotated)
-    return  flow_rotated
-
-
-def ico_padding2fov(padding_size = 0.0):
-    """
-    Convert the ico projection with padding to FoV parameters.
-
-    """
-
-
-    pass
-
-def cube_padding2fov(padding_size = 0.0):
-    """
-
-    """
-
-    pass
-
-
+    return flow_rotated
 
 
 def tangent_image_resolution(erp_image_width, padding_size):
@@ -259,7 +240,7 @@ def tangent_image_resolution(erp_image_width, padding_size):
     return int(tangent_image_width + 0.5), int(tangent_image_height + 0.5)
 
 
-def ico_projection_cam_params(image_width = 400, padding_size=0):
+def ico_projection_cam_params(image_width=400, padding_size=0):
     """    
     Figure out the camera intrinsic parameters for 20 faces of icosahedron.
     It does not need camera parameters.
@@ -323,7 +304,7 @@ def ico_projection_cam_params(image_width = 400, padding_size=0):
 
         params = {'rotation': rotation_mat,
                   'translation': np.array([0, 0, 0]),
-                  "fov_h" : fov_h,
+                  "fov_h": fov_h,
                   "fov_v": fov_v,
                   'intrinsic': {
                       'image_width': image_width,
@@ -337,3 +318,27 @@ def ico_projection_cam_params(image_width = 400, padding_size=0):
         subimage_cam_param_list.append(params)
 
     return subimage_cam_param_list
+
+
+def get_padding_vs_fov_plot():
+    """ Plot the relationship between the padding and FoV. """
+    points_number = 200
+    padding_list = np.linspace(0.0, 20.0, points_number, endpoint=True)
+
+    fov_h_list = []
+    fov_v_list = []
+
+    for padding_size in padding_list:
+        cam_param = ico_projection_cam_params(padding_size=padding_size)
+        fov_h_list.append(np.rad2deg(cam_param[7]["fov_h"]))
+        fov_v_list.append(np.rad2deg(cam_param[7]["fov_v"]))
+
+    import matplotlib.pyplot as plt
+    # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
+    fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='fov_h')  # ,c=plt_x_index)
+    fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='fov_v')  # ,c=plt_x_index)
+    plt.xlabel("FoV degree")
+    plt.ylabel("padding_size")
+    plt.legend(handles=[fov_h_not, fov_v_not])
+    # plt.colorbar()
+    plt.show()

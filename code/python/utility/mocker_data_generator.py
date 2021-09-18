@@ -47,13 +47,13 @@ def hsv_to_rgb(hsv):
     return rgb.reshape(input_shape)
 
 
-def erp_image_strip(image_height=300):
+def image_strip(image_height=300, image_width=600):
     """ Get a mocking data, size is [height, width, 3]
     
     :return: the mocking data.
     :rtype: numpy
     """
-    data = np.arange(image_height * image_height * 2.0) / (image_height * image_height * 2.0)
+    data = np.arange(image_height * image_width) / (image_height * image_width)
 
     hsv_data = np.stack((data, np.ones_like(data), np.ones_like(data)), axis=1)
     rgb_data = hsv_to_rgb(hsv_data)
@@ -62,8 +62,8 @@ def erp_image_strip(image_height=300):
     return rgb_data
 
 
-def erp_image_square(image_height=300):
-    data = np.zeros((image_height, image_height * 2), np.float64)
+def image_square(image_height=300, image_width=600):
+    data = np.zeros((image_height, image_width), np.float64)
     data[5:-5, 5:-5] = 1.0
     data = ndimage.distance_transform_bf(data)
     max_value = np.max(data)
@@ -72,19 +72,32 @@ def erp_image_square(image_height=300):
     hsv_data = np.stack((data, np.ones_like(data), np.ones_like(data)), axis=2).reshape((-1, 3))
     rgb_data = hsv_to_rgb(hsv_data)
     rgb_data = (rgb_data * 255.0).astype(np.uint8)
-    rgb_data = rgb_data.reshape((image_height, image_height * 2, 3))
+    rgb_data = rgb_data.reshape((image_height, image_width, 3))
     return rgb_data
 
 
-def erp_opticalflow_simple(erp_image_height = 20, u_default = 10, v_default =10):
+def opticalflow_simple(erp_image_height=20, erp_image_width=40, u_default=10, v_default=10):
     """ Create the mock optical flow data.
 
     :param erp_image_height: [2, height, width], float 64
     :type erp_image_height: [type]
     """
-    erp_image_width = 2 * erp_image_height
     of_data = np.zeros((2, erp_image_height, erp_image_width), np.float64)
-
     of_data[0, :, :] = u_default
     of_data[1, :, :] = v_default
+    return of_data
+
+
+def opticalflow_random(image_height=20, image_width=40, u_value=None, v_value=None):
+    """ Return [height, width, 2]"""
+    if u_value is not None and v_value is not None:
+        of_data = np.zeros((image_height, image_width, 2), np.float64)
+
+        of_data[0, :, :] = u_value
+        of_data[1, :, :] = v_value
+    else:
+        rng = np.random.default_rng(12345)
+        of_data = rng.standard_normal(size=(image_height, image_width, 2), dtype=np.float64)
+        of_data[:, :, 0] = of_data[:, :, 0] * image_width * 0.5
+        of_data[:, :, 1] = of_data[:, :, 1] * image_height * 0.5
     return of_data

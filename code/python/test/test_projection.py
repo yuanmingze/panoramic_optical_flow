@@ -1,37 +1,64 @@
 import os
 
 import configuration as config
-import flow_estimate
+
 import flow_vis
 import flow_warp
 import spherical_coordinates
 
 from utility import projection
 from utility import image_io
-from utility import flow_io
-from utility import flow_postproc
+from utility import mocker_data_generator as MDG
+
 
 import numpy as np
 
 
-def test_get_rotation(erp_src_image_path, erp_flow_path):
-    """Test the get_rotation function.
-    """
-    erp_image = image_io.image_read(erp_src_image_path)
-    erp_flow = flow_io.flow_read(erp_flow_path)
+def test_get_blend_weight_ico():
+    """"""
+    height = 50
+    width = 40
+    x_list = np.linspace(-1.0, 1.0, width, endpoint=True)
+    y_list = np.linspace(-1.0, 1.0, height, endpoint=True)
+    face_x_src_gnomonic, face_y_src_gnomonic = np.meshgrid(x_list, y_list)
+    face_x_src_gnomonic = face_x_src_gnomonic.reshape((-1))
+    face_y_src_gnomonic = face_y_src_gnomonic.reshape((-1))
 
-    erp_flow = flow_postproc.erp_of_wraparound(erp_flow)
+    # [h,w,2]
+    flow_uv = MDG.opticalflow_random(height, width)
 
-    # get the rotation
-    erp_image_rotated = flow_warp.global_rotation_warping(erp_image, erp_flow)
+    gnomonic_bounding_box = np.array([[-0.8, -0.8], [0, 0.8], [0.8, -0.8]], dtype=np.float64)
 
-    # rotate the src image
-    rotated_image_path = erp_src_image_path + "_rotated.jpg"
-    print("output rotated image: {}".format(rotated_image_path))
-    image_io.image_save(erp_image_rotated, rotated_image_path)
+    # straightforward, cartesian_distance_log, cartesian_distance_exp, normal_distribution, normal_distribution_flowcenter, image_warp_error
+    weight_list = ["image_warp_error"]
+    print("Weight List: {}".format(weight_list))
+    if "straightforward" in weight_list:
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "straightforward",
+                                                     gnomonic_bounding_box=gnomonic_bounding_box)
+    elif "cartesian_distance_log" in weight_list:
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "cartesian_distance_log")
+    elif "cartesian_distance_exp" in weight_list:
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "cartesian_distance_exp")
+    elif "normal_distribution" in weight_list:
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "normal_distribution")
+    elif "normal_distribution_flowcenter" in weight_list:
+        # flow_vis.flow_value_to_color(flow_uv)
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "normal_distribution_flowcenter", flow_uv)
+    elif "image_warp_error" in weight_list:
+        image_erp_src = MDG.image_square(height, width)
+        image_erp_tar = MDG.image_square(height, width)
+        weight_mat = projection.get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic, "image_warp_error", flow_uv,
+                                                     image_erp_src=image_erp_src, image_erp_tar=image_erp_tar)
+
+    weight_mat = weight_mat.reshape((height, width))
+    image_io.image_show(weight_mat)
 
 
-def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
+def test_get_blend_weight_cubemap():
+    pass
+
+
+def test_flow_rotate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
     """ 
     Test warp optical flow. Always rotate the target image.
     """
@@ -66,46 +93,9 @@ def test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath
     image_io.image_save(src_image_data_rot, erp_src_image_filepath + "_warp_backward_rot.jpg")
 
 
-def test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath):
-    src_image_data = image_io.image_read(erp_src_image_filepath)
-    tar_image_data = image_io.image_read(erp_tar_image_filepath)
-    # flow_array = flow_estimate.of_methdod_DIS(src_image_data, tar_image_data)
-
-    # theta, phi
-    rotation_list = [(-20, 10.0), (30.0, -10.0), (30.0, 15.0), (-30.0, 15.0), (-25.0, -13.0)]
-    for rotation in rotation_list:
-        rotation_theta = np.radians(rotation[0])
-        rotation_phi = np.radians(rotation[1])
-        rotation_mat = spherical_coordinates.rot_sph2mat(rotation_theta, rotation_phi)
-        flow_array = spherical_coordinates.rotation2erp_motion_vector(src_image_data.shape[0:2], rotation_mat)
-        # flow_vis.flow_value_to_color(flow_array)
-        theta_delta, phi_delta = projection.flow2rotation_2d(flow_array, False)
-        print("original rotation: {},{}, result is: {}, {}".
-              format(np.degrees(rotation_theta), np.degrees(rotation_phi), np.degrees(theta_delta), np.degrees(phi_delta)))
-
-
-def get_padding_vs_fov_plot():
+def test_get_padding_vs_fov_plot():
     """ Plot the relationship between the padding and FoV. """
-    points_number = 200
-    padding_list = np.linspace(0.0, 20.0, points_number, endpoint=True)
-
-    fov_h_list = []
-    fov_v_list = []
-
-    for padding_size in padding_list:
-        cam_param = projection.ico_projection_cam_params(padding_size=padding_size)
-        fov_h_list.append(np.rad2deg(cam_param[7]["fov_h"]))
-        fov_v_list.append(np.rad2deg(cam_param[7]["fov_v"]))
-
-    import matplotlib.pyplot as plt
-    # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
-    fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='fov_h')  # ,c=plt_x_index)
-    fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='fov_v')  # ,c=plt_x_index)
-    plt.xlabel("FoV degree")
-    plt.ylabel("padding_size")
-    plt.legend(handles=[fov_h_not, fov_v_not])
-    # plt.colorbar()
-    plt.show()
+    projection.get_padding_vs_fov_plot()
 
 
 if __name__ == "__main__":
@@ -130,12 +120,12 @@ if __name__ == "__main__":
     if 1 in test_list:
         # test_get_rotation(erp_src_image_filepath, erp_flow_gt_filepath)
         # test_get_rotation(erp_src_image_filepath, erp_flow_dis_filepath)
-        test_get_rotation()
+        test_get_blend_weight_ico()
     if 2 in test_list:
         # test_flow_accumulate_endpoint(erp_src_image_filepath, erp_tar_image_filepath)
-        test_flow_accumulate_endpoint()
+        test_get_blend_weight_cubemap()
     if 3 in test_list:
         # test_flow2rotation_2d(erp_src_image_filepath, erp_tar_image_filepath)
-        test_flow2rotation_2d()
+        test_flow_rotate_endpoint()
     if 4 in test_list:
-        get_padding_vs_fov_plot()
+        test_get_padding_vs_fov_plot()

@@ -6,11 +6,11 @@ from utility import image_io
 def test_get_erp_image():
     """[summary]
     """
-    image_data = MDG.erp_image_strip()
+    image_data = MDG.image_strip()
     image_io.image_show(image_data)
 
 def test_get_demo_erp_image():
-    image_data = MDG.erp_image_square()
+    image_data = MDG.image_square()
     image_io.image_show(image_data)
 
 

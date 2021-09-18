@@ -365,7 +365,7 @@ def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_typ
     """
     # 0) get the rotation matrix from optical flow
     if rotation_type == "2D":
-        # compuate the average of optical flow & get the delta theta and phi
+        # compute the average of optical flow & get the delta theta and phi
         theta_delta, phi_delta = flow2rotation_2d(erp_flow, False)
 
         if not forward_warp:
