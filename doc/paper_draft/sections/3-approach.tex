@@ -76,7 +76,6 @@ This naturally limits the maximum flow magnitude to $\leq$180°.
 %%visualisations friendly
 %%close the spherical coordinate expression
 
-
 \begin{figure}[hbt!]
 	\centering
 %	\begin{center}
@@ -113,7 +112,7 @@ finally, we stitch the optical flow fields for all tangent images back together 
 %The perspective image optical flow method is off-the-shelf method which is general to any optical flow method.
 Our approach in principle supports any perspective optical flow method, and results are therefore expected to improve as improved optical flow methods become available in future.
 
-
+\vspace{-1em}
 %\textbf{Equirectangular Image Projection}.
 \paragraph{Gnomonic Projection.}
 %
@@ -175,7 +174,7 @@ As each tangent image's optical flow is estimated independently, the estimates m
 \new{The $\omega_{i}$ computes the colour difference between the source tangent image $I_{t,i}$ and the backwards-warped target image, to reduce the weight of badly estimated tangent images' optical flow $\mathcal{F}_{t,i}$.}
 %
 \new{The $\omega_i$ is estimated by 
-$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation and $I_{t+1,i}$ the corresponding tangent image of $I_{t+1}$.}
+$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation, and $I_{t+1,i}$ is the corresponding tangent image of $I_{t,i}$ at time ${t+1}$.}
 %
 \new{The $\mathcal{F}_t$ blended with the weighted tangent image optical flows,  $\frac{\sum_i{\mathcal{F}_{t,i} \cdot \omega_{i}}}{\sum_i{\omega_i}}$.}
 
@@ -211,7 +210,7 @@ Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_
 First, we convert the coordinates of the start and end points of all optical flow vectors to spherical coordinates with unit length.
 Then, we solve for the optimal rotation between the start points and the corresponding end points using least-squares fitting, which can be solved in closed form by singular value decomposition \cite{ArunHB1987,SorkiR2017}.}
 
-
+\vspace{-1em}
 \paragraph{Global Rotation Image Warping.}
 After \new{estimating} the global rotation $\bar{R}$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $\bar{R}$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
 %
@@ -220,7 +219,7 @@ First, we estimate the rotation $\bar{R}$ directly from ERP optical flow to roug
 %We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
 We then use the cubemap optical flow to \new{estimate the residual rotation} $\hat{R}$ \new{to} fine-tune the \new{global rotation} alignment.
 
-
+\vspace{-1em}
 %\textbf{Panoramic Optical Flow Global Rotation Warping.}
 \paragraph{Global Rotation Optical Flow Warping.}
 %To restore the $\mathcal{F}$ from the icosahedron optical flow $\tilde{\mathcal{F}}$, the end point of $\tilde{\mathcal{F}}$ should trace to the pixel position in $I_{t+1}$.

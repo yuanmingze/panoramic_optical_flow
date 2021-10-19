@@ -21,7 +21,7 @@ We use DIS flow \cite{KroegTDV2016} for the tangent flow fields.
 %The method performance evaluated on both synthetic and real-world dataset by panoramic error metric.
 We evaluate the performance of our method on synthetic and real-world datasets using multiple spherical error metrics.
 
-
+\vspace{-1em}
 \paragraph{Datasets.}
 %% dicuess the 360 dataset
 %
@@ -68,7 +68,7 @@ To further explore our method's performance qualitatively, we also test our meth
 %% how to evaluate
 %Meanwhile, to evaluate on the read-word dataset without the ground truth optical flow, we use SSIM and RMS to metric between the RGB image and the optical flow warped RGB image ~\cite{???}.
 
-
+\vspace{-1em}
 \paragraph{Error Metrics.}
 
 %The AAE, EPE and RMS ~\cite{BakerSLRBS2011} are the most common used for the perspective image optical flow quantity analysis, which metric the euclidean distance between the estimated optical flow and the ground truth optical flow.
@@ -145,7 +145,7 @@ For \footurl{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, \footurl{https:
 %
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
-
+\vspace{-1em}
 \paragraph{Quantitative Evaluation.}
 
 %% how 
@@ -166,27 +166,10 @@ Meanwhile, our global rotation warping pre-aligns the input images, so that our 
 %the SEPE metric the error with geodesic distance to neglect the 360° image distortion, so the SEPE is more objective than EPE.
 
 
-\Cref{fig:exp:compflow} shows some example estimated 360° optical flow fields and their SEPE visualised as heatmaps (lighter is better).
-%% analyse the diagram
-%The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
-Other methods mainly introduce errors on the top and bottom edges of the optical flow.
-Our method has the lowest errors at the top and bottom, while the middle region is quite similar to the DIS result.
-%The RAFT the best performance in the middle of the image.
-
-
-%% summary
-Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we can conclude that
-%
-perspective optical flow cannot correctly handle the top and bottom regions of ERP images, but our method can help them improve dramatically in these areas.
-%
-Our method succeeds where the underlying optical flow method (DIS) fails, while maintaining the same performance in the equatorial image region.
-
-
-
 %% TODO 
 %different image resolution 0.5K, 1K, 2K.
 %Generalization: Compare the different optical flow backbone result, to prove the generalisation of our method.
-\begin{table}%[h!]
+\begin{table}[h!]
 	\centering
 	\caption{\label{tab:exp:oferrorquality}%
 		Optical flow errors on the synthetic Replica 360° dataset.
@@ -328,6 +311,23 @@ Our method succeeds where the underlying optical flow method (DIS) fails, while 
 \end{figure*}
 
 
+\Cref{fig:exp:compflow} shows some example estimated 360° optical flow fields and their SEPE visualised as heatmaps (lighter is better).
+%% analyse the diagram
+%The optical flow SEPE heatmap shown in the 2nd than 4th rows of \cref{fig:exp:compflow}, there are visualized in the same error range and larger error darker.
+Other methods mainly introduce errors on the top and bottom edges of the optical flow.
+Our method has the lowest errors at the top and bottom, while the middle region is quite similar to the DIS result.
+%The RAFT the best performance in the middle of the image.
+
+
+%% summary
+Based on the \cref{tab:exp:oferrorquality} and \cref{fig:exp:compflow}, we can conclude that
+%
+perspective optical flow cannot correctly handle the top and bottom regions of ERP images, but our method can help them improve dramatically in these areas.
+%
+Our method succeeds where the underlying optical flow method (DIS) fails, while maintaining the same performance in the equatorial image region.
+
+
+\vspace{-1em}
 \paragraph{Qualitative Evaluation.}
 
 To analyse the performance of 360° optical flow methods on a real-world dataset without ground-truth optical flow, we measure the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the source image and backward-warped target image.
@@ -389,6 +389,79 @@ The differences between methods is less pronounced than in the Replica 360° dat
 \end{figure}
 
 
+\begin{table}[h!]
+	\centering
+	\caption{\label{fig:exp:ablations}%
+		The results of our ablation study. See \cref{sec:ablations} for details.}
+	\resizebox{0.8\linewidth}{!}{%
+		%	\setlength{\tabcolsep}{3pt}%
+		\begin{tabular}{p{0.2cm}p{1.9cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+			\toprule
+			&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
+			\midrule
+			\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
+			% & Full method  &     4.988 &     0.1885 &     39.26 &     0.007241 &     0.05278 &     0.01824 \\
+			% & w/o weight   & \bf 4.854 & \bf 0.1863 & \bf 37.10 & \bf 0.007118 & \bf 0.05074 &     0.01899 \\
+			% & w/o ERP      &     4.961 &     0.1871 &     38.32 &     0.007165 &     0.05094 &     0.01504 \\
+			% & w/o cubemap  &     4.956 &     0.1881 &     38.22 &     0.007171 &     0.05241 & \bf 0.01451 \\
+			& Full method  &     \new{3.507} &     \new{0.1694} &     \new{34.21} & \bf \new{0.005370} &     \new{0.03480} &     \new{0.01021 } \\ 
+			& w/o weight   &     \new{3.616} &     \new{0.1692} &     \new{34.86} &     \new{0.005405} &     \new{0.03478} &     \new{0.01235 } \\
+			& w/o ERP      & \bf \new{3.434} & \bf \new{0.1688} & \bf \new{33.81} &     \new{0.005376} & \bf \new{0.03437} &     \new{0.009951} \\ 
+			& w/o cubemap  &     \new{3.533} &     \new{0.1698} &     \new{34.04} &     \new{0.005399} &     \new{0.03519} & \bf \new{0.009730} \\ 
+			& w/o ico      &     \new{3.481} &     \new{0.1711} &     \new{30.45} &     \new{0.006040} &     \new{0.03724} &     \new{0.01412 } \\
+			% & Full method  &     \new{3.507} &     \new{0.1694} &     \new{34.21} &     \new{0.005370} &     \new{0.03480} &     \new{0.01021 } \\ 
+			% & w/o weight   &     \new{3.616} &     \new{0.1692} &     \new{34.86} &     \new{0.005405} &     \new{0.03478} &     \new{0.01235 } \\
+			% & w/o ERP      &     \new{3.434} &     \new{0.1688} &     \new{33.81} &     \new{0.005376} &     \new{0.03437} &     \new{0.009951} \\ 
+			% & w/o cubemap  &     \new{3.533} &     \new{0.1698} &     \new{34.04} &     \new{0.005399} &     \new{0.03519} &     \new{0.009730} \\ 
+			% & w/o ico      &     \new{3.481} &     \new{0.1711} &     \new{30.45} &     \new{0.006040} &     \new{0.03724} &     \new{0.01412 } \\ 
+			\midrule
+			\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Line}}} 
+			% & Full method  &     10.41 &     0.2461 &     55.78 & \bf 0.01533 &     0.08943 & \bf 0.03448 \\
+			% & w/o weight   & \bf 10.13 &     0.2447 & \bf 48.60 &     0.01600 & \bf 0.08798 &     0.03566 \\
+			% & w/o ERP      &     10.82 & \bf 0.2648 &     56.48 &     0.01580 &     0.09090 &     0.03519 \\
+			% & w/o cubemap  &     10.88 &     0.2484 &     57.61 &     0.01575 &     0.08987 &     0.03535 \\
+			& Full method  &     \new{5.839} &     \new{0.1971} &     \new{40.74} &     \new{0.01063} &     \new{0.05951} &     \new{0.02098}  \\
+			& w/o weight   &     \new{5.475} &     \new{0.1960} &     \new{32.36} &     \new{0.01100} & \bf \new{0.05815} &     \new{0.02214}   \\ 
+			& w/o ERP      &     \new{5.749} & \bf \new{0.1945} &     \new{40.11} &     \new{0.01069} &     \new{0.05881} &     \new{0.02107}  \\ 
+			& w/o cubemap  &     \new{5.816} &     \new{0.1953} &     \new{40.09} &     \new{0.01075} &     \new{0.05825} &     \new{0.02136}  \\ 
+			& w/o ico      & \bf \new{4.262} &     \new{0.2042} & \bf \new{26.28} & \bf \new{0.01015} &     \new{0.07242} & \bf \new{0.01818}  \\ 
+			% & Full method  &     \new{5.839} &     \new{0.1971} &     \new{40.74} &     \new{0.01063} &     \new{0.05951} &     \new{0.02098}  \\
+			% & w/o weight   &     \new{5.475} &     \new{0.1960} &     \new{32.36} &     \new{0.01100} &     \new{0.05815} &     \new{0.02214}   \\ 
+			% & w/o ERP      &     \new{5.749} &     \new{0.1945} &     \new{40.11} &     \new{0.01069} &     \new{0.05881} &     \new{0.02107}  \\ 
+			% & w/o cubemap  &     \new{5.816} &     \new{0.1953} &     \new{40.09} &     \new{0.01075} &     \new{0.05825} &     \new{0.02136}  \\ 
+			% & w/o ico      &     \new{4.262} &     \new{0.2042} &     \new{26.28} &     \new{0.01015} &     \new{0.07242} &     \new{0.01818}  \\ 
+			\midrule
+			\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Random}}} 
+			& Full method  &     \new{14.10} &     \new{0.2192} &     \new{59.78} &     \new{0.02717} &     \new{0.08849} &     \new{0.05753} \\
+			& w/o weight   & \bf \new{13.66} &     \new{0.2176} &     \new{57.87} &     \new{0.02723} &     \new{0.08679} &     \new{0.05684}  \\ 
+			& w/o ERP      &     \new{15.71} &     \new{0.2211} &     \new{60.81} &     \new{0.03212} &     \new{0.09007} &     \new{0.06161} \\ 
+			& w/o cubemap  &     \new{13.96} & \bf \new{0.2145} &     \new{58.92} & \bf \new{0.02652} & \bf \new{0.08428} & \bf \new{0.05619} \\ 
+			& w/o ico      &     \new{14.81} &     \new{0.2490} & \bf \new{57.15} &     \new{0.03389} &     \new{0.1167 } &     \new{0.06173} \\ 
+			% & Full method  &     \new{14.10} &     \new{0.2192} &     \new{59.78} &     \new{0.02717} &     \new{0.08849} &     \new{0.05753} \\
+			% & w/o weight   &     \new{13.66} &     \new{0.2176} &     \new{57.87} &     \new{0.02723} &     \new{0.08679} &     \new{0.05684}  \\ 
+			% & w/o ERP      &     \new{15.71} &     \new{0.2211} &     \new{60.81} &     \new{0.03212} &     \new{0.09007} &     \new{0.06161} \\ 
+			% & w/o cubemap  &     \new{13.96} &     \new{0.2145} &     \new{58.92} &     \new{0.02652} &     \new{0.08428} &     \new{0.05619} \\ 
+			% & w/o ico      &     \new{14.81} &     \new{0.2490} &     \new{57.15} &     \new{0.03389} &     \new{0.1167 } &     \new{0.06173} \\ 
+			\midrule
+			\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}}
+			% & Full method  &     8.602 &     0.2270 &     50.27 &     0.01264 &     0.07722 &     0.02907 \\
+			% & w/o weight   & \bf 7.524 & \bf 0.2130 & \bf 42.94 &     0.01161 & \bf 0.06967 &     0.02741 \\
+			% & w/o ERP      &     7.889 &     0.2260 &     47.40 &     0.01149 &     0.07092 &     0.02512 \\
+			% & w/o cubemap  &     7.921 &     0.2182 &     47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
+			& Full method  &     \new{7.701} &     \new{0.1946} &     \new{44.62} & \bf \new{0.01411} &     \new{0.06027} & \bf \new{0.02905}   \\
+			& w/o weight   &     \new{7.585} &     \new{0.1942} &     \new{41.70} &     \new{0.01455} &     \new{0.05991} &     \new{0.03045}  \\
+			& w/o ERP      &     \new{8.298} &     \new{0.1948} &     \new{44.91} &     \new{0.01606} &     \new{0.06109} &     \new{0.03088} \\
+			& w/o cubemap  &     \new{7.771} & \bf \new{0.1932} &     \new{44.35} &     \new{0.01422} & \bf \new{0.05924} &     \new{0.02909} \\
+			& w/o ico      & \bf \new{7.519} &     \new{0.2081} & \bf \new{37.96} &     \new{0.01670} &     \new{0.07547} &     \new{0.03134} \\ 
+			% & Full method  &     \new{7.701} &     \new{0.1946} &     \new{44.62} &     \new{0.01411} &     \new{0.06027} &     \new{0.02905}   \\
+			% & w/o weight   &     \new{7.585} &     \new{0.1942} &     \new{41.70} &     \new{0.01455} &     \new{0.05991} &     \new{0.03045}  \\
+			% & w/o ERP      &     \new{8.298} &     \new{0.1948} &     \new{44.91} &     \new{0.01606} &     \new{0.06109} &     \new{0.03088} \\
+			% & w/o cubemap  &     \new{7.771} &     \new{0.1932} &     \new{44.35} &     \new{0.01422} &     \new{0.05924} &     \new{0.02909} \\
+			% & w/o ico      &     \new{7.519} &     \new{0.2081} &     \new{37.96} &     \new{0.01670} &     \new{0.07547} &     \new{0.03134} \\ 
+			\bottomrule
+	\end{tabular}}%
+\end{table}%\vspace{-2em}
+
 \subsection{Ablation Studies}
 \label{sec:ablations}
 
@@ -404,7 +477,7 @@ But `Full method'make most of and balance each term's advantage, to make it get 
 %because the ERP optical flow is the global motion, which can handle large pixel motion.
 %as the ERP-based rotation estimation better handles large pixel motions.
 
-
+\vspace{-1em}
 \paragraph{Stitch Blending Weight.}
 The blending weight aims to smoothly and consistently stitch the overlap area of different faces' optical flow.
 The result without blending weight is shown as `w/o weight' in \cref{fig:exp:ablations}, which replaces all weights with the unit weight.
@@ -415,76 +488,3 @@ The result without blending weight is shown as `w/o weight' in \cref{fig:exp:abl
 %However, `w/o weight' performs slightly better on the complete dataset.
 \new{The `Full Method' outperforms the `w/o weight' because the blending weight brings down the unreliable optical flow, such as the pixels move out or in the tangent image boundary but their reliable optical flow can get from corresponding pixels on other tangent images.}
 
-
-\begin{table}%[h!]
-	\centering
-	\caption{\label{fig:exp:ablations}%
-		The results of our ablation study. See \cref{sec:ablations} for details.}
-	\resizebox{0.8\linewidth}{!}{%
-%	\setlength{\tabcolsep}{3pt}%
-	\begin{tabular}{p{0.2cm}p{1.9cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.3cm}p{1.3cm}p{1.3cm}}
-		\toprule
-		&  Method & ${EPE}\downarrow$ & $AAE\downarrow$ & $RMS\downarrow$ & $SEPE\downarrow$ & ${SAAE}\downarrow$ & ${SRMS}\downarrow$ \\
-		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Circle}}}
-		% & Full method  &     4.988 &     0.1885 &     39.26 &     0.007241 &     0.05278 &     0.01824 \\
-		% & w/o weight   & \bf 4.854 & \bf 0.1863 & \bf 37.10 & \bf 0.007118 & \bf 0.05074 &     0.01899 \\
-		% & w/o ERP      &     4.961 &     0.1871 &     38.32 &     0.007165 &     0.05094 &     0.01504 \\
-		% & w/o cubemap  &     4.956 &     0.1881 &     38.22 &     0.007171 &     0.05241 & \bf 0.01451 \\
-		& Full method  &     \new{3.507} &     \new{0.1694} &     \new{34.21} & \bf \new{0.005370} &     \new{0.03480} &     \new{0.01021 } \\ 
-		& w/o weight   &     \new{3.616} &     \new{0.1692} &     \new{34.86} &     \new{0.005405} &     \new{0.03478} &     \new{0.01235 } \\
-		& w/o ERP      & \bf \new{3.434} & \bf \new{0.1688} & \bf \new{33.81} &     \new{0.005376} & \bf \new{0.03437} &     \new{0.009951} \\ 
-		& w/o cubemap  &     \new{3.533} &     \new{0.1698} &     \new{34.04} &     \new{0.005399} &     \new{0.03519} & \bf \new{0.009730} \\ 
-		& w/o ico      &     \new{3.481} &     \new{0.1711} &     \new{30.45} &     \new{0.006040} &     \new{0.03724} &     \new{0.01412 } \\
-		% & Full method  &     \new{3.507} &     \new{0.1694} &     \new{34.21} &     \new{0.005370} &     \new{0.03480} &     \new{0.01021 } \\ 
-		% & w/o weight   &     \new{3.616} &     \new{0.1692} &     \new{34.86} &     \new{0.005405} &     \new{0.03478} &     \new{0.01235 } \\
-		% & w/o ERP      &     \new{3.434} &     \new{0.1688} &     \new{33.81} &     \new{0.005376} &     \new{0.03437} &     \new{0.009951} \\ 
-		% & w/o cubemap  &     \new{3.533} &     \new{0.1698} &     \new{34.04} &     \new{0.005399} &     \new{0.03519} &     \new{0.009730} \\ 
-		% & w/o ico      &     \new{3.481} &     \new{0.1711} &     \new{30.45} &     \new{0.006040} &     \new{0.03724} &     \new{0.01412 } \\ 
-		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Line}}} 
-		% & Full method  &     10.41 &     0.2461 &     55.78 & \bf 0.01533 &     0.08943 & \bf 0.03448 \\
-		% & w/o weight   & \bf 10.13 &     0.2447 & \bf 48.60 &     0.01600 & \bf 0.08798 &     0.03566 \\
-		% & w/o ERP      &     10.82 & \bf 0.2648 &     56.48 &     0.01580 &     0.09090 &     0.03519 \\
-		% & w/o cubemap  &     10.88 &     0.2484 &     57.61 &     0.01575 &     0.08987 &     0.03535 \\
-		& Full method  &     \new{5.839} &     \new{0.1971} &     \new{40.74} &     \new{0.01063} &     \new{0.05951} &     \new{0.02098}  \\
-		& w/o weight   &     \new{5.475} &     \new{0.1960} &     \new{32.36} &     \new{0.01100} & \bf \new{0.05815} &     \new{0.02214}   \\ 
-		& w/o ERP      &     \new{5.749} & \bf \new{0.1945} &     \new{40.11} &     \new{0.01069} &     \new{0.05881} &     \new{0.02107}  \\ 
-		& w/o cubemap  &     \new{5.816} &     \new{0.1953} &     \new{40.09} &     \new{0.01075} &     \new{0.05825} &     \new{0.02136}  \\ 
-		& w/o ico      & \bf \new{4.262} &     \new{0.2042} & \bf \new{26.28} & \bf \new{0.01015} &     \new{0.07242} & \bf \new{0.01818}  \\ 
-		% & Full method  &     \new{5.839} &     \new{0.1971} &     \new{40.74} &     \new{0.01063} &     \new{0.05951} &     \new{0.02098}  \\
-		% & w/o weight   &     \new{5.475} &     \new{0.1960} &     \new{32.36} &     \new{0.01100} &     \new{0.05815} &     \new{0.02214}   \\ 
-		% & w/o ERP      &     \new{5.749} &     \new{0.1945} &     \new{40.11} &     \new{0.01069} &     \new{0.05881} &     \new{0.02107}  \\ 
-		% & w/o cubemap  &     \new{5.816} &     \new{0.1953} &     \new{40.09} &     \new{0.01075} &     \new{0.05825} &     \new{0.02136}  \\ 
-		% & w/o ico      &     \new{4.262} &     \new{0.2042} &     \new{26.28} &     \new{0.01015} &     \new{0.07242} &     \new{0.01818}  \\ 
-		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{Random}}} 
-		& Full method  &     \new{14.10} &     \new{0.2192} &     \new{59.78} &     \new{0.02717} &     \new{0.08849} &     \new{0.05753} \\
-		& w/o weight   & \bf \new{13.66} &     \new{0.2176} &     \new{57.87} &     \new{0.02723} &     \new{0.08679} &     \new{0.05684}  \\ 
-		& w/o ERP      &     \new{15.71} &     \new{0.2211} &     \new{60.81} &     \new{0.03212} &     \new{0.09007} &     \new{0.06161} \\ 
-		& w/o cubemap  &     \new{13.96} & \bf \new{0.2145} &     \new{58.92} & \bf \new{0.02652} & \bf \new{0.08428} & \bf \new{0.05619} \\ 
-		& w/o ico      &     \new{14.81} &     \new{0.2490} & \bf \new{57.15} &     \new{0.03389} &     \new{0.1167 } &     \new{0.06173} \\ 
-		% & Full method  &     \new{14.10} &     \new{0.2192} &     \new{59.78} &     \new{0.02717} &     \new{0.08849} &     \new{0.05753} \\
-		% & w/o weight   &     \new{13.66} &     \new{0.2176} &     \new{57.87} &     \new{0.02723} &     \new{0.08679} &     \new{0.05684}  \\ 
-		% & w/o ERP      &     \new{15.71} &     \new{0.2211} &     \new{60.81} &     \new{0.03212} &     \new{0.09007} &     \new{0.06161} \\ 
-		% & w/o cubemap  &     \new{13.96} &     \new{0.2145} &     \new{58.92} &     \new{0.02652} &     \new{0.08428} &     \new{0.05619} \\ 
-		% & w/o ico      &     \new{14.81} &     \new{0.2490} &     \new{57.15} &     \new{0.03389} &     \new{0.1167 } &     \new{0.06173} \\ 
-		\midrule
-		\multirow{4}{*}{\rotatebox[origin=c]{90}{\emph{All}}}
-		% & Full method  &     8.602 &     0.2270 &     50.27 &     0.01264 &     0.07722 &     0.02907 \\
-		% & w/o weight   & \bf 7.524 & \bf 0.2130 & \bf 42.94 &     0.01161 & \bf 0.06967 &     0.02741 \\
-		% & w/o ERP      &     7.889 &     0.2260 &     47.40 &     0.01149 &     0.07092 &     0.02512 \\
-		% & w/o cubemap  &     7.921 &     0.2182 &     47.91 & \bf 0.01146 &     0.07114 & \bf 0.02492 \\
-		& Full method  &     \new{7.701} &     \new{0.1946} &     \new{44.62} & \bf \new{0.01411} &     \new{0.06027} & \bf \new{0.02905}   \\
-		& w/o weight   &     \new{7.585} &     \new{0.1942} &     \new{41.70} &     \new{0.01455} &     \new{0.05991} &     \new{0.03045}  \\
-		& w/o ERP      &     \new{8.298} &     \new{0.1948} &     \new{44.91} &     \new{0.01606} &     \new{0.06109} &     \new{0.03088} \\
-		& w/o cubemap  &     \new{7.771} & \bf \new{0.1932} &     \new{44.35} &     \new{0.01422} & \bf \new{0.05924} &     \new{0.02909} \\
-		& w/o ico      & \bf \new{7.519} &     \new{0.2081} & \bf \new{37.96} &     \new{0.01670} &     \new{0.07547} &     \new{0.03134} \\ 
-		% & Full method  &     \new{7.701} &     \new{0.1946} &     \new{44.62} &     \new{0.01411} &     \new{0.06027} &     \new{0.02905}   \\
-		% & w/o weight   &     \new{7.585} &     \new{0.1942} &     \new{41.70} &     \new{0.01455} &     \new{0.05991} &     \new{0.03045}  \\
-		% & w/o ERP      &     \new{8.298} &     \new{0.1948} &     \new{44.91} &     \new{0.01606} &     \new{0.06109} &     \new{0.03088} \\
-		% & w/o cubemap  &     \new{7.771} &     \new{0.1932} &     \new{44.35} &     \new{0.01422} &     \new{0.05924} &     \new{0.02909} \\
-		% & w/o ico      &     \new{7.519} &     \new{0.2081} &     \new{37.96} &     \new{0.01670} &     \new{0.07547} &     \new{0.03134} \\ 
-		\bottomrule
-	\end{tabular}}%
-\end{table}%\vspace{-2em}
