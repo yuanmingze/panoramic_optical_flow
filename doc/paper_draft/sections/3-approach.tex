@@ -24,7 +24,7 @@ As shown in \cref{fig:approach:pipeline}, our method comprises three steps:
 %
 (2)~We estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ based on cubemap projection optical flow (see \cref{sec:approach:projstit}), and then rotate the image ${\bar{I}}_{t+1}$ according to the rotation $\hat{R}$ estimated from the cubemap flow ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$.
 %
-(3)~We estimate the fine-scale flow $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ using icosahedron projection optical flow (see \cref{sec:approach:warping}), then backward-rotate the fine-sacle flow $\tilde{\mathcal{F}}_t$ by rotations $\bar{R}$ and $\hat{R}$ to generate the final 360° optical flow $\mathcal{F}_t$.
+(3)~We estimate the fine-scale flow $\tilde{\mathcal{F}}_t$ from $I_{t}$ to ${\hat{I}}_{t+1}$ using icosahedron projection optical flow (see \cref{sec:approach:warping}), then backward-rotate the fine-scale flow $\tilde{\mathcal{F}}_t$ by rotations $\bar{R}$ and $\hat{R}$ to generate the final 360° optical flow $\mathcal{F}_t$.
 \looseness-1
 
 
@@ -241,4 +241,4 @@ Applied to optical flow, this yields:
 	\text{.}
 %\end{split}
 \end{equation}
-\vspace{-2em}
+%\vspace{-2em}
