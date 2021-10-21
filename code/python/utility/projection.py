@@ -320,7 +320,7 @@ def ico_projection_cam_params(image_width=400, padding_size=0):
     return subimage_cam_param_list
 
 
-def get_padding_vs_fov_plot():
+def get_padding_vs_fov_plot(output_filepath = None):
     """ Plot the relationship between the padding and FoV. """
     points_number = 200
     padding_list = np.linspace(0.0, 20.0, points_number, endpoint=True)
@@ -334,11 +334,21 @@ def get_padding_vs_fov_plot():
         fov_v_list.append(np.rad2deg(cam_param[7]["fov_v"]))
 
     import matplotlib.pyplot as plt
+    if output_filepath is not None:
+        fig = plt.figure(frameon = False)
+        fig.set_size_inches(14, 8)
     # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
-    fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='fov_h')  # ,c=plt_x_index)
-    fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='fov_v')  # ,c=plt_x_index)
-    plt.xlabel("FoV degree")
-    plt.ylabel("padding_size")
-    plt.legend(handles=[fov_h_not, fov_v_not])
+    # fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='FoV (Horizontal)')  # ,c=plt_x_index)
+    fov_h_not = plt.plot(fov_h_list, padding_list, c="r", marker="o", label='FoV (Horizontal)')  # ,c=plt_x_index)
+
+    # fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='FoV (Verical)')  # ,c=plt_x_index)
+    fov_v_not = plt.plot(fov_v_list, padding_list,  c="g", marker="s", label='FoV (Verical)')  # ,c=plt_x_index)
+
+    plt.xlabel("FoV [°]")
+    plt.ylabel("Padding Size")
+    # plt.legend(handles=[fov_h_not, fov_v_not])
     # plt.colorbar()
-    plt.show()
+    if output_filepath is not None:
+        plt.savefig(output_filepath)
+    else:
+        plt.show()

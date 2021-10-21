@@ -6,6 +6,8 @@ Tested on GCC 8.3.
 
 # Python
 
+`main.py` include the run and comparison code for BMVC 2021.
+
 # Matlab
 
 # Blender

@@ -95,7 +95,8 @@ def test_flow_rotate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
 
 def test_get_padding_vs_fov_plot():
     """ Plot the relationship between the padding and FoV. """
-    projection.get_padding_vs_fov_plot()
+    output_filepath = config.TEST_data_root_dir + "paddingsize_vs_fov.pdf"
+    projection.get_padding_vs_fov_plot(output_filepath)
 
 
 if __name__ == "__main__":

@@ -86,6 +86,10 @@ Optical flow is without **wrap-around**, the optical flow warped pixel may beyon
 - Panoramic Optical mask:
     - {:04d}_mask_pano.png: the 8bit single channel png, unavailable pixel is 0.
 
+## Camera Pose
+
+Support camera pose Line, circle, and random.
+
 # 2. Tutorial For Panoramic Optical Flow
 
 The code generates the synthetic data for panoramic optical flow dataset.
