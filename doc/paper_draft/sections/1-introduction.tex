@@ -27,7 +27,7 @@ Among other things, this enables 360° video stabilisation \cite{Kopf2016}, dept
 However, the most common format of 360° images, equirectangular projection (ERP), suffers from severe distortions when mapping a spherical 360° image to the 2D image plane.
 This distortion is not considered by most existing optical flow algorithms,
 %which thus estimate potentially incorrect flow fields.
-which \new{may lead to flow estimation errors}.
+which may lead to flow estimation errors.
 
 
 %% compare existing method
@@ -44,7 +44,7 @@ To overcome the limited spatial resolution supported by these methods, other wor
 %
 Moreover, these tangent images are based on \emph{gnomonic} projection, which is a common tool used in geography to map a sphere to a plane, as the great circle on the sphere maps to a straight line in the tangent image~\cite{EderSLF2020}.
 %
-\new{This principle has been applied to tasks such as monocular depth estimation \cite{WangHCLYSCS2018, WangYSCT2020}, semantic segmentation \cite{EderSLF2020, ZhangLSC2019}, and classification \cite{EderSLF2020, LuoZSX2019, LeeJYJY2019}, but not yet to optical flow.}
+This principle has been applied to tasks such as monocular depth estimation \cite{WangHCLYSCS2018, WangYSCT2020}, semantic segmentation \cite{EderSLF2020, ZhangLSC2019}, and classification \cite{EderSLF2020, LuoZSX2019, LeeJYJY2019}, but not yet to optical flow.
 %
 %Meanwhile, to make the spherical sampled uniformly, the tangent points (gnomonic projection centre point) selected base on the regular polyhedron (cube and regular Icosahedron).
 Our approach builds on this insight to estimate accurate 360° optical flow for high-resolution ERP images by sampling tangent images uniformly based on regular polyhedra (cube and icosahedron).
@@ -57,7 +57,7 @@ This paper makes the following technical contributions:
 \begin{enumerate}[nosep]
 \item 
 %propose a gnomonic projection-based panoramic optical flow method to solve the error caused by the equirectangular image's large distortion;
-We propose a 360° optical flow method based on gnomonic projection to overcome the distortions induced by the  equirectangular projection of 360° images.
+We propose a 360° optical flow method based on gnomonic projection to overcome the distortions induced by the equirectangular projection of 360° images.
 
 \item
 %global warping method to align the image, large span motion in 360 images.

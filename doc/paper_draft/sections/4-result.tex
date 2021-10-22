@@ -52,17 +52,17 @@ We therefore implemented an ERP camera model using OpenGL geometry shaders that 
 %The 360° Replica dataset rendering with two kinds of camera path circle and line.
 %The circle path (\emph{Circle}) is the camera face to outward and moves along a 0.5-meter radius circle, each image render by 10° interval.
 %The line path (\emph{Line}) is the camera face the same direction and moves in a straight line, each image renders by 0.2-meter interval.
-We render \new{three} types of camera paths for ground-truth evaluation \new{at a resolution of 1280$\times$640\,pixels}.
+We render three types of camera paths for ground-truth evaluation at a resolution of 1280$\times$640\,pixels.
 A \emph{Circle}, in which the camera moves along a 50\,cm radius circle and faces outwards, with images rendered every 10°.
 A \emph{Line}, where the camera faces the same direction and moves in a straight line, with images rendered every 20\,cm.
 %\TODO{please check this, Mingze $\to$}
-\new{And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$1\,metres and rotations jittered by $\pm$10° degrees along each of the Euler angle axes.}
+And \emph{Random}, with camera centres uniformly randomly sampled within a box of 1$\times$1$\times$1\,metres and rotations jittered by $\pm$10° degrees along each of the Euler angle axes.
 
 
 %% real world dataset
 %The synthetic dataset just ego-motion, the real-word dataset is including non-rigid and objects motion.
 %Although the synthetic dataset is highly realistic, real-world data tends to be more challenging, with complex lighting and motions.
-Although the synthetic dataset is \new{reasonably} realistic, real-world data tends to be more challenging, with complex lighting and motions.
+Although the synthetic dataset is reasonably realistic, real-world data tends to be more challenging, with complex lighting and motions.
 %
 To further explore our method's performance qualitatively, we also test our method on the OmniPhotos dataset \cite{BerteYLR2020}, which contains diverse 360° videos of real scenes captured with a high-quality 360° video camera.
 %% how to evaluate
@@ -90,7 +90,8 @@ Specifically, we propose the spherical AAE (SAAE), spherical EPE (SEPE, see \cre
 The spherical AAE (SAAE) measures the angle between the estimated and ground-truth optical flow vectors on the surface of a unit sphere using spherical trigonometry.
 %
 %In both SEPE and SRMS the distance ($d$) is the geodesic distance between to endpoint on the unit sphere and the $n$ is the number of pixels.
-For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere\DELETE{, and the $N$ is the number of pixels}:
+For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints on the unit sphere:
+%\DELETE{, and the $N$ is the number of pixels}:
 %We set the unavailable optical flow to 0 both ground truth and estimated optical flow.
 %
 %\begin{equation}\label{equ_exp_epe}
@@ -137,11 +138,11 @@ For SEPE and SRMS, $d(\cdot, \cdot)$ is the geodesic distance between endpoints 
 \subsection{Comparison}
 
 %We compare our method with following state-of-the-art methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
-We compare our method with \new{OmniFlowNet \cite{ArtizZAD2020}, a state-of-the-art 360° optical flow method, as well as the} following state-of-the-art \new{perspective} methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
+We compare our method with OmniFlowNet \cite{ArtizZAD2020}, a state-of-the-art 360° optical flow method, as well as the following state-of-the-art perspective methods: RAFT~\cite{TeedD2020a}, PWC-Net~\cite{SunYLK2018} and DIS~\cite{KroegTDV2016}.
 %
 For \footurl{https://github.com/COATZ/OmniFlowNet}{OmniFlowNet}, \footurl{https://github.com/princeton-vl/RAFT}{RAFT} and \footurl{https://github.com/NVlabs/PWC-Net}{PWC-Net}, we use the official released code, and for DIS, we use OpenCV's implementation.
 % 
-\new{OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of 1024$\times$512\,pixels, and upsample the estimated flow fields back to the original image resolution afterwards.}
+OmniFlowNet ran out of GPU memory on our NVIDIA RTX 2060 (6 GB RAM), so we downscale the input images to a resolution of 1024$\times$512\,pixels, and upsample the estimated flow fields back to the original image resolution afterwards.
 %
 The performance evaluation comprises quantitative and qualitative evaluation on the Replica 360° and OmniPhotos datasets.
 
@@ -258,13 +259,13 @@ Meanwhile, our global rotation warping pre-aligns the input images, so that our 
 	\centering
 	\begin{tabular}{@{}c*{6}{@{\hspace{-9pt}}c}@{}}
 		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{white} &
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{white} &
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{white} &
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{white} &
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{\new{(f) OmniFlowNet}}{white}
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{\new{(f) OmniFlowNet}}{black}
 		\\[-1.0em]
-		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{white} &
+		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
 		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) DIS (SEPE)}{black} &
 		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) Ours (SEPE)}{black} &
 		\labeledfig{images/of_error/office_0_line/office_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) PWC-Net (SEPE)}{black} &

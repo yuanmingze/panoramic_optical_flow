@@ -8,7 +8,7 @@
 		The input is a pair of equirectangular images, $I_t$ and $I_{t+1}$, and the output is the optical flow $\mathcal{F}_t$.
 %		The $\oplus$ and  $\ominus$ are the image forward rotation operation and optical flow backward rotation operation ~\cref{sec:approach:warping}, respectively.
 		The operators `$\oplus$' and `$\ominus$' rotate images forward and optical flow fields backward, respectively, using image warping (see \cref{sec:approach:warping}).
-		The green box estimates \new{the optimal} rotation from a 360° optical flow field.
+		The green box estimates the optimal rotation from a 360° optical flow field.
 	}
 	\label{fig:approach:pipeline}
 \end{figure}
@@ -20,7 +20,7 @@ At the same time, our high-level approach generalises to any off-the-shelf persp
 % overview method
 As shown in \cref{fig:approach:pipeline}, our method comprises three steps:
 %
-(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from \new{ERP} image $I_{t}$ to ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\bar{\mathcal{F}}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
+(1)~We estimate the optical flow $\bar{\mathcal{F}}_t$ from ERP image $I_{t}$ to ${I_{t+1}}$, followed by rotating $I_{t+1}$ towards to $I_{t}$ based on the rotation estimate $\bar{R}$ from the flow $\bar{\mathcal{F}}_t$, which generates the warped ERP image ${\bar{I}}_{t+1}$ (see \cref{sec:approach:warping}).
 %
 (2)~We estimate the panoramic optical flow ${\hat{\mathcal{F}}}_t$ from $I_{t}$ to ${\bar{I}}_{t+1}$ based on cubemap projection optical flow (see \cref{sec:approach:projstit}), and then rotate the image ${\bar{I}}_{t+1}$ according to the rotation $\hat{R}$ estimated from the cubemap flow ${\hat{\mathcal{F}}}_t$ to generate ${\hat{I}}_{t+1}$.
 %
@@ -88,7 +88,7 @@ This naturally limits the maximum flow magnitude to $\leq$180°.
 		360° optical flow illustrated:
 		A bunny moves from (a) to (b) within an ERP image.
 		(c) Perspective optical flow methods estimate the bunny's motion from the right to the left via the front.
-		(d) However, the shortest path for the bunny to move is along the back wrap-around.		
+		(d) However, the shortest path for the bunny to move is along the back wrap-around.
 	}
 \end{figure}
 
@@ -170,13 +170,13 @@ As each tangent image's optical flow is estimated independently, the estimates m
 %And $W_{warp}$ is the difference between the optical flow backwards warped target image and the source image, to down weight the optical flow mismatching the warped image.
 %(2)~A warping error term that computes the colour difference between the source image and the backwards-warped target image, to reduce the weight of badly estimated motion vectors.
 %\TODO{Provide more mathematical explanation of the blending procedure.}
-\new{When stitching the tangent flow fields in the equirectangular format, we thus compute a per-pixel blending weight $\omega_{i}$ for each tangent image $I_{t,i}$ to smoothly blend its optical flows $\mathcal{F}_{t,i}$ in the overlap areas.}
-\new{The $\omega_{i}$ computes the colour difference between the source tangent image $I_{t,i}$ and the backwards-warped target image, to reduce the weight of badly estimated tangent images' optical flow $\mathcal{F}_{t,i}$.}
+When stitching the tangent flow fields in the equirectangular format, we thus compute a per-pixel blending weight $\omega_{i}$ for each tangent image $I_{t,i}$ to smoothly blend its optical flows $\mathcal{F}_{t,i}$ in the overlap areas.
+The $\omega_{i}$ computes the colour difference between the source tangent image $I_{t,i}$ and the backwards-warped target image, to reduce the weight of badly estimated tangent images' optical flow $\mathcal{F}_{t,i}$.
 %
-\new{The $\omega_i$ is estimated by 
-$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation, and $I_{t+1,i}$ is the corresponding tangent image of $I_{t,i}$ at time ${t+1}$.}
+The $\omega_i$ is estimated by 
+$e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)$ is the backwards warping operation, and $I_{t+1,i}$ is the corresponding tangent image of $I_{t,i}$ at time ${t+1}$.
 %
-\new{The $\mathcal{F}_t$ blended with the weighted tangent image optical flows,  $\frac{\sum_i{\mathcal{F}_{t,i} \cdot \omega_{i}}}{\sum_i{\omega_i}}$.}
+The $\mathcal{F}_t$ blended with the weighted tangent image optical flows,  $\frac{\sum_i{\mathcal{F}_{t,i} \cdot \omega_{i}}}{\sum_i{\omega_i}}$.
 
 %% blending method
 %\TODO{???}
@@ -195,29 +195,29 @@ $e^{-| I_{t,i} - Warp(I_{t+1,i}, \mathcal{F}_{t,i})|}$, the $Warp(\cdot , \cdot)
 \subsection{Global Rotation Warping}
 \label{sec:approach:warping}
 
-Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align \new{the ERP} image $I_{t+1}$ to \DELETE{image }$I_{t}$.
+Inspired by warping-based optical flow~\cite{BroxBPW2004}, we estimate the global rotation to pre-align the ERP image $I_{t+1}$ to $I_{t}$.
 This helps reduce the range of pixel motion to a level that is more suitable for the smaller FoV of tangent images.
-%
-\DELETE{The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
-%
-%The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
-We compute the horizontal rotation from the horizontal flow component $\mathcal{F}_u(\mathbf{x})$ using $\frac{2\pi}{N\cdot W}\sum_\mathbf{x}\mathcal{F}_u(\mathbf{x})$, where $N$ is the number of pixels and $W \!\times\! H$ the resolution of the ERP image.
-%
-%The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
-Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.}
+% %
+% \DELETE{The global rotation $R$ comprises both horizontal and vertical rotations, that are extracted from the 360° optical flow, to rotate all pixels in the ERP image.
+% %
+% %The horizontal rotation extract from the optical flow horizontal part i.e. $\mathcal{F}_u$ with the equation $\frac{2\pi}{n\cdot W}\sum\mathcal{F}_u$, the $n$ is image pixel number and $W$ is image width in pixel.
+% We compute the horizontal rotation from the horizontal flow component $\mathcal{F}_u(\mathbf{x})$ using $\frac{2\pi}{N\cdot W}\sum_\mathbf{x}\mathcal{F}_u(\mathbf{x})$, where $N$ is the number of pixels and $W \!\times\! H$ the resolution of the ERP image.
+% %
+% %The vertical rotation extract from the vertical part i.e. $\mathcal{F}_v$ with the equation $\frac{2\pi}{n\cdot H}\sum\mathcal{F}_v$, $H$ is the image height.
+% Similarly, we compute the vertical rotation from the vertical flow $\mathcal{F}_v$ using $\frac{\pi}{N \cdot H}\sum_\mathbf{x}\mathcal{F}_v(\mathbf{x})$.}
 % it's the noly 20% middle column of the $\mathcal{F}_v$
-\new{We compute the global rotation $\bar{R}$ from the computed optical flow field as follows.
+We compute the global rotation $\bar{R}$ from the computed optical flow field as follows.
 First, we convert the coordinates of the start and end points of all optical flow vectors to spherical coordinates with unit length.
-Then, we solve for the optimal rotation between the start points and the corresponding end points using least-squares fitting, which can be solved in closed form by singular value decomposition \cite{ArunHB1987,SorkiR2017}.}
+Then, we solve for the optimal rotation between the start points and the corresponding end points using least-squares fitting, which can be solved in closed form by singular value decomposition \cite{ArunHB1987,SorkiR2017}.
 
 \vspace{-1em}
 \paragraph{Global Rotation Image Warping.}
-After \new{estimating} the global rotation $\bar{R}$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $\bar{R}$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
+After estimating the global rotation $\bar{R}$ from the 360° optical flow, we warp the target image $I_{t+1}$ by the rotation $\bar{R}$ to align it to the source image $I_{t}$. %~\cite{ZioulKZAD2019}.
 %
 We apply global rotation warping based on the coarse to fine principle.
 First, we estimate the rotation $\bar{R}$ directly from ERP optical flow to roughly align the image $I_{t+1}$ and compensate for camera ego-motion.
 %We then use the cubemap optical flow to fine-tune the alignment using $\hat{R}$.
-We then use the cubemap optical flow to \new{estimate the residual rotation} $\hat{R}$ \new{to} fine-tune the \new{global rotation} alignment.
+We then use the cubemap optical flow to estimate the residual rotation $\hat{R}$ to fine-tune the global rotation alignment.
 
 \vspace{-1em}
 %\textbf{Panoramic Optical Flow Global Rotation Warping.}
