@@ -337,17 +337,27 @@ def get_padding_vs_fov_plot(output_filepath = None):
     if output_filepath is not None:
         fig = plt.figure(frameon = False)
         fig.set_size_inches(14, 8)
+
+    plot_markersize = 3.0
     # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
     # fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='FoV (Horizontal)')  # ,c=plt_x_index)
-    fov_h_not = plt.plot(fov_h_list, padding_list, c="r", marker="o", label='FoV (Horizontal)')  # ,c=plt_x_index)
+    fov_h_not,  = plt.plot(fov_h_list, padding_list, c="r", marker="o",markersize = plot_markersize, label='FoV (Horizontal)')  # ,c=plt_x_index)
 
     # fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='FoV (Verical)')  # ,c=plt_x_index)
-    fov_v_not = plt.plot(fov_v_list, padding_list,  c="g", marker="s", label='FoV (Verical)')  # ,c=plt_x_index)
+    fov_v_not, = plt.plot(fov_v_list, padding_list,  c="g", marker="s", markersize = plot_markersize, label='FoV (Verical)')  # ,c=plt_x_index)
+    label_font_size= 20
+    plt.legend(handles=[fov_h_not, fov_v_not], loc='upper left', prop={'size': label_font_size - 4})
 
-    plt.xlabel("FoV [°]")
-    plt.ylabel("Padding Size")
+    plt.xlabel("FoV [°]", fontsize=label_font_size)
+    plt.ylabel("Padding Size", fontsize=label_font_size)
+
     # plt.legend(handles=[fov_h_not, fov_v_not])
     # plt.colorbar()
+    fig.tight_layout()
+
+    # plt.show()
+    # return
+
     if output_filepath is not None:
         plt.savefig(output_filepath)
     else:

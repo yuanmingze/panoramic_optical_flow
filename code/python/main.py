@@ -913,5 +913,6 @@ if __name__ == "__main__":
     if 5 in task_list:
         """ Visualized the relationship between the padding v.s. FoV"""
         # output_filepath = config.TEST_data_root_dir + "paddingsize_vs_fov.pdf"
-        output_filepath = "./paddingsize_vs_fov.pdf"
+        # output_filepath = "./paddingsize_vs_fov.pdf"
+        output_filepath = "../../doc/paper_draft/images/paddingsize_vs_fov.pdf"
         projection.get_padding_vs_fov_plot(output_filepath)
