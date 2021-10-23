@@ -1,12 +1,12 @@
+import configuration as config
+
 import re
 import csv
 import os
 import re
-
 import pathlib
 
-import configuration as config
-import flow_warp
+from utility import flow_warp
 from utility import projection_cubemap as proj_cm
 from utility import image_io
 from utility import depth_io

@@ -1,10 +1,10 @@
 
-from utility import image_io
 from skimage.transform import resize
-
 import numpy as np
 
-from logger import Logger
+from . import image_io
+
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

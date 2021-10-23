@@ -13,8 +13,11 @@ __pycache__/
 /data/*
 /data/output/*
 
-
 build/
+
+# wheel packing build
+/code/python/dist/
+/code/python/*.egg-info/
 
 # Jupyter Notebook
 .ipynb_checkpoints

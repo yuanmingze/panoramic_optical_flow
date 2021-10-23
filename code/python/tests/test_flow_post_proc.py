@@ -1,9 +1,7 @@
 import configuration as config
 
-import flow_postproc
-import flow_warp
-import image_utility
-
+from utility import flow_postproc
+from utility import flow_warp
 from utility import image_io
 from utility import flow_io
 from utility import flow_vis

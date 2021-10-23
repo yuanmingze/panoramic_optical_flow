@@ -1,6 +1,5 @@
-// windows env
 {
-    // pylance
+    // python settting
     "python.languageServer": "Pylance",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/code/python",
@@ -8,8 +7,8 @@
         "${workspaceFolder}/code/python/test"
     ],
     "python.analysis.completeFunctionParens": true,
-    //
-    "python.pythonPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/python.exe",
+    // "python.pythonPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/python.exe",
+    "python.pythonPath": "/mnt/sda1/workenv_linux_ubuntu_20_04/python3_8_360opticalflow/bin/python",
     "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "autopep8",
     "python.formatting.autopep8Args": [
@@ -28,35 +27,24 @@
         "--rcfile",
         "${workspaceFolder}/.vscode/pylintrc"
     ],
-    "python.linting.pylintPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/pylint.exe",
+    // "python.linting.pylintPath": "D:/workenv_windows/python_3_7_panoramic_optical_flow/Scripts/pylint.exe",
+    "python.linting.pylintPath": "/mnt/sda1/workenv_linux_ubuntu_20_04/python3_8_360opticalflow/bin/pylint",
     "python.linting.pylintCategorySeverity.convention": "Information",
     // cmake
     "cmake.configureOnOpen": false,
+    "cSpell.words": [
+        "BMVC",
+        "cubemap",
+        "equirectangular",
+        "GLSL",
+        "heatmaps",
+        "regularisation",
+        "RMSE",
+        "SAAE",
+        "SEPE",
+        "SRMS",
+        "SSIM",
+        "undistort",
+        "Wulongting"
+    ],
 }
-// {
-//     "python.pythonPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
-//     "python.venvPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/python3",
-//     "python.terminal.activateEnvironment": true,
-//     "python.envFile": "${workspaceFolder}/.env",
-//     "python.formatting.provider": "autopep8",
-//     "python.formatting.autopep8Args": ["--max-line-length=200"],
-//     "python.autoComplete.addBrackets": true,
-//     "python.autoComplete.extraPaths": [
-//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/",
-//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/test/"],
-//     "python.linting.enabled": true,
-//     "python.linting.pylintEnabled": true,
-//     "python.linting.pylintArgs": ["--list-msgs"],
-//     "python.linting.pylintPath": "/mnt/sda1/workenv_linux/python_3_6_megaparallax/bin/pylint",
-//     "python.linting.pylintCategorySeverity.convention": "Information",
-//     // "cmake.sourceDirectory": "${workspaceFolder}/code/cpp/replica360",
-//     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-//     "files.associations": {
-//         "charconv": "cpp"
-//     },
-//     "cmake.configureOnOpen": false,
-//     "python.analysis.extraPaths": [
-//         "/mnt/sda1/workspace_windows/panoramic_optical_flow/code/python/"
-//     ],
-//     "python.analysis.completeFunctionParens": true,
-// }

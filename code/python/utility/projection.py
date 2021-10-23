@@ -1,13 +1,13 @@
 import numpy as np
 from scipy import ndimage
-
-import flow_postproc
-import polygon
-import spherical_coordinates as sc
-import projection_icosahedron as proj_ico
 from scipy.spatial.transform import Rotation as R
 
-from logger import Logger
+from . import flow_postproc
+from . import polygon
+from . import spherical_coordinates as sc
+from . import projection_icosahedron as proj_ico
+
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

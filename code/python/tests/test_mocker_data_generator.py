@@ -1,6 +1,6 @@
 import configuration
 
-import mocker_data_generator as MDG
+from utility import mocker_data_generator as MDG
 from utility import image_io
 
 def test_get_erp_image():

@@ -1,6 +1,7 @@
+import configuration as config
+
 import os
 
-import configuration as config
 from utility import depth_io
 from utility.logger import Logger
 

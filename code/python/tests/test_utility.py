@@ -1,9 +1,8 @@
+import configuration as config
+
 import os
 import pathlib
-
 import numpy as np
-
-import configuration as config
 
 from utility import depth_io
 from utility import image_io

@@ -2,9 +2,9 @@ import os
 from struct import pack, unpack
 
 import numpy as np
-import image_io
-from logger import Logger
 
+from . import image_io
+from .logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

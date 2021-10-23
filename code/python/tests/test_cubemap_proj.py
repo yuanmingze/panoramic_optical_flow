@@ -1,6 +1,6 @@
-import os
-
 import configuration as config
+
+import os
 
 from utility import flow_estimate, flow_postproc, gnomonic_projection
 from utility import image_io

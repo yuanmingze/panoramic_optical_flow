@@ -1,13 +1,12 @@
 import numpy as np
 from scipy import ndimage
 
-import gnomonic_projection
-import polygon
-import flow_postproc
-import spherical_coordinates
-import projection
+from . import gnomonic_projection
+from . import polygon
+from . import spherical_coordinates
+from . import projection
 
-from logger import Logger
+from .logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -17,7 +16,6 @@ Cubemap for rgb image and optical flow:
 1) 6 face order is +x, -x, +y, -y, +z, -z;   
 Reference: https://en.wikipedia.org/wiki/Cube_mapping
 """
-
 
 def generage_cubic_ply(mesh_file_path):
     """

@@ -1,10 +1,10 @@
-import pathlib
+import configuration as config
 
+import pathlib
 import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 
-import configuration as config
 
 from utility import flow_vis
 from utility import flow_io

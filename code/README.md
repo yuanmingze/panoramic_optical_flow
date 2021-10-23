@@ -8,6 +8,9 @@ Tested on GCC 8.3.
 
 `main.py` include the run and comparison code for BMVC 2021.
 
+`python -m build` to build the `whl` package, run `pip ./dist/panoopticalflow-1.0.0-py3-none-any.whl` to install the package.
+
+
 # Matlab
 
 # Blender

@@ -1,8 +1,5 @@
-import configuration
-
 import numpy as np
 from scipy import ndimage
-
 
 def hsv_to_rgb(hsv):
     """

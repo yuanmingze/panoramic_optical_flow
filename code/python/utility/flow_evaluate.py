@@ -1,23 +1,18 @@
-
-
-from logging import FileHandler
-from warnings import filterwarnings
-import numpy as np
 import os
 import csv
 
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import matplotlib.cm as cm
-import flow_postproc
-import flow_warp
 
-import spherical_coordinates
-import image_io
-import flow_io
+from . import flow_postproc
+from . import flow_warp
+from . import spherical_coordinates
+from . import image_io
+from . import flow_io
 
-from logger import Logger
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

@@ -1,7 +1,6 @@
 import configuration as config
 
 from utility import image_utility
-
 from utility.logger import Logger
 
 log = Logger(__name__)

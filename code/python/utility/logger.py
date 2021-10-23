@@ -1,18 +1,9 @@
-#!/usr/bin/env python3
-# Copyright 2004-present Facebook. All Rights Reserved.
-
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-
 import logging
 import traceback
-
-import logging
 
 import colorama
 from colorama import Fore, Back, Style
 colorama.init()
-
 
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors

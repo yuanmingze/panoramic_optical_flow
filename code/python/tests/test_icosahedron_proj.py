@@ -1,12 +1,11 @@
+import configuration as config
+
 import os
 import numpy as np
-
 from PIL import Image
 import matplotlib.pyplot as plt
 
-import configuration as config
-import flow_evaluate
-
+from utility import flow_evaluate
 from utility import image_io
 from utility import projection_icosahedron as proj_ico
 from utility import flow_io

@@ -10,8 +10,8 @@ from PIL import Image
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
-import image_evaluate
-from logger import Logger
+from . import image_evaluate
+from .logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

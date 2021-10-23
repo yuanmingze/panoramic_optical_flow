@@ -1,15 +1,14 @@
 import numpy as np
 from scipy import ndimage
-import pointcloud_utils
-import spherical_coordinates
-
-from utility import flow_postproc
-from utility import spherical_coordinates as sc
-from utility import flow_warp
-from logger import Logger
-
 from scipy.spatial.transform import rotation
 from scipy.stats import norm
+
+from . import pointcloud_utils
+from . import spherical_coordinates
+from . import flow_postproc
+from . import spherical_coordinates as sc
+from . import flow_warp
+from .logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

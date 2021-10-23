@@ -1,4 +1,3 @@
-
 import configuration as config
 
 from utility import logger

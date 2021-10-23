@@ -1,6 +1,9 @@
 import configuration
-import spherical_coordinates
 
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+
+from utility import spherical_coordinates
 from utility import flow_warp
 from utility import flow_vis
 from utility import spherical_coordinates as sc
@@ -8,10 +11,6 @@ from utility import image_io
 from utility import flow_io
 from utility import mocker_data_generator as MDG
 from utility import flow_postproc
-
-import numpy as np
-
-from scipy.spatial.transform import Rotation as R
 
 
 def test_warp_forward():
