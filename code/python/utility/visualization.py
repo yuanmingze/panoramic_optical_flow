@@ -31,17 +31,17 @@ def vis_dir(root_dir, recursice_enable= True):
 
     for file_path in dir_path.iterdir():
         if file_path.is_dir():
-            vis_dir(root_dir, recursice_enable)
+            vis_dir(file_path, recursice_enable)
         else:
             # visualize optical flow
             if file_path.suffix == ".floss" or file_path.suffix == ".flo":
                 log.info("visualize file: {}".format(file_path))
                 if  file_path.suffix == ".floss":
-                    of_data = flow_io.readFlowFloss(str(file_path))
+                    of_data = flow_io.read_flow_floss(str(file_path))
                 elif  file_path.suffix == ".flo":
-                    of_data = flow_io.readFlowFile(str(file_path))        
+                    of_data = flow_io.read_flow_flo(str(file_path))        
                 
-                # TODO judge and visual 360 flow 
+                # TODO judge and visual 360 flow
                 of_data_color = flow_vis.flow_to_color(of_data)
                 flow_visual_file_path = str(file_path) + ".jpg"
                 image_io.image_save(of_data_color, flow_visual_file_path)
@@ -57,3 +57,23 @@ def vis_dir(root_dir, recursice_enable= True):
 
                 output_path = str(file_path) + ".jpg"
                 depth_io.depth_visual_save(depth_data, output_path, min_ratio=0.05, max_ratio=0.95, visual_colormap="jet")
+
+
+if __name__ == '__main__':
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--task', type=str, help='the task index')
+
+    args = parser.parse_args()
+
+    test_list = []
+    test_list.append(args.task)
+
+    import os
+    cur_dir = os.getcwd() 
+
+    if args.task == "vis":
+        print("visualize folder {}".format(cur_dir))
+        vis_dir(cur_dir)

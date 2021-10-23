@@ -131,7 +131,6 @@ def write_flow_flo(flow_data, fname):
     fid.close()
 
 
-# def readFlowFloss(fname):
 def read_flow_floss(fname):
     '''
     args

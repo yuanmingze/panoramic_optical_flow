@@ -1,17 +1,22 @@
 The code of optical flow process.
 Some optical flow functions are implemented by CPP and Python.
 
-# CPP
+# 1. CPP
 Tested on GCC 8.3.
 
-# Python
+# 2. Python
 
 `main.py` include the run and comparison code for BMVC 2021.
 
-`python -m build` to build the `whl` package, run `pip ./dist/panoopticalflow-1.0.0-py3-none-any.whl` to install the package.
+- `python -m pip uninstall panoopticalflow --yes`: uninstall the original package;
+- `python -m build`: to build the `whl` package;
+- `pip ./dist/panoopticalflow-1.0.0-py3-none-any.whl`: install build package.
 
+The package provide following CLI script:
 
-# Matlab
+- `python -m panoopticalflow.visuazliation --task vis`: to visualize current folder `flo`, `pfm` and `dpt` files and save `jpg` image.
 
-# Blender
+# 3. Matlab
+
+# 4. Blender
 Blender project file and script.
