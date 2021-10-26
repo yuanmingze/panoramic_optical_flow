@@ -1,0 +1,51 @@
+\section{Related Work}
+
+\textbf{Optical Flow}
+has been a fundamental computer vision technique for decades, as it estimates dense correspondences between two input images \cite{BakerSLRBS2011,MenzeHG2018}.
+These correspondences can be used to identify object or camera ego-motion, and optical flow thus finds many applications in robotics, scene understanding, geometry reconstruction etc.
+Traditional optical flow methods are formulated using energy minimization based on photoconsistency and regularisation with a smoothness term \cite{KroegTDV2016, HornS1981, LucasK1981, BlackA1991}.
+\citet{BroxBPW2004} proposed a warping-based method that refines optical flow estimations in a coarse-to-fine fashion.
+\citet{SunRB2014} uses a median filter post-processing step to produce sharper object boundaries in the optical flow fields.
+
+
+In recent years, learning-based methods have defined a new state of the art in optical flow estimation.
+The first methods were based on supervised learning, generally on synthetic training data.
+FlowNet \cite{DosovFIHHGSCB2015} lifts the correlation operation into feature space, and uses a multi-scale architecture to effectively predict optical flow from two input images.
+FlowNet2 \cite{IlgMSKDB2017} introduces image warping between multiple cascaded FlowNets to increase the accuracy of large pixel motion.
+PWC-Net \cite{SunYLK2020} incorporates the best practices of traditional optical flow methods into a neural network: pyramid processing, image warping, and cost volume processing.
+RAFT \cite{TeedD2020a} employs a recurrent network to iteratively estimate optical flow from the 4D correlation volume between all pairs of pixels. %
+\citet{AleotPM2021} propose a data generation method using monocular depth estimation to synthesise a second view from a single input image.
+This enables self-supervised training of existing optical flow methods.
+
+
+Virtually all optical flow methods focus on perspective input images, although spherical images have recently received more attention.
+To this end, recent approaches by \citet{ArtizZAD2020} and \citet{BhandZY2020}
+transfer the architecture and weights of pre-trained networks \cite{DosovFIHHGSCB2015,HuiTC2018} to spherical images in the equirectangular projection (ERP) format.
+
+
+\paragraph{Panoramic Image Processing.}
+
+Panoramic (aka 360° or \emph{spherical}) images have been used in a wide variety of application areas, including
+depth estimation \cite{ImHRJCK2016, JiangSZDH2021, LaiXLL2019, SunSC2021, WangHCLYSCS2018, WangSTCS2020, WangYSCT2020, ZioulKZD2018, ZioulKZAD2019},
+room layout estimation \cite{WangYSCT2021, Tran2021, EderMG2019, FernaFPDCG2020, JinXZZTXYG2020, SunSC2021, ZengKG2020},
+semantic segmentation \cite{LeeJYJY2019, SunSC2021, YangZRHS2021, ZhangLSC2019},
+novel-view synthesis \cite{BerteYLR2020, HuangCCJ2017, MatzeCEKS2017, XuZXTG2021} and so on.
+The key problem when working with spherical images is to project them onto a regular 2D pixel grid for easy processing, as any projection introduces some kind of distortion – similar to maps of the world.
+\looseness-1 %
+
+
+Spherical images are sometimes projected to a cubemap,
+i.e. the six sides of a cube, potentially with overlap between sides \cite{ChengCDWLS2018, WangHCLYSCS2018, WangYSCT2020}.
+However, the resulting perspective images have large angles of view of $\geq$90°, which introduces significant perspective distortion.
+A smaller field of view can be achieved using icosahedron projection, producing 20 triangular faces, or in fact any subdivision of the icosahedron \citep{LuoZSX2019, ZhangLSC2019, LeeJYJY2019}.
+In the limit, perspective tangent images can be obtained anywhere on the sphere using gnomonic projection \citep{CoorsCG2018, EderSLF2020}.
+To overcome the significant distortions near the poles at the top/bottom image edges in ERP images, distortion-aware convolutions adapt kernels using gnomonic projection \cite{CoorsCG2018, SuG2019, TatenNT2018}, which enable training on perspective images and testing on ERP images.
+
+
+Our method combines ERP, cubemap and icosahedron projections to incrementally estimate global rotation and to refine spherical optical flow estimates to achieve higher accuracy.
+
+
+
+
+
+

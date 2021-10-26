@@ -1,0 +1,554 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Padding Size}
+\label{sec:sup:ablations}
+
+The padding size is how much expand on the gnomonic projection coordinate system.
+When the padding size is 0.1, shown in \cref{fig:sup:howtopadding}, the tangent area is expended from 1.0 to 1.1 ($1.0  + padding\_size$).
+The tangent image padding extends the field of view  (see Section 3.2 in the main paper), such that there is more overlap between the source and target images to find better correspondences and improve optical flow consistency.
+However, increased padding size reduces the tangent image angular resolution. 
+As shown in the \cref{fig:sup:paddingvsfov}, the image's field of view (FoV) increasing with raising padding size.
+We test padding size from 0.0 to 0.6 and show the result in \cref{fig:sup:ablationpadding}.
+Larger padding sizes reduce the spherical end-point error (SEPE).
+The SEPE plateaus at a padding of around 0.5, which optimally trades off angular resolution and padding size.
+
+
+\begin{figure*}[hbt!]
+	\centering
+	\includegraphics[width=0.80\textwidth]{images/tangent_image/tangent_image_padding.pdf}
+	\caption{\label{fig:sup:howtopadding}%
+		The tangent image padding.}
+\end{figure*}
+
+\begin{figure*}[hbt!]
+	\centering
+	\includegraphics[width=0.80\textwidth]{images/paddingsize_vs_fov.pdf}
+	\caption{\label{fig:sup:paddingvsfov}%
+		The relationship between tangent image FoV and padding size. The red and green curves are the tangent image horizontal and vertical FoV, respectively.}
+\end{figure*}
+
+\begin{figure*}[hbt!]
+	\centering
+	\includegraphics[width=0.80\textwidth]{images/abla_padding.pdf}
+	\caption{\label{fig:sup:ablationpadding}%
+		The spherical end-point error (SEPE) for a range of padding sizes.}
+\end{figure*}
+
+
+\section{Additional Results}
+
+Here we show additional results for quantitative and qualitative evaluation.
+
+\paragraph{Quantitative Evaluation.}
+
+\cref{fig:sup:compflowcircle}, \cref{fig:sup:compflowline} and \cref{fig:sup:compflowrandom} show additional results and comparisons on the Replica 360° dataset, for circula, linear and random camera motions, respectively.
+The our method's SEPE heatmaps show consistently smaller errors near the poles (top and bottom image edges).
+
+\begin{figure*}[hbt!]
+	\centering
+	\begin{tabular}{@{}c*{6}{@{\hspace{-9pt}}c}@{}}
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{apartment\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{white} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{white} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{white} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{white} &
+		\labeledfig{images/of_error/apartment_0_circ/apartment_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{white}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{apartment\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_circ/apartment_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{frl\_apartment\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_circ/frl_apartment_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{hotel\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black} &
+		\\[-1.0em]
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_circ/hotel_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black} 
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{office\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_circ/office_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{room\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_circ/room_0_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Circle}:\emph{room\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}	
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_circ/room_1_circ_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+\end{tabular}
+\caption{\label{fig:sup:compflowcircle}%
+	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset (\emph{Circle}).}
+\end{figure*}
+
+
+\begin{figure*}[hbt!]
+	\centering
+	\begin{tabular}{@{}c*{6}{@{\hspace{-9pt}}c}@{}}
+		\\[-0.5em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{apartment\_0}}}
+		\\[-0.5em]
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black} 
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_line/apartment_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{apartment\_1}}}
+		\\[-0.5em]
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_line/apartment_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{frl\_apartment\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_line/frl_apartment_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{hotel\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_line/hotel_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{office\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_line/office_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{room\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_line/room_0_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{room\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_line/room_1_line_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet$}{black}
+\end{tabular}
+\caption{\label{fig:sup:compflowline}%
+	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset (\emph{Line}).}
+\end{figure*}
+
+
+\begin{figure*}[hbt!]
+	\centering
+	\begin{tabular}{@{}c*{6}{@{\hspace{-9pt}}c}@{}}
+		\\[-0.5em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{apartment\_0}}}
+		\\[-0.5em]
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_0_rand/apartment_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{apartment\_1}}}
+		\\[-0.5em]
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/apartment_1_rand/apartment_1_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{frl\_apartment\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/frl_apartment_0_rand/frl_apartment_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{hotel\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/hotel_0_rand/hotel_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{office\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/office_1_rand/office_1_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{room\_0}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_0004_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_gt_0004_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_dis_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_our_0.4_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_pwcnet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_raft_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_0_rand/room_0_rand_1k_0_omniflownet_0004_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+		\\[-0.6em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Line}:\emph{room\_1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_0005_rgb_pano.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_dis_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) $DIS$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_our_0.4_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) $Our$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_pwcnet_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) $PWCNet$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_raft_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) $RAFT$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_omniflownet_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) $OmniFlowNet$}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_gt_0005_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(g) GT}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_dis_0005_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(h) $DIS\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_our_0.4_0005_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(i) $Our\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_pwcnet_0005_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(j) $PWCNet\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_raft_0005_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(k) $RAFT\_SEPE$}{black} &
+		\labeledfig{images/of_error/room_1_rand/room_1_rand_1k_0_omniflownet_0005_opticalflow_backward_pano.flo_error_vis.jpg}{0.165}{(l) $OmniFlowNet\_SEPE$}{black}
+\end{tabular}
+\caption{\label{fig:sup:compflowrandom}%
+	Estimated 360° optical flow and error heatmaps on the Replica 360° dataset (\emph{Line}).}
+\end{figure*}
+
+
+\paragraph{Qualitative Evaluation.}
+
+In \cref{fig:sup:backwardwarp}, we show additional interpolation error heatmaps on the OmniPhotos dataset \cite{BerteYLR2020}.
+They visualize the interpolation error \cite{BakerSLRBS2011}, i.e. the RGB colour difference between the source image and backward-warped target image.
+
+\begin{figure*}[hbt!]
+	\centering
+	\begin{tabular}{@{}c*{6}{@{\hspace{-9pt}}c}@{}}
+		\\[-0.8em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Ballintoy}}}
+		\\[-0.6em]
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_panoramic-0255.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_dis_0255_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_our_weight_0255_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_pwcnet_0255_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_raft_0255_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_omniflownet_0255_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(f) OmniFlowNet}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_panoramic-0256.jpg}{0.165}{(g) $I_{t+1}$}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_dis_0255_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(h) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_our_weight_0255_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(i) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_pwcnet_0255_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(j) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_raft_0255_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(k) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_omniflownet_0255_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(l) OmniFlowNet (Warp)}{black}
+		\\[-1.0em]
+		&
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_dis_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(m) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_our_weight_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(n) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_pwcnet_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(o) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_raft_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(p) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/ballintoy/Ballintoy_omniflownet_0255_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(q) OmniFlowNet (Warp)}{black}
+		\\[-0.8em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Ship}}}
+		\\[-0.6em]
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_panoramic-0547.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_dis_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_our_weight_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_pwcnet_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_raft_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_omniflownet_0547_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) OmniFlowNet}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_panoramic-0548.jpg}{0.165}{(g) $I_{t+1}$}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_dis_0547_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(h) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_our_weight_0547_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(i) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_pwcnet_0547_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(j) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_raft_0547_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(k) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_omniflownet_0547_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(l) OmniFlowNet (Warp)}{black}
+		\\[-1.0em]
+		&
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_dis_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(m) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_our_weight_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(n) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_pwcnet_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(o) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_raft_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(p) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/dublinShip1/DublinShip1_omniflownet_0547_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(q) OmniFlowNet (Warp)}{black}
+		\\[-0.8em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Temple3}}}
+		\\[-0.6em]
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_panoramic-0365.jpg}{0.165}{(a) $I_t$}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_dis_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_our_weight_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_pwcnet_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_raft_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_omniflownet_0365_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) OmniFlowNet}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_panoramic-0366.jpg}{0.165}{(g) $I_{t+1}$}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_dis_0365_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(h) DIS (Warp)}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_our_weight_0365_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(i) Ours (Warp)}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_pwcnet_0365_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(j) PWC-Net (Warp)}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_raft_0365_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(k) RAFT (Warp)}{white} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_omniflownet_0365_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(l) OmniFlowNet (Warp)}{white}
+		\\[-1.0em]
+		&
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_dis_0365_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(m) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_our_weight_0365_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(n) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_pwcnet_0365_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(o) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_raft_0365_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(p) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/osakatemple6/OsakaTemple6_omniflownet_0365_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(q) OmniFlowNet (Warp)}{black} 	
+		\\[-0.8em]
+		\multicolumn{5}{l}{\footnotesize{\emph{SecretGarden1}}}
+		\\[-0.6em]
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_panoramic-0530.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_dis_0531_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_our_weight_0531_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_pwcnet_0531_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_raft_0531_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_omniflownet_0531_opticalflow_backward_pano.flo_flow_vis.jpg}{0.165}{(f) OmniFlowNet}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_panoramic-0531.jpg}{0.165}{(g) $I_{t+1}$}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_dis_0531_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(h) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_our_weight_0531_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(i) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_pwcnet_0531_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(j) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_raft_0531_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(k) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_omniflownet_0531_opticalflow_backward_pano.flo_wrap.jpg}{0.165}{(l) OmniFlowNet (Warp)}{black}
+		\\[-1.0em]
+		&
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_dis_0531_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(m) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_our_weight_0531_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(n) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_pwcnet_0531_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(o) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_raft_0531_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(p) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/secretgarden1/SecretGarden1_omniflownet_0531_opticalflow_backward_pano.flo_warp_error_vis.jpg}{0.165}{(q) OmniFlowNet (Warp)}{black}	
+		\\[-0.8em]
+		\multicolumn{5}{l}{\footnotesize{\emph{Wulongting}}}
+		\\[-0.6em]
+		\labeledfig{images/of_warp/wulongting/Wulongting_panoramic-0696.jpg}{0.165}{(a) $I_t$}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_dis_0696_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(b) DIS}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_our_weight_0696_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(c) Ours}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_pwcnet_0696_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(d) PWC-Net}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_raft_0696_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(e) RAFT}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_omniflownet_0696_opticalflow_forward_pano.flo_flow_vis.jpg}{0.165}{(f) OmniFlowNet}{black}
+		\\[-1.0em]
+		\labeledfig{images/of_warp/wulongting/Wulongting_panoramic-0697.jpg}{0.165}{(g) $I_{t+1}$}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_dis_0696_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(h) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_our_weight_0696_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(i) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_pwcnet_0696_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(j) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_raft_0696_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(k) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_omniflownet_0696_opticalflow_forward_pano.flo_wrap.jpg}{0.165}{(l) OmniFlowNet (Warp)}{black}
+		\\[-1.0em]
+		&
+		\labeledfig{images/of_warp/wulongting/Wulongting_dis_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(m) DIS (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_our_weight_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(n) Ours (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_pwcnet_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(o) PWC-Net (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_raft_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(p) RAFT (Warp)}{black} &
+		\labeledfig{images/of_warp/wulongting/Wulongting_omniflownet_0696_opticalflow_forward_pano.flo_warp_error_vis.jpg}{0.165}{(q) OmniFlowNet (Warp)}{black} 
+	\end{tabular}
+	\caption{\label{fig:sup:backwardwarp}%
+		Backward warping results on several OmniPhotos datasets.}
+\end{figure*}
+
+
+
+

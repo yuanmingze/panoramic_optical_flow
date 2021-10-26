@@ -1,0 +1,27 @@
+\section{Conclusion}
+
+We proposed a flexible method for estimating 360° optical flow using tangent images and global rotation warping.
+Tangent images use gnomonic projection to uniformly sample a 360° ERP image from an initial cubemap to the final icosahedron-based tangent images to overcome the equirectangular projection distortions.
+Any existing off-the-shelf optical flow method can be used on the tangent images.
+Our method uses global rotation warping to pre-align the input images and overcome large motions between frames.
+Finally, we blend optical flow to reduce discontinuities at face boundaries.
+Our evaluation shows that our method achieves state-of-the-art performance for 360° optical flow estimation.
+
+
+\new{Our proposed approach overcomes the limited resolutions supported by CNN-based methods due to model size constraints (e.g. 1024$\times$512 \cite{ArtizZAD2020}) by processing tangent images separately.
+This enables the estimation of high-resolution 360° optical flow, for example at 2K$\times$1K resolution, which is not supported by existing methods.}
+
+\vspace{-1em}
+\new{\paragraph{Limitations.}
+Large pose changes are a common limitation of most optical flow methods, which are primarily designed for handling small motions.
+In our method, we use global rotation alignment to effectively minimise the net disparity across the unit sphere.
+This helps in the case of moderate pose changes, but large pose changes remain challenging.
+}
+
+
+\vspace{-1em}
+\paragraph{Future Work.}
+Our method struggles with large camera translations; one could replace the global rotation warping with a meshgrid-based warping method that can pre-align both rotational and translational camera motions.
+
+
+
