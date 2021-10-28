@@ -354,6 +354,21 @@ def sph2car(theta, phi, radius=1.0):
     return np.stack((x, y, z), axis=0)
 
 
+def rotation_erp_horizontal_fast(input_image, horizon_degree):
+    """ Rotate the ERP image along the X-axis (horizontal).
+
+    :param input_image: image shape is [height, width, channels_nubmer]
+    :type input_image: numpy
+    :param horizon_degree: rotation degree along the +x direction.
+    :type horizon_degree: float
+    """
+    image_width = input_image.shape[1]
+    phi_roll_numb = horizon_degree / 360.0 * image_width
+    # TODO it need interpolation
+    input_image_rotated = np.roll(input_image, int(phi_roll_numb), axis=1)
+    return input_image_rotated
+
+
 def rotate_erp_array(erp_image, rotation_mat=None):
     """ Rotate the ERP image with the theta and phi.
 

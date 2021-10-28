@@ -170,3 +170,37 @@ def image_save(image_data, image_file_path):
         im.save(image_file_path)
     else:
         log.error("The image channel number is {}".format(image_channels_number))
+
+
+def image_seq2gif(image_seq_list, output_filepath):
+    """ Convert a image sequence to a gif animation image and save. 
+
+    :param image_seq_list: The input image sequence of numpy image data.
+    :type image_seq_list: list 
+    :param output_filepath: The output gif image's file path.
+    :type output_filepath: str
+    """
+    if len(image_seq_list) <= 0:
+        log.error("image seq is empty!")
+
+    image_width = image_seq_list[0].shape[0]
+    image_height = image_seq_list[0].shape[1]
+
+    image_seq_list_ = None
+    if type(image_seq_list[0]) == np.ndarray:
+        image_seq_list_ = []
+        for image in image_seq_list:
+            image_seq_list_.append(Image.fromarray(image))
+    else:
+        image_seq_list_ = image_seq_list
+
+    # image_gif = Image.new('RGB', (image_height, image_width), (0, 0, 0))
+    image_gif = image_seq_list_[0]
+
+    image_gif.save(output_filepath,
+                   save_all=True,  # save all frame to gif image
+                   append_images=image_seq_list_,  # the image to be saved
+                   optimize=False,  # compress
+                   duration=40,  # each frame display time, MS (milliseconds)
+                   loop=0  # 0 is loop forever
+                   )
