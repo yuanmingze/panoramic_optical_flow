@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 
 # to import module in sibling folders
 dir_scripts = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +20,10 @@ class ReplicaConfig():
     """The dataset convention 
     """
     # 0) the Replica-Dataset root folder
-    replica_data_root_dir = "D:/dataset/replica_v1_0/"
+    if platform.system() == "Windows":
+        replica_data_root_dir = "D:/dataset/replica_v1_0/"
+    elif platform.system() == "Linux":
+        replica_data_root_dir = "/mnt/sda1/dataset/replica_v1_0/"
 
     # # all dataset list
     # "apartment_0",
@@ -85,9 +89,14 @@ class ReplicaConfig():
     replica_pano_rgb_backward_of_forwardwarp_filename_exp = "{:04d}_opticalflow_backward_rgb_forwardwarp.jpg"
 
     # 2) data generating programs
-    program_root_dir = "D:/workspace_windows/replica/Replica-Dataset_360/build_msvc/ReplicaSDK/Release/"
-    render_panorama_program_filepath = program_root_dir + "ReplicaRendererPanorama.exe"
-    render_cubemap_program_filepath = program_root_dir + "ReplicaRendererCubemap.exe"
+    if platform.system() == "Windows":
+        program_root_dir = "D:/workspace_windows/replica/Replica-Dataset_360/build_msvc/ReplicaSDK/Release/"
+        render_panorama_program_filepath = program_root_dir + "ReplicaRendererPanorama.exe"
+        render_cubemap_program_filepath = program_root_dir + "ReplicaRendererCubemap.exe"
+    elif platform.system() == "Linux":
+        program_root_dir = "/mnt/sda1/workspace_windows/replica/Rendering360OpticalFlow/build_linux/ReplicaSDK/"
+        render_panorama_program_filepath = program_root_dir + "ReplicaRendererPanorama"
+        render_cubemap_program_filepath = program_root_dir + "ReplicaRendererCubemap"
     renderRGBEnable = True
     renderDepthEnable = True
     renderMotionVectorEnable = True

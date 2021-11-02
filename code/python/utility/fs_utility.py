@@ -1,6 +1,8 @@
 
 import pathlib
 import os
+import shutil
+from random import shuffle
 
 from .logger import Logger
 
@@ -65,3 +67,42 @@ def dir_rm(dir_path):
             item.unlink()
     directory.rmdir()
 
+
+def list_files(folder_path, extension):
+    """ List all file with specified extension name.
+
+    :param folder_path: the files root dir.
+    :type folder_path: str
+    :param extension: file extension name, eg al. .jpg.
+    :type extension: str
+    """
+    files_list = []
+    for file in os.listdir(folder_path):
+        if file.endswith(extension):
+            files_list.append(file)
+    return files_list
+
+
+def copy_replace(src_filepath, tar_filepath, replace_list = None):
+    """ Copy file and replace words.
+
+    :param src_filepath: the source file path.
+    :type src_filepath: str
+    :param tar_filepath: the target file path.
+    :type tar_filepath: str
+    :param replace_list: the word list need to replace.
+    :type replace_list: dict
+    """    
+    if replace_list is None:
+        log.info("The replace words list is empty. Copy file directly.")
+        shutil.copy(src_filepath, tar_filepath)
+
+    with open(src_filepath, 'r') as file :
+        filedata = file.read()
+
+    for old_word in replace_list:
+        new_word = replace_list[old_word]
+        filedata = filedata.replace(old_word, new_word)
+    
+    with open(tar_filepath, 'w') as file:
+        file.write(filedata)
