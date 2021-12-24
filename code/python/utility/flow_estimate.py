@@ -243,7 +243,10 @@ class PanoOpticalFlow():
             for index in range(0, len(cubeface_images_src_list)):
                 optical_flow_cubemap = self.optical_flow_base_line_method(cubeface_images_src_list[index], cubeface_images_tar_list[index])
                 cubemap_face_of_list.append(optical_flow_cubemap)
-            optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height, self.padding_size_cubemap, src_erp_image, tar_erp_image, wrap_around=True)
+
+            optical_flow_cubemap = proj_cm.cubemap2erp_flow(cubemap_face_of_list, erp_image_height = erp_image_height, \
+                                padding_size = self.padding_size_cubemap, image_erp_src=src_erp_image, image_erp_tar=tar_erp_image, wrap_around=True)
+                                
             # 1-2) warp target image
             tar_erp_image_rot_cubemap, rotation_mat_cubemap = flow_warp.global_rotation_warping(tar_erp_image, optical_flow_cubemap, forward_warp=False, rotation_type=self.flow2rotmat_method)
             log.debug("Cubemap optical flow rotation is {}".format(spherical_coordinates.rot_mat2sph(rotation_mat_cubemap)))
@@ -276,7 +279,11 @@ class PanoOpticalFlow():
             for index in range(0, len(icoface_images_src_list)):
                 optical_flow_ico = self.optical_flow_base_line_method(icoface_images_src_list[index], icoface_images_tar_list[index])
                 ico_face_of_list.append(optical_flow_ico)
-            optical_flow_ico = proj_ico.ico2erp_flow(ico_face_of_list, erp_image_height, self.padding_size_ico, src_erp_image, tar_erp_image, wrap_around=True, face_blending_method=self.face_blending_method_ico)
+            optical_flow_ico = proj_ico.ico2erp_flow(tangent_flows_list = ico_face_of_list, 
+                                erp_flow_height = erp_image_height, 
+                                padding_size = self.padding_size_ico, 
+                                image_erp_src = src_erp_image, image_erp_tar = tar_erp_image, wrap_around=True, face_blending_method=self.face_blending_method_ico)
+          
           
             # update
             erp_optical_flow = optical_flow_ico

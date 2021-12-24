@@ -681,6 +681,37 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our", dataset_dirli
                 image_io.image_save(optical_flow_vis, result_opticalflow_vis_filepath)
 
 
+def of_estimate_test():
+    """ Test the pipeline. """
+    padding_size = 0.3
+    
+    output_dir = "../../data/replica_360/hotel_0/"
+    test_data_root_dir = "../../data/replica_360/hotel_0/"
+
+    src_erp_image = image_io.image_read(test_data_root_dir + "0001_rgb.jpg")
+    tar_erp_image = image_io.image_read(test_data_root_dir + "0002_rgb.jpg")
+
+    result_opticalflow_filepath = test_data_root_dir + "0001_rgb_forward.flo"
+    result_opticalflow_vis_filepath = test_data_root_dir + "0001_rgb_forward.flo.jpg"
+
+    # 1) estimate optical flow
+    flow_estimator = flow_estimate.PanoOpticalFlow()
+    flow_estimator.debug_enable = False
+    flow_estimator.debug_output_dir = None
+    flow_estimator.padding_size_cubemap = padding_size
+    flow_estimator.padding_size_ico = padding_size
+    flow_estimator.flow2rotmat_method= "3D"
+    flow_estimator.tangent_image_width_ico = 480
+    optical_flow = flow_estimator.estimate(src_erp_image, tar_erp_image)
+
+    # 2) evaluate the optical flow and output result
+    # output optical flow image
+    flow_io.flow_write(optical_flow, result_opticalflow_filepath)
+    optical_flow_vis = flow_vis.flow_to_color(optical_flow, min_ratio=0.2, max_ratio=0.8)
+
+    image_io.image_save(optical_flow_vis, result_opticalflow_vis_filepath)
+
+
 if __name__ == "__main__":
     """ This file for BMVC 2021 360 optical flow. """
 
