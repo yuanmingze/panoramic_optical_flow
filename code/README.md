@@ -16,7 +16,5 @@ The package provide following CLI script:
 
 - `python -m panoopticalflow.visuazliation --task vis`: to visualize current folder `flo`, `pfm` and `dpt` files and save `jpg` image.
 
-# 3. Matlab
-
-# 4. Blender
+# 3. Blender
 Blender project file and script.

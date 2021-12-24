@@ -30,3 +30,11 @@ Please read the README.md file in each folder to get more information.
 The Replica-Dataset code generate the raw data, the `code/python/replica360/` code to post-process the data to generate the final dataset data.
 
 The core method implement in `code/python/utility`.
+
+
+# Feature List
+
+- [ ] Implement BMVC 2021 method
+- [ ] 360 optical flow metric: SphEPE, etc.
+- [ ] 360 optical flow visualization;
+- [ ] The code to compare with other method;
