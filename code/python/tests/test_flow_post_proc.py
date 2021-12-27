@@ -1,11 +1,11 @@
 import configuration as config
 
-from utility import flow_postproc
-from utility import flow_warp
-from utility import image_io
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_postproc
+import flow_postproc
+import flow_warp
+import image_io
+import flow_io
+import flow_vis
+import flow_postproc
 
 
 def test_flow_resize(data_dir):

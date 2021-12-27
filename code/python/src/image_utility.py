@@ -2,9 +2,9 @@
 from skimage.transform import resize
 import numpy as np
 
-from . import image_io
+import image_io
 
-from .logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -12,10 +12,10 @@ log.logger.propagate = False
 def image_file_resize(image_input_filepath, image_output_filepath, image_height=None, image_width=None, resize_ratio=1.0):
     """ Resize image files.
 
-    :param image1_filepath: The input image file path.
-    :type image1_filepath: str
-    :param image2_filepath: The output image file path.
-    :type image2_filepath: str
+    :param image_input_filepath: The input image file path.
+    :type image_input_filepath: str
+    :param image_output_filepath: The output image file path.
+    :type image_output_filepath: str
     """
     image_data = image_io.image_read(image_input_filepath)
 
@@ -29,16 +29,16 @@ def image_file_resize(image_input_filepath, image_output_filepath, image_height=
 
 
 def image_resize(image_data, image_size=None, image_ratio=None):
-    """ Resize image
+    """Resize image.
 
-    :param image_data: [description]
+    :param image_data: The input image.
     :type image_data: numpy
     :param image_size: Resize image's size, defaults to None
     :type image_size: tuple, optional
-    :param image_ratio: [description], defaults to None
+    :param image_ratio: The resize ratio, defaults to None
     :type image_ratio: float, optional
-    :return: [description]
-    :rtype: [type]
+    :return: The resized image.
+    :rtype: numpy
     """
     if image_size is None:
         image_size = [size * image_ratio for size in image_data.shape[:2]]

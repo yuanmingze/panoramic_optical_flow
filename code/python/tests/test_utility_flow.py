@@ -2,15 +2,12 @@ import configuration as config
 
 import pathlib
 import numpy as np
-from matplotlib import pyplot as plt
 from PIL import Image
 
-
-from utility import flow_vis
-from utility import flow_io
-from utility import flow_evaluate
-from utility import image_io
-
+import flow_vis
+import flow_io
+import flow_evaluate
+import image_io
 
 def test_warp_image():
     """

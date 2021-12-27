@@ -4,8 +4,7 @@ from re import X
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-from utility import gnomonic_projection as gp
+import gnomonic_projection as gp
 
 
 def test_reverse_gnomonic_projection():
@@ -31,7 +30,7 @@ def test_reverse_gnomonic_projection():
     sph_list_x, sph_list_y = gp.reverse_gnomonic_projection(tangent_x, tangent_y, tangent_point_theta, tangent_point_phi)
 
     tangent_point_list = np.stack((tangent_x.flatten(), tangent_y.flatten()), axis=1)
-    print("tangetn_point_list \n {}".format(tangent_point_list))
+    print("tangent_point_list \n {}".format(tangent_point_list))
     print("spherical_point_list \n {}".format(np.stack((sph_list_x.flatten(), sph_list_y.flatten()), axis=1)))
 
     color = range(len(tangent_x.flatten()))
@@ -88,7 +87,7 @@ def test_gnomonic_projection():
     sph_list_x, sph_list_y = gp.gnomonic_projection(tangent_x, tangent_y, tangent_point_theta, tangent_point_phi)
 
     tangent_point_list = np.stack((tangent_x.flatten(), tangent_y.flatten()), axis=1)
-    print("tangetn_point_list \n {}".format(tangent_point_list))
+    print("tangent_point_list \n {}".format(tangent_point_list))
     print("spherical_point_list \n {}".format(np.stack((sph_list_x.flatten(), sph_list_y.flatten()), axis=1)))
 
     color = range(len(tangent_x.flatten()))

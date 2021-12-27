@@ -4,7 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utility import polygon
+import polygon
 
 
 def test_detect_intersection_segments_array():

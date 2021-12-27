@@ -1,8 +1,8 @@
 import configuration as config
 
-from utility import image_io
-from utility import flow_io
-from utility import flow_evaluate
+import image_io
+import flow_io
+import flow_evaluate
 
 
 def test_opticalflow_metric(erp_flo_gt_filepath, erp_flo_eva_filepath, erp_flo_mask_filepath, erp_flo_output_dir):

@@ -1,15 +1,14 @@
-from . import image_io
-from . import spherical_coordinates
+import image_io
+import spherical_coordinates
 
-
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
 
 
 def bunny_animation(input_image_filepath, output_image_filepath):
-    """ Make a bunney animation gif figure.
+    """ Make a bunny animation gif figure.
 
     :param input_image_filepath: The input 
     :type input_image_filepath: str

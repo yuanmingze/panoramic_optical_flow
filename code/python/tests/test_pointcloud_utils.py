@@ -3,7 +3,7 @@ import configuration as config
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 
-from utility import pointcloud_utils
+import pointcloud_utils
 
 def test_correpairs2rotation():
     """Get the 3D rotation from 3D points pairs."""

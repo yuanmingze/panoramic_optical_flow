@@ -1,15 +1,13 @@
 import numpy as np
 from scipy import ndimage
-from scipy.spatial.transform import rotation
 from scipy.stats import norm
 
-from . import pointcloud_utils
-from . import spherical_coordinates
-from . import flow_postproc
-from . import spherical_coordinates as sc
-from . import flow_warp
-from .logger import Logger
+import pointcloud_utils
+import spherical_coordinates
+import flow_postproc
+import spherical_coordinates as sc
 
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -54,8 +52,7 @@ def flow_warp_meshgrid(motion_flow_u, motion_flow_v):
 
 
 def warp_backward(image_target, of_forward):
-    """
-    Backward warp with optical flow from the target image to generate the source image. 
+    """Backward warp with optical flow from the target image to generate the source image. 
 
     :param image_target: The terget image of optical flow, [height, width, channel].
     :type image_target: numpy
@@ -94,10 +91,20 @@ def warp_backward(image_target, of_forward):
 
 
 def warp_forward_padding(image_target, of_forward, padding_x=0, padding_y=0):
-    '''
-    warp the target image to the source image with the forward optical flow.
+    """Warp the target image to the source image with the forward optical flow.
     The padding is used in the case the optical flow warp out of the image range.
-    '''
+
+    :param image_target: The optical flow's target image.
+    :type image_target: numpy
+    :param of_forward: The optical flow array.
+    :type of_forward: numpy
+    :param padding_x: The image padding area on the vertical., defaults to 0
+    :type padding_x: int, optional
+    :param padding_y: The image padding area on the horizontal, defaults to 0
+    :type padding_y: int, optional
+    :return: Warpped target image.
+    :rtype: numpy
+    """
     image_size = np.shape(image_target)
     image_height = image_size[0]
     image_width = image_size[1]
@@ -202,9 +209,20 @@ def warp_forward(image_first, of_forward, wrap_around=False, ignore_transparent=
 
 
 def warp_forward_padding(image_first, of_forward, padding_x=0, padding_y=0):
-    """
-    forward warpping
-    The padding to protect the pixel warped range out of image boundary
+    """Forward warpping the source image. 
+    The padding to protect the pixel warped range out of image boundary.
+
+    :param image_first: The optical flow's source image.
+    :type image_first: numpy
+    :param of_forward: The optical flow data.
+    :type of_forward: numpy
+    :param padding_x: The image padding area on the vertical., defaults to 0
+    :type padding_x: int, optional
+    :param padding_y: The image padding area on the horizontal, defaults to 0
+    :type padding_y: int, optional
+    :return: Warpped target image.
+    :return: Warpped source image.
+    :rtype: numpy
     """
     image_size = np.shape(image_first)
     image_height = image_size[0]
@@ -246,12 +264,14 @@ def warp_forward_padding(image_first, of_forward, padding_x=0, padding_y=0):
     return dest_image
 
 
-def flow2rotation_3d(erp_flow, mask_method = "center"):
+def flow2rotation_3d(erp_flow, mask_method="center"):
     """Compute the two image rotation from the ERP image's optical flow with SVD.
     The rotation is from the first image to second image.
 
     :param erp_flow: The ERP optical flow. [height, width,2]
     :type erp_flow: numpy
+    :param mask_method: center mehtod is just use the point close to obit.
+    :type mask_method: str
     :return: The rotation matrix.
     :rtype: numpy
     """
@@ -289,22 +309,22 @@ def flow2rotation_3d(erp_flow, mask_method = "center"):
     return rotation_mat
 
 
-def flow2rotation_2d(erp_flow_, use_weight=True):
+def flow2rotation_2d(erp_flow, use_weight=True):
     """Compute the  two image rotation from the ERP image's optical flow.
     The rotation is from the first image to second image.
 
     :param erp_flow: the erp image's flow 
     :type erp_flow: numpy 
     :param use_weight: use the centre rows and columns to compute the rotation, default is True.
-    :type: bool
+    :type use_weight: bool
     :return: the offset of ERP image, [theta shift, phi shift], radian
     :rtype: float
     """
-    erp_image_height = erp_flow_.shape[0]
-    erp_image_width = erp_flow_.shape[1]
+    erp_image_height = erp_flow.shape[0]
+    erp_image_width = erp_flow.shape[1]
 
     # convert the pixel offset to rotation radian
-    erp_flow = flow_postproc.erp_of_wraparound(erp_flow_)
+    erp_flow = flow_postproc.erp_of_wraparound(erp_flow)
     theta_delta_array = 2.0 * np.pi * (erp_flow[:, :, 0] / erp_image_width)
     theta_delta = np.mean(theta_delta_array)
 
@@ -358,7 +378,8 @@ def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_typ
     :type erp_flow: numpy 
     :param forward_warp: If yes, the erp_image is use the erp_flow forward warp erp_image.
     :type forward_warp: bool 
-    :param 
+    :param rotation_type: the global rotation method.
+    :type rotation_type: str
     :return: The rotated ERP image,  the rotation matrix from original to target (returned erp image).
     :rtype: numpy
     """
@@ -379,7 +400,7 @@ def global_rotation_warping(erp_image, erp_flow, forward_warp=True, rotation_typ
         log.error("Do not suport rotation type {}".format(rotation_type))
 
     # 1) rotate the ERP image with the rotation matrix
-    erp_image_rot = sc.rotate_erp_array(erp_image, rotation_mat = rotation_mat)
+    erp_image_rot = sc.rotate_erp_array(erp_image, rotation_mat=rotation_mat)
     if erp_image.dtype == np.uint8:
         erp_image_rot = erp_image_rot.astype(np.uint8)
 

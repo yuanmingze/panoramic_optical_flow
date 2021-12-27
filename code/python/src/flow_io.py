@@ -3,8 +3,8 @@ from struct import pack, unpack
 
 import numpy as np
 
-from . import image_io
-from .logger import Logger
+import image_io
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -12,8 +12,9 @@ log.logger.propagate = False
 
 def flow_read(file_path):
     """Load the optical flow from file.
+
     :param file_path: the optical flow file path
-    :type files: str
+    :type file_path: str
     """
     if not os.path.exists(file_path):
         log.error("file {} do not exist.".format(file_path))
@@ -27,7 +28,7 @@ def flow_read(file_path):
 
 
 def flow_write(flow_data, file_path):
-    """[summary]
+    """Save optical flow data to file.
 
     :param flow_data: the optical flow data array, required size is (height, width, 2)
     :type flow_data: numpy
@@ -90,7 +91,7 @@ def read_flow_flo(file_name):
 def write_flow_flo(flow_data, fname):
     """Write the optical flow data to *.flo file.
 
-    :param img: Optical flow data, [height, widht, 2]
+    :param img: Optical flow data, [height, width, 2]
     :type img: numpy
     :param fname: the output file path.
     :type fname: str
@@ -132,12 +133,11 @@ def write_flow_flo(flow_data, fname):
 
 
 def read_flow_floss(fname):
-    '''
-    args
-        fname (str)
-    return
-        flow (numpy array) numpy array of shape (height, width, 2)
-    '''
+    """Load floss format optical flow file.
+    :param fname (str)
+    :return: numpy array of shape (height, width, 2).
+    :rtype: numpy 
+    """
     if not os.path.exists(fname):
         raise RuntimeError("{} do not exist!".format(fname))
 
@@ -173,13 +173,16 @@ def read_flow_floss(fname):
     return flow
 
 
-# def writeFlowFloss(filename, uv, v=None):
 def write_flow_floss(filename, uv, v=None):
-    """ Write optical flow to file as format *.floss
-    
-    If v is None, uv is assumed to contain both u and v channels,
-    stacked in depth.
-    Original code by Deqing Sun, adapted from Daniel Scharstein.
+    """Write optical flow to file as format *.floss.
+     If v is None, uv is assumed to contain both u and v channels, stacked in depth.
+
+    :param filename: The output floss optical flow file path.
+    :type filename: str
+    :param uv: The optical flow data. 
+    :type uv: numpy
+    :param v: The optical flow V channel, defaults to None
+    :type v: numpy, optional
     """
     nBands = 2
 
@@ -207,8 +210,13 @@ def write_flow_floss(filename, uv, v=None):
 
 
 def read_flow_bin(binary_file_path, height, width):
-    """
-    load depth value form binary file, replica360 generated.
+    """Load depth value form binary file, replica360 generated.
+    :param binary_file_path: The binary optical flow file path.
+    :type binary_file_path: str
+    :param height: The optical flow array height.
+    :type height: int
+    :param width: The optical flow array width.
+    :type width: int
     """
     xbash = np.fromfile(binary_file_path, dtype='float32')
     data = xbash.reshape(width, height, 4)

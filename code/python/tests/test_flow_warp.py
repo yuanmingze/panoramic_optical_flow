@@ -3,14 +3,14 @@ import configuration
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from utility import spherical_coordinates
-from utility import flow_warp
-from utility import flow_vis
-from utility import spherical_coordinates as sc
-from utility import image_io
-from utility import flow_io
-from utility import mocker_data_generator as MDG
-from utility import flow_postproc
+import spherical_coordinates
+import flow_warp
+import flow_vis
+import spherical_coordinates as sc
+import image_io
+import flow_io
+import mocker_data_generator as MDG
+import flow_postproc
 
 
 def test_warp_forward():
@@ -32,7 +32,7 @@ def test_flow2rotation():
 
     # 0) create flow
     rotation_matrix = spherical_coordinates.rot_sph2mat(10, 5, True)
-    print("The ground truch rotation is {}".format(spherical_coordinates.rot_mat2sph(rotation_matrix)))
+    print("The ground truth rotation is {}".format(spherical_coordinates.rot_mat2sph(rotation_matrix)))
     erp_motion_vector = sc.rotation2erp_motion_vector((erp_height, erp_width), rotation_matrix=rotation_matrix)
     flow_color = flow_vis.flow_to_color(erp_motion_vector)
     image_io.image_show(flow_color)

@@ -1,16 +1,17 @@
 import logging
 import traceback
+import platform
 
 import colorama
 from colorama import Fore, Back, Style
 colorama.init()
+
 
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors
     reference: https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output/
     """
 
-    import platform
     if platform.system() == 'Windows':
         grey = "\x1b[38;21m"
         yellow = "\x1b[33;21m"

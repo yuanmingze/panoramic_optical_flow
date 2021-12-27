@@ -1,24 +1,22 @@
 import sys
 sys.path.append('core')
+
 from utils.utils import InputPadder
 from utils import flow_viz
 from raft import RAFT
 from PIL import Image
 import torch
 import numpy as np
-import glob
-import cv2
+
 import os
 import argparse
 import sys
-import struct
 import re
 import pathlib
 from struct import pack, unpack
 
 INDEX_MAX = sys.maxsize
 DEVICE = 'cuda'
-
 
 def scene_of_folder(root_dir):
     """

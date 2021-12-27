@@ -4,13 +4,13 @@ import os
 import pathlib
 import numpy as np
 
-from utility import depth_io
-from utility import image_io
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_warp
-from utility import polygon
-from utility import gnomonic_projection as gp
+import depth_io
+import image_io
+import flow_io
+import flow_vis
+import flow_warp
+import polygon
+import gnomonic_projection as gp
 
 path = os.getcwd()
 TEST_DATA_ROOT_FOLDER = path + "/../../data/replica_360/office_0/"
@@ -53,12 +53,11 @@ def depth_map_format_transfrom():
 
 def test_depth_io():
     """
-    test depht io
+    test depth io
     """
     dpt_file_path = TEST_DATA_ROOT_FOLDER + "0000_depth.dpt"
 
-    # load grount truth from bin file
-    #depht_io.write_dpt(depth_data, dpt_file_path)
+    # load ground truth from bin file
     depth_data = depth_io.read_dpt(dpt_file_path)
 
     image_io.image_show(depth_data)

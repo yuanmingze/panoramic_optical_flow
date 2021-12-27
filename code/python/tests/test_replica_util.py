@@ -6,18 +6,17 @@ import os
 import re
 import pathlib
 
-from utility import flow_warp
-from utility import projection_cubemap as proj_cm
-from utility import image_io
-from utility import depth_io
-from utility import flow_io
-from utility import flow_vis
-from utility import image_evaluate
-from utility import flow_evaluate
-from utility import replica_util
+import flow_warp
+import projection_cubemap as proj_cm
+import image_io
+import depth_io
+import flow_io
+import flow_vis
+import image_evaluate
+import flow_evaluate
+import datasets_utility
+import image_utility
 
-
-from replica360 import configuration as replica360config
 
 def test_pano_optical_flow():
     """ """
@@ -53,11 +52,11 @@ def test_cubemap_optical_flow_withwraparound():
     rgb_data_list = []
     # face_flow_depths = []
     face_flows_wraparound = []
-    cubemap_face_abbre = ["R", "L", "U", "D", "F", "B"]
+    cubemap_face_abbr = ["R", "L", "U", "D", "F", "B"]
     face_rgb_name_expression = "0000_{}_rgb.jpg"
     face_gt_flow_padding_name_expression = "0001_{}_motionvector_backward.flo"
     face_gt_flow_depth_padding_name_expression = "0001_{}_motionvector_backward.flo.dpt"
-    for index in cubemap_face_abbre:
+    for index in cubemap_face_abbr:
         # read optical flow *.flo files
         cubemap_flow_path = optical_flow_dir + face_gt_flow_padding_name_expression.format(index)
         face_flow_data = flow_io.read_flow_flo(cubemap_flow_path)
@@ -67,7 +66,7 @@ def test_cubemap_optical_flow_withwraparound():
         # face_flow_depths.append(depth_io.read_dpt(cubemap_flow_depth_path))
         of_depth_data = depth_io.read_dpt(cubemap_flow_depth_path)
         # image_io.image_show(of_depth_data)
-        wraparound_data = replica_util.opticalflow_warparound(of_depth_data)
+        wraparound_data = datasets_utility.opticalflow_warparound(of_depth_data)
         face_flows_wraparound.append(wraparound_data)
         
         if index == 'x':
@@ -92,7 +91,6 @@ def test_cubemap_optical_flow_withwraparound():
     image_io.image_save(face_flow_vis, erp_flow_stitch_name)
     # forward warp the source image
     rgb_data = image_io.image_read(optical_flow_gt_dir + "0001_rgb_pano.jpg")
-    from utility import image_utility
     rgb_data = image_utility.image_resize(rgb_data, erp_flow_stitch.shape[:2])
     rgb_data_forward_warp = flow_warp.warp_forward(rgb_data, erp_flow_stitch, wrap_around=True)
     image_io.image_show(rgb_data_forward_warp)

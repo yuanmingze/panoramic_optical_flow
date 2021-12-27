@@ -2,8 +2,8 @@ import configuration as config
 
 import os
 
-from utility import depth_io
-from utility.logger import Logger
+import depth_io
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -24,6 +24,6 @@ def test_vis_dpt_folder(data_dir):
 
 if __name__ == "__main__":
     # data_dir = config.TEST_data_root_dir + "replica_360/office_0_line_cubemap_stitch_debug/cubemap_dpt/"
+    # data_dir = "D:/workdata/opticalflow_data/replica_cubemap/office_0_line/"
     data_dir = config.TEST_data_root_dir + "replica_360/office_0_line_cubemap_stitch_debug/"
-    # data_dir = "D:/workdata/opticalflow_data/replic_cubemap/office_0_line/"
     test_vis_dpt_folder(data_dir)

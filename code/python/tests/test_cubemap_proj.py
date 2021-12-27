@@ -2,16 +2,16 @@ import configuration as config
 
 import os
 
-from utility import flow_estimate, flow_postproc, gnomonic_projection
-from utility import image_io
-from utility import flow_io
-from utility import flow_vis
-from utility import projection_cubemap as proj_cm
-from utility import flow_warp
-from utility import depth_io
+import image_io
+import flow_io
+import flow_vis
+import projection_cubemap as proj_cm
+import flow_estimate
+import flow_postproc
+import flow_warp
+import depth_io
 
-from utility.logger import Logger
-
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

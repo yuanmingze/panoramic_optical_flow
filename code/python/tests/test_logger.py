@@ -1,6 +1,6 @@
 import configuration as config
 
-from utility import logger
+import logger
 
 log = logger.Logger(__name__)
 log.logger.propagate = False

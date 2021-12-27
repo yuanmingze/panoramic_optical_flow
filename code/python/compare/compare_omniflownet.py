@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Note it's Python 2. Set up method refere `https://github.com/COATZ/OmniFlowNet`.
 Run the script on the folder `OmniFlowNet/models/testing/`.
@@ -11,8 +9,6 @@ Input is the `image_list.csv` file.
 Each line contain 3 column,
 
 `source_image_relative_path, target_image_relative_path, optical_flow_output_relative_path`
-
-
 """
 
 import os, sys, csv
@@ -251,7 +247,7 @@ def OmniFlowNet_run(replica_dataset_root_dir):
     The original OmniFlowNet test_iter.py script.
     """
 
-    # set the caffe run time envirement
+    # set the caffe run time environment
     caffe_bin = 'bin/caffe.bin'
     img_size_bin = 'bin/get_image_size'
 

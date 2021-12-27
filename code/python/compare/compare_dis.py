@@ -1,18 +1,14 @@
+import configuration
+
 import re
 import os
 import sys
-import csv
 import pathlib
 
-import sys
-sys.path.append("..")
-
-from utility import flow_io
-from utility import image_io
-from utility import flow_vis
-from utility import replica_util
-from utility import flow_estimate
-
+import flow_io
+import image_io
+import flow_vis
+import flow_estimate
 
 """
 Evaluate the quality of optical flow in panoramic images optical flow.

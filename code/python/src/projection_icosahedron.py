@@ -5,13 +5,13 @@ import numpy as np
 from scipy import ndimage
 from skimage.transform import resize
 
-from . import gnomonic_projection as gp
-from . import spherical_coordinates as sc
-from . import polygon
-from . import projection
-from . import flow_postproc
+import gnomonic_projection as gp
+import spherical_coordinates as sc
+import polygon
+import projection
+import flow_postproc
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -87,10 +87,8 @@ def generate_icosphere_ply(mesh_file_path):
 
 
 def get_icosahedron_parameters_subdivsion(subdivision_level, triangle_index):
-    """Get the parameters' of x-level subdivsion icosahedron.
-
+    """ TODO Get the parameters' of x-level subdivsion icosahedron.
     Use loop subdivision to the icosahedron.
-    TODO implement  
 
     :param subdivision_level: The subdivsion 's level.
     :type subdivision_level: int
@@ -101,8 +99,7 @@ def get_icosahedron_parameters_subdivsion(subdivision_level, triangle_index):
 
 
 def get_icosahedron_parameters(triangle_index, padding_size=0.0):
-    """
-    Get icosahedron's tangent face's paramters.
+    """Get icosahedron's tangent face's paramters.
     Get the tangent point theta and phi. Known as the theta_0 and phi_0.
     The erp image origin as top-left corner
 
@@ -287,7 +284,6 @@ def get_icosahedron_parameters(triangle_index, padding_size=0.0):
 
 def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_image=True):
     """Project the equirectangular image to 20 triangle images.
-
     Project the equirectangular image to level-0 icosahedron.
 
     :param erp_image: the input equirectangular image.
@@ -377,7 +373,6 @@ def erp2ico_image(erp_image, tangent_image_width, padding_size=0.0, full_face_im
 
 def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_method=None):
     """Stitch the level-0 icosahedron's tangent image to ERP image.
-
     blender_method:
         - None: just sample the triangle area;
         - Mean: the mean value on the overlap area.
@@ -450,7 +445,7 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
 
         if blender_method is None:
             available_pixels_list = polygon.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
-                                                         triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
+                                                              triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
 
             # the tangent available gnomonic coordinate sample the pixel from the tangent image
             tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
@@ -465,7 +460,7 @@ def ico2erp_image(tangent_images, erp_image_height, padding_size=0.0, blender_me
                                        [gnomonic_x_max, gnomonic_y_min],
                                        [gnomonic_x_min, gnomonic_y_min]]
             available_pixels_list = polygon.inside_polygon_2d(np.stack((tangent_xv.flatten(), tangent_yv.flatten()), axis=1),
-                                                         triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
+                                                              triangle_points_tangent, on_line=True, eps=pixel_eps).reshape(tangent_xv.shape)
 
             tangent_xv, tangent_yv = gp.gnomonic2pixel(tangent_xv[available_pixels_list], tangent_yv[available_pixels_list],
                                                        0.0, tangent_image_width, tangent_image_height, tangent_gnomonic_range)
@@ -541,7 +536,7 @@ def erp2ico_flow(erp_flow_mat, tangent_image_width, padding_size=0.0, full_face_
         # flow start point from gnomonic --> spherical coordinate --> pixel location
         tangent_point = triangle_param["tangent_point"]  # tangent center project point
         tangent_triangle_theta_, tangent_triangle_phi_ = gp.reverse_gnomonic_projection(gnom_range_xv[inside_list], gnom_range_yv[inside_list], tangent_point[0], tangent_point[1])
-        # spherical coordinate --> ERP 
+        # spherical coordinate --> ERP
         face_erp_pixel_x, face_erp_pixel_y = sc.sph2erp(tangent_triangle_theta_, tangent_triangle_phi_, erp_image_height, erp_modulo=False)
 
         # 1) comput the end point location in the tangent image
@@ -621,8 +616,8 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         gnomonic_y_min = np.amin(triangle_points_tangent[:, 1], axis=0)
         gnomonic_y_max = np.amax(triangle_points_tangent[:, 1], axis=0)
         face_src_range_gnom = [gnomonic_x_min, gnomonic_x_max, gnomonic_y_min, gnomonic_y_max]
-        pixel_eps = abs(gnomonic_x_max - gnomonic_x_min) / (2 * tangent_flow_width) 
-        
+        pixel_eps = abs(gnomonic_x_max - gnomonic_x_min) / (2 * tangent_flow_width)
+
         # 1) get tangent face available pixles range in ERP spherical coordinate
         erp_flow_col_start, erp_flow_row_start = sc.sph2erp(availied_ERP_area[0], availied_ERP_area[2], erp_flow_height, sph_modulo=False)
         erp_flow_col_stop, erp_flow_row_stop = sc.sph2erp(availied_ERP_area[1], availied_ERP_area[3], erp_flow_height, sph_modulo=False)
@@ -646,11 +641,11 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
         face_src_x_gnom, face_src_y_gnom = gp.gnomonic_projection(face_src_xy_sph[0, :, :], face_src_xy_sph[1, :, :], theta_0, phi_0, True)
 
         # the available (in the triangle) pixels list
-        # TODO for all method check the 
+        # TODO for all method check the
         available_list = np.full(face_src_x_gnom.shape, False)
         face_src_gnom_no_nan = np.logical_not(np.isnan(face_src_x_gnom))
         available_list[face_src_gnom_no_nan] = polygon.inside_polygon_2d(
-            np.stack((face_src_x_gnom[face_src_gnom_no_nan].flatten(), face_src_y_gnom[face_src_gnom_no_nan].flatten()), axis=1), 
+            np.stack((face_src_x_gnom[face_src_gnom_no_nan].flatten(), face_src_y_gnom[face_src_gnom_no_nan].flatten()), axis=1),
             triangle_points_tangent, on_line=True, eps=pixel_eps)
         # available_list = available_list.reshape(face_src_x_gnom.shape)
         # available_list = np.logical_and(face_src_gnom_no_nan, available_list)
@@ -661,9 +656,10 @@ def ico2erp_flow(tangent_flows_list, erp_flow_height=None, padding_size=0.0, ima
 
         # 3) get the value of optical flow end point location
         # 3-0) get the tangent images flow in the tangent image space, ignore the pixels outside the tangent image
-        face_flow_u_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 0], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1,  mode='nearest')#mode='constant', cval=255)
+        face_flow_u_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 0], [face_src_y_gnom_pixel,
+                                                         face_src_x_gnom_pixel], order=1,  mode='nearest')  # mode='constant', cval=255)
         face_tar_x_gnom_pixel_avail = face_src_x_gnom_pixel + face_flow_u_gnom_pixel
-        face_flow_v_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 1], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='nearest')#mode='constant', cval=255)
+        face_flow_v_gnom_pixel = ndimage.map_coordinates(tangent_flows_list[face_index][:, :, 1], [face_src_y_gnom_pixel, face_src_x_gnom_pixel], order=1, mode='nearest')  # mode='constant', cval=255)
         face_tar_y_gnom_pixel_avail = face_src_y_gnom_pixel + face_flow_v_gnom_pixel
 
         # 3-1) transfrom the flow from tangent image space to ERP image space

@@ -5,13 +5,11 @@ from struct import unpack
 
 import numpy as np
 from PIL import Image
-
-
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
-from . import image_evaluate
-from .logger import Logger
+import image_evaluate
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -38,8 +36,7 @@ def create_depth_mask(depth_map, output_filepath=None,  threshold=0.0):
 
 
 def depth2disparity(depth_map, baseline=1.0, focal=1.0):
-    """
-    Convert the depth map to disparity map.
+    """Convert the depth map to disparity map.
 
     :param depth_map: depth map data
     :type depth_map: numpy
@@ -63,6 +60,8 @@ def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.
     :type dapthe_data: numpy 
     :param output_path: the absolute path of output image, if is None return rendering result.
     :type output_path: str
+    :return:
+    :rtype: numpy
     """
     dapthe_data_temp = depth_data.astype(np.float64)
     vmin_, vmax_ = image_evaluate.get_min_max(depth_data, min_ratio, max_ratio)
@@ -97,8 +96,7 @@ def depth_visual_save(depth_data, output_path=None, min_ratio=0.05, max_ratio=0.
 
 
 def read_bin(binary_file_path, height, width):
-    """
-    load depht value form binary file
+    """Load depth value form binary file.
     """
     xbash = np.fromfile(binary_file_path, dtype='float32')
     depth_data = xbash.reshape(height, width, 1)
@@ -106,8 +104,7 @@ def read_bin(binary_file_path, height, width):
 
 
 def read_png_int8(png_file_path):
-    """
-    read depth map from png file.
+    """Read depth map from png file.
     """
     depth_data = np.array(Image.open(png_file_path))
 
@@ -124,10 +121,10 @@ def read_png_int8(png_file_path):
 def write_png_int8(depth_data, png_file_path):
     """Write depth map to 24bit three channel png file.
 
-    :param depth_data: [description]
-    :type depth_data: [type]
-    :param png_file_path: [description]
-    :type png_file_path: [type]
+    :param depth_data: numpy
+    :type depth_data: depth map.
+    :param png_file_path: str
+    :type png_file_path: output file path
     """
     depth_value = (depth_data * 65536.0).astype(int)
 
@@ -145,15 +142,13 @@ def write_png_int8(depth_data, png_file_path):
     img.save(png_file_path, compress_level=0)
 
 
-def write_png_int16(png_file_path, depth,):
+def write_png_int16(png_file_path, depth):
     """Write depth map to 16bit single channel png file.
 
     :param png_file_path: png file path
     :type png_file_path: str
     :param depth: depth map data
     :type depth: numpy
-    :param bits: the byte number store single pixel depth map, defaults to 2
-    :type bits: int, optional
     """
     depth_min = depth.min()
     depth_max = depth.max()
@@ -170,7 +165,7 @@ def write_png_int16(png_file_path, depth,):
 
 
 def read_dpt(dpt_file_path):
-    """read depth map from *.dpt file.
+    """Read depth map from *.dpt file.
 
     :param dpt_file_path: the dpt file path
     :type dpt_file_path: str

@@ -3,12 +3,12 @@ import configuration as config
 import os
 import numpy as np
 
-from utility import flow_vis
-from utility import flow_warp
-from utility import spherical_coordinates
-from utility import projection
-from utility import image_io
-from utility import mocker_data_generator as MDG
+import flow_vis
+import flow_warp
+import spherical_coordinates
+import projection
+import image_io
+import mocker_data_generator as MDG
 
 
 def test_get_blend_weight_ico():
@@ -66,7 +66,7 @@ def test_flow_rotate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
     rotation_theta = np.radians(30.0)
     rotation_phi = np.radians(30.0)
 
-    # 1) compute the flow from src to rotated rotated tar image
+    # 1) compute the flow from source to rotated rotated tar image
     rotation_mat = spherical_coordinates.rot_sph2mat(rotation_theta, rotation_phi, False)
     tar_image_data_rot = spherical_coordinates.rotate_erp_array(src_image_data, rotation_mat)
     image_io.image_save(tar_image_data_rot, erp_tar_image_filepath + "_rot.jpg")
@@ -79,7 +79,7 @@ def test_flow_rotate_endpoint(erp_src_image_filepath, erp_tar_image_filepath):
     tar_image_data_warp = flow_warp.warp_backward(tar_image_data_rot, flow_dis)
     image_io.image_save(tar_image_data_warp, erp_tar_image_filepath + "_rot_flow.jpg")
 
-    # 2) get the flow from src to tar image
+    # 2) get the flow from source to tar image
     # warp the optical flow base on rotation
     flow_dis_rot = projection.flow_rotate_endpoint(flow_dis, rotation_mat.T)
     flow_vis_data = flow_vis.flow_to_color(flow_dis_rot, min_ratio=0.2, max_ratio=0.8)

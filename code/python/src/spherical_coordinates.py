@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from . import flow_warp
+import flow_warp
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -132,10 +132,10 @@ def get_angle_sph_ofcolor(points_center, points_u, points_v):
     angle_cv[quadrants_index == 2] = angle_cv[quadrants_index == 2] + np.pi
     angle_cv[quadrants_index == 1] = -angle_cv[quadrants_index == 1] + 2.0 * np.pi
 
-    # if the center at pole the angle is 
-    poles_index = np.logical_or(points_center[:,1] == np.pi * 0.5, points_center[:,1] == -np.pi * 0.5)
+    # if the center at pole the angle is
+    poles_index = np.logical_or(points_center[:, 1] == np.pi * 0.5, points_center[:, 1] == -np.pi * 0.5)
     if poles_index.any():
-        angle_cv[poles_index] = points_u[poles_index,0]
+        angle_cv[poles_index] = points_u[poles_index, 0]
 
     return angle_cv
 
@@ -160,12 +160,12 @@ def get_angle_sph(points_A, points_B, points_C):
     :return: the angle between AB and AC, alway return the smaller angle which is in range [0, +pi]
     :rtype: numpy
     """
-    points_A_theta = points_A[:,0]
-    points_A_phi = points_A[:,1]
-    points_B_theta = points_B[:,0]
-    points_B_phi = points_B[:,1]
-    points_C_theta = points_C[:,0]
-    points_C_phi = points_C[:,1]
+    points_A_theta = points_A[:, 0]
+    points_A_phi = points_A[:, 1]
+    points_B_theta = points_B[:, 0]
+    points_B_phi = points_B[:, 1]
+    points_C_theta = points_C[:, 0]
+    points_C_phi = points_C[:, 1]
 
     length_AB = great_circle_distance_uv(points_A_theta, points_A_phi, points_B_theta, points_B_phi, radius=1)
     length_AC = great_circle_distance_uv(points_A_theta, points_A_phi, points_C_theta, points_C_phi, radius=1)
@@ -208,17 +208,17 @@ def get_angle_sph(points_A, points_B, points_C):
 
 
 def erp_pixel_modulo_0(erp_points_list, image_height):
-    """[summary]
+    """Make x,y and ERP pixels coordinate system range.
 
     :param erp_points_list: The erp pixel list, [2, points_number]
     :type erp_points_list: numpy
     :param image_height: erp image height
     :type image_height: numpy
     """
-    x = erp_points_list[0,:]
-    y = erp_points_list[1,:]
-    x, y = erp_pixel_modulo(x, y , image_height)
-    return np.stack((x,y), axis=0)
+    x = erp_points_list[0, :]
+    y = erp_points_list[1, :]
+    x, y = erp_pixel_modulo(x, y, image_height)
+    return np.stack((x, y), axis=0)
 
 
 def erp_pixel_modulo(x_arrray, y_array, image_height):
@@ -232,6 +232,7 @@ def erp_pixel_modulo(x_arrray, y_array, image_height):
 
 def erp_sph_modulo(theta, phi):
     """Modulo of the spherical coordinate for the erp coordinate.
+    
     """
     points_theta = np.remainder(theta + np.pi, 2 * np.pi) - np.pi
     points_phi = -(np.remainder(-phi + 0.5 * np.pi, np.pi) - 0.5 * np.pi)
@@ -239,8 +240,7 @@ def erp_sph_modulo(theta, phi):
 
 
 def erp2sph(erp_points, erp_image_height=None, sph_modulo=False):
-    """
-    convert the point from erp image pixel location to spherical coordinate.
+    """Convert the point from erp image pixel location to spherical coordinate.
     The image center is spherical coordinate origin.
 
     :param erp_points: the point location in ERP image x∊[0, width-1], y∊[0, height-1] , size is [2, :]
@@ -280,6 +280,9 @@ def erp2sph(erp_points, erp_image_height=None, sph_modulo=False):
 
 
 def sph2erp_0(sph_points, erp_image_height=None, sph_modulo=False):
+    """Transform the spherical coordinate location to ERP image pixel location.
+    @see car2sph
+    """    
     theta = sph_points[0, :]
     phi = sph_points[1, :]
     erp_x, erp_y = sph2erp(theta, phi, erp_image_height, sph_modulo)
@@ -310,13 +313,13 @@ def sph2erp(theta, phi, erp_image_height, sph_modulo=False):
     return erp_x, erp_y
 
 
-
 def car2sph(points_car, min_radius=1e-10):
-    """
-    Transform the 3D point from cartesian to unit spherical coordinate.
+    """Transform the 3D point from cartesian to unit spherical coordinate.
 
     :param points_car: The 3D point array, is [point_number, 3], first column is x, second is y, third is z
     :type points_car: numpy
+    :param min_radius: The minimized radius.
+    :type min_radius: float
     :return: the points spherical coordinate, (theta, phi)
     :rtype: numpy
     """
@@ -355,7 +358,7 @@ def sph2car(theta, phi, radius=1.0):
 
 
 def rotation_erp_horizontal_fast(input_image, horizon_degree):
-    """ Rotate the ERP image along the X-axis (horizontal).
+    """Rotate the ERP image along the X-axis (horizontal).
 
     :param input_image: image shape is [height, width, channels_nubmer]
     :type input_image: numpy
@@ -374,29 +377,24 @@ def rotate_erp_array(erp_image, rotation_mat=None):
 
     :param erp_image: The ERP image, [height, width, 3]
     :type erp_image: numpy
-    :param rotation_theta: The source to target rotation's theta.
-    :type rotation_theta: float
-    :param rotation_phi: The source to target rotation's phi.
-    :type rotation_phi: float
+    :param rotation_mat: The erp rotation matrix.
+    :type rotation_mat: numpy
     """
     # flow from tar to src
     opticalflow = rotation2erp_motion_vector(erp_image.shape[0:2], rotation_matrix=rotation_mat.T)
     return flow_warp.warp_backward(erp_image, opticalflow)    # the image backword warp
-    
+
 
 def rotate_erp_array_skylib(data_array, rotation_matrix):
-    """
-    Rotate the image along the theta and phi.
+    """Rotate the image along the theta and phi.
 
     Note Skylib coordinate system x is left, Y is up, z is forward
     It is different with our method.
 
     :param data_array: the data array (image, depth map, etc.), size is [height, height*2, :]
     :type data_array: numpy
-    :param rotate_theta: rotate along the longitude, radian
-    :type rotate_theta: float
-    :param rotate_phi: rotate along the latitude, radian
-    :type rotate_phi: float 
+    :param rotation_mat: The erp rotation matrix.
+    :type rotation_mat: numpy
     :return: the rotated data array
     :rtype: numpy
     """
@@ -441,8 +439,7 @@ def rotate_sph_coord(sph_theta, sph_phi, rotate_theta=None, rotate_phi=None, rot
 
 
 def rotation2erp_motion_vector(array_size, rotation_matrix=None, wraparound=False):
-    """
-    Convert the spherical coordinate rotation to ERP coordinate motion flow.
+    """Convert the spherical coordinate rotation to ERP coordinate motion flow.
     With rotate the image's mesh grid.
 
     :param data_array: the array size, [array_hight, array_width]
@@ -484,8 +481,9 @@ def rot_sph2mat(theta, phi, degrees_=True):
     return R.from_euler("xyz", [phi, theta, 0], degrees=degrees_).as_matrix()
 
 
-def rot_mat2sph(rot_mat, degrees_ = True):
-    """Convert the 3D rotation to spherical coodinate theta and phi."""
+def rot_mat2sph(rot_mat, degrees_=True):
+    """Convert the 3D rotation to spherical coodinate theta and phi.
+    """
     euler_angle = R.from_matrix(rot_mat).as_euler("xyz", degrees=degrees_)
     # log.debug("rot_mat2sph: {}".format(euler_angle))
     return tuple(euler_angle[:2])

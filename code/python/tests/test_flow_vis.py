@@ -3,11 +3,12 @@ import configuration as config
 import numpy as np
 import os
 
-from utility import mocker_data_generator as MDG
-from utility import image_io
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_postproc
+import mocker_data_generator as MDG
+import mocker_data_generator as MDG
+import image_io
+import flow_io
+import flow_vis
+import flow_postproc
 
 
 def vis_of_folder(data_dir):
@@ -92,14 +93,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # data_dir = "D:/workdata/omniphoto_bmvc_2021/BathAbbey2/result/pwcnet/"
-    # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/cubemap/"
-    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/LiteFlowNet/models/testing/results/"
-    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/LiteFlowNet2/models/testing/results/"
-    # data_dir = "/mnt/sda1/workspace_linux/OmniFlowNet/OmniFlowNet/models/testing/results/"
-    # data_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/hotel_0_line_1k_0/result/omniflownet/"
-    # data_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/apartment_0_circ_1k_0/result/omniflownet/"
-    # data_dir = "D:/workdata/opticalflow_data_bmvc_2021/apartment_0_rand_1k_0/result/raft/"
     # data_dir = config.TEST_data_root_dir + "/replica_360/apartment_0_line_1k_0/cubemap_flo/"
     # data_dir = config.TEST_data_root_dir + "/replica_360/office_0_line_cubemap_stitch_debug/cubemap_flo/"
     data_dir = config.TEST_data_root_dir + "replica_360_cubemap/office_0_circ_pano/"

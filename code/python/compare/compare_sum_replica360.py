@@ -1,24 +1,18 @@
 import re
 import os
-import sys
 import csv
 import pathlib
 from threading import Thread
 
-from matplotlib import image
 
 import numpy as np
 
-import sys
-sys.path.append("..")
-
-from utility import flow_estimate
-from utility import flow_evaluate
-from utility import flow_io
-from utility import image_io
-from utility import flow_vis
-from utility import replica_util
-from utility import flow_postproc
+import flow_evaluate
+import flow_io
+import image_io
+import flow_vis
+import datasets_utility
+import flow_postproc
 
 """
 evalute the estimated optical flow and output the error to csv file
@@ -96,8 +90,8 @@ def flow_evaluate_frames(flow_gt_dir, flow_estimated_dir):
     evaluate the quality of estimated optical flow.
     """
     # get data list
-    min_index, max_index, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(flow_gt_dir)
-    _, _, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(flow_gt_dir)
+    min_index, max_index, image_list, of_forward_list, of_backward_list = datasets_utility.scene_of_folder(flow_gt_dir)
+    _, _, image_list, of_forward_list, of_backward_list = datasets_utility.scene_of_folder(flow_gt_dir)
 
     # estimate and output to csv file
     output_csv_header = "# index, file_name, AAE, EPE, RME, AAE_SC, EPE_SC, RME_SC\n"

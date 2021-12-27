@@ -2,20 +2,22 @@ import numpy as np
 from scipy import ndimage
 from scipy.spatial.transform import Rotation as R
 
-from . import flow_postproc
-from . import polygon
-from . import spherical_coordinates as sc
-from . import projection_icosahedron as proj_ico
+import flow_postproc
+import polygon
+import spherical_coordinates as sc
+import projection_icosahedron as proj_ico
 
-from .logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
 
-def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
+def get_blend_weight_ico(face_x_src_gnomonic,
+                         face_y_src_gnomonic,
                          weight_type,
                          flow_uv=None,
-                         image_erp_src=None, image_erp_tar=None,
+                         image_erp_src=None, 
+                         image_erp_tar=None,
                          gnomonic_bounding_box=None):
     """Compute the faces's weight.
 
@@ -28,11 +30,11 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
     :param flow_uv: the tangent face forward optical flow which is in image coordinate, unit is pixel. [:, 2]
     :type flow_uv: numpy 
     :param image_erp_src: the source ERP rgb image, used to compute the optical flow warp error
-    :type: numpy
+    :type image_erp_src: numpy
     :param image_erp_tar: the target ERP rgb image used to compute the optical flow warp error
-    :type: numpy
+    :type image_erp_tar: numpy
     :param gnomonic_bounding_box: the available pixels area's bounding box
-    :type: list
+    :type gnomonic_bounding_box: list
     :return: the cubemap's face weight used to blend different faces to ERP image.
     :rtype: numpy
     """
@@ -95,7 +97,8 @@ def get_blend_weight_ico(face_x_src_gnomonic, face_y_src_gnomonic,
 def get_blend_weight_cubemap(face_x_src_gnomonic, face_y_src_gnomonic,
                              weight_type,
                              flow_uv=None,
-                             image_erp_src=None, image_erp_tar=None,
+                             image_erp_src=None, 
+                             image_erp_tar=None,
                              gnomonic_bounding_box=None):
     """Compute the faces's weight.
 
@@ -222,10 +225,10 @@ def flow_rotate_endpoint(optical_flow, rotation, wraparound=False):
 def tangent_image_resolution(erp_image_width, padding_size):
     """Get the suggested tangent image resolution base on the FoV.
 
-    :param erp_image_width: [description]
-    :type erp_image_width: [type]
-    :param padding_size: [description]
-    :type padding_size: [type]
+    :param erp_image_width: The erp image width.
+    :type erp_image_width: int
+    :param padding_size: The tangent subimage padding size.
+    :type padding_size: float
     :return: recommended tangent image size in pixel.
     :rtype: int
     """
@@ -320,8 +323,9 @@ def ico_projection_cam_params(image_width=400, padding_size=0):
     return subimage_cam_param_list
 
 
-def get_padding_vs_fov_plot(output_filepath = None):
-    """ Plot the relationship between the padding and FoV. """
+def get_padding_vs_fov_plot(output_filepath=None):
+    """ Plot the relationship between the padding and FoV.
+    """
     points_number = 200
     padding_list = np.linspace(0.0, 20.0, points_number, endpoint=True)
 
@@ -335,17 +339,17 @@ def get_padding_vs_fov_plot(output_filepath = None):
 
     import matplotlib.pyplot as plt
     if output_filepath is not None:
-        fig = plt.figure(frameon = False)
+        fig = plt.figure(frameon=False)
         fig.set_size_inches(14, 8)
 
     plot_markersize = 3.0
     # plt_x_index = np.linspace(0, points_number, endpoint=False, num=points_number)
     # fov_h_not = plt.scatter(fov_h_list, padding_list, c="r", marker="o", label='FoV (Horizontal)')  # ,c=plt_x_index)
-    fov_h_not,  = plt.plot(fov_h_list, padding_list, c="r", marker="o",markersize = plot_markersize, label='FoV (Horizontal)')  # ,c=plt_x_index)
+    fov_h_not,  = plt.plot(fov_h_list, padding_list, c="r", marker="o", markersize=plot_markersize, label='FoV (Horizontal)')  # ,c=plt_x_index)
 
     # fov_v_not = plt.scatter(fov_v_list, padding_list,  c="g", marker="s", label='FoV (Verical)')  # ,c=plt_x_index)
-    fov_v_not, = plt.plot(fov_v_list, padding_list,  c="g", marker="s", markersize = plot_markersize, label='FoV (Verical)')  # ,c=plt_x_index)
-    label_font_size= 20
+    fov_v_not, = plt.plot(fov_v_list, padding_list,  c="g", marker="s", markersize=plot_markersize, label='FoV (Verical)')  # ,c=plt_x_index)
+    label_font_size = 20
     plt.legend(handles=[fov_h_not, fov_v_not], loc='upper left', prop={'size': label_font_size - 4})
 
     plt.xlabel("FoV [°]", fontsize=label_font_size)

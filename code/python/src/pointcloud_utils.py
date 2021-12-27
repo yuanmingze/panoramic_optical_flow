@@ -4,8 +4,8 @@ import os
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from . import spherical_coordinates as sc
-from .logger import Logger
+import spherical_coordinates as sc
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -13,6 +13,7 @@ log.logger.propagate = False
 """
 Point cloud utility.
 """
+
 
 def depthmap2pointcloud_erp(depth_map, rgb_image, output_ply_file_path):
     """ Convert the ERP depth map and rgb_image to 3D colored point cloud.

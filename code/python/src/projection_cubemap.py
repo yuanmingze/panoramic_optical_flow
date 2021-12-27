@@ -1,12 +1,12 @@
 import numpy as np
 from scipy import ndimage
 
-from . import gnomonic_projection
-from . import polygon
-from . import spherical_coordinates
-from . import projection
+import gnomonic_projection
+import polygon
+import spherical_coordinates
+import projection
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -16,6 +16,7 @@ Cubemap for rgb image and optical flow:
 1) 6 face order is +x, -x, +y, -y, +z, -z;   
 Reference: https://en.wikipedia.org/wiki/Cube_mapping
 """
+
 
 def generage_cubic_ply(mesh_file_path):
     """
@@ -60,8 +61,7 @@ def generage_cubic_ply(mesh_file_path):
 
 
 def get_cubemap_parameters(padding_size=0.0):
-    """
-    Get the information of circumscribed cuboid in spherical coordinate system:
+    """Get the information of circumscribed cuboid in spherical coordinate system:
     0) tangent points;
     1) 4 corner points for each tangent images;
     2) tangent area range in spherical coordinate. And the points order is: TL->TR->BR->BL.
@@ -167,16 +167,15 @@ def get_cubemap_parameters(padding_size=0.0):
 
 
 def erp2cubemap_flow(erp_flow_mat, padding_size=0.0, face_image_size=500):
-    """
-    Project the equirectangular optical flow to 6 face of cube map base on the inverse gnomonic projection.
+    """Project the equirectangular optical flow to 6 face of cube map base on the inverse gnomonic projection.
     The (x,y) of tangent image's tangent point is (0,0) of tangent image.
 
     :param erp_flow_mat: the equirectangular image's flow, dimension is [height, width, 3]
     :type erp_flow_mat: numpy
     :param padding_size: face flow padding size, defaults to 0.0
     :type padding_size: float, optional
-    :param padding_size: the size of each face, defaults to 500
-    :type padding_size: int, optional
+    :param face_image_size: the size of each face, defaults to 500
+    :type face_image_size: int, optional
     :retrun: 6 images of each fact of cubemap projection
     :rtype: list
     """
@@ -248,8 +247,7 @@ def erp2cubemap_flow(erp_flow_mat, padding_size=0.0, face_image_size=500):
 
 
 def erp2cubemap_image(erp_image_mat, padding_size=0.0, face_image_size=None):
-    """
-    Project the equirectangular optical flow to 6 face of cube map base on the inverse gnomonic projection.
+    """Project the equirectangular optical flow to 6 face of cube map base on the inverse gnomonic projection.
     The (x,y) of tangent image's tangent point is (0,0) of tangent image.
 
     :param erp_image_mat: the equirectangular image, dimension is [height, width, 3]
@@ -318,8 +316,8 @@ def face_meshgrid(face_erp_range_sphere_list, erp_image_height):
     :type face_erp_range_sphere_list: list
     :param erp_image_height: [description]
     :type erp_image_height: [type]
-    :return: [description]
-    :rtype: [type]
+    :return: the available points list.
+    :rtype: tuple
     """
     # face_theta_min = face_erp_range_sphere_list[3][0]
     # face_phi_min = face_erp_range_sphere_list[3][1]
@@ -373,11 +371,11 @@ def face_meshgrid(face_erp_range_sphere_list, erp_image_height):
     return face_erp_x, face_erp_y
 
 
-def cubemap2erp_image(cubemap_images_list,  padding_size=0.0, erp_image_height=None):
-    """
-    Assamble the 6 face cubemap to ERP image.
+def cubemap2erp_image(cubemap_images_list, padding_size=0.0, erp_image_height=None):
+    """Assamble the 6 face cubemap to ERP image.
 
-    :param cubemap_list: cubemap images, the sequence is +x, -x, +y, -y, +z, -z
+    :param cubemap_images_list: cubemap images, the sequence is +x, -x, +y, -y, +z, -z
+    :type cubemap_images_list: list
     :return: The ERP RGB image the output image width is 4 times of cubmap's size
     """
     # check the face images number
@@ -431,7 +429,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0, erp_image_height=N
         face_x, face_y = gnomonic_projection.gnomonic_projection(face_theta_, face_phi_, theta_0, phi_0)
         pbc = 1.0 + padding_size  # projection_boundary_coefficient
         inside_list = polygon.inside_polygon_2d(np.stack((face_x.flatten(), face_y.flatten()), axis=1),
-                                                            np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
+                                                np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.
@@ -450,7 +448,7 @@ def cubemap2erp_image(cubemap_images_list,  padding_size=0.0, erp_image_height=N
     return erp_image_mat
 
 
-def cubemap2erp_flow(cubemap_flows_list, face_flows_wraparound = None, erp_image_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False, synthetic_data=False):
+def cubemap2erp_flow(cubemap_flows_list, face_flows_wraparound=None, erp_image_height=None, padding_size=0.0, image_erp_src=None, image_erp_tar=None, wrap_around=False, synthetic_data=False):
     """
     Assamble the 6 cubemap optical flow to ERP optical flow. 
 
@@ -505,7 +503,7 @@ def cubemap2erp_flow(cubemap_flows_list, face_flows_wraparound = None, erp_image
 
         # get ERP image's pixel available array, indicate pixels whether fall in the tangent face image, remove the pixels outside the tangent image
         available_list = polygon.inside_polygon_2d(np.stack((face_x_src_gnomonic.flatten(), face_y_src_gnomonic.flatten()), axis=1), np.array([
-                                                               [-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x_src_gnomonic))
+            [-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x_src_gnomonic))
 
         # normailzed tangent image space --> tangent image space
         tangent_gnomonic_range = [-pbc, +pbc, -pbc, +pbc]
@@ -686,7 +684,7 @@ def cubemap2erp_depth(cubemap_depth_list, erp_depthmap_height=None, padding_size
         phi_0 = center_point[1]
         face_x, face_y = gnomonic_projection.gnomonic_projection(face_theta_, face_phi_, theta_0, phi_0)
         inside_list = polygon.inside_polygon_2d(np.stack((face_x.flatten(), face_y.flatten()), axis=1),
-                                                            np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
+                                                np.array([[-pbc, pbc], [pbc, pbc], [pbc, -pbc], [-pbc, -pbc]]), True).reshape(np.shape(face_x))
 
         # remove the pixels outside the tangent image & translate to tangent image pixel coordinate,
         # map the gnomonic coordinate to tangent image's pixel coordinate.

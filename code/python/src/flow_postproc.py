@@ -1,6 +1,6 @@
 import numpy as np
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -15,16 +15,13 @@ def erp_pixles_modulo(x_arrray, y_array, image_width, image_height):
 
 
 def erp_of_wraparound(erp_flow, of_u_threshold=None):
-    """
-    Convert un-wrap-around (do not overflow) to ERP optical flow to the wrap-around (overflow) ERP optical flow.
+    """Convert un-wrap-around (do not overflow) to ERP optical flow to the wrap-around (overflow) ERP optical flow.
     The optical flow larger than threshold need to be wrap-around.
 
     :param erp_flow: the panoramic optical flow [height, width, 2]
     :type  erp_flow: numpy
     :param of_u_threshold: The wrap-around threshold of optical flow u.
     :type of_u_threshold: float
-    :param of_v_threshold: The wrap-around threshold of optical flow v.
-    :type of_v_threshold: float
     :return: The ERP optical flow
     :rtype: numpy
     """
@@ -56,8 +53,7 @@ def erp_of_wraparound(erp_flow, of_u_threshold=None):
 
 
 def erp_of_unwraparound(optical_flow):
-    """
-    Convert the wrap-around (overflow) ERP optical flow to un-warp-around (do not overflow) optical flow.
+    """Convert the wrap-around (overflow) ERP optical flow to un-warp-around (do not overflow) optical flow.
 
     :param optical_flow: the panoramic optical flow [height, width, 2]
     :type optical_flow: numpy
@@ -99,8 +95,10 @@ def flow_resize(optical_flow_data, resize_ratio=None, width_new=None, height_new
 
     :param optical_flow_data: Size is [height, width, 2]
     :type optical_flow_data: numpy 
-    :return: [description]
-    :rtype: [type]
+    :param resize_ratio: The optical flow resize ratio.
+    :type resize_ratio: float
+    :return: resized optical flow array.
+    :rtype: numpy
     """
     if resize_ratio is None and (width_new is None or height_new is None):
         log.error("new optical flow size set error")

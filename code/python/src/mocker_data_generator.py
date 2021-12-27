@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import ndimage
 
+
 def hsv_to_rgb(hsv):
-    """
-    Code from https://gist.github.com/PolarNick239/691387158ff1c41ad73c.
+    """Code from https://gist.github.com/PolarNick239/691387158ff1c41ad73c.
 
     >>> from colorsys import hsv_to_rgb as hsv_to_rgb_single
     >>> 'r={:.0f} g={:.0f} b={:.0f}'.format(*hsv_to_rgb_single(0.60, 0.79, 239))

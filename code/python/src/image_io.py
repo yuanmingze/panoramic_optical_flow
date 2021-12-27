@@ -5,15 +5,15 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-from . import depth_io
+import depth_io
 
-from .logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
 
 def image_read(image_file_path):
-    """[summary]
+    """Load rgb image data from file.
 
     :param image_file_path: the absolute path of image
     :type image_file_path: str
@@ -27,7 +27,7 @@ def image_read(image_file_path):
 
 
 def image_diff(image_generated, image_gt, output_path=""):
-    """
+    """Generate image different color map.
     """
     # rgb to gray
     rgb_weights = [0.2989, 0.5870, 0.1140]
@@ -45,8 +45,7 @@ def image_diff(image_generated, image_gt, output_path=""):
 
 
 def visual_data(data_array):
-    """
-    visualize the single channel boolean or float etc. data to heatmap.
+    """Visualize the single channel boolean or float etc. data to heatmap.
     """
     return depth_io.depth_visual_save(data_array)
     # max = None
@@ -82,19 +81,18 @@ def visual_data(data_array):
     # return image[:, :, 0:3]
 
 
-def image_show(image, title=" "):
-    """
-    visualize the numpy array
+def image_show(image, title=" ", verbose=False):
+    """Visualize the numpy array
     """
     if len(np.shape(image)) == 3:
-        print("show 3 channels rgb image")
+        if verbose: print("show 3 channels rgb image")
         image_rgb = image.astype(int)
         plt.title(title)
         plt.axis("off")
         plt.imshow(image_rgb)
         plt.show()
     elif len(np.shape(image)) == 2:
-        print("visualize 2 channel raw data")
+        if verbose: print("visualize 2 channel raw data")
         images = []
         cmap = plt.get_cmap('rainbow')
         fig, axs = plt.subplots(nrows=1, sharex=True, figsize=(3, 5))
@@ -115,7 +113,7 @@ def image_show(image, title=" "):
 
 
 def image_save_rgba(image, image_file_path):
-    """save the numpy array image to RGBA image.
+    """Save the numpy array image to RGBA image.
 
     :param image: The RGBA image data, it request 4 channels.
     :type image: numpy

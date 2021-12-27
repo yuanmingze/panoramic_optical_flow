@@ -1,17 +1,16 @@
-from . import flow_postproc
-from . import flow_vis
-from . import flow_warp
-from . import image_io
-from . import projection
-from . import projection_cubemap as proj_cm
-from . import projection_icosahedron as proj_ico
-from . import spherical_coordinates
+import flow_postproc
+import flow_vis
+import flow_warp
+import image_io
+import projection
+import projection_cubemap as proj_cm
+import projection_icosahedron as proj_ico
+import spherical_coordinates
 
 import cv2
 import numpy as np
-from scipy.spatial.transform import Rotation as R
 
-from .logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -125,7 +124,7 @@ class PanoOpticalFlow():
         :type src_erp_image: numpy
         :param tar_erp_image: the target ERP image data.
         :type tar_erp_image: numpy
-        :return: the optical flow from src image to tar image.
+        :return: the optical flow from source image to tar image.
         :rtype: numpy
         """
         erp_image_height = src_erp_image.shape[0]
@@ -208,7 +207,7 @@ class PanoOpticalFlow():
         :type src_erp_image: numpy
         :param tar_erp_image: the target ERP image data.
         :type tar_erp_image: numpy
-        :return: the optical flow from src image to tar image.
+        :return: the optical flow from source image to target image.
         :rtype: numpy
         """
         erp_image_height = src_erp_image.shape[0]

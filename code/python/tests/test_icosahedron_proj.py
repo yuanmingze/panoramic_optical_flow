@@ -5,15 +5,15 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-from utility import flow_evaluate
-from utility import image_io
-from utility import projection_icosahedron as proj_ico
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_warp
-from utility import flow_estimate
+import flow_evaluate
+import image_io
+import projection_icosahedron as proj_ico
+import flow_io
+import flow_vis
+import flow_warp
+import flow_estimate
 
-from utility.logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -177,7 +177,8 @@ def test_ico_flow_stitch(ico_src_image_output_dir, tangent_flow_filename_express
     image_erp_tar = image_io.image_read(tar_erp_image_path)
 
     log.info("stitch face optical flow to ERP optical flow.")
-    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src, image_erp_tar=image_erp_tar, wrap_around=True, face_blending_method = "normwarp")
+    erp_flow_stitch = proj_ico.ico2erp_flow(face_flows, image_erp_src.shape[0], padding_size, image_erp_src=image_erp_src,
+                                            image_erp_tar=image_erp_tar, wrap_around=True, face_blending_method="normwarp")
     flow_io.write_flow_flo(erp_flow_stitch, erp_src_flow_stitch_filepath)
 
     face_flow_vis = flow_vis.flow_to_color(erp_flow_stitch, min_ratio=0.1, max_ratio=0.9)

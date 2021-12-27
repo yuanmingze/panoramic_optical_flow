@@ -1,16 +1,5 @@
-import io
-import pathlib
-import re
 import os
-
-import sys
-sys.path.append("..")
-
-from utility import replica_util
-from utility import flow_io
-from utility import flow_vis
-from utility import image_io
-
+import datasets_utility
 
 def generate_listfile(root_dir, of_txt_path, flo_output_dir):
     """
@@ -22,7 +11,7 @@ def generate_listfile(root_dir, of_txt_path, flo_output_dir):
 
     # of_txt_path = txt_output_dir + "replica_listfile.txt"
 
-    min_index, max_index, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(root_dir)
+    min_index, max_index, image_list, of_forward_list, of_backward_list = datasets_utility.scene_of_folder(root_dir)
 
     with open(of_txt_path, "w") as of_txt_file:
 

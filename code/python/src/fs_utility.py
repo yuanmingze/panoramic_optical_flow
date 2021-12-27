@@ -4,7 +4,7 @@ import os
 import shutil
 from random import shuffle
 
-from .logger import Logger
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

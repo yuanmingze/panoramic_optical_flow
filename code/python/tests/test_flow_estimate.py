@@ -2,12 +2,12 @@ import configuration as config
 
 import os
 
-from utility import flow_postproc
-from utility import flow_estimate
-from utility import image_io
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_warp
+import flow_postproc
+import flow_estimate
+import image_io
+import flow_io
+import flow_vis
+import flow_warp
 
 from logger import Logger
 log = Logger(__name__)

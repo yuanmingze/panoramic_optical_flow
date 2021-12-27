@@ -1,6 +1,5 @@
 import glob
-import pathlib
-from struct import pack, unpack
+from struct import pack
 import os
 import argparse
 import sys
@@ -25,8 +24,8 @@ sys.path.append(dir_scripts)
 sys.path.append(os.path.join(dir_scripts, "test"))
 sys.path.append(os.path.join(dir_scripts, "utility"))
 
-from utility import flow_postproc
-from utility import fs_utility
+import flow_postproc
+import fs_utility
 from main import OmniPhotoDataset
 from main import ReplicaPanoDataset
 

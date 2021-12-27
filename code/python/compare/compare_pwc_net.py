@@ -1,3 +1,4 @@
+import configuration 
 import os
 import sys
 
@@ -8,11 +9,10 @@ sys.path.append(dir_scripts)
 sys.path.append(os.path.join(dir_scripts, "test"))
 sys.path.append(os.path.join(dir_scripts, "utility"))
 
-from utility import replica_util
-from utility import fs_utility
+import datasets_utility
+import fs_utility
 
-import configuration 
-from main import OmniPhotoDataset, ReplicaPanoDataset
+from datasets_utility import ReplicaPanoDataset
 
 """
 The code to generate the img1.txt, img2.txt and out.txt for PWC-Net (caffe).
@@ -30,7 +30,7 @@ def generate_input_txt(root_dir, txt_output_dir, flo_output_dir):
     img2_txt_path = txt_output_dir + "img2.txt"
     out_txt_path = txt_output_dir + "out.txt"
 
-    min_index, max_index, image_list, of_forward_list, of_backward_list = replica_util.scene_of_folder(root_dir)
+    min_index, max_index, image_list, of_forward_list, of_backward_list = datasets_utility.scene_of_folder(root_dir)
 
     with open(img1_txt_path, "w") as img1_txt_file, \
             open(img2_txt_path, "w") as img2_txt_file,\
@@ -57,8 +57,8 @@ def generate_input_txt(root_dir, txt_output_dir, flo_output_dir):
     print("generate img1.txt, img2.txt and out.txt files")
 
 
-def generate_input_txt_bmvc_omniphoto(omniphoto_dataset, txt_output_dir):
-    """Get the our and DIS's result in omniphoto. """
+def generate_input_txt_bmvc_omniphotos(omniphotos_dataset, txt_output_dir):
+    """Get the our and DIS's result in omniphotos. """
     img1_txt_path = txt_output_dir + "img1.txt"
     img2_txt_path = txt_output_dir + "img2.txt"
     out_txt_path = txt_output_dir + "out.txt"
@@ -69,20 +69,20 @@ def generate_input_txt_bmvc_omniphoto(omniphoto_dataset, txt_output_dir):
 
     opticalflow_mathod = "pwcnet"
 
-    dataset_dirlist = omniphoto_dataset.dataset_circ_dirlist
+    dataset_dirlist = omniphotos_dataset.dataset_circ_dirlist
     
     # 1) iterate each 360 image dataset
     for pano_image_folder in dataset_dirlist:
         print("processing the data folder {}".format(pano_image_folder))
         # input dir
-        input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
+        input_filepath = omniphotos_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphotos_dataset.pano_data_dir + "/"
         # input index
         inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
         pano_start_idx = 1
         pano_end_idx = len(inputfile_list) - 1
 
         # output folder
-        output_pano_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_output_dir
+        output_pano_filepath = omniphotos_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphotos_dataset.pano_output_dir
         output_dir = output_pano_filepath + "/" + opticalflow_mathod + "/"
         fs_utility.dir_make(output_pano_filepath)
         fs_utility.dir_make(output_dir)
@@ -93,10 +93,10 @@ def generate_input_txt_bmvc_omniphoto(omniphoto_dataset, txt_output_dir):
                 # 0) load image to CPU memory
                 if forward_of:
                     tar_erp_image_filepath = inputfile_list[pano_image_idx + 1]
-                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
+                    optical_flow_filepath = omniphotos_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
                 else:
                     tar_erp_image_filepath = inputfile_list[pano_image_idx - 1]
-                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
+                    optical_flow_filepath = omniphotos_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
 
                 src_erp_image_filepath = inputfile_list[pano_image_idx]
                 if pano_image_idx % 2 == 0:
@@ -202,4 +202,4 @@ if __name__ == "__main__":
         txt_output_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/pwcnet/"
     replica_dataset = ReplicaPanoDataset()
     generate_input_txt_bmvc_replica(replica_dataset, txt_output_dir)
-    # generate_input_txt_bmvc_omniphoto(OmniPhotoDataset, txt_output_dir)
+    # generate_input_txt_bmvc_omniphotos(OmniPhotoDataset, txt_output_dir)

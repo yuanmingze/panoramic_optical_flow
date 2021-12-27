@@ -1,90 +1,50 @@
-import logging
+from tests import configuration
 
-from test import configuration as config
-from replica360.configuration import ReplicaConfig
-
-from utility import image_io
-from utility import flow_estimate
-from utility import flow_io
-from utility import flow_vis
-from utility import flow_evaluate
-from utility import flow_postproc
-from utility import fs_utility
-from utility import image_evaluate
-from utility import flow_warp
-from utility import image_utility
-from utility import projection
+import image_io
+import flow_estimate
+import flow_io
+import flow_vis
+import flow_evaluate
+import flow_postproc
+import fs_utility
+import image_evaluate
+import flow_warp
+import image_utility
+import projection
+from datasets_utility import ReplicaPanoDataset, OmniPhotoDataset
 
 import os
 import csv
 import sys
 from shutil import copyfile
-from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt 
 from skimage.transform import resize as ski_resize
 
-from utility.logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
 """ This file include run, comparision result summary code, for BMVC 2021 360 optical flow. """
 
-class OmniPhotoDataset():
 
-    if sys.platform == 'win32':
-        pano_dataset_root_dir = "D:/workdata/omniphoto_bmvc_2021/"
-        # pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
-        result_output_dir = "D:/workspace_windows/panoramic_optical_flow/data/omniphoto_result/"
-    elif sys.platform == 'linux':
-        pano_dataset_root_dir = "/mnt/sda1/workdata/omniphoto_bmvc_2021/"
-        result_output_dir = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/omniphoto_result/"
-
-    pano_data_dir = "pano/"
-
-    pano_output_dir = "result/"
-    pano_output_csv = "result_omniphoto.csv"
-
-    pano_image_height = 640
-
-    # file name expression
-    pano_rgb_image_filename_exp = "panoramic-{:04d}.jpg"
-    pano_opticalflow_forward_filename_exp = "{:04d}_opticalflow_forward_pano.flo"
-    pano_opticalflow_forward_visual_filename_exp = "{:04d}_opticalflow_forward_pano_visual.jpg"
-    pano_opticalflow_backward_filename_exp = "{:04d}_opticalflow_backward_pano.flo"
-    pano_opticalflow_backward_visual_filename_exp = "{:04d}_opticalflow_backward_pano_visual.jpg"
-
-    # circle data
-    dataset_circ_dirlist = [
-        "Ballintoy",
-        "BathAbbey2",
-        "BathParadeGardens",
-        "BeihaiPark",
-        "Coast",
-        "DublinShip1",
-        "OsakaTemple6",
-        "SecretGarden1",
-        "Wulongting",
-    ]
-
-
-def of_estimate_omniphoto(omniphoto_dataset):
+def of_estimate_omniphotos(omniphotos_dataset):
     """Get the our and optical flow result in replica. """
-    dataset_dirlist = omniphoto_dataset.dataset_circ_dirlist
+    dataset_dirlist = omniphotos_dataset.dataset_circ_dirlist
 
     # 1) iterate each 360 image dataset
     for pano_image_folder in dataset_dirlist:
         print("processing the data folder {}".format(pano_image_folder))
         # input dir
-        input_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_data_dir + "/"
+        input_filepath = omniphotos_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphotos_dataset.pano_data_dir + "/"
         # input index
         inputfile_list = fs_utility.dir_ls(input_filepath, ".jpg")
         pano_start_idx = 1
         pano_end_idx = len(inputfile_list) - 1
 
         # output folder
-        output_pano_filepath = omniphoto_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphoto_dataset.pano_output_dir
+        output_pano_filepath = omniphotos_dataset.pano_dataset_root_dir + pano_image_folder + "/" + omniphotos_dataset.pano_output_dir
         output_dir = output_pano_filepath + "/our/"
         fs_utility.dir_make(output_pano_filepath)
         fs_utility.dir_make(output_dir)
@@ -95,17 +55,17 @@ def of_estimate_omniphoto(omniphoto_dataset):
                 # 0) load image to CPU memory
                 if forward_of:
                     tar_erp_image_filepath = inputfile_list[pano_image_idx + 1]
-                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
-                    optical_flow_vis_filepath = omniphoto_dataset.pano_opticalflow_forward_visual_filename_exp.format(pano_image_file_idx)
+                    optical_flow_filepath = omniphotos_dataset.pano_opticalflow_forward_filename_exp.format(pano_image_file_idx)
+                    optical_flow_vis_filepath = omniphotos_dataset.pano_opticalflow_forward_visual_filename_exp.format(pano_image_file_idx)
                 else:
                     tar_erp_image_filepath = inputfile_list[pano_image_idx - 1]
-                    optical_flow_filepath = omniphoto_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
-                    optical_flow_vis_filepath = omniphoto_dataset.pano_opticalflow_backward_visual_filename_exp.format(pano_image_file_idx)
+                    optical_flow_filepath = omniphotos_dataset.pano_opticalflow_backward_filename_exp.format(pano_image_file_idx)
+                    optical_flow_vis_filepath = omniphotos_dataset.pano_opticalflow_backward_visual_filename_exp.format(pano_image_file_idx)
 
                 src_erp_image_filepath = inputfile_list[pano_image_idx]
 
                 if pano_image_idx % 2 == 0:
-                    print("Flow Method: {}, image folder: {}, srouce Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_folder, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
+                    print("Flow Method: {}, image folder: {}, source Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_folder, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
                 src_erp_image = image_io.image_read(input_filepath + src_erp_image_filepath)
                 tar_erp_image = image_io.image_read(input_filepath + tar_erp_image_filepath)
 
@@ -114,9 +74,9 @@ def of_estimate_omniphoto(omniphoto_dataset):
                     log.error("{} image size is {}".format(src_erp_image_filepath, src_erp_image.shape))
                 if tar_erp_image.shape[0] * 2 != tar_erp_image.shape[1]:
                     log.error("{} image size is {}".format(tar_erp_image, src_erp_image.shape))
-                if src_erp_image.shape[0] != omniphoto_dataset.pano_image_height:
-                    src_erp_image = ski_resize(src_erp_image, (omniphoto_dataset.pano_image_height, omniphoto_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
-                    tar_erp_image = ski_resize(tar_erp_image, (omniphoto_dataset.pano_image_height, omniphoto_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
+                if src_erp_image.shape[0] != omniphotos_dataset.pano_image_height:
+                    src_erp_image = ski_resize(src_erp_image, (omniphotos_dataset.pano_image_height, omniphotos_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
+                    tar_erp_image = ski_resize(tar_erp_image, (omniphotos_dataset.pano_image_height, omniphotos_dataset.pano_image_height * 2), anti_aliasing=True, preserve_range=True)
 
                 # 1) estimate optical flow
                 flow_estimator = flow_estimate.PanoOpticalFlow()
@@ -135,96 +95,6 @@ def of_estimate_omniphoto(omniphoto_dataset):
                 optical_flow_vis = flow_vis.flow_to_color(optical_flow, min_ratio=0.2, max_ratio=0.8)
                 result_opticalflow_vis_filepath = output_dir + optical_flow_vis_filepath
                 image_io.image_save(optical_flow_vis, result_opticalflow_vis_filepath)
-
-
-class ReplicaPanoDataset(ReplicaConfig):
-
-    if sys.platform == 'win32':
-        pano_dataset_root_dir = "D:/workdata/opticalflow_data_bmvc_2021/"
-        result_output_dir = "D:/workspace_windows/panoramic_optical_flow/data/replica_result/"
-    elif sys.platform == 'linux':
-        pano_dataset_root_dir = "/mnt/sda1/workdata/opticalflow_data_bmvc_2021/"
-        result_output_dir = "/mnt/sda1/workspace_windows/panoramic_optical_flow/data/replica_result/"
-
-    pano_data_dir = "pano/"
-
-    pano_output_dir = "result/"
-    pano_output_csv = "result_replica.csv"
-
-    padding_size = None
-
-    # circle data
-    dataset_circ_dirlist = [
-        "apartment_0_circ_1k_0",
-        "apartment_1_circ_1k_0",
-        # "apartment_2_circ_1k_0",
-        "frl_apartment_0_circ_1k_0",
-        # "frl_apartment_1_circ_1k_0",
-        "frl_apartment_2_circ_1k_0",
-        "frl_apartment_3_circ_1k_0",
-        # "frl_apartment_4_circ_1k_0",
-        # "frl_apartment_5_circ_1k_0",
-        "hotel_0_circ_1k_0",
-        "office_0_circ_1k_0",
-        "office_1_circ_1k_0",
-        "office_2_circ_1k_0",
-        "office_3_circ_1k_0",
-        "office_4_circ_1k_0",
-        "room_0_circ_1k_0",
-        "room_1_circ_1k_0",
-        # "room_2_circ_1k_0",
-    ]
-    circle_start_idx = 4
-    circle_end_idx = 6
-
-    # line data
-    dataset_line_dirlist = [
-        "apartment_0_line_1k_0",
-        "apartment_1_line_1k_0",
-        # "apartment_2_line_1k_0",
-        "frl_apartment_0_line_1k_0",
-        # "frl_apartment_1_line_1k_0",
-        "frl_apartment_2_line_1k_0",
-        "frl_apartment_3_line_1k_0",
-        # "frl_apartment_4_grid_1k_0",
-        # "frl_apartment_5_grid_1k_0",
-        "hotel_0_line_1k_0",
-        "office_0_line_1k_0",
-        "office_1_line_1k_0",
-        "office_2_line_1k_0",
-        "office_3_line_1k_0",
-        "office_4_line_1k_0",
-        "room_0_line_1k_0",
-        "room_1_line_1k_0",
-        # "room_2_grid_1k_0",
-    ]
-    line_start_idx = 4
-    line_end_idx = 6
-
-    # random data
-    dataset_rand_dirlist = [
-        "apartment_0_rand_1k_0",
-        "apartment_1_rand_1k_0",
-        # "apartment_2_rand_1k_0",
-        "frl_apartment_0_rand_1k_0",
-        # "frl_apartment_1_rand_1k_0",
-        "frl_apartment_2_rand_1k_0",
-        "frl_apartment_3_rand_1k_0",
-        # "frl_apartment_4_rand_1k_0",
-        # "frl_apartment_5_rand_1k_0",
-        "hotel_0_rand_1k_0",
-        "office_0_rand_1k_0",
-        "office_1_rand_1k_0",
-        "office_2_rand_1k_0",
-        "office_3_rand_1k_0",
-        "office_4_rand_1k_0",
-        "room_0_rand_1k_0",
-        "room_1_rand_1k_0",
-        # "room_2_rand_1k_0",
-    ]
-    rand_start_idx = 4
-    rand_end_idx = 6
-    
 
 
 def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath = None, opticalflow_mathod = "our_weight"):
@@ -261,9 +131,9 @@ def plot_padding_error(replica_dataset, padding_size_list, output_pdf_filepath =
 
     plt.show()
     if output_pdf_filepath is None:
-        f.savefig(replica_dataset.pano_dataset_root_dir  + "padding.pdf", bbox_inches='tight')
+        fig.savefig(replica_dataset.pano_dataset_root_dir  + "padding.pdf", bbox_inches='tight')
     else:
-        f.savefig(output_pdf_filepath, bbox_inches='tight')
+        fig.savefig(output_pdf_filepath, bbox_inches='tight')
 
 
 def summary_error_dataset_replica(replica_dataset, opticalflow_mathod="our", dataset_dirlist = None, csv_postfix = None):
@@ -314,8 +184,8 @@ def summary_error_dataset_replica(replica_dataset, opticalflow_mathod="our", dat
         of_error_sum_csv_filepath = of_error_sum_csv_filepath + f"{csv_postfix}_"
 
     of_error_sum_csv_filepath = of_error_sum_csv_filepath + replica_dataset.pano_output_csv
-    log.info("Ouput the datasets summary error to {}".format(of_error_sum_csv_filepath))
-    log.info("output the error summary file to {}".format(of_error_sum_csv_filepath))
+    log.info("Output the datasets summary error to {}".format(of_error_sum_csv_filepath))
+    log.info("Output the error summary file to {}".format(of_error_sum_csv_filepath))
     msg = ""
     msg += "AAE: {}\n".format(aae / row_counter)
     msg += "EPE: {}\n".format(epe / row_counter)
@@ -576,7 +446,7 @@ def of_estimate_replica_clean(dataset_dirlist, opticalflow_result_foldername=Non
 
 def of_estimate_replica(replica_dataset, opticalflow_mathod="our", dataset_dirlist = None, overwrite_exist = False):
     """Get the our and DIS's result in replica. """
-    print("Optical flow method: {}, detaset_dirlist: {}, overwrite {}".format(opticalflow_mathod, dataset_dirlist, overwrite_exist))
+    print("Optical flow method: {}, dataset_dirlist: {}, overwrite {}".format(opticalflow_mathod, dataset_dirlist, overwrite_exist))
 
     padding_size = replica_dataset.padding_size
 
@@ -633,7 +503,7 @@ def of_estimate_replica(replica_dataset, opticalflow_mathod="our", dataset_dirli
 
                 src_erp_image_filepath = replica_dataset.replica_pano_rgb_image_filename_exp.format(pano_image_idx)
                 if pano_image_idx % 2 == 0:
-                    print("Flow Method: {}, image index: {}, srouce Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
+                    print("Flow Method: {}, image index: {}, source Image: {}, target image: {}, output flow file: {}".format(opticalflow_mathod, pano_image_idx, src_erp_image_filepath, tar_erp_image_filepath, optical_flow_filepath))
                 src_erp_image = image_io.image_read(input_filepath + src_erp_image_filepath)
                 tar_erp_image = image_io.image_read(input_filepath + tar_erp_image_filepath)
 
@@ -781,7 +651,7 @@ if __name__ == "__main__":
 
         # 0) estimate optical flow
         of_estimate_replica(replica_pano_dataset, opticalflow_mathod, dataset_dirlist, overwrite_exist=False)
-        # of_estimate_omniphoto(OmniPhotoDataset)
+        # of_estimate_omniphotos(OmniPhotoDataset)
 
     if 1 in task_list:
         """ Comparision: summary EPE etc. numerical error. for Replica360 and Omniphotos """
@@ -813,7 +683,7 @@ if __name__ == "__main__":
 
         summary_all_dataset_csv_filename_postfix = args.datatype #rand,line,circ, all
 
-        log.info("Optical flow method: {}, detaset_dirlist: {}".format(opticalflow_mathod, dataset_dirlist))
+        log.info("Optical flow method: {}, dataset_dirlist: {}".format(opticalflow_mathod, dataset_dirlist))
 
         # 1) evaluate error for each dataset folder (scene)
         summary_error_scene_replica(replica_pano_dataset, opticalflow_mathod, dataset_dirlist, overwrite=False)
@@ -896,11 +766,11 @@ if __name__ == "__main__":
         flo_filename = "0696_opticalflow_forward_pano.flo"
         # #
         if sys.platform == 'win32':
-            rgb_filepath_exp = "D:/workdata/omniphoto_bmvc_2021/{}/pano/{}"
-            flow_filepath_exp = "D:/workdata/omniphoto_bmvc_2021/{}/result/{}/{}"
+            rgb_filepath_exp = "D:/workdata/omniphotos_bmvc_2021/{}/pano/{}"
+            flow_filepath_exp = "D:/workdata/omniphotos_bmvc_2021/{}/result/{}/{}"
         elif sys.platform == 'linux':
-            rgb_filepath_exp = "/mnt/sda1/workdata/omniphoto_bmvc_2021/{}/pano/{}"
-            flow_filepath_exp = "/mnt/sda1/workdata/omniphoto_bmvc_2021/{}/result/{}/{}"
+            rgb_filepath_exp = "/mnt/sda1/workdata/omniphotos_bmvc_2021/{}/pano/{}"
+            flow_filepath_exp = "/mnt/sda1/workdata/omniphotos_bmvc_2021/{}/result/{}/{}"
         warp_of_multi(scene_name, method_list, flow_filepath_exp, flo_filename,
                       rgb_filepath_exp, rgb_filename, rgb_gt_filename, output_dir=output_dir)
 

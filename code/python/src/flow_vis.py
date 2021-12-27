@@ -1,15 +1,13 @@
-
-
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from PIL import Image
 import numpy as np
 
-from . import flow_warp
-from . import image_evaluate
-from . import image_utility
-from . import spherical_coordinates as sc
-from .logger import Logger
+import flow_warp
+import image_evaluate
+import image_utility
+import spherical_coordinates as sc
+from logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False
@@ -80,7 +78,7 @@ def create_colorwheel_bar(image_size):
     return flow_wheel
 
 
-def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of = False):
+def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of=False):
     """
     Applies the flow color wheel to (possibly clipped) flow components u and v.
 
@@ -103,16 +101,16 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of = False):
     flow_image = np.zeros((u.shape[0], u.shape[1], 3), np.uint8)
     colorwheel = make_colorwheel()  # shape [55x3]
     # image_io.image_show(np.expand_dims(colorwheel, axis = 1))
-    row_number = colorwheel.shape[0] # ncols is 55
-    # 
+    row_number = colorwheel.shape[0]  # ncols is 55
+    #
     angle = None
     if sph_of:
         # get the geodesic distance and spherical angle
-        rad = flow_pix2geo(u, v) 
-        angle = flow_pix2sphangle(u, v) / np.pi - 1.0 # spherical optical flow 
+        rad = flow_pix2geo(u, v)
+        angle = flow_pix2sphangle(u, v) / np.pi - 1.0  # spherical optical flow
     else:
         rad = np.sqrt(np.square(u) + np.square(v))
-        angle = np.arctan2(-v, -u) / np.pi # [-1, +1]
+        angle = np.arctan2(-v, -u) / np.pi  # [-1, +1]
     angle_row_idx = (angle + 1) / 2 * (row_number - 1)
     angle_row_idx_floor = np.floor(angle_row_idx).astype(np.int32)
     angle_row_idx_ceil = angle_row_idx_floor + 1
@@ -122,9 +120,9 @@ def flow_uv_to_colors(u, v, convert_to_bgr=False, sph_of = False):
         colorwheel_channel = colorwheel[:, i]
         row_floor = colorwheel_channel[angle_row_idx_floor] / 255.0
         row_ceiling = colorwheel_channel[angle_row_idx_ceil] / 255.0
-        color = (1-ratio)*row_floor + ratio*row_ceiling # bilinear interpolation
+        color = (1-ratio)*row_floor + ratio*row_ceiling  # bilinear interpolation
         idx = (rad <= 1)
-        color[idx] = 1 - rad[idx] * (1-color[idx]) # 
+        color[idx] = 1 - rad[idx] * (1-color[idx])
         color[~idx] = color[~idx] * 0.75   # radian larger than 1, out of range
         # Note the 2-i => BGR instead of RGB
         ch_idx = 2-i if convert_to_bgr else i
@@ -169,7 +167,7 @@ def flow_pix2sphangle(u, v):
     start_points_sph = start_points_sph.reshape((2, -1))
     end_points_sph_u = end_points_sph_u.reshape((2, -1))
     end_points_sph_v = end_points_sph_v.reshape((2, -1))
-    
+
     # get the angle
     angle_mat = sc.get_angle_sph_ofcolor(start_points_sph.T, end_points_sph_u.T, end_points_sph_v.T)
     angle_mat = angle_mat.reshape((height, width))
@@ -188,23 +186,23 @@ def flow_pix2geo(u, v):
     :type v: numpy
     :return: Spherical coordinate optical flow.
     :rtype: numpy
-    """    
+    """
     image_height = v.shape[0]
     image_width = v.shape[1]
     if image_height * 2 != image_width:
         log.error("Need ERP image.")
-    # 
+    #
     start_y_pixel, start_x_pixel = np.mgrid[0:image_height, 0:image_width]
     start_x_sph, start_y_sph = sc.erp2sph(np.stack((start_x_pixel, start_y_pixel), axis=0), sph_modulo=True)
     #
-    end_pixel = flow_warp.flow_warp_meshgrid(u,v)
+    end_pixel = flow_warp.flow_warp_meshgrid(u, v)
     end_x_sph, end_y_sph = sc.erp2sph(end_pixel, sph_modulo=True)
-    # 
+    #
     uv_geo = sc.great_circle_distance_uv(start_x_sph, start_y_sph, end_x_sph, end_y_sph)
     return uv_geo
 
 
-def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar = False, sph_of = False):
+def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, max_ratio=1.0, add_bar=False, sph_of=False):
     """ Expects a two dimensional flow image of shape.
 
     :param flow_uv: Flow UV image of shape [H,W,2]
@@ -272,7 +270,7 @@ def flow_to_color(flow_uv, clip_flow=None, convert_to_bgr=False, min_ratio=0.0, 
         # plt.show()
         fig.dpi = 100.0
         wi, hi = fig.get_size_inches()
-        fig.set_size_inches(hi* (10.0 /4.0), hi)
+        fig.set_size_inches(hi * (10.0 / 4.0), hi)
 
         # convet to numpy
         fig.canvas.draw()  # draw the renderer

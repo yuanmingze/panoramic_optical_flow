@@ -6,13 +6,13 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-from . import flow_postproc
-from . import flow_warp
-from . import spherical_coordinates
-from . import image_io
-from . import flow_io
+import flow_postproc
+import flow_warp
+import spherical_coordinates
+import image_io
+import flow_io
 
-from .logger import Logger
+from logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -29,7 +29,6 @@ def error_visual(error_data, max=None, min=None, verbose=False, visual_colormap=
     """
     visualize the error data, and return colored error image.
 
-    :param spherical: whether compute the EPE in spherical coordinate, 
     :param verbose: show the error images
     """
     if max is None:
