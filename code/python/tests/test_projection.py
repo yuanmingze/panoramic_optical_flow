@@ -3,12 +3,12 @@ import configuration as config
 import os
 import numpy as np
 
-import flow_vis
-import flow_warp
-import spherical_coordinates
-import projection
-import image_io
-import mocker_data_generator as MDG
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_warp
+from panoopticalflow import spherical_coordinates
+from panoopticalflow import projection
+from panoopticalflow import image_io
+from panoopticalflow import mocker_data_generator as MDG
 
 
 def test_get_blend_weight_ico():

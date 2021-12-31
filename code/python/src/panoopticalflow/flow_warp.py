@@ -2,12 +2,12 @@ import numpy as np
 from scipy import ndimage
 from scipy.stats import norm
 
-import pointcloud_utils
-import spherical_coordinates
-import flow_postproc
-import spherical_coordinates as sc
+from . import pointcloud_utils
+from . import spherical_coordinates
+from . import flow_postproc
+from . import spherical_coordinates as sc
 
-from logger import Logger
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

@@ -9,8 +9,10 @@ Tested on GCC 8.3.
 `main.py` include the run and comparison code for BMVC 2021.
 
 - `python -m pip uninstall panoopticalflow --yes`: uninstall the original package;
-- `python -m build`: to build the `whl` package;
-- `pip ./dist/panoopticalflow-1.0.0-py3-none-any.whl`: install build package.
+- `python setup.py bdist_wheel`: to build the `whl` package;
+- `pip install ./dist/panoopticalflow-0.1.0-py3-none-any.whl`: install build package.
+- clean build file: `python setup.py clean --all`
+
 
 The package provide following CLI script:
 

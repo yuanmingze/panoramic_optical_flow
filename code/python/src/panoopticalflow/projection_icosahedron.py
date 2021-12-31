@@ -5,14 +5,13 @@ import numpy as np
 from scipy import ndimage
 from skimage.transform import resize
 
-import gnomonic_projection as gp
-import spherical_coordinates as sc
-import polygon
-import projection
-import flow_postproc
+from . import gnomonic_projection as gp
+from . import spherical_coordinates as sc
+from . import polygon
+from . import projection
+from . import flow_postproc
 
-from logger import Logger
-
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

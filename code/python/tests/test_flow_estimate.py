@@ -2,14 +2,14 @@ import configuration as config
 
 import os
 
-import flow_postproc
-import flow_estimate
-import image_io
-import flow_io
-import flow_vis
-import flow_warp
+from panoopticalflow import flow_postproc
+from panoopticalflow import flow_estimate
+from panoopticalflow import image_io
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_warp
 
-from logger import Logger
+from panoopticalflow.logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

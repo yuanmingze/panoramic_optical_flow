@@ -5,15 +5,15 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-import flow_evaluate
-import image_io
-import projection_icosahedron as proj_ico
-import flow_io
-import flow_vis
-import flow_warp
-import flow_estimate
+from panoopticalflow import flow_evaluate
+from panoopticalflow import image_io
+from panoopticalflow import projection_icosahedron as proj_ico
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_warp
+from panoopticalflow import flow_estimate
 
-from logger import Logger
+from panoopticalflow.logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

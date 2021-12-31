@@ -1,8 +1,7 @@
 import configuration as config
 
-import image_utility
-from logger import Logger
-
+from panoopticalflow import image_utility
+from panoopticalflow.logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

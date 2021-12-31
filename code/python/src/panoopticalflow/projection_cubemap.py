@@ -1,13 +1,12 @@
 import numpy as np
 from scipy import ndimage
 
-import gnomonic_projection
-import polygon
-import spherical_coordinates
-import projection
+from . import gnomonic_projection
+from . import polygon
+from . import spherical_coordinates
+from . import projection
 
-from logger import Logger
-
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

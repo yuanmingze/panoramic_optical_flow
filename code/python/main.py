@@ -1,17 +1,17 @@
 from tests import configuration
 
-import image_io
-import flow_estimate
-import flow_io
-import flow_vis
-import flow_evaluate
-import flow_postproc
-import fs_utility
-import image_evaluate
-import flow_warp
-import image_utility
-import projection
-from datasets_utility import ReplicaPanoDataset, OmniPhotoDataset
+from panoopticalflow import image_io
+from panoopticalflow import flow_estimate
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_evaluate
+from panoopticalflow import flow_postproc
+from panoopticalflow import fs_utility
+from panoopticalflow import image_evaluate
+from panoopticalflow import flow_warp
+from panoopticalflow import image_utility
+from panoopticalflow import projection
+from panoopticalflow.datasets_utility import ReplicaPanoDataset, OmniPhotoDataset
 
 import os
 import csv
@@ -22,7 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from skimage.transform import resize as ski_resize
 
-from logger import Logger
+from panoopticalflow.logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

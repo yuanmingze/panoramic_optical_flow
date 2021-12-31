@@ -3,12 +3,12 @@ import matplotlib.cm as cm
 from PIL import Image
 import numpy as np
 
-import flow_warp
-import image_evaluate
-import image_utility
-import spherical_coordinates as sc
-from logger import Logger
+from . import flow_warp
+from . import image_evaluate
+from . import image_utility
+from . import spherical_coordinates as sc
 
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

@@ -1,6 +1,6 @@
 import configuration as config
 
-import draft_figure
+from panoopticalflow import draft_figure
 
 
 def test_bunny_animation():

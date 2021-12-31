@@ -5,9 +5,9 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-import depth_io
+from . import depth_io
 
-from logger import Logger
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

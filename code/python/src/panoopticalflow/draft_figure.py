@@ -1,7 +1,7 @@
-import image_io
-import spherical_coordinates
+from . import image_io
+from . import spherical_coordinates
 
-from logger import Logger
+from .logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

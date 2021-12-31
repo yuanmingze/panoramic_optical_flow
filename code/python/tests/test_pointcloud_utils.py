@@ -3,7 +3,7 @@ import configuration as config
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 
-import pointcloud_utils
+from panoopticalflow import pointcloud_utils
 
 def test_correpairs2rotation():
     """Get the 3D rotation from 3D points pairs."""

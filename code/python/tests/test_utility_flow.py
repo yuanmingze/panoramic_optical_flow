@@ -4,10 +4,10 @@ import pathlib
 import numpy as np
 from PIL import Image
 
-import flow_vis
-import flow_io
-import flow_evaluate
-import image_io
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_io
+from panoopticalflow import flow_evaluate
+from panoopticalflow import image_io
 
 def test_warp_image():
     """

@@ -4,7 +4,7 @@ from re import X
 import numpy as np
 import matplotlib.pyplot as plt
 
-import gnomonic_projection as gp
+from panoopticalflow import gnomonic_projection as gp
 
 
 def test_reverse_gnomonic_projection():

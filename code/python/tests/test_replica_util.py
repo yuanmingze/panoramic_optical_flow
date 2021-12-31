@@ -6,16 +6,16 @@ import os
 import re
 import pathlib
 
-import flow_warp
-import projection_cubemap as proj_cm
-import image_io
-import depth_io
-import flow_io
-import flow_vis
-import image_evaluate
-import flow_evaluate
-import datasets_utility
-import image_utility
+from panoopticalflow import flow_warp
+from panoopticalflow import projection_cubemap as proj_cm
+from panoopticalflow import image_io
+from panoopticalflow import depth_io
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import image_evaluate
+from panoopticalflow import flow_evaluate
+from panoopticalflow import datasets_utility
+from panoopticalflow import image_utility
 
 
 def test_pano_optical_flow():

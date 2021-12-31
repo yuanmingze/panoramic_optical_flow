@@ -1,16 +1,18 @@
-import flow_postproc
-import flow_vis
-import flow_warp
-import image_io
-import projection
-import projection_cubemap as proj_cm
-import projection_icosahedron as proj_ico
-import spherical_coordinates
 
 import cv2
 import numpy as np
 
-from logger import Logger
+from . import flow_postproc
+from . import flow_vis
+from . import flow_warp
+from . import image_io
+from . import projection
+from . import projection_cubemap as proj_cm
+from . import projection_icosahedron as proj_ico
+from . import spherical_coordinates
+
+
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

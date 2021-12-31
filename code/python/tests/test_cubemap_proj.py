@@ -2,16 +2,16 @@ import configuration as config
 
 import os
 
-import image_io
-import flow_io
-import flow_vis
-import projection_cubemap as proj_cm
-import flow_estimate
-import flow_postproc
-import flow_warp
-import depth_io
+from panoopticalflow import image_io
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import projection_cubemap as proj_cm
+from panoopticalflow import flow_estimate
+from panoopticalflow import flow_postproc
+from panoopticalflow import flow_warp
+from panoopticalflow import depth_io
 
-from logger import Logger
+from panoopticalflow.logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

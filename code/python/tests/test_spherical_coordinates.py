@@ -4,13 +4,13 @@ import os
 import numpy as np
 from scipy.spatial.transform import Rotation as R, rotation
 
-import spherical_coordinates
-import spherical_coordinates as sc
-import image_io
-import flow_warp
-import flow_vis
+from panoopticalflow import spherical_coordinates
+from panoopticalflow import spherical_coordinates as sc
+from panoopticalflow import image_io
+from panoopticalflow import flow_warp
+from panoopticalflow import flow_vis
 
-from logger import Logger
+from panoopticalflow.logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

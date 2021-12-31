@@ -4,8 +4,7 @@ import os
 import shutil
 from random import shuffle
 
-from logger import Logger
-
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -31,7 +30,7 @@ def dir_make(directory):
         log.info("Directory {} exist".format(directory))
 
 
-def dir_ls(dir_path, postfix = None):
+def dir_ls(dir_path, postfix=None):
     """Find all files in a directory with extension.
 
     :param dir_path: folder path.
@@ -68,22 +67,26 @@ def dir_rm(dir_path):
     directory.rmdir()
 
 
-def list_files(folder_path, extension):
+def list_files(folder_path, extension=None):
     """ List all file with specified extension name.
 
     :param folder_path: the files root dir.
     :type folder_path: str
-    :param extension: file extension name, eg al. .jpg.
+    :param extension: file extension name, eg al. .jpg. if is None list all folders.
     :type extension: str
     """
     files_list = []
     for file in os.listdir(folder_path):
-        if file.endswith(extension):
-            files_list.append(file)
+        if extension is None:
+            if os.path.isdir(folder_path + file):
+                files_list.append(file)
+        else:
+            if file.endswith(extension):
+                files_list.append(file)
     return files_list
 
 
-def copy_replace(src_filepath, tar_filepath, replace_list = None):
+def copy_replace(src_filepath, tar_filepath, replace_list=None):
     """ Copy file and replace words.
 
     :param src_filepath: the source file path.
@@ -92,17 +95,18 @@ def copy_replace(src_filepath, tar_filepath, replace_list = None):
     :type tar_filepath: str
     :param replace_list: the word list need to replace.
     :type replace_list: dict
-    """    
+    """
     if replace_list is None:
         log.info("The replace words list is empty. Copy file directly.")
         shutil.copy(src_filepath, tar_filepath)
+        return
 
-    with open(src_filepath, 'r') as file :
+    with open(src_filepath, 'r') as file:
         filedata = file.read()
 
     for old_word in replace_list:
         new_word = replace_list[old_word]
         filedata = filedata.replace(old_word, new_word)
-    
+
     with open(tar_filepath, 'w') as file:
         file.write(filedata)

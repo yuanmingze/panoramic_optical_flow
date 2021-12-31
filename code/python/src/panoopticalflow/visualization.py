@@ -1,12 +1,12 @@
 
 import pathlib
 
-import flow_io
-import flow_vis
-import image_io
-import depth_io
+from . import flow_io
+from . import flow_vis
+from . import image_io
+from . import depth_io
 
-from logger import Logger
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 
@@ -55,23 +55,3 @@ def vis_dir(root_dir, recursive_enable=True):
 
                 output_path = str(file_path) + ".jpg"
                 depth_io.depth_visual_save(depth_data, output_path, min_ratio=0.05, max_ratio=0.95, visual_colormap="jet")
-
-
-if __name__ == '__main__':
-
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--task', type=str, help='the task index')
-
-    args = parser.parse_args()
-
-    test_list = []
-    test_list.append(args.task)
-
-    import os
-    cur_dir = os.getcwd()
-
-    if args.task == "vis":
-        print("visualize folder {}".format(cur_dir))
-        vis_dir(cur_dir)

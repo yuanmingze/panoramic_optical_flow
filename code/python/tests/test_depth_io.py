@@ -2,8 +2,8 @@ import configuration as config
 
 import os
 
-import depth_io
-from logger import Logger
+from panoopticalflow import depth_io
+from panoopticalflow.logger import Logger
 
 log = Logger(__name__)
 log.logger.propagate = False

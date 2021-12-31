@@ -1,8 +1,7 @@
 import configuration as config
 
-import logger
-
-log = logger.Logger(__name__)
+from  panoopticalflow.logger import Logger
+log = Logger(__name__)
 log.logger.propagate = False
 
 def test_logger():

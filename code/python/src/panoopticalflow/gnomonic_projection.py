@@ -1,10 +1,9 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-import spherical_coordinates
+from . import spherical_coordinates
 
-from logger import Logger
-
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

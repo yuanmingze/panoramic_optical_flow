@@ -4,13 +4,13 @@ import os
 import pathlib
 import numpy as np
 
-import depth_io
-import image_io
-import flow_io
-import flow_vis
-import flow_warp
-import polygon
-import gnomonic_projection as gp
+from panoopticalflow import depth_io
+from panoopticalflow import image_io
+from panoopticalflow import flow_io
+from panoopticalflow import flow_vis
+from panoopticalflow import flow_warp
+from panoopticalflow import polygon
+from panoopticalflow import gnomonic_projection as gp
 
 path = os.getcwd()
 TEST_DATA_ROOT_FOLDER = path + "/../../data/replica_360/office_0/"

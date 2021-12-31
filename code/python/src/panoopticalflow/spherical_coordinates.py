@@ -1,10 +1,9 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-import flow_warp
+from . import flow_warp
 
-from logger import Logger
-
+from .logger import Logger
 log = Logger(__name__)
 log.logger.propagate = False
 

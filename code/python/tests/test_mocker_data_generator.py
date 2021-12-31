@@ -1,7 +1,7 @@
 import configuration
 
-import mocker_data_generator as MDG
-import image_io
+from panoopticalflow import mocker_data_generator as MDG
+from panoopticalflow import image_io
 
 def test_get_erp_image():
     """[summary]
